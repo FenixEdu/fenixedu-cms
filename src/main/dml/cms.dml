@@ -1,0 +1,339 @@
+package org.fenixedu.cms.domain;
+
+class Site{
+  String alternativeSite;
+  String style;
+  DateTime creationDate;
+  LocalizedString name;
+  LocalizedString description;
+  String slug;
+
+  Boolean published;
+}
+
+class Page{
+  DateTime creationDate;
+  LocalizedString name;
+  String slug;
+
+  Boolean published;
+}
+
+class Category{
+  DateTime creationDate;
+  LocalizedString name;
+  String slug;
+}
+
+class Menu{
+  DateTime creationDate;
+  LocalizedString name;
+}
+
+class MenuItem{
+  DateTime creationDate;
+  Integer position;
+  LocalizedString name;
+  String url;
+}
+
+class Post{
+  LocalizedString name;
+  String slug;
+  LocalizedString body;
+  DateTime creationDate;
+}
+
+class Component{
+  DateTime creationDate;
+  String type;
+}
+
+class CMSTheme{
+  DateTime creationDate;
+  String name;
+  String description;
+  String type;
+
+}
+
+class CMSTemplate{
+  String name;
+  String description;
+  String type;
+}
+
+class CMSTemplateFile extends .org.fenixedu.bennu.io.domain.GenericFile{}
+
+
+class ViewPost extends Component{}
+class ListPosts extends Component{}
+class ListCategoryPosts extends Component{}
+class ListOfCategories extends Component{}
+class StaticPost extends Component{}
+class MenuComponent extends Component{}
+
+relation ComponentUser{
+  .org.fenixedu.bennu.core.domain.User playsRole createdBy{
+    multiplicity 1..1;
+  }
+
+  protected Component playsRole componentsCreated{
+    multiplicity *;
+  }
+}
+
+relation PrimaryCMSThemeBennu{
+  protected .org.fenixedu.bennu.core.domain.Bennu playsRole primaryBennu{
+    multiplicity 0..1;
+  }
+  CMSTheme playsRole defaultCMSTheme{
+    multiplicity 0..1;
+  }
+}
+
+relation CMSThemeBennu{
+  .org.fenixedu.bennu.core.domain.Bennu playsRole bennu{
+    multiplicity 1..1;
+  }
+  CMSTheme playsRole CMSThemes{
+    multiplicity *;
+  }
+}
+
+relation CMSTemplateCMSTheme{
+  CMSTheme playsRole theme{
+    multiplicity 1..1;
+  }
+  CMSTemplate playsRole templates{
+    multiplicity *;
+  }
+}
+
+relation CMSTemplateCMSTH{
+  CMSTemplateFile playsRole file{
+    multiplicity 1..1;
+  }
+
+  CMSTemplate playsRole template{
+    multiplicity 0..1;
+  }
+}
+
+relation CMSThemeUser{
+  .org.fenixedu.bennu.core.domain.User playsRole createdBy{
+    multiplicity 1..1;
+  }
+  protected CMSTheme playsRole themesCreated{
+    multiplicity *;
+  }
+}
+
+relation CMSThemeCMSTheme{
+  CMSTheme playsRole extended{
+    multiplicity 0..1;
+  }
+
+  CMSTheme playsRole children{
+    multiplicity *;
+  }
+}
+
+
+relation CMSThemeSite{
+  CMSTheme playsRole theme{
+    multiplicity 0..1;
+  }
+
+  Site playsRole sites{
+    multiplicity *;
+  }
+}
+
+relation CMSTemplatePage{
+  CMSTemplate playsRole template{
+    multiplicity 0..1;
+  }
+
+  Page playsRole pages{
+    multiplicity *;
+  }
+}
+
+relation CMSThemeCMSTemplateFile{
+  protected CMSTheme playsRole theme{
+    multiplicity 1..1;
+  }
+
+  CMSTemplateFile playsRole files{
+    multiplicity *;
+  }
+}
+
+relation ListCategoryPostsCategory{
+  protected ListCategoryPosts playsRole components{
+    multiplicity *;
+  }
+  Category playsRole category{
+    multiplicity 0..1;
+  }
+}
+
+relation ComponentPage{
+  Component playsRole components{
+    multiplicity *;
+  }
+  Page playsRole page;
+}
+
+relation StaticPostPost{
+  StaticPost playsRole component{
+    multiplicity *;
+  }
+  Post playsRole post{
+    multiplicity 1..1;
+  }
+}
+
+relation MenuComponentMenu{
+  MenuComponent playsRole component{
+    multiplicity *;
+  }
+  Menu playsRole menu{
+    multiplicity 1..1;
+  }
+}
+relation CategorySite{
+    Site playsRole site;
+    Category playsRole categories {
+        multiplicity *;
+    }
+}
+
+relation MenuSite{
+    Site playsRole site;
+    Menu playsRole menus {
+        multiplicity *;
+    }
+}
+
+relation MenuMenuItem{
+    Menu playsRole menu;
+    MenuItem playsRole items {
+        multiplicity *;
+    }
+}
+
+relation MenuTopMenuItem{
+    Menu playsRole top;
+    MenuItem playsRole toplevelItems {
+        multiplicity *;
+    }
+}
+
+relation MenuItemMenuItem{
+    MenuItem playsRole parent;
+    MenuItem playsRole children {
+        multiplicity *;
+    }
+}
+
+relation PageMenuItem{
+    Page playsRole page;
+    MenuItem playsRole menuItems {
+        multiplicity *;
+    }
+}
+
+relation SitePost{
+    Site playsRole site;
+    Post playsRole post {
+        multiplicity *;
+    }
+}
+
+relation SitePage {
+    Site playsRole site;
+    Page playsRole pages {
+        multiplicity *;
+    }
+}
+
+relation CategoryPost{
+  Category playsRole category;
+  Post playsRole posts{
+    multiplicity *;
+  }
+}
+
+relation BennuSite{
+  .org.fenixedu.bennu.core.domain.Bennu playsRole bennu{
+    multiplicity 1..1;
+  }
+  Site playsRole sites{
+    multiplicity *;
+  }
+}
+
+relation SiteMenuFunctionality{
+  .org.fenixedu.bennu.portal.domain.MenuFunctionality playsRole functionality{
+    multiplicity 1..1;
+  }
+  Site playsRole sites{
+    multiplicity 0..1;
+  }
+}
+
+relation SiteUser{
+  .org.fenixedu.bennu.core.domain.User playsRole createdBy{
+    multiplicity 1..1;
+  }
+  Site playsRole sitesCreated{
+    multiplicity *;
+  }
+}
+
+relation PageUser{
+  .org.fenixedu.bennu.core.domain.User playsRole createdBy{
+    multiplicity 1..1;
+  }
+  protected Page playsRole pagesCreated{
+    multiplicity *;
+  }
+}
+
+relation CategoryUser{
+  .org.fenixedu.bennu.core.domain.User playsRole createdBy{
+    multiplicity 1..1;
+  }
+  protected Category playsRole categoriesCreated{
+    multiplicity *;
+  }
+}
+
+relation PostUser{
+  .org.fenixedu.bennu.core.domain.User playsRole createdBy{
+    multiplicity 1..1;
+  }
+  protected Post playsRole postsCreated{
+    multiplicity *;
+  }
+}
+
+relation MenuUser{
+  .org.fenixedu.bennu.core.domain.User playsRole createdBy{
+    multiplicity 1..1;
+  }
+  protected Menu playsRole menusCreated{
+    multiplicity *;
+  }
+}
+
+relation MenuItemUser{
+  .org.fenixedu.bennu.core.domain.User playsRole createdBy{
+    multiplicity 1..1;
+  }
+  protected MenuItem playsRole menuItemsCreated{
+    multiplicity *;
+  }
+}
