@@ -2,6 +2,7 @@ package org.fenixedu.cms.portal;
 
 
 
+import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.ListCategoryPosts;
 import org.fenixedu.cms.domain.ListOfCategories;
@@ -22,7 +23,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-@Controller
+@BennuSpringController(AdminPortal.class)
 @RequestMapping("/cms/manage")
 public class AdminComponents {
 

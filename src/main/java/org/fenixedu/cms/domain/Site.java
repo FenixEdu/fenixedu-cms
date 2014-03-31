@@ -28,7 +28,7 @@ public class Site extends Site_Base {
 
     private static final Logger logger = LoggerFactory.getLogger(Site.class);
 
-    protected static void register(String type, Class c) {
+    public static void register(String type, Class c) {
         TEMPLATES.put(type, c);
     }
 
@@ -199,7 +199,7 @@ public class Site extends Site_Base {
     public String getStaticDirectory() {
         String path = CoreConfiguration.getConfiguration().applicationUrl();
         if (!path.endsWith("/")) {
-            path += path + "/";
+            path = path + "/";
         }
         return path + this.getSlug() + "/static";
     }

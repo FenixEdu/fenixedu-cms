@@ -1,5 +1,6 @@
 package org.fenixedu.cms.portal;
 
+import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.I18N;
@@ -14,7 +15,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import pt.ist.fenixframework.Atomic;
 
-@Controller
+@BennuSpringController(AdminPortal.class)
 @RequestMapping("/cms/manage")
 public class AdminPosts {
     @RequestMapping(value="{slug}/posts", method = RequestMethod.GET)

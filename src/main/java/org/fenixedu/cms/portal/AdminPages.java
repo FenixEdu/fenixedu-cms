@@ -1,5 +1,6 @@
 package org.fenixedu.cms.portal;
 
+import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
 import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.Page;
@@ -17,7 +18,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-@Controller
+@BennuSpringController(AdminPortal.class)
 @RequestMapping("/cms/manage")
 public class AdminPages {
 

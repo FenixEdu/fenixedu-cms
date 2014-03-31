@@ -14,16 +14,17 @@ import java.util.zip.ZipInputStream;
 import javax.servlet.http.HttpServletRequest;
 
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
 import org.fenixedu.cms.domain.CMSTemplateFile;
 import org.fenixedu.cms.domain.CMSTheme;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.view.RedirectView;
@@ -35,11 +36,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-@Controller
+@BennuSpringController(AdminPortal.class)
 @RequestMapping("/cms/manage")
 public class AdminThemes {
-
-    final int BUFFER = 2048;
 
     final static Pattern RELATIVE_PARENT = Pattern.compile("^../|/../|/..$");
     final static Pattern RELATIVE_CURRENT = Pattern.compile("^./|/./|/.$");
@@ -69,7 +68,7 @@ public class AdminThemes {
     }
 
     @RequestMapping(value = "themes/create", method = RequestMethod.POST)
-    public RedirectView addTheme(@RequestParam Boolean isDefault, @RequestParam("uploadedFile") CommonsMultipartFile uploadedFile)
+    public RedirectView addTheme(@RequestParam Boolean isDefault, @RequestParam("uploadedFile") MultipartFile uploadedFile)
             throws IOException {
 
         File temp = File.createTempFile("tempCmsTheme", ".zip");
@@ -114,7 +113,7 @@ public class AdminThemes {
             }
 
             int len;
-            byte[] buffer = new byte[BUFFER];
+            byte[] buffer = new byte[2048];
             ByteArrayOutputStream bs = new ByteArrayOutputStream();
 
             while ((len = zis.read(buffer)) > 0) {
@@ -221,23 +220,24 @@ public class AdminThemes {
         String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
         path = path.substring(("/cms/manage/themes/" + theme.getType() + "/editFile/").length());
         CMSTemplateFile file = CMSTheme.forType(type).fileForPath(path);
-        
+
         model.addAttribute("theme", CMSTheme.forType(type));
         model.addAttribute("linkBack", "/cms/manage/themes/" + theme.getType() + "/see");
         model.addAttribute("file", file);
 
         String contentType = file.getContentType();
+
         if (contentType.equals("text/html")) {
             model.addAttribute("type", "twig");
             model.addAttribute("content", new String(file.getContent()));
         } else if (contentType.equals("text/javascript")) {
             model.addAttribute("type", "javascript");
             model.addAttribute("content", new String(file.getContent()));
-        } else if (contentType.equals("text/css")){
-            model.addAttribute("type", "css");            
+        } else if (contentType.equals("text/css")) {
+            model.addAttribute("type", "css");
             model.addAttribute("content", new String(file.getContent()));
         }
-        
+
         return "editThemeFile";
     }
 }

@@ -26,7 +26,7 @@
       <c:forEach var="i" items="${themes}">
         <tr>
           <td>
-            <h5>${i.getName()} <c:if test="${i.default}">
+            <h5>${i.getName()} <c:if test="${true}">
           <span class="label label-success">Default</span>
       </c:if></h5>
             <div><small>Type:<code>${i.type}</code></small></div>

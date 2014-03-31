@@ -1,5 +1,6 @@
 package org.fenixedu.cms.portal;
 
+import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.cms.domain.Page;
@@ -22,7 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-@Controller
+@BennuSpringController(AdminPortal.class)
 @RequestMapping("/cms/manage")
 public class AdminMenuItem {
 
