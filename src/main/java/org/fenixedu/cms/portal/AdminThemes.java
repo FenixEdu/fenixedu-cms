@@ -1,9 +1,6 @@
 package org.fenixedu.cms.portal;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -18,14 +15,12 @@ import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
 import org.fenixedu.cms.domain.CMSTemplateFile;
 import org.fenixedu.cms.domain.CMSTheme;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -71,11 +66,7 @@ public class AdminThemes {
     public RedirectView addTheme(@RequestParam Boolean isDefault, @RequestParam("uploadedFile") MultipartFile uploadedFile)
             throws IOException {
 
-        File temp = File.createTempFile("tempCmsTheme", ".zip");
-        uploadedFile.transferTo(temp);
-
-        FileInputStream fis = new FileInputStream(temp);
-        ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
+        ZipInputStream zis = new ZipInputStream(uploadedFile.getInputStream());
         ZipEntry entry;
 
         String prefix = null;
