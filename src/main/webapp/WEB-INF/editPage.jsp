@@ -5,10 +5,11 @@
 <h2>${page.name.content}</h2>
 <p class="small">Site: <strong>${site.name.content}</strong>  </p>
 <form class="form-horizontal" action="" method="post" role="form">
-  <div class="form-group">
+  <div class="${emptyName ? "form-group has-error" : "form-group"}">
     <label for="inputEmail3" class="col-sm-2 control-label">Name</label>
     <div class="col-sm-10">
       <input type="text" name="name" class="form-control" id="inputEmail3" placeholder="Name" value="${page.name.content}" \>
+      <c:if test="${emptyName}"><p class="text-danger">Please enter a Page name.</p></c:if>
     </div>
   </div>
   <div class="form-group">
@@ -92,7 +93,8 @@
               <td>${m.createdBy.username}</td>
               <td><joda:format value="${m.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
               <td>
-                <a href="deleteComponent/${m.getExternalId()}" class="btn btn-danger btn-sm">Delete</a>
+                <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteComponentForm').submit();">Delete</a>
+               	<form id="deleteComponentForm" action="deleteComponent/${m.getExternalId()}" method="POST"></form>
               </td>
             </tr>
           </c:forEach>

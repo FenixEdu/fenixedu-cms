@@ -45,11 +45,12 @@
               <a href="${pageContext.request.contextPath}/cms/manage/${i.slug}/categories" class="btn btn-sm btn-default">Categories</a>
 
               <a href="${pageContext.request.contextPath}/cms/manage/${i.slug}/menus" class="btn btn-sm btn-default">Menus</a>
+
+              <a href="${pageContext.request.contextPath}/cms/manage/${i.slug}/edit" class="btn btn-sm btn-default">Edit</a>
+
+     	      <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteSiteForm').submit();">Delete</a>
+              <form id="deleteSiteForm" action="${pageContext.request.contextPath}/cms/manage/${i.slug}/delete"" method="POST"></form>
             </div>
-
-            <a href="${pageContext.request.contextPath}/cms/manage/${i.slug}/edit" class="btn btn-sm btn-default">Edit</a>
-
-            <a href="${pageContext.request.contextPath}/cms/manage/${i.slug}/delete" class="btn btn-danger btn-sm">Delete</a>
 
           </td>
         </tr>

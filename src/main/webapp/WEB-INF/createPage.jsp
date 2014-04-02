@@ -1,10 +1,12 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <h1>Creating new Page</h1>
 <p class="small">Site: <strong>${site.name.content}</strong>  </p>
 <form class="form-horizontal" action="" method="post" role="form">
-  <div class="form-group">
+  <div class="${emptyName ? "form-group has-error" : "form-group"}">
     <label for="inputEmail3" class="col-sm-2 control-label">Name</label>
     <div class="col-sm-10">
       <input type="text" name="name" class="form-control" id="inputEmail3" placeholder="Name">
+      <c:if test="${emptyName}"><p class="text-danger">Please enter the Page name.</p></c:if>
     </div>
   </div>
   

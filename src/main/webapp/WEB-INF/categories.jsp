@@ -32,9 +32,12 @@
               <td>${c.createdBy.username}</td>
               <td><joda:format value="${c.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
               <td>
-                <a href="categories/${c.slug}/delete" class="btn btn-danger btn-sm">Delete</a>
-                <a href="categories/${c.slug}/stuff" class="btn btn-sm btn-default">Stuff</a>
-                <a href="${pageContext.request.contextPath}/${c.site.slug}/${c.slug}" class="btn btn-sm btn-default" target="_blank">Link</a>
+              	<div class="btn-group">
+	                <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteCategoryForm').submit();">Delete</a>
+	                <a href="categories/${c.slug}/stuff" class="btn btn-sm btn-default">Stuff</a>
+	                <a href="${pageContext.request.contextPath}/${c.site.slug}/${c.slug}" class="btn btn-sm btn-default" target="_blank">Link</a>
+					<form id="deleteCategoryForm" action="categories/${c.slug}/delete" method="POST"></form>
+				</div>
               </td>
             </tr>
           </c:forEach>

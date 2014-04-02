@@ -35,8 +35,9 @@
                 <div class="btn-group">
                   <a href="pages/${p.slug}/edit" class="btn btn-sm btn-default">Edit</a>
                   <a href="${pageContext.request.contextPath}/${p.site.slug}/${p.slug}" class="btn btn-sm btn-default" target="_blank">Link</a>
+				  <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deletePageForm').submit();">Delete</a>
+               	  <form id="deletePageForm" action="pages/${p.slug}/delete" method="POST"></form>
                 </div>
-                <a href="pages/${p.slug}/delete" class="btn btn-danger btn-sm">Delete</a>
               </td>
             </tr>
           </c:forEach>

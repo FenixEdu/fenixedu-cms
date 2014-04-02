@@ -5,7 +5,6 @@ import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +46,7 @@ public class AdminMenu {
         p.setName(new LocalizedString(I18N.getLocale(),name));
     }
     
-    @RequestMapping(value="{slugSite}/menus/{oidMenu}/delete", method = RequestMethod.GET)
+    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/delete", method = RequestMethod.POST)
     public RedirectView delete(Model model, @PathVariable(value="slugSite") String slugSite, @PathVariable(value="oidMenu") String oidMenu){
         Site s = Site.fromSlug(slugSite);
         s.menuForOid(oidMenu).delete();

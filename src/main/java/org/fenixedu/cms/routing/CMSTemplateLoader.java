@@ -1,7 +1,6 @@
 package org.fenixedu.cms.routing;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
@@ -42,7 +41,9 @@ final class CMSTemplateLoader extends ClasspathLoader {
     public Reader getReader(String templateName) throws LoaderException {
         try {
             if (theme.getType().equals("cms-default-theme")) {
-                String text = readFile("/Users/nurv/Desktop/cms-default-theme/" + templateName, StandardCharsets.UTF_8);
+                String text =
+                        readFile("/home/borgez/workspace/cms/src/main/webapp/cms-default-theme/" + templateName,
+                                StandardCharsets.UTF_8);
                 return new InputStreamReader(new ByteArrayInputStream(text.getBytes()), "UTF-8");
             } else {
                 CMSTemplateFile file = this.theme.fileForPath(templateName);

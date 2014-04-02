@@ -36,8 +36,11 @@
           <td><joda:format value="${i.creationDate}" pattern="MMM dd, yyyy"/></td>
           <td>${i.templatesSet.size()}</td>
           <td>
-            <a class="btn btn-default" href="themes/${i.type}/see">More</a>
-            <a class="btn btn-default btn-danger" href="themes/${i.type}/delete">Delete</a>
+          	<div class="btn-group">
+	            <a class="btn btn-default" href="themes/${i.type}/see">More</a>
+	            <a class="btn btn-default btn-danger" onclick="document.getElementById('deleteThemeForm').submit();">Delete</a>
+	            <form id="deleteThemeForm" action="themes/${i.type}/delete" method="post"></form>
+            </div>
           </td>
         </tr>
       </c:forEach>

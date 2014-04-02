@@ -12,7 +12,6 @@ import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.StaticPost;
 import org.fenixedu.cms.domain.ViewPost;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,7 +62,7 @@ public class AdminComponents {
         }
     }
 
-    @RequestMapping(value = "{slugSite}/pages/{slugPage}/deleteComponent/{oid}", method = RequestMethod.GET)
+    @RequestMapping(value = "{slugSite}/pages/{slugPage}/deleteComponent/{oid}", method = RequestMethod.POST)
     public RedirectView deleteComponent(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "slugPage") String slugPage, @PathVariable(
                     value = "oid") String oid) {

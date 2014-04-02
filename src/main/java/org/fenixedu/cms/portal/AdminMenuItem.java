@@ -7,7 +7,6 @@ import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -188,7 +187,7 @@ public class AdminMenuItem {
         }
     }
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/delete/{oidMenuItem}", method = RequestMethod.GET)
+    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/delete/{oidMenuItem}", method = RequestMethod.POST)
     public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu, @PathVariable(value = "oidMenuItem") String oidMenuItem) {
         Site s = Site.fromSlug(slugSite);

@@ -5,7 +5,6 @@ import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,7 +49,7 @@ public class AdminPosts {
         
     }
     
-    @RequestMapping(value="{slugSite}/posts/{slugPost}/delete", method = RequestMethod.GET)
+    @RequestMapping(value = "{slugSite}/posts/{slugPost}/delete", method = RequestMethod.POST)
     public RedirectView delete(Model model, @PathVariable(value="slugSite") String slugSite, @PathVariable(value="slugPost") String slugPost){
         Site s = Site.fromSlug(slugSite);
         s.postForSlug(slugPost).delete();

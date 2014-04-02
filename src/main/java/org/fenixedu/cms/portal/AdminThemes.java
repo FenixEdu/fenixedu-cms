@@ -51,7 +51,7 @@ public class AdminThemes {
         return "viewTheme";
     }
 
-    @RequestMapping(value = "themes/{type}/delete", method = RequestMethod.GET)
+    @RequestMapping(value = "themes/{type}/delete", method = RequestMethod.POST)
     public RedirectView deleteTheme(Model model, @PathVariable(value = "type") String type) {
         CMSTheme.forType(type).delete();
         return new RedirectView("/xpto/cms/manage/themes", false);

@@ -31,8 +31,11 @@
               <td>${m.createdBy.username}</td>
               <td><joda:format value="${m.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
               <td>
-                <a href="menus/${m.oid}/delete" class="btn btn-danger btn-sm">Delete</a>
-                <a href="menus/${m.oid}/change" class="btn btn-sm btn-default">Change</a>
+              	<div class="btn-group">
+	                <a href="menus/${m.oid}/change" class="btn btn-sm btn-default">Change</a>
+	                <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteMenuForm').submit();">Delete</a>
+					<form id="deleteMenuForm" action="menus/${m.oid}/delete" method="POST"></form>
+				</div>
               </td>
             </tr>
           </c:forEach>

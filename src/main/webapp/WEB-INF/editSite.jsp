@@ -3,10 +3,11 @@
 
 <h1>Edit site</h1>
 <form class="form-horizontal" action="" method="post" role="form">
-  <div class="form-group">
+  <div class="${emptyName ? "form-group has-error" : "form-group"}">
     <label for="inputEmail3" class="col-sm-2 control-label">Name</label>
     <div class="col-sm-10">
       <input type="text" name="name" class="form-control" id="inputEmail3" placeholder="Name" value="${site.name.content}" \>
+      <c:if test="${emptyName}"><p class="text-danger">Please enter a Site name.</p></c:if>
     </div>
   </div>
 
