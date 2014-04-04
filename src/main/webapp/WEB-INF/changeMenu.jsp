@@ -1,5 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="joda" uri="http://www.joda.org/joda/time/tags" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 
 <style>
   
@@ -8,7 +9,7 @@
   }
 </style>
 <div class="container">
-<h1>Change Menu</h1>
+<h1><spring:message code="menu.edit.title"/></h1>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 <link href="${pageContext.request.contextPath}/static/css/skin-awesome/ui.fancytree.css" rel="stylesheet" type="text/css">
 <script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.min.js" type="text/javascript"></script>
@@ -23,12 +24,12 @@
         <input type="hidden" name="menuItemOidParent" value="null" />
         <input type="hidden" name="position" value="" />
       <div class="form-group">
-        <button onclick="showModal();return false" class="btn btn-default">Create subitem</button>
+        <button onclick="showModal();return false" class="btn btn-default"><spring:message code="menu.edit.label.createSubitem"/></button>
       </div>
     
       <div class="form-group">
-        <label class="control-label" for="inputSuccess1">Menu Label</label>
-        <input type="text" name="name" class="form-control" placeholder="Name">
+        <label class="control-label" for="inputSuccess1"><spring:message code="menu.edit.label.menuLabel"/></label>
+        <input type="text" name="name" class="form-control" placeholder="<spring:message code="menu.edit.label.name"/>">
       </div>
 
       <div id="menuitem-options">
@@ -36,10 +37,10 @@
       <div class="radio">
         <label>
           <input type="radio" name="use" class="useurl" value="url" checked>
-          Link to a URL
+          <spring:message code="menu.edit.label.linkToUrl"/>
         </label>
         <div class="form-group">
-          <input type="text" name="url" class="url-select form-control" placeholder="URL">
+          <input type="text" name="url" class="url-select form-control" placeholder="<spring:message code="menu.edit.label.url"/>">
         </div>
       </div>
 
@@ -48,7 +49,7 @@
       <div class="radio">
         <label>
           <input type="radio" name="use" class="usepage" value="page">
-          Link to a Page
+          <spring:message code="menu.edit.label.linkToPage"/>
         </label>
         <div class="form-group">
           <select name="slugPage" class="page-select form-control">
@@ -63,8 +64,8 @@
       </div>
       
       <div class="form-group">
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a href="#" class="btn btn-danger delete">Delete</a>
+        <button type="submit" class="btn btn-primary"><spring:message code="action.save"/></button>
+        <a href="#" class="btn btn-danger delete"><spring:message code="action.delete"/></a>
       </div>
       </form>
     </div>
@@ -81,8 +82,8 @@
       </div>
       <div class="modal-body">
       <div class="form-group">
-        <label class="control-label" for="inputSuccess1">Menu Label</label>
-        <input type="text" name="name" class="form-control" placeholder="Name">
+        <label class="control-label" for="inputSuccess1"><spring:message code="menu.edit.label.menuLabel"/></label>
+        <input type="text" name="name" class="form-control" placeholder="<spring:message code="menu.edit.label.name"/>">
       </div>
 
       <div id="menuitem-options">
@@ -90,10 +91,10 @@
       <div class="radio">
         <label>
           <input type="radio" name="use" class="useurl" value="url" checked>
-          Link to a URL
+          <spring:message code="menu.edit.label.linkToUrl"/>
         </label>
         <div class="form-group">
-          <input type="text" name="url" class="url-select form-control" placeholder="URL">
+          <input type="text" name="url" class="url-select form-control" placeholder="<spring:message code="menu.edit.label.url"/>">
         </div>
       </div>
 
@@ -102,7 +103,7 @@
       <div class="radio">
         <label>
           <input type="radio" name="use" class="usepage" value="page">
-          Link to a Page
+		  <spring:message code="menu.edit.label.linkToPage"/>
         </label>
         <div class="form-group">
           <select name="slugPage" class="page-select form-control">
@@ -118,8 +119,8 @@
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Create item</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="action.close"/></button>
+        <button type="submit" class="btn btn-primary"><spring:message code="action.create"/></button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

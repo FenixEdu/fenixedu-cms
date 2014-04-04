@@ -1,25 +1,26 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="joda" uri="http://www.joda.org/joda/time/tags" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 
-<h1>Editing</h1>
+<h1><spring:message code="page.edit.title" /></h1>
 <h2>${page.name.content}</h2>
-<p class="small">Site: <strong>${site.name.content}</strong>  </p>
+<p class="small"><spring:message code="page.edit.label.site" />: <strong>${site.name.content}</strong>  </p>
 <form class="form-horizontal" action="" method="post" role="form">
   <div class="${emptyName ? "form-group has-error" : "form-group"}">
-    <label for="inputEmail3" class="col-sm-2 control-label">Name</label>
+    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.name" /></label>
     <div class="col-sm-10">
-      <input type="text" name="name" class="form-control" id="inputEmail3" placeholder="Name" value="${page.name.content}" \>
-      <c:if test="${emptyName}"><p class="text-danger">Please enter a Page name.</p></c:if>
+      <input type="text" name="name" class="form-control" id="inputEmail3" placeholder="<spring:message code="page.edit.label.name" />" value="${page.name.content}" \>
+      <c:if test="${emptyName}"><p class="text-danger"><spring:message code="page.edit.error.emptyName" /></p></c:if>
     </div>
   </div>
   <div class="form-group">
-    <label for="inputEmail3" class="col-sm-2 control-label">Slug</label>
+    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.slug" /></label>
     <div class="col-sm-10">
-      <input type="text" name="slug" class="form-control" id="inputEmail3" placeholder="Slug" value="${page.slug}" \>
+      <input type="text" name="slug" class="form-control" id="inputEmail3" placeholder="<spring:message code="page.edit.label.slug" />" value="${page.slug}" \>
     </div>
   </div>
   <div class="form-group">
-    <label for="inputEmail3" class="col-sm-2 control-label">Template</label>
+    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.template" /></label>
     <div class="col-sm-10">
       <select name="template" id="tempate">
         <option value="null">-</option>
@@ -31,16 +32,16 @@
   </div>
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-      <button type="submit" class="btn btn-default btn-primary">Save</button>
+      <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.save" /></button>
     </div>
   </div>
 </form>
 
-<h3>Components in this page:</h3>
+<h3><spring:message code="page.edit.label.pageComponents" />:</h3>
 <p>
 <div class="btn-group">
     <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
-      Add a new Component
+      <spring:message code="page.edit.label.addComponent" />
       <span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
@@ -48,39 +49,39 @@
         <form action="createComponent" method="post">
           <input type="hidden" name="componentType" value="viewPost" />
         </form>
-        <a onclick="$(this).prev().submit()" href="#">View Post</a>
+        <a onclick="$(this).prev().submit()" href="#"><spring:message code="page.edit.label.viewPost" /></a>
       </li>
       <li>
         <form action="createComponent" method="post">
           <input type="hidden" name="componentType" value="listCategories" />
         </form>
-        <a onclick="$(this).prev().submit()" href="#">List of Categories</a>
+        <a onclick="$(this).prev().submit()" href="#"><spring:message code="page.edit.label.listOfCategories" /></a>
       <li>
         <form action="createComponent" method="post">
           <input type="hidden" name="componentType" value="listPost" />
         </form>
-        <a onclick="$(this).prev().submit()" href="#">List of Posts</a>
+        <a onclick="$(this).prev().submit()" href="#"><spring:message code="page.edit.label.listOfPosts" /></a>
       </li>
-      <li><a data-toggle="modal" data-target="#listCategoryPosts" href="#">List of Posts by Category</a></li>
-      <li><a data-toggle="modal" data-target="#staticPost" href="#">Static Post</a></li>
-      <li><a data-toggle="modal" data-target="#menu" href="#">Menu</a></li>
+      <li><a data-toggle="modal" data-target="#listCategoryPosts" href="#"><spring:message code="page.edit.label.listOfPostsByCategory" /></a></li>
+      <li><a data-toggle="modal" data-target="#staticPost" href="#"><spring:message code="page.edit.label.staticPost" /></a></li>
+      <li><a data-toggle="modal" data-target="#menu" href="#"><spring:message code="page.edit.label.menu" /></a></li>
     </ul>
   </div>
 </p>
 
 <c:choose>
       <c:when test="${page.componentsSet.size() == 0}">
-      <p>There are no menus created for this site.</p>
+      <p><spring:message code="page.edit.label.emtpySiteMenus" /></p>
       </c:when>
 
       <c:otherwise>
         <table class="table table-striped table-bordered">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Created By</th>
-              <th>Creation Date</th>
-              <th>Operations</th>
+              <th><spring:message code="page.edit.label.name" /></th>
+              <th><spring:message code="page.edit.label.createdBy" /></th>
+              <th><spring:message code="page.edit.label.creationDate" /></th>
+              <th><spring:message code="page.edit.label.operations" /></th>
             </tr>
           </thead>
           <tbody>
@@ -93,7 +94,7 @@
               <td>${m.createdBy.username}</td>
               <td><joda:format value="${m.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
               <td>
-                <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteComponentForm').submit();">Delete</a>
+                <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteComponentForm').submit();"><spring:message code="action.delete" /></a>
                	<form id="deleteComponentForm" action="deleteComponent/${m.getExternalId()}" method="POST"></form>
               </td>
             </tr>
@@ -109,15 +110,15 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="listCategoryPostsLabel">Add "List of Posts by Category"</h4>
+        <h4 class="modal-title" id="listCategoryPostsLabel"><spring:message code="page.edit.label.listOfPostsByCategory" /></h4>
       </div>
       <div class="modal-body">
           <input type="hidden" name="componentType" value="listCategoryPosts" />
 
           <div class="form-group">
-            <label class="control-label" for="inputSuccess1">Category</label>
+            <label class="control-label" for="inputSuccess1"><spring:message code="page.edit.label.category" /></label>
             <select name="catSlug">
-              <option value="null">&lt; Dynamic, use request parameter &gt;</option>
+              <option value="null">&lt; <spring:message code="page.edit.label.dynamic" /> &gt;</option>
               <c:forEach var="c" items="${site.categoriesSet}">
                 <option value="${ c.slug }">${ c.name.content }</option>
               </c:forEach>
@@ -125,8 +126,8 @@
           </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="action.close" /></button>
+        <button type="submit" class="btn btn-primary"><spring:message code="action.save" /></button>
       </div>
       </form>
     </div>
@@ -139,13 +140,13 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="menuLabel">Add "Menu"</h4>
+        <h4 class="modal-title" id="menuLabel"><spring:message code="action.add.menu" /></h4>
       </div>
       <div class="modal-body">
           <input type="hidden" name="componentType" value="menu" />
 
           <div class="form-group">
-            <label class="control-label" for="inputSuccess1">Menu</label>
+            <label class="control-label" for="inputSuccess1"><spring:message code="page.edit.label.menu" /></label>
             <select name="menuOid">
               <c:forEach var="m" items="${site.menusSet}">
                 <option value="${ m.oid }">${ m.name.content }</option>
@@ -154,8 +155,8 @@
           </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="action.close" /></button>
+        <button type="submit" class="btn btn-primary"><spring:message code="action.save" /></button>
       </div>
       </form>
     </div>
@@ -168,13 +169,13 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="staticPostLabel">Add "Static Post"</h4>
+        <h4 class="modal-title" id="staticPostLabel"><spring:message code="page.edit.label.addStaticPost" /></h4>
       </div>
       <div class="modal-body">
           <input type="hidden" name="componentType" value="staticPost" />
 
           <div class="form-group">
-            <label class="control-label" for="inputSuccess1">Post</label>
+            <label class="control-label" for="inputSuccess1"><spring:message code="page.edit.label.post" /></label>
             <select name="postSlug">
               <c:forEach var="m" items="${site.postSet}">
                 <option value="${ m.slug }">${ m.name.content }</option>
@@ -183,8 +184,8 @@
           </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="action.close" /></button>
+        <button type="submit" class="btn btn-primary"><spring:message code="action.save" /></button>
       </div>
       </form>
     </div>
