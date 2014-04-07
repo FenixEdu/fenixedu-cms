@@ -4,16 +4,23 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.joda.time.DateTime;
 
-import com.google.common.collect.FluentIterable;
-
 import pt.ist.fenixframework.Atomic;
 
+import com.google.common.collect.FluentIterable;
+
+/**
+ * Models the items of a {@link Menu}
+ */
 public class MenuItem extends MenuItem_Base {
     
+    /**
+     * The logged {@link User} creates a new MenuItem.
+     */
     public MenuItem() {
         super();
         if(Authenticate.getUser() == null){
@@ -23,6 +30,14 @@ public class MenuItem extends MenuItem_Base {
         this.setCreationDate(new DateTime());
     }
     
+    /**
+     * Adds a children at a given position and shifts the existing items.
+     * 
+     * @param item
+     *            the {@link MenuItem} to be added.
+     * @param position
+     *            the position where the item should be added.
+     */
     public void putAt(MenuItem item, int position) {
         if (position < 0){
             position = 0;
@@ -49,7 +64,13 @@ public class MenuItem extends MenuItem_Base {
         item.setPosition(position);
         getChildrenSet().add(item);
     }
-    
+
+    /**
+     * Removes a given {@link MenuItem}
+     * 
+     * @param mi
+     *            the children to be removed
+     */
     public void remove(MenuItem mi){
         int found = 0;
         for(MenuItem item : new ArrayList<>(getChildrenSorted())){
@@ -62,10 +83,22 @@ public class MenuItem extends MenuItem_Base {
         }
     }
     
+    /**
+     * Adds a new {@link MenuItem} has the last item.
+     * 
+     * @param mi
+     *            the {@link MenuItem} to be added.
+     */
     public void add(MenuItem mi){
         this.putAt(mi, getChildrenSet().size());
     }
-    
+
+    /**
+     * Removes the {@link MenuItem} from its parent.
+     * <p>
+     * The Parent can be a {@link Menu} or a {@link MenuItem}
+     * </p>
+     */
     public void removeFromParent(){
         if (this.getTop() != null){
             this.getTop().remove(this);
@@ -73,7 +106,10 @@ public class MenuItem extends MenuItem_Base {
             this.getParent().remove(this);
         }
     }
-    
+
+    /**
+     * @return the childrens sorted by position
+     */
     public List<MenuItem> getChildrenSorted(){
         
         return FluentIterable.from(getChildrenSet()).toSortedList(new Comparator<MenuItem>() {
@@ -86,6 +122,9 @@ public class MenuItem extends MenuItem_Base {
         });
     }
     
+    /**
+     * @return the URL address to visit the item.
+     */
     public String getAddress(){
         if (getUrl() != null){
             return getUrl();

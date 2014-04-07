@@ -1,13 +1,19 @@
 package org.fenixedu.cms.domain;
 
+import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.Atomic;
 
+/**
+ * Categories give a semantic group for {@link Site} and {@link Post}.
+ */
 public class Category extends Category_Base {
-    
+    /**
+     * The logged {@link User} creates a new instance of a {@link Category}
+     */
     public Category() {
         super();
         if(Authenticate.getUser() == null){

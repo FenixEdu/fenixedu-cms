@@ -1,12 +1,13 @@
 package org.fenixedu.cms.domain;
 
-import java.io.FileNotFoundException;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.fenixedu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.cms.rendering.TemplateContext;
 
+/**
+ * Component that obtains the necessary info about a {@link Post}
+ */
 @ComponentType(type = "viewPost", name = "View Post", description = "View a Single Post")
 public class ViewPost extends ViewPost_Base {
 
@@ -14,6 +15,9 @@ public class ViewPost extends ViewPost_Base {
         super();
     }
 
+    /**
+     * fetches a post based on the 'q' parameter of the request and saves that post on the local and global context as 'post'
+     */
     @Override
     public void handle(Page page, HttpServletRequest req, TemplateContext local, TemplateContext global) {
         String post = req.getParameter("q");

@@ -3,11 +3,21 @@ package org.fenixedu.cms.domain;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 
+/**
+ * SiteTemplate for that is an example of a blog having a dummy content.
+ */
 @RegisterSiteTemplate(name="Blog", description="A simple blog", type="blog")
 public class BlogTemplate implements SiteTemplate {
 
     private Post about;
 
+    /**
+     * Populates a site with the structure of a blog.
+     * Including some pages, menus, posts and categories.
+     * 
+     * @param site
+     *            the site to be populated.
+     */
     @Override
     public void makeIt(Site site) {
         

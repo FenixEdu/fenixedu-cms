@@ -13,6 +13,9 @@ import org.fenixedu.cms.rendering.TemplateContext;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
+/**
+ * Component that lists the {@link Post} of a given category.
+ */
 @ComponentType(type = "listCategoryPosts", name = "List Category Posts", description = "Lists the Posts from a given category")
 public class ListCategoryPosts extends ListCategoryPosts_Base {
 

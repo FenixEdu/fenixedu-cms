@@ -2,13 +2,12 @@ package org.fenixedu.cms.domain;
 
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
@@ -23,15 +22,33 @@ import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
 public class Site extends Site_Base {
-
+    /**
+     * maps the registered template types on the tempate classes
+     */
     protected static final HashMap<String, Class<?>> TEMPLATES = new HashMap<>();
 
     private static final Logger logger = LoggerFactory.getLogger(Site.class);
 
+    /**
+     * registers a new site template
+     * 
+     * @param type
+     *            the type of the template. This must be unique on the application.
+     * @param c
+     *            the class to be registered as a template.
+     */
     public static void register(String type, Class c) {
         TEMPLATES.put(type, c);
     }
 
+    /**
+     * searches for a {@link SiteTemplate} by type.
+     * 
+     * @param type
+     *            the type of the {@link SiteTemplate} wanted.
+     * @return
+     *         the {@link SiteTemplate} with the given type if it exists or null otherwise.
+     */
     public static SiteTemplate templateFor(String type) {
         try {
             return (SiteTemplate) TEMPLATES.get(type).newInstance();
@@ -41,6 +58,10 @@ public class Site extends Site_Base {
         }
     }
 
+    /**
+     * 
+     * @return mapping between the type and description for all the registered {@link SiteTemplate}.
+     */
     public static HashMap<String, String> getTemplates() {
         HashMap<String, String> map = new HashMap<>();
 
@@ -52,6 +73,9 @@ public class Site extends Site_Base {
         return map;
     }
 
+    /**
+     * the logged {@link User} creates a new {@link Site}.
+     */
     public Site() {
         super();
         if (Authenticate.getUser() == null) {
@@ -62,6 +86,14 @@ public class Site extends Site_Base {
 
     }
 
+    /**
+     * searches for a {@link Site} by slug.
+     * 
+     * @param slug
+     *            the slug of the {@link Site} wanted.
+     * @return
+     *         the {@link Site} with the given slug if it exists, or null otherwise.
+     */
     public static Site fromSlug(String slug) {
         for (Site site : Bennu.getInstance().getSitesSet()) {
             if (site.getSlug().equals(slug)) {
@@ -71,6 +103,14 @@ public class Site extends Site_Base {
         return null;
     }
 
+    /**
+     * searches for a {@link Page} by slug on this {@link Site}.
+     * 
+     * @param slug
+     *            the slug of the {@link Page} wanted.
+     * @return
+     *         the {@link Page} with the given slug if it exists on this site, or null otherwise.
+     */
     public Page pageForSlug(String slug) {
         for (Page page : getPagesSet()) {
             if (page.getSlug().equals(slug)) {
@@ -80,6 +120,14 @@ public class Site extends Site_Base {
         return null;
     }
 
+    /**
+     * searches for a {@link Post} by slug on this {@link Site}.
+     * 
+     * @param slug
+     *            the slug of the {@link Post} wanted.
+     * @return
+     *         the {@link Post} with the given slug if it exists on this site, or null otherwise.
+     */
     public Post postForSlug(String slug) {
         for (Post post : getPostSet()) {
             if (post.getSlug().equals(slug)) {
@@ -89,6 +137,14 @@ public class Site extends Site_Base {
         return null;
     }
 
+    /**
+     * searches for a {@link Category} by slug on this {@link Site}.
+     * 
+     * @param slug
+     *            the slug of the {@link Category} wanted.
+     * @return
+     *         the {@link Category} with the given slug if it exists on this site, or null otherwise.
+     */
     public Category categoryForSlug(String slug) {
         for (Category category : getCategoriesSet()) {
             if (category.getSlug().equals(slug)) {
@@ -98,6 +154,14 @@ public class Site extends Site_Base {
         return null;
     }
 
+    /**
+     * searches for a {@link Menu} by oid on this {@link Site}.
+     * 
+     * @param slug
+     *            the slug of the {@link Menu} wanted.
+     * @return
+     *         the {@link Menu} with the given oid if it exists on this site, or null otherwise.
+     */
     public Menu menuForOid(String oid) {
         Menu menu = FenixFramework.getDomainObject(oid);
         if (menu == null || menu.getSite() != this) {
@@ -174,6 +238,9 @@ public class Site extends Site_Base {
         this.deleteDomainObject();
     }
 
+    /**
+     * @return the {@link ViewPost} of this {@link Site} if it is defined, or null otherwise.
+     */
     public Page getViewPostPage() {
         for (Page page : getPagesSet()) {
             for (Component component : page.getComponentsSet()) {
@@ -185,6 +252,9 @@ public class Site extends Site_Base {
         return null;
     }
     
+    /**
+     * @return the {@link ListCategoryPosts} of this {@link Site} if it is defined, or null otherwise.
+     */
     public Page getViewCategoryPage() {
         for (Page page : getPagesSet()) {
             for (Component component : page.getComponentsSet()) {
@@ -196,6 +266,9 @@ public class Site extends Site_Base {
         return null;
     }
     
+    /**
+     * @return the static directory of this {@link Site}.
+     */
     public String getStaticDirectory() {
         String path = CoreConfiguration.getConfiguration().applicationUrl();
         if (!path.endsWith("/")) {

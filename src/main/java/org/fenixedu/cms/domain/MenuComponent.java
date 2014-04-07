@@ -9,6 +9,9 @@ import org.fenixedu.cms.rendering.TemplateContext;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
+/**
+ * Component that provides a {@link Menu} for a given {@link Page}
+ */
 @ComponentType(type="menu", name="Menu", description="Attaches a Menu to a Page")
 public class MenuComponent extends MenuComponent_Base {
     

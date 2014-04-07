@@ -1,6 +1,7 @@
 package org.fenixedu.cms.domain;
 
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.joda.time.DateTime;
 
@@ -9,6 +10,9 @@ import pt.ist.fenixframework.Atomic.TxMode;
 
 public class CMSTheme extends CMSTheme_Base {
 
+    /**
+     * The logged {@link User} creates a new instance of a {@link CMSTheme}
+     */
     public CMSTheme() {
         super();
         if (Authenticate.getUser() == null) {
@@ -18,6 +22,14 @@ public class CMSTheme extends CMSTheme_Base {
         this.setCreationDate(new DateTime());
     }
 
+    /**
+     * Searches for a {@link CMSTheme} with a given type.
+     * 
+     * @param t
+     *            the type of the wanted {@link CMSTheme}.
+     * @return
+     *         the {@link CMSTheme} with the given type if it exists, or null otherwise.
+     */
     public static CMSTheme forType(String t) {
         for (CMSTheme theme : Bennu.getInstance().getCMSThemesSet()) {
             if (theme.getType().equals(t)) {
@@ -26,7 +38,15 @@ public class CMSTheme extends CMSTheme_Base {
         }
         return null;
     }
-    
+
+    /**
+     * Searches for a {@link CMSTemplate} with a given type on this theme.
+     * 
+     * @param t
+     *            the type of the wanted {@link CMSTemplate}.
+     * @return
+     *         the {@link CMSTemplate} with the given type if it exists, or null otherwise.
+     */
     public CMSTemplate templateForType(String t) {
         for (CMSTemplate template : this.getTemplatesSet()) {
             if (template.getType().equals(t)) {
@@ -36,6 +56,14 @@ public class CMSTheme extends CMSTheme_Base {
         return null;
     }
 
+    /**
+     * Searches for a {@link CMSTemplateFile} with a given name on this theme.
+     * 
+     * @param t
+     *            the displayName of the wanted {@link CMSTemplateFile}.
+     * @return
+     *         the {@link CMSTemplateFile} with the given displayName if it exists, or null otherwise.
+     */
     public CMSTemplateFile fileForPath(String t) {
         for (CMSTemplateFile file : this.getFilesSet()) {
             if (file.getDisplayName().equals(t)) {
@@ -45,6 +73,10 @@ public class CMSTheme extends CMSTheme_Base {
         return null;
     }
     
+    /**
+     * 
+     * @return true if this is the default theme for the CMS, and false otherwise.
+     */
     public boolean isDefault(){
         return Bennu.getInstance().getDefaultCMSTheme() == this;
     }

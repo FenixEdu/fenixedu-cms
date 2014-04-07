@@ -1,5 +1,6 @@
 package org.fenixedu.cms.domain;
 
+import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -7,8 +8,13 @@ import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.Atomic;
 
+/**
+ * Model for a page on a given Site.
+ */
 public class Page extends Page_Base {
-    
+    /**
+     * the logged {@link User} creates a new Page.
+     */
     public Page() {
         super();
         this.setCreationDate(new DateTime());
@@ -28,6 +34,14 @@ public class Page extends Page_Base {
         }
     }
     
+    /**
+     * Searches a {@link Component} of this page by oid.
+     * 
+     * @param oid
+     *            the oid of the {@link Component} to be searched.
+     * @return
+     *         the {@link Component} with the given oid if it is a component of this page and null otherwise.
+     */
     public Component componentForOid(String oid){
         for (Component c : getComponentsSet()){
             if (c.getExternalId().equals(oid)){
@@ -48,6 +62,9 @@ public class Page extends Page_Base {
         this.deleteDomainObject();
     }
 
+    /**
+     * @return the URL link for this page.
+     */
     public String getAddress() {
         String path = CoreConfiguration.getConfiguration().applicationUrl();
         if (path.charAt(path.length()-1) != '/') {
