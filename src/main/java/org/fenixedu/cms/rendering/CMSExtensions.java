@@ -7,20 +7,19 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.google.common.base.Functions;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Range;
-import com.mitchellbosecke.pebble.PebbleEngine;
 import com.mitchellbosecke.pebble.error.ParserException;
 import com.mitchellbosecke.pebble.extension.Extension;
 import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
+import com.mitchellbosecke.pebble.extension.NodeVisitor;
 import com.mitchellbosecke.pebble.extension.Test;
 import com.mitchellbosecke.pebble.lexer.Token;
-import com.mitchellbosecke.pebble.node.Node;
+import com.mitchellbosecke.pebble.node.RenderableNode;
 import com.mitchellbosecke.pebble.operator.BinaryOperator;
 import com.mitchellbosecke.pebble.operator.UnaryOperator;
 import com.mitchellbosecke.pebble.tokenParser.AbstractTokenParser;
@@ -57,7 +56,7 @@ public class CMSExtensions implements Extension {
         }
 
         @Override
-        public Node parse(Token token) throws ParserException {
+        public RenderableNode parse(Token token) throws ParserException {
 
             return null;
         }
@@ -76,12 +75,6 @@ public class CMSExtensions implements Extension {
             Range<Integer> range = Range.closedOpen((Integer) args.get("from"), (Integer) args.get("to"));
             return ContiguousSet.create(range, DiscreteDomain.integers());
         }
-
-    }
-
-    @Override
-    public void initRuntime(PebbleEngine engine) {
-        // TODO Auto-generated method stub
 
     }
 
@@ -121,6 +114,12 @@ public class CMSExtensions implements Extension {
 
     @Override
     public Map<String, Object> getGlobalVariables() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public List<NodeVisitor> getNodeVisitors() {
         // TODO Auto-generated method stub
         return null;
     }

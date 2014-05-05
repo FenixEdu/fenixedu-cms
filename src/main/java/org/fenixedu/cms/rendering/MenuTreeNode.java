@@ -1,22 +1,26 @@
 package org.fenixedu.cms.rendering;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.io.Writer;
 
-import com.mitchellbosecke.pebble.compiler.Compiler;
-import com.mitchellbosecke.pebble.node.AbstractNode;
+import com.mitchellbosecke.pebble.error.PebbleException;
+import com.mitchellbosecke.pebble.extension.NodeVisitor;
+import com.mitchellbosecke.pebble.node.AbstractRenderableNode;
+import com.mitchellbosecke.pebble.template.EvaluationContext;
+import com.mitchellbosecke.pebble.template.PebbleTemplateImpl;
 
-public class MenuTreeNode extends AbstractNode {
-    
-    private void compileNode(){
-        
-               
-    }
+public class MenuTreeNode extends AbstractRenderableNode {
     
     @Override
-    public void compile(Compiler compiler) {
-        compiler.newline().write("List<String> bits = new ArrayList<String>();");        
-        compiler.write("context.pushScope();").newline();
+    public void render(PebbleTemplateImpl self, Writer writer, EvaluationContext context) throws PebbleException, IOException {
+        writer.write("List<String> bits = new ArrayList<String>();");
+        writer.write("context.pushScope();");
+    }
+
+    @Override
+    public void accept(NodeVisitor visitor) {
+        // TODO Auto-generated method stub
+
     }
     
 

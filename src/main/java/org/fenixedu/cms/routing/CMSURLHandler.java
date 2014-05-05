@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
 import org.fenixedu.cms.domain.CMSTemplateFile;
@@ -78,7 +77,7 @@ final class CMSURLHandler implements SemanticURLHandler {
                     PebbleEngine engine = new PebbleEngine(new StringLoader());
                     engine.addExtension(new CMSExtensions());
                     PebbleTemplate compiledTemplate =
-                            engine.compile("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
+                            engine.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
 
                     res.setStatus(500);
                     res.setContentType("text/html");
@@ -174,7 +173,7 @@ final class CMSURLHandler implements SemanticURLHandler {
         engine.addExtension(new CMSExtensions());
         PebbleTemplate compiledTemplate = null;
 
-        compiledTemplate = engine.compile(page.getTemplate().getFile().getDisplayName());
+        compiledTemplate = engine.getTemplate(page.getTemplate().getFile().getDisplayName());
 
         res.setStatus(200);
         res.setContentType("text/html");
@@ -243,13 +242,14 @@ final class CMSURLHandler implements SemanticURLHandler {
         if (cmsTheme != null) {
             PebbleEngine engine = new PebbleEngine(new CMSTemplateLoader(cmsTheme));
             engine.addExtension(new CMSExtensions());
-            compiledTemplate = engine.compile("404.html");
+            compiledTemplate = engine.getTemplate("404.html");
         }
 
         if (cmsTheme == null || compiledTemplate == null) {
             PebbleEngine engine = new PebbleEngine(new StringLoader());
             engine.addExtension(new CMSExtensions());
-            compiledTemplate = engine.compile("<html><head></head><body><h1>File Not Found</h1><b>Url:</b>{{url}}</body></html>");
+            compiledTemplate =
+                    engine.getTemplate("<html><head></head><body><h1>File Not Found</h1><b>Url:</b>{{url}}</body></html>");
         }
 
         res.setStatus(404);
@@ -271,14 +271,14 @@ final class CMSURLHandler implements SemanticURLHandler {
         if (cmsTheme != null) {
             PebbleEngine engine = new PebbleEngine(new CMSTemplateLoader(cmsTheme));
             engine.addExtension(new CMSExtensions());
-            compiledTemplate = engine.compile("500.html");
+            compiledTemplate = engine.getTemplate("500.html");
         }
 
         if (cmsTheme == null || compiledTemplate == null) {
             PebbleEngine engine = new PebbleEngine(new StringLoader());
             engine.addExtension(new CMSExtensions());
             compiledTemplate =
-                    engine.compile("<html><head></head><body><h1>Internal Server Error</h1><b>Url:</b>{{url}}</body></html>");
+                    engine.getTemplate("<html><head></head><body><h1>Internal Server Error</h1><b>Url:</b>{{url}}</body></html>");
         }
 
         res.setStatus(500);
