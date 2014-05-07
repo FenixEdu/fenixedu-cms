@@ -122,7 +122,7 @@ relation CMSTemplateCMSTH{
 
 relation CMSThemeUser{
   .org.fenixedu.bennu.core.domain.User playsRole createdBy{
-    multiplicity 1..1;
+    multiplicity 0..1;
   }
   protected CMSTheme playsRole themesCreated{
     multiplicity *;

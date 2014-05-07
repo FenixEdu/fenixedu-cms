@@ -14,10 +14,6 @@ public class CMSTheme extends CMSTheme_Base {
      * The logged {@link User} creates a new instance of a {@link CMSTheme}
      */
     public CMSTheme() {
-        super();
-        if (Authenticate.getUser() == null) {
-            throw new RuntimeException("Needs Login");
-        }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
     }
