@@ -91,7 +91,7 @@ final class CMSURLHandler implements SemanticURLHandler {
             }
 
             if (pageSlug.startsWith("/static/")) {
-                pageSlug = pageSlug.substring(1);
+                pageSlug = pageSlug.substring(pageSlug.lastIndexOf('/') + 1);
                 CMSTemplateFile file = sites.getTheme().fileForPath(pageSlug);
                 if (file != null) {
                     InputStream i = file.getStream();
