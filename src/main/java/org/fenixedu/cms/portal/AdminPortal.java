@@ -20,8 +20,8 @@ import pt.ist.fenixframework.Atomic.TxMode;
 
 import com.google.common.base.Strings;
 
-@SpringApplication(group = "anyone", path = "cms", title = "cms-manage")
-@SpringFunctionality(app = AdminPortal.class, title = "cms-manage")
+@SpringApplication(group = "anyone", path = "cms", title = "application.title")
+@SpringFunctionality(app = AdminPortal.class, title = "application.admin-portal.title")
 @RequestMapping("/cms/manage")
 public class AdminPortal {
 
