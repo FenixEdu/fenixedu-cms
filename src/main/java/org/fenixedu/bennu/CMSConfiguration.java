@@ -1,11 +1,11 @@
 package org.fenixedu.bennu;
 
+import org.fenixedu.bennu.cms.domain.Component;
+import org.fenixedu.bennu.cms.domain.ComponentType;
+import org.fenixedu.bennu.cms.domain.RegisterSiteTemplate;
+import org.fenixedu.bennu.cms.domain.Site;
+import org.fenixedu.bennu.cms.domain.SiteTemplate;
 import org.fenixedu.bennu.spring.BennuSpringModule;
-import org.fenixedu.cms.domain.Component;
-import org.fenixedu.cms.domain.ComponentType;
-import org.fenixedu.cms.domain.RegisterSiteTemplate;
-import org.fenixedu.cms.domain.Site;
-import org.fenixedu.cms.domain.SiteTemplate;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
