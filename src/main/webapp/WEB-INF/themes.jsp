@@ -4,6 +4,7 @@
 
 <h1><spring:message code="site.manage.title" /></h1>
 <p>
+  <a href="${pageContext.request.contextPath}/cms/manage/themes/loadDefault" class="btn btn-default"><spring:message code="site.manage.label.loadDefault" /></a>
   <a href="${pageContext.request.contextPath}/cms/manage/themes/create" class="btn btn-primary"><spring:message code="site.manage.label.addTheme" /></a>
 </p>
 

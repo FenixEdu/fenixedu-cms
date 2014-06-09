@@ -1,7 +1,5 @@
 package org.fenixedu.bennu.cms.portal;
 
-
-
 import org.fenixedu.bennu.cms.domain.Category;
 import org.fenixedu.bennu.cms.domain.ListCategoryPosts;
 import org.fenixedu.bennu.cms.domain.ListOfCategories;

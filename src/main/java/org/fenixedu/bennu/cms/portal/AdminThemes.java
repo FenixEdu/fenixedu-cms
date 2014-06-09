@@ -39,10 +39,16 @@ public class AdminThemes {
         return "viewTheme";
     }
 
+    @RequestMapping(value = "themes/loadDefault", method = RequestMethod.GET)
+    public RedirectView loadDefaultThemes(Model model) {
+        CMSThemeLoader.createDefaultThemes();
+        return new RedirectView("/cms/manage/themes", true);
+    }
+
     @RequestMapping(value = "themes/{type}/delete", method = RequestMethod.POST)
     public RedirectView deleteTheme(Model model, @PathVariable(value = "type") String type) {
         CMSTheme.forType(type).delete();
-        return new RedirectView("/xpto/cms/manage/themes", false);
+        return new RedirectView("/cms/manage/themes", true);
     }
 
     @RequestMapping(value = "themes/create", method = RequestMethod.GET)
