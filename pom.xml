@@ -16,21 +16,7 @@
         <version.org.fenixedu.bennu>3.0.1</version.org.fenixedu.bennu>
 	<version.org.fenixedu.bennu.spring>1.0.0</version.org.fenixedu.bennu.spring>
     </properties>
-<!--
-   <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
--->
+
     <dependencies>
         <dependency>
             <groupId>org.fenixedu</groupId>
