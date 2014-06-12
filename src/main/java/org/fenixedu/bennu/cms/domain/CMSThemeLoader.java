@@ -131,11 +131,16 @@ public class CMSThemeLoader {
         String themeType = themeDef.get("type").getAsString();
         CMSTheme theme = CMSTheme.forType(themeType);
 
-        if (theme != null) {
-            theme.delete();
+//        if (theme != null) {
+//            theme.delete();
+//        }
+//
+//        theme = new CMSTheme();
+
+        if (theme == null) {
+            theme = new CMSTheme();
         }
 
-        theme = new CMSTheme();
         theme.setBennu(Bennu.getInstance());
         theme.setName(themeDef.get("name").getAsString());
         theme.setDescription(themeDef.get("description").getAsString());
