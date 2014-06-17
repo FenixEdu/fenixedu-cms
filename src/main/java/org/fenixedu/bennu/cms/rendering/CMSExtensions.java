@@ -1,8 +1,11 @@
 package org.fenixedu.bennu.cms.rendering;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -48,6 +51,24 @@ public class CMSExtensions implements Extension {
 
     }
 
+    private static class I18NFunction implements Function {
+        @Override
+        public List<String> getArgumentNames() {
+            List<String> names = new ArrayList<>();
+            names.add("bundle");
+            names.add("key");
+            return names;
+        }
+
+        @Override
+        public Object execute(Map<String, Object> args) {
+            String bundle = (String) args.get("bundle");
+            String key = args.get("key").toString();
+
+            return BundleUtil.getString(bundle, key);
+        }
+    }
+
     public static class RecursiveTreeToken extends AbstractTokenParser {
 
         @Override
@@ -91,7 +112,10 @@ public class CMSExtensions implements Extension {
 
     @Override
     public Map<String, Function> getFunctions() {
-        return ImmutableMap.of("range", (Function) new RangeFunction());
+        Map<String, Function> functions = new HashMap<>();
+        functions.put("i18n", new I18NFunction());
+        functions.put("range", new RangeFunction());
+        return functions;
     }
 
     @Override
