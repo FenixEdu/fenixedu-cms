@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+  {% for post in pagination.posts %}
+  <div class="blog-post">
+    <h2 class="blog-post-title"><a href="{{ post.address }}">{{ post.name.content }}</a></h2>
+    <p class="small blog-post-meta">{{ post.creationDate|formatDate("MMMM d, Y, H:m") }} by <a href="#">{{post.createdBy.username}}</a></p>
+    <p>
+      {{post.body.content}}
+    </p>
+  </div><!-- /.blog-post -->
+  {% endfor %}
+
+  {% if pagination.pages.size != 1 %}
+  <center>
+  <ul class="pagination pagination-sm">
+
+    {% if pagination.current != 1 %}
+      <li><a href="#">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><a href="#">&laquo;</a></li>
+    {% endif %}
+
+    {% for i in pagination.pages %}
+      {% if loop.index + 1 == pagination.current %}
+        <li class="active"><a href="{{ i.url }}">{{loop.index + 1}}</a></li>
+      {% else %}
+        <li><a href="{{ i.url }}">{{loop.index + 1}}</a></li>
+      {% endif %}
+    {% endfor %}
+
+    {% if pagination.current != pagination.pages %}
+      <li><a href="#">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><a href="#">&raquo;</a></li>
+    {% endif %}
+
+  </ul>
+  </center>
+  {% endif %}
+{% endblock content %}
