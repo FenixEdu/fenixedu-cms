@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -91,14 +92,18 @@ final class CMSURLHandler implements SemanticURLHandler {
             }
 
             if (pageSlug.startsWith("/static/")) {
-                pageSlug = pageSlug.substring(pageSlug.lastIndexOf('/') + 1);
-                CMSTemplateFile file = sites.getTheme().fileForPath(pageSlug);
-                if (file != null) {
-                    InputStream i = file.getStream();
+//                pageSlug = pageSlug.substring(pageSlug.lastIndexOf('/') + 1);
+                InputStream i = sites.getTheme().streamForPath(pageSlug);
+                CMSTemplateFile f = sites.getTheme().fileForPath(pageSlug);
+                if (i != null) {
                     OutputStream o = buf;
                     long l = ByteStreams.copy(i, o);
                     res.setContentLength((int) l);
-                    res.setContentType(file.getContentType());
+                    if (f != null) {
+                        res.setContentType(f.getContentType());
+                    } else {
+                        res.setContentType(new MimetypesFileTypeMap().getContentType(pageSlug));
+                    }
                 } else {
                     render404(req, pageSlug, res, bufWriter, sites);
                 }
