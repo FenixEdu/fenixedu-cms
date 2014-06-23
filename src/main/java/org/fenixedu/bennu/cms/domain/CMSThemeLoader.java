@@ -4,8 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import org.fenixedu.bennu.core.domain.Bennu;
 
@@ -30,16 +30,24 @@ public class CMSThemeLoader {
     final static Pattern RELATIVE_PARENT = Pattern.compile("^../|/../|/..$");
     final static Pattern RELATIVE_CURRENT = Pattern.compile("^./|/./|/.$");
     final static Pattern FULL_PATH = Pattern.compile("^/.*");
-    private final static String DEFAULT_THEMES_PATH = "src/main/webapp/themes";
 
     public static void createDefaultThemes() {
-        URI uri = Paths.get(DEFAULT_THEMES_PATH).toUri();
-        File themesContainer = new File(uri);
-        for (File themeFolder : themesContainer.listFiles()) {
-            if (themeFolder.isDirectory()) {
-                createFromFolder(true, themeFolder);
+        InputStream in = CMSThemeLoader.class.getResourceAsStream("/META-INF/resources/WEB-INF/cms-default-theme.zip");
+        ZipInputStream zin = new ZipInputStream(in);
+        create(true, getFolderEntries(zin));
+    }
+
+    private static List<ZipEntryBean> getFolderEntries(ZipInputStream zin) {
+        List<ZipEntryBean> zipEntryBeans = Lists.newArrayList();
+        ZipEntry zipEntry;
+        try {
+            while ((zipEntry = zin.getNextEntry()) != null) {
+                zipEntryBeans.add(new ZipEntryBean(zin, zipEntry));
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return zipEntryBeans;
     }
 
     public static CMSTheme createFromZip(Boolean isDefault, ZipFile zipFile) {
@@ -179,7 +187,6 @@ public class CMSThemeLoader {
             CMSTemplateFile file = new CMSTemplateFile(name, name, files.get(fileName).toByteArray());
             theme.addFiles(file);
             processedFiles.put(name, file);
-            System.out.println("Extracting: " + fileName);
         }
         for (Entry<String, JsonElement> entry : themeDef.get("templates").getAsJsonObject().entrySet()) {
             String type = entry.getKey();
@@ -230,28 +237,37 @@ public class CMSThemeLoader {
 
     private static class ZipEntryBean extends EntryBean {
 
-        private ZipEntry zipEntry;
-        private ZipFile zipFile;
+        private ByteArrayOutputStream bs = new ByteArrayOutputStream();
 
         public ZipEntryBean(ZipFile zipFile, ZipEntry zipEntry) {
             super(zipEntry.getName(), zipEntry.isDirectory());
-            this.zipFile = zipFile;
-            this.zipEntry = zipEntry;
+            try {
+                int len;
+                byte[] buffer = new byte[2048];
+                while ((len = zipFile.getInputStream(zipEntry).read(buffer)) > 0) {
+                    bs.write(buffer, 0, len);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Error reading the content of the zip file entry", e.getCause());
+            }
+        }
+
+        public ZipEntryBean(ZipInputStream zin, ZipEntry zipEntry) {
+            super(zipEntry.getName(), zipEntry.isDirectory());
+            try {
+                int len;
+                byte[] buffer = new byte[2048];
+                while ((len = zin.read(buffer)) > 0) {
+                    bs.write(buffer, 0, len);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Error reading the content of the zip file entry", e.getCause());
+            }
         }
 
         @Override
         public ByteArrayOutputStream getArrayOutputStream() {
-            try {
-                int len;
-                byte[] buffer = new byte[2048];
-                ByteArrayOutputStream bs = new ByteArrayOutputStream();
-                while ((len = zipFile.getInputStream(zipEntry).read(buffer)) > 0) {
-                    bs.write(buffer, 0, len);
-                }
-                return bs;
-            } catch (IOException e) {
-                throw new RuntimeException("Error reading the content of the zip file entry", e.getCause());
-            }
+            return bs;
         }
 
     }
