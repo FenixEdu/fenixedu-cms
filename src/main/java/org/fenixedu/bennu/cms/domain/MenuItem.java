@@ -3,6 +3,7 @@ package org.fenixedu.bennu.cms.domain;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.domain.User;
@@ -15,7 +16,7 @@ import pt.ist.fenixframework.Atomic;
 /**
  * Models the items of a {@link Menu}
  */
-public class MenuItem extends MenuItem_Base {
+public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
     
     /**
      * The logged {@link User} creates a new MenuItem.
@@ -110,7 +111,7 @@ public class MenuItem extends MenuItem_Base {
      * @return the childrens sorted by position
      */
     public List<MenuItem> getChildrenSorted(){
-        return getChildrenSet().stream().sorted(Comparator.comparing(MenuItem::getPosition)).collect(Collectors.toList());
+        return getChildrenSet().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
     }
     
     /**
@@ -142,4 +143,15 @@ public class MenuItem extends MenuItem_Base {
         this.setTop(null);
         this.deleteDomainObject();
     }
+
+    @Override
+    public int compareTo(MenuItem o) {
+        return getPosition() - o.getPosition();
+    }
+
+    @Override
+    public Integer getPosition() {
+        return Optional.ofNullable(super.getPosition()).orElse(0);
+    }
+
 }

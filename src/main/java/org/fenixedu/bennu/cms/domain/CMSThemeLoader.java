@@ -10,6 +10,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -174,11 +175,10 @@ public class CMSThemeLoader {
         }
 
         for (Entry<String, JsonElement> entry : themeDef.get("templates").getAsJsonObject().entrySet()) {
-            CMSTemplate tp = new CMSTemplate();
-
             String type = entry.getKey();
             JsonObject obj = entry.getValue().getAsJsonObject();
-
+            
+            CMSTemplate tp = Optional.ofNullable(theme.templateForType(type)).orElse(new CMSTemplate());
             tp.setName(obj.get("name").getAsString());
             tp.setDescription(obj.get("description").getAsString());
             tp.setType(type);

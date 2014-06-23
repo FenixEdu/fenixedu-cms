@@ -117,7 +117,7 @@ public class Menu extends Menu_Base {
     }
     
     public List<MenuItem> getToplevelItemsSorted(){
-        return getToplevelItemsSet().stream().sorted(Comparator.comparing(MenuItem::getPosition)).collect(Collectors.toList());
-
+        return getToplevelItemsSet().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
     }
+
 }
