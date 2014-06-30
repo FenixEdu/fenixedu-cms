@@ -20,7 +20,7 @@ import pt.ist.fenixframework.Atomic.TxMode;
 import com.google.common.base.Strings;
 
 @BennuSpringController(AdminPortal.class)
-@RequestMapping("/cms/manage")
+@RequestMapping("/sites")
 public class AdminPages {
 
     @RequestMapping(value = "{slug}/pages", method = RequestMethod.GET)

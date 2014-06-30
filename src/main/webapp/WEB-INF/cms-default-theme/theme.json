@@ -1,7 +1,7 @@
 {
 	"type":"cms-default-theme",
-	"name":"FenixEDU CMS Default Theme",
-	"description":"This is the FenixEDU CMS Default Theme",
+	"name":"Bennu CMS Default Theme",
+	"description":"This is the Bennu CMS Default Theme",
 	"templates":{
 		"posts":{
 			"name": "Posts Page",

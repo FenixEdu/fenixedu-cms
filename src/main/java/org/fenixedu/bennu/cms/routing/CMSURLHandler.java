@@ -27,6 +27,7 @@ import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
 
@@ -60,75 +61,95 @@ final class CMSURLHandler implements SemanticURLHandler {
         Site sites = menu.getSites();
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         Writer bufWriter = new OutputStreamWriter(buf);
+        User user = Authenticate.getUser();
 
-        try {
-            String pageSlug = req.getRequestURI().substring(req.getContextPath().length() + menu.getFullPath().length());
+        if (sites.getCanViewGroup().isMember(user)) {
+            if(sites.getPublished()) {
+                try {
+                    String pageSlug = req.getRequestURI().substring(req.getContextPath().length() + menu.getFullPath().length());
 
-            if (pageSlug.length() == 0) {
+                    if (pageSlug.length() == 0) {
 
-            }
+                    }
 
-            if (pageSlug.endsWith("/")) {
-                if (req.getMethod().equals("GET")) {
-                    res.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-                    res.setHeader("Location", rewritePageUrl(req));
-                    return;
-                } else if (req.getMethod().equals("POST")) {
-                    PebbleEngine engine = new PebbleEngine(new StringLoader());
-                    engine.addExtension(new CMSExtensions());
-                    PebbleTemplate compiledTemplate =
-                            engine.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
+                    if (pageSlug.endsWith("/")) {
+                        if (req.getMethod().equals("GET")) {
+                            res.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+                            res.setHeader("Location", rewritePageUrl(req));
+                            return;
+                        } else if (req.getMethod().equals("POST")) {
+                            if (CoreConfiguration.getConfiguration().developmentMode()) {
+                                PebbleEngine engine = new PebbleEngine(new StringLoader());
+                                engine.addExtension(new CMSExtensions());
+                                PebbleTemplate compiledTemplate =
+                                        engine.getTemplate(
+                                                "<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
 
-                    res.setStatus(500);
-                    res.setContentType("text/html");
-                    compiledTemplate.evaluate(bufWriter);
-                }
-            }
+                                res.setStatus(500);
+                                res.setContentType("text/html");
+                                compiledTemplate.evaluate(bufWriter);
+                            } else {
+                                render500(req, res, bufWriter, sites);
+                            }
+                        }
+                    }
 
-            if (sites.getTheme() == null) {
-                render404(req, pageSlug, res, bufWriter, sites);
-                return;
-            }
+                    if (sites.getTheme() == null) {
+                        render404(req, res, bufWriter, sites);
+                    }
 
-            if (pageSlug.startsWith("/static/")) {
-                pageSlug = pageSlug.substring(pageSlug.lastIndexOf('/') + 1);
-                CMSTemplateFile file = sites.getTheme().fileForPath(pageSlug);
-                if (file != null) {
-                    InputStream i = file.getStream();
-                    OutputStream o = buf;
-                    long l = ByteStreams.copy(i, o);
-                    res.setContentLength((int) l);
-                    res.setContentType(file.getContentType());
-                } else {
-                    render404(req, pageSlug, res, bufWriter, sites);
-                }
-            } else {
-                pageSlug = pageSlug.replace("/", "");
+                    if (pageSlug.startsWith("/static/")) {
+                        pageSlug = pageSlug.substring(1);
+                        CMSTemplateFile file = sites.getTheme().fileForPath(pageSlug);
+                        if (file != null) {
+                            InputStream i = file.getStream();
+                            OutputStream o = buf;
+                            long l = ByteStreams.copy(i, o);
+                            res.setContentLength((int) l);
+                            res.setContentType(file.getContentType());
+                        } else {
+                            render404(req, res, bufWriter, sites);
+                        }
+                    } else {
+                        pageSlug = pageSlug.replace("/", "");
 
-                Page page = sites.pageForSlug(pageSlug);
+                        Page page = sites.pageForSlug(pageSlug);
 
-                if (page == null || page.getTemplate() == null) {
-                    render404(req, pageSlug, res, bufWriter, sites);
-                } else {
+                        if (page == null || page.getTemplate() == null) {
+                            render404(req, res, bufWriter, sites);
+                        } else {
+                            try {
+                                renderPage(req, pageSlug, res, bufWriter, sites, page);
+                            } catch (ResourceNotFoundException e) {
+                                render404(req, res, bufWriter, sites);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    buf = new ByteArrayOutputStream();
+                    bufWriter = new OutputStreamWriter(buf);
+                    e.printStackTrace();
                     try {
-                        renderPage(req, pageSlug, res, bufWriter, sites, page);
-                    } catch (ResourceNotFoundException e) {
-                        render404(req, pageSlug, res, bufWriter, sites);
+                        render500(req, res, bufWriter, sites);
+                    } catch (PebbleException e1) {
+                        System.out.println("FATAL");
+                        e1.printStackTrace();
                     }
                 }
+            }else{
+                try {
+                    render404(req,res,bufWriter,sites);
+                } catch (PebbleException e) {
+                    e.printStackTrace();
+                }
             }
-        } catch (Exception e) {
-            buf = new ByteArrayOutputStream();
-            bufWriter = new OutputStreamWriter(buf);
-            e.printStackTrace();
+        }else{
             try {
-                render500(req, res, bufWriter, sites);
-            } catch (PebbleException e1) {
-                System.out.println("FATAL");
-                e1.printStackTrace();
+                render403(req,res,bufWriter,sites);
+            } catch (PebbleException e) {
+                e.printStackTrace();
             }
         }
-
         OutputStream os = res.getOutputStream();
         os.write(buf.toByteArray(), 0, buf.size());
     }
@@ -230,7 +251,7 @@ final class CMSURLHandler implements SemanticURLHandler {
         return result;
     }
 
-    private void render404(final HttpServletRequest req, String reqPagePath, HttpServletResponse res, Writer bufWriter, Site site)
+    private void render404(final HttpServletRequest req, HttpServletResponse res, Writer bufWriter, Site site)
             throws PebbleException, IOException {
         TemplateContext global = new TemplateContext();
         global.put("request", makeRequestWrapper(req));
@@ -257,6 +278,34 @@ final class CMSURLHandler implements SemanticURLHandler {
         res.setContentType("text/html");
         compiledTemplate.evaluate(bufWriter, global);
 
+    }
+
+    private void render403(final HttpServletRequest req, HttpServletResponse res, Writer bufWriter, Site site)
+            throws PebbleException, IOException {
+        TemplateContext global = new TemplateContext();
+        global.put("request", makeRequestWrapper(req));
+        global.put("site", makeSiteWrapper(site));
+        global.put("staticDir", site.getStaticDirectory());
+        CMSTheme cmsTheme = site.getTheme();
+
+        PebbleTemplate compiledTemplate = null;
+
+        if (cmsTheme != null) {
+            PebbleEngine engine = new PebbleEngine(new CMSTemplateLoader(cmsTheme));
+            engine.addExtension(new CMSExtensions());
+            compiledTemplate = engine.getTemplate("403.html");
+        }
+
+        if (cmsTheme == null || compiledTemplate == null) {
+            PebbleEngine engine = new PebbleEngine(new StringLoader());
+            engine.addExtension(new CMSExtensions());
+            compiledTemplate =
+                    engine.getTemplate("<html><head></head><body><h1>Forbiden</h1><b>Url:</b>{{url}}</body></html>");
+        }
+
+        res.setStatus(500);
+        res.setContentType("text/html");
+        compiledTemplate.evaluate(bufWriter, global);
     }
 
     private void render500(final HttpServletRequest req, HttpServletResponse res, Writer bufWriter, Site site)

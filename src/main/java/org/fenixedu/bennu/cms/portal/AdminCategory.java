@@ -18,7 +18,7 @@ import pt.ist.fenixframework.Atomic;
 import com.google.common.base.Strings;
 
 @BennuSpringController(AdminPortal.class)
-@RequestMapping("/cms/manage")
+@RequestMapping("/sites")
 public class AdminCategory {
     @RequestMapping(value = "{slug}/categories", method = RequestMethod.GET)
     public String categories(Model model, @PathVariable(value = "slug") String slug) {

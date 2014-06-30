@@ -21,7 +21,7 @@ import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
 @BennuSpringController(AdminPortal.class)
-@RequestMapping("/cms/manage")
+@RequestMapping("/sites")
 public class AdminComponents {
 
     @RequestMapping(value = "{slugSite}/pages/{slugPage}/createComponent", method = RequestMethod.POST)

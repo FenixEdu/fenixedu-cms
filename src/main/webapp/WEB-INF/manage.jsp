@@ -3,10 +3,6 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <h1><spring:message code="site.manage.title" /></h1>
-<p>
-  <a href="${pageContext.request.contextPath}/cms/manage/create" class="btn btn-primary"><spring:message code="site.manage.label.createSite" /></a>
-  <a href="${pageContext.request.contextPath}/cms/manage/themes" class="btn btn-default"><spring:message code="site.manage.label.manageThemes" /></a>
-</p>
 
 <c:if test="">
 
@@ -39,18 +35,18 @@
           <td><joda:format value="${i.creationDate}" pattern="MMM dd, yyyy"/></td>
           <td>
             <div class="btn-group">
-              <a href="${pageContext.request.contextPath}/cms/manage/${i.slug}/posts" class="btn btn-sm btn-default"><spring:message code="site.manage.label.posts" /></a>
+              <a href="sites/${i.slug}/posts" class="btn btn-sm btn-default"><spring:message code="site.manage.label.posts" /></a>
 
-              <a href="${pageContext.request.contextPath}/cms/manage/${i.slug}/pages" class="btn btn-sm btn-default"><spring:message code="site.manage.label.pages" /></a>
+              <a href="sites/${i.slug}/pages" class="btn btn-sm btn-default"><spring:message code="site.manage.label.pages" /></a>
 
-              <a href="${pageContext.request.contextPath}/cms/manage/${i.slug}/categories" class="btn btn-sm btn-default"><spring:message code="site.manage.label.categories" /></a>
+              <a href="sites/${i.slug}/categories" class="btn btn-sm btn-default"><spring:message code="site.manage.label.categories" /></a>
 
-              <a href="${pageContext.request.contextPath}/cms/manage/${i.slug}/menus" class="btn btn-sm btn-default"><spring:message code="site.manage.label.menus" /></a>
+              <a href="sites/${i.slug}/menus" class="btn btn-sm btn-default"><spring:message code="site.manage.label.menus" /></a>
 
-              <a href="${pageContext.request.contextPath}/cms/manage/${i.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
+              <a href="sites/${i.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
 
      	      <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteSiteForm').submit();"><spring:message code="action.delete" /></a>
-              <form id="deleteSiteForm" action="${pageContext.request.contextPath}/cms/manage/${i.slug}/delete"" method="POST"></form>
+              <form id="deleteSiteForm" action="sites/${i.slug}/delete"" method="POST"></form>
             </div>
 
           </td>

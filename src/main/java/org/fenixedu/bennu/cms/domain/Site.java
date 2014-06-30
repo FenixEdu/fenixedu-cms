@@ -9,6 +9,9 @@ import java.util.regex.Pattern;
 import org.fenixedu.bennu.cms.routing.CMSBackend;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.groups.AnyoneGroup;
+import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.core.groups.NobodyGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
@@ -59,6 +62,7 @@ public class Site extends Site_Base {
         }
     }
 
+
     /**
      * 
      * @return mapping between the type and description for all the registered {@link SiteTemplate}.
@@ -84,7 +88,28 @@ public class Site extends Site_Base {
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
+        this.setCanViewGroup(AnyoneGroup.get());
+    }
 
+    /**
+     * returns the group of people who can view this site.
+     *
+     * @return group
+     *          the access group for this site
+     */
+    public Group getCanViewGroup(){
+        return getViewGroup().toGroup();
+    }
+
+    /**
+     * sets the access group for this site
+     *
+     * @param group
+     *          the group of people who can view this site
+     */
+    @Atomic
+    public void setCanViewGroup(Group group){
+        setViewGroup(group.toPersistentGroup());
     }
 
     /**
@@ -169,7 +194,7 @@ public class Site extends Site_Base {
     /**
      * searches for a {@link Menu} by oid on this {@link Site}.
      * 
-     * @param slug
+     * @param oid
      *            the slug of the {@link Menu} wanted.
      * @return
      *         the {@link Menu} with the given oid if it exists on this site, or null otherwise.
@@ -207,12 +232,19 @@ public class Site extends Site_Base {
         }
     }
 
+    @Atomic
+    private void deleteMenuFunctionality(){
+        MenuFunctionality mf = this.getFunctionality();
+        this.setFunctionality(null);
+        mf.delete();
+    }
+
     @Override
     // TODO: either prevent setting duplicated slugs or attach postfix.
     public void setSlug(String slug) {
         super.setSlug(slug);
         if (this.getFunctionality() != null) {
-            this.getFunctionality().delete();
+            deleteMenuFunctionality();
         }
 
         this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), false, slug,

@@ -23,7 +23,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 @BennuSpringController(AdminPortal.class)
-@RequestMapping("/cms/manage")
+@RequestMapping("/sites")
 public class AdminMenuItem {
 
     @RequestMapping(value = "{slugSite}/menus/{oidMenu}/change", method = RequestMethod.GET)

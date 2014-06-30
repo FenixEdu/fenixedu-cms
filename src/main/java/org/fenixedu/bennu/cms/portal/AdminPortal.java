@@ -22,43 +22,13 @@ import com.google.common.base.Strings;
 
 @SpringApplication(group = "anyone", path = "cms", title = "application.title")
 @SpringFunctionality(app = AdminPortal.class, title = "application.admin-portal.title")
-@RequestMapping("/cms/manage")
+@RequestMapping("/sites")
 public class AdminPortal {
 
     @RequestMapping
     public String list(Model model) {
         model.addAttribute("sites", Bennu.getInstance().getSitesSet());
         return "manage";
-    }
-
-    @RequestMapping(value = "create", method = RequestMethod.GET)
-    public String create(Model model) {
-        model.addAttribute("templates", Site.getTemplates());
-        return "create";
-    }
-
-    @RequestMapping(value = "create", method = RequestMethod.POST)
-    public RedirectView create(Model model, @RequestParam String name, @RequestParam String description,
-            @RequestParam String template, RedirectAttributes redirectAttributes) {
-        if (Strings.isNullOrEmpty(name)) {
-            redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/manage/create", true);
-        } else {
-            createSite(name, description, template);
-            return new RedirectView("/cms/manage", true);
-        }
-    }
-
-    @Atomic
-    private void createSite(String name, String description, String template) {
-        Site site = new Site();
-        site.setBennu(Bennu.getInstance());
-        site.setDescription(new LocalizedString(I18N.getLocale(), description));
-        site.setName(new LocalizedString(I18N.getLocale(), name));
-
-        if (!template.equals("null")) {
-            Site.templateFor(template).makeIt(site);
-        }
     }
 
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.GET)
@@ -70,22 +40,31 @@ public class AdminPortal {
     }
 
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
-    public RedirectView edit(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
-            @RequestParam String description, @RequestParam String theme, RedirectAttributes redirectAttributes) {
-        if (Strings.isNullOrEmpty(name)) {
+    public RedirectView edit(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
+            @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug,
+            @RequestParam(required = false) Boolean published, RedirectAttributes redirectAttributes) {
+        if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/manage/" + slug + "/edit", true);
+            return new RedirectView("/cms/sites/" + slug + "/edit", true);
         } else {
-            editSite(name, description, theme, Site.fromSlug(slug));
-            return new RedirectView("/cms/manage", true);
+            if (published == null) {
+                published = false;
+            }
+            editSite(name, description, theme, newSlug, published, Site.fromSlug(slug));
+            return new RedirectView("/cms/sites", true);
         }
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private void editSite(String name, String description, String theme, Site s) {
-        s.setName(new LocalizedString(I18N.getLocale(), name));
-        s.setDescription(new LocalizedString(I18N.getLocale(), description));
+    private void editSite(LocalizedString name, LocalizedString description, String theme, String slug, Boolean published,
+            Site s) {
+        s.setName(name);
+        s.setDescription(description);
         s.setTheme(CMSTheme.forType(theme));
+        if (!s.getSlug().equals(slug)){
+            s.setSlug(slug);
+        }
+        s.setPublished(published);
     }
 
     //THIS NEEDS REVEIEW
@@ -93,7 +72,7 @@ public class AdminPortal {
     public RedirectView delete(@PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
         s.delete();
-        return new RedirectView("/cms/manage", true);
+        return new RedirectView("/cms/sites", true);
     }
 
 }

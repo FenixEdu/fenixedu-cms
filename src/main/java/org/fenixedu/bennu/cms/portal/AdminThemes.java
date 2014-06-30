@@ -12,6 +12,7 @@ import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.CMSThemeLoader;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
+import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,40 +24,40 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.io.Files;
 
-@BennuSpringController(AdminPortal.class)
-@RequestMapping("/cms/manage")
+@SpringFunctionality(app = AdminPortal.class, title = "application.admin-themes.title")
+@RequestMapping("/themes")
 public class AdminThemes {
 
-    @RequestMapping(value = "themes", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public String themes(Model model) {
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
         return "themes";
     }
 
-    @RequestMapping(value = "themes/{type}/see", method = RequestMethod.GET)
+    @RequestMapping(value = "{type}/see", method = RequestMethod.GET)
     public String viewTheme(Model model, @PathVariable(value = "type") String type) {
         model.addAttribute("theme", CMSTheme.forType(type));
         return "viewTheme";
     }
 
-    @RequestMapping(value = "themes/loadDefault", method = RequestMethod.GET)
+    @RequestMapping(value = "loadDefault", method = RequestMethod.GET)
     public RedirectView loadDefaultThemes(Model model) {
         CMSThemeLoader.createDefaultThemes();
         return new RedirectView("/cms/manage/themes", true);
     }
 
-    @RequestMapping(value = "themes/{type}/delete", method = RequestMethod.POST)
+    @RequestMapping(value = "{type}/delete", method = RequestMethod.POST)
     public RedirectView deleteTheme(Model model, @PathVariable(value = "type") String type) {
         CMSTheme.forType(type).delete();
         return new RedirectView("/cms/manage/themes", true);
     }
 
-    @RequestMapping(value = "themes/create", method = RequestMethod.GET)
+    @RequestMapping(value = "create", method = RequestMethod.GET)
     public String addTheme(Model model) {
         return "addTheme";
     }
 
-    @RequestMapping(value = "themes/create", method = RequestMethod.POST)
+    @RequestMapping(value = "create", method = RequestMethod.POST)
     public RedirectView addTheme(@RequestParam Boolean isDefault, @RequestParam("uploadedFile") MultipartFile uploadedFile)
             throws IOException {
         File tempFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
@@ -66,7 +67,7 @@ public class AdminThemes {
     }
 
 
-    @RequestMapping(value = "themes/{type}/editFile/**", method = RequestMethod.GET)
+    @RequestMapping(value = "{type}/editFile/**", method = RequestMethod.GET)
     public String editFile(Model model, @PathVariable(value = "type") String type, HttpServletRequest request) {
         CMSTheme theme = CMSTheme.forType(type);
         String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
