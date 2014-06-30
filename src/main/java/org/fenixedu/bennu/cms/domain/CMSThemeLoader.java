@@ -1,35 +1,40 @@
 package org.fenixedu.bennu.cms.domain;
 
-import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.fenixedu.bennu.core.domain.Bennu;
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
-
-import java.io.*;
-import java.net.URL;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+
+import org.apache.commons.io.FilenameUtils;
+import org.fenixedu.bennu.core.domain.Bennu;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.Atomic.TxMode;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class CMSThemeLoader {
 
     final static Pattern RELATIVE_PARENT = Pattern.compile("^../|/../|/..$");
     final static Pattern RELATIVE_CURRENT = Pattern.compile("^./|/./|/.$");
     final static Pattern FULL_PATH = Pattern.compile("^/.*");
-
-    public static void createDefaultThemes() {
-        InputStream in = CMSThemeLoader.class.getResourceAsStream("/META-INF/resources/WEB-INF/cms-default-theme.zip");
-        ZipInputStream zin = new ZipInputStream(in);
-        create(true, getFolderEntries(zin));
-    }
+    public static Logger LOGGER = LoggerFactory.getLogger(CMSThemeLoader.class);
 
     private static List<ZipEntryBean> getFolderEntries(ZipInputStream zin) {
         List<ZipEntryBean> zipEntryBeans = Lists.newArrayList();
@@ -44,12 +49,16 @@ public class CMSThemeLoader {
         return zipEntryBeans;
     }
 
-    public static CMSTheme createFromZip(Boolean isDefault, ZipFile zipFile) {
-        return create(isDefault, getZipEntries(zipFile));
+    public static CMSTheme createFromZipStream(ZipInputStream zin) {
+        return create(getFolderEntries(zin));
     }
 
-    public static CMSTheme createFromFolder(Boolean isDefault, File folder) {
-        return create(isDefault, getFolderEntries(folder));
+    public static CMSTheme createFromZip(ZipFile zipFile) {
+        return create(getZipEntries(zipFile));
+    }
+
+    public static CMSTheme createFromFolder(File folder) {
+        return create(getFolderEntries(folder));
     }
 
     private static List<FileEntryBean> getFolderEntries(File folder) {
@@ -73,7 +82,7 @@ public class CMSThemeLoader {
         return zipEntryBeans;
     }
 
-    private static CMSTheme create(Boolean isDefault, List<? extends EntryBean> entries) {
+    private static CMSTheme create(List<? extends EntryBean> entries) {
         String prefix = null;
         boolean isOnlyDirectory = true;
 
@@ -117,38 +126,53 @@ public class CMSThemeLoader {
 
         CMSTheme theme = createTheme(prefix, isOnlyDirectory, files, themeDescription);
 
-        if (isDefault) {
-            Bennu.getInstance().setDefaultCMSTheme(theme);
-        }
-
         return theme;
     }
+
     @Atomic(mode = TxMode.WRITE)
     private static CMSTheme createTheme(String prefix, boolean isOnlyDirectory, HashMap<String, ByteArrayOutputStream> files,
             JsonObject themeDef) {
+        try {
+            if (themeDef == null) {
+                throw new RuntimeException("Theme did not contain a theme.json");
+            }
 
-        if (themeDef == null) {
-            throw new RuntimeException("Theme did not contain a theme.json");
+            String themeType = themeDef.get("type").getAsString();
+
+            CMSTheme theme = Optional.ofNullable(CMSTheme.forType(themeType)).orElseGet(() -> new CMSTheme());
+            theme.setDescription(themeDef.get("description").getAsString());
+            theme.setName(themeDef.get("name").getAsString());
+            theme.setBennu(Bennu.getInstance());
+            theme.setType(themeType);
+
+            HashSet<CMSTemplate> refused = Sets.newHashSet(theme.getTemplatesSet());
+            theme.getFilesSet().stream().forEach(file -> file.delete());
+
+            loadExtends(themeDef, theme);
+            HashMap<String, CMSTemplateFile> processedFiles = loadFiles(prefix, isOnlyDirectory, files, theme);
+            loadPageTemplates(themeDef, theme, refused, processedFiles);
+
+            for (CMSTemplate t : refused) {
+                if (t.getPagesSet().size() != 0) {
+                    throw new RuntimeException("Cannot replace theme, '" + t.getType()
+                            + "' is being used in some pages but is not included in new theme.");
+                } else {
+                    t.delete();
+                }
+            }
+
+            if (Bennu.getInstance().getCMSThemesSet().size() == 1) {
+                Bennu.getInstance().setDefaultCMSTheme(theme);
+            }
+            return theme;
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            e.printStackTrace();
+            return null;
         }
+    }
 
-        String themeType = themeDef.get("type").getAsString();
-        CMSTheme theme = CMSTheme.forType(themeType);
-
-//        if (theme != null) {
-//            theme.delete();
-//        }
-//
-//        theme = new CMSTheme();
-
-        if (theme == null) {
-            theme = new CMSTheme();
-        }
-
-        theme.setBennu(Bennu.getInstance());
-        theme.setName(themeDef.get("name").getAsString());
-        theme.setDescription(themeDef.get("description").getAsString());
-        theme.setType(themeType);
-
+    private static void loadExtends(JsonObject themeDef, CMSTheme theme) {
         if (themeDef.has("extends")) {
             String type = themeDef.get("extends").getAsString();
             if (type != null) {
@@ -160,31 +184,24 @@ public class CMSThemeLoader {
                 }
             }
         }
-        HashMap<String, CMSTemplateFile> processedFiles = new HashMap<>();
-        for (String fileName : files.keySet()) {
-            String name = null;
+    }
 
-            if (isOnlyDirectory) {
-                name = fileName.substring(prefix.length() + 1);
-            } else {
-                name = fileName;
-            }
-
-            CMSTemplateFile file = new CMSTemplateFile(name, name, files.get(fileName).toByteArray());
-            theme.addFiles(file);
-            processedFiles.put(name, file);
-        }
-
+    private static void loadPageTemplates(JsonObject themeDef, CMSTheme theme, HashSet<CMSTemplate> refused,
+            HashMap<String, CMSTemplateFile> processedFiles) {
         for (Entry<String, JsonElement> entry : themeDef.get("templates").getAsJsonObject().entrySet()) {
-            CMSTemplate tp = new CMSTemplate();
-
             String type = entry.getKey();
             JsonObject obj = entry.getValue().getAsJsonObject();
+
+            CMSTemplate tp = Optional.ofNullable(theme.templateForType(type)).orElseGet(() -> new CMSTemplate());
 
             tp.setName(obj.get("name").getAsString());
             tp.setDescription(obj.get("description").getAsString());
             tp.setType(type);
             tp.setTheme(theme);
+
+            if (refused.contains(tp)) {
+                refused.remove(tp);
+            }
 
             String path = obj.get("file").getAsString();
             CMSTemplateFile file = processedFiles.get(path);
@@ -194,11 +211,17 @@ public class CMSThemeLoader {
             }
             tp.setFile(file);
         }
+    }
 
-        if (Bennu.getInstance().getCMSThemesSet().size() == 1) {
-            Bennu.getInstance().setDefaultCMSTheme(theme);
+    private static HashMap<String, CMSTemplateFile> loadFiles(String prefix, boolean isOnlyDirectory,
+            HashMap<String, ByteArrayOutputStream> files, CMSTheme theme) {
+        HashMap<String, CMSTemplateFile> processedFiles = new HashMap<>();
+        for (String name : files.keySet()) {
+            CMSTemplateFile file = new CMSTemplateFile(FilenameUtils.getName(name), name, files.get(name).toByteArray());
+            theme.addFiles(file);
+            processedFiles.put(name, file);
         }
-        return theme;
+        return processedFiles;
     }
 
     private static abstract class EntryBean {

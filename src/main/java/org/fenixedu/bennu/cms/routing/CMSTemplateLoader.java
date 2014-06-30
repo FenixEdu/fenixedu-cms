@@ -4,7 +4,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
-import org.fenixedu.bennu.cms.domain.CMSTemplateFile;
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.Site;
 
@@ -25,8 +24,7 @@ final class CMSTemplateLoader extends ClasspathLoader {
     @Override
     public Reader getReader(String templateName) throws LoaderException {
         try {
-            CMSTemplateFile file = this.theme.fileForPath(templateName);
-            return new InputStreamReader(file.getStream(), "UTF-8");
+            return new InputStreamReader(this.theme.streamForPath(templateName), "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new LoaderException(e, "Stuff");
         }

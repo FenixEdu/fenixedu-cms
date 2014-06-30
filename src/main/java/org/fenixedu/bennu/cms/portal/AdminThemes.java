@@ -42,7 +42,7 @@ public class AdminThemes {
 
     @RequestMapping(value = "loadDefault", method = RequestMethod.GET)
     public RedirectView loadDefaultThemes(Model model) {
-        CMSThemeLoader.createDefaultThemes();
+        //TODO
         return new RedirectView("/cms/manage/themes", true);
     }
 
@@ -62,7 +62,10 @@ public class AdminThemes {
             throws IOException {
         File tempFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
         Files.write(uploadedFile.getBytes(), tempFile);
-        CMSThemeLoader.createFromZip(isDefault, new ZipFile(tempFile));
+        CMSTheme theme = CMSThemeLoader.createFromZip(new ZipFile(tempFile));
+        if (isDefault) {
+            Bennu.getInstance().setDefaultCMSTheme(theme);
+        }
         return new RedirectView("/cms/manage/themes", true);
     }
 

@@ -85,7 +85,12 @@
 			<artifactId>pebble</artifactId>
 			<version>1.0.0</version>
 		</dependency>
-	</dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-integration</artifactId>
+			<version>1.0.0.RELEASE</version>
+		</dependency>
+    </dependencies>
 
     <repositories>
         <repository>

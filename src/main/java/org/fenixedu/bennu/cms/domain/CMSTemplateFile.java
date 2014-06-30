@@ -18,4 +18,11 @@ public class CMSTemplateFile extends CMSTemplateFile_Base {
         return true;
     }
     
+    @Override
+    public void delete() {
+        this.setTheme(null);
+        this.setTemplate(null);
+        super.delete();
+    }
+
 }

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -64,13 +65,14 @@ final class CMSURLHandler implements SemanticURLHandler {
         User user = Authenticate.getUser();
 
         if (sites.getCanViewGroup().isMember(user)) {
-            if(sites.getPublished()) {
+            if (sites.getPublished()) {
                 try {
                     String pageSlug = req.getRequestURI().substring(req.getContextPath().length() + menu.getFullPath().length());
 
                     if (pageSlug.length() == 0) {
 
                     }
+
 
                     if (pageSlug.endsWith("/")) {
                         if (req.getMethod().equals("GET")) {
@@ -94,19 +96,19 @@ final class CMSURLHandler implements SemanticURLHandler {
                         }
                     }
 
-                    if (sites.getTheme() == null) {
-                        render404(req, res, bufWriter, sites);
-                    }
-
                     if (pageSlug.startsWith("/static/")) {
-                        pageSlug = pageSlug.substring(1);
-                        CMSTemplateFile file = sites.getTheme().fileForPath(pageSlug);
-                        if (file != null) {
-                            InputStream i = file.getStream();
+//                pageSlug = pageSlug.substring(pageSlug.lastIndexOf('/') + 1);
+                        InputStream i = sites.getTheme().streamForPath(pageSlug);
+                        CMSTemplateFile f = sites.getTheme().fileForPath(pageSlug);
+                        if (i != null) {
                             OutputStream o = buf;
                             long l = ByteStreams.copy(i, o);
                             res.setContentLength((int) l);
-                            res.setContentType(file.getContentType());
+                            if (f != null) {
+                                res.setContentType(f.getContentType());
+                            } else {
+                                res.setContentType(new MimetypesFileTypeMap().getContentType(pageSlug));
+                            }
                         } else {
                             render404(req, res, bufWriter, sites);
                         }
@@ -136,16 +138,16 @@ final class CMSURLHandler implements SemanticURLHandler {
                         e1.printStackTrace();
                     }
                 }
-            }else{
+            } else {
                 try {
-                    render404(req,res,bufWriter,sites);
+                    render404(req, res, bufWriter, sites);
                 } catch (PebbleException e) {
                     e.printStackTrace();
                 }
             }
-        }else{
+        } else {
             try {
-                render403(req,res,bufWriter,sites);
+                render403(req, res, bufWriter, sites);
             } catch (PebbleException e) {
                 e.printStackTrace();
             }
@@ -179,7 +181,7 @@ final class CMSURLHandler implements SemanticURLHandler {
         global.put("site", makeSiteWrapper(site));
         global.put("page", makePageWrapper(page));
         global.put("staticDir", site.getStaticDirectory());
-        
+
         List<TemplateContext> components = new ArrayList<TemplateContext>();
 
         for (Component component : page.getComponentsSet()) {
