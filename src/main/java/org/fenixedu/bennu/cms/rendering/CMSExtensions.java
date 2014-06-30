@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.WordUtils;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -49,6 +50,23 @@ public class CMSExtensions implements Extension {
             return "";
         }
 
+    }
+
+    public class TitleFilter implements Filter {
+
+        @Override
+        public List<String> getArgumentNames() {
+            return null;
+        }
+
+        @Override
+        public Object apply(Object input, Map<String, Object> args) {
+            if (input != null && input instanceof String) {
+                return WordUtils.capitalizeFully((String) input);
+            } else {
+                return "";
+            }
+        }
     }
 
     private static class I18NFunction implements Function {
@@ -101,7 +119,7 @@ public class CMSExtensions implements Extension {
 
     @Override
     public Map<String, Filter> getFilters() {
-        return ImmutableMap.of("formatDate", (Filter) new DateTimeFormaterFilter());
+        return ImmutableMap.of("formatDate", new DateTimeFormaterFilter(), "title", new TitleFilter());
     }
 
     @Override
