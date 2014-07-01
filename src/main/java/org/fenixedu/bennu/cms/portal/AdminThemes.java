@@ -11,7 +11,6 @@ import org.fenixedu.bennu.cms.domain.CMSTemplateFile;
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.CMSThemeLoader;
 import org.fenixedu.bennu.core.domain.Bennu;
-import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,8 +23,8 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.io.Files;
 
-@SpringFunctionality(app = AdminPortal.class, title = "application.admin-themes.title")
-@RequestMapping("/themes")
+@SpringFunctionality(app = AdminSites.class, title = "application.admin-themes.title")
+@RequestMapping("/cms/themes")
 public class AdminThemes {
 
     @RequestMapping(method = RequestMethod.GET)
@@ -43,13 +42,13 @@ public class AdminThemes {
     @RequestMapping(value = "loadDefault", method = RequestMethod.GET)
     public RedirectView loadDefaultThemes(Model model) {
         //TODO
-        return new RedirectView("/cms/manage/themes", true);
+        return new RedirectView("/cms/themes", true);
     }
 
     @RequestMapping(value = "{type}/delete", method = RequestMethod.POST)
     public RedirectView deleteTheme(Model model, @PathVariable(value = "type") String type) {
         CMSTheme.forType(type).delete();
-        return new RedirectView("/cms/manage/themes", true);
+        return new RedirectView("/cms/themes", true);
     }
 
     @RequestMapping(value = "create", method = RequestMethod.GET)
@@ -66,7 +65,7 @@ public class AdminThemes {
         if (isDefault) {
             Bennu.getInstance().setDefaultCMSTheme(theme);
         }
-        return new RedirectView("/cms/manage/themes", true);
+        return new RedirectView("/cms/themes", true);
     }
 
 
@@ -74,11 +73,11 @@ public class AdminThemes {
     public String editFile(Model model, @PathVariable(value = "type") String type, HttpServletRequest request) {
         CMSTheme theme = CMSTheme.forType(type);
         String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-        path = path.substring(("/cms/manage/themes/" + theme.getType() + "/editFile/").length());
+        path = path.substring(("/cms/themes/" + theme.getType() + "/editFile/").length());
         CMSTemplateFile file = CMSTheme.forType(type).fileForPath(path);
 
         model.addAttribute("theme", CMSTheme.forType(type));
-        model.addAttribute("linkBack", "/cms/manage/themes/" + theme.getType() + "/see");
+        model.addAttribute("linkBack", "/cms/themes/" + theme.getType() + "/see");
         model.addAttribute("file", file);
 
         String contentType = file.getContentType();

@@ -5,7 +5,6 @@ import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,8 +12,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
 
-@SpringFunctionality(app = AdminPortal.class, title = "application.create-site.title")
-@RequestMapping("/new")
+@SpringFunctionality(app = AdminSites.class, title = "application.create-site.title")
+@RequestMapping("/cms/sites/new")
 public class CreateSite {
 
     @RequestMapping(method = RequestMethod.GET)
@@ -29,13 +28,13 @@ public class CreateSite {
             RedirectAttributes redirectAttributes) {
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/new", true);
+            return new RedirectView("/cms/sites/new", true);
         } else {
             if (published == null) {
                 published = false;
             }
             createSite(name, description, published, template);
-            return new RedirectView("/cms/new/", true);
+            return new RedirectView("/cms/sites/", true);
         }
     }
 

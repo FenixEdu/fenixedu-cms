@@ -3,9 +3,9 @@ package org.fenixedu.bennu.cms.portal;
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
-import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,12 +18,10 @@ import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-import com.google.common.base.Strings;
-
 @SpringApplication(group = "anyone", path = "cms", title = "application.title")
-@SpringFunctionality(app = AdminPortal.class, title = "application.admin-portal.title")
-@RequestMapping("/sites")
-public class AdminPortal {
+@SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")
+@RequestMapping("/cms/sites")
+public class AdminSites {
 
     @RequestMapping
     public String list(Model model) {
@@ -45,7 +43,7 @@ public class AdminPortal {
             @RequestParam(required = false) Boolean published, RedirectAttributes redirectAttributes) {
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/sites/" + slug + "/edit", true);
+            return new RedirectView("/sites/" + slug + "/edit", true);
         } else {
             if (published == null) {
                 published = false;
@@ -61,7 +59,7 @@ public class AdminPortal {
         s.setName(name);
         s.setDescription(description);
         s.setTheme(CMSTheme.forType(theme));
-        if (!s.getSlug().equals(slug)){
+        if (!s.getSlug().equals(slug)) {
             s.setSlug(slug);
         }
         s.setPublished(published);

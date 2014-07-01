@@ -275,7 +275,7 @@ public class Site extends Site_Base {
         for (Page page : getPagesSet()) {
             page.delete();
         }
-
+        this.setViewGroup(null);
         this.setTheme(null);
         this.setCreatedBy(null);
         this.setBennu(null);

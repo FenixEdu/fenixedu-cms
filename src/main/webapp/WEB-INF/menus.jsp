@@ -5,7 +5,7 @@
 <h1><spring:message code="menu.manage.title" /></h1>
 <p class="small"><spring:message code="menu.manage.label.site" />: <a href="../"><strong>${site.name.content}</strong></a> </p>
 <p>
-<a href="menus/create" class="btn btn-default btn-primary"><spring:message code="menu.manage.label.createMenu" /></a>
+<a href="${pageContext.request.contextPath}/cms/menus/${site.slug}/create" class="btn btn-default btn-primary"><spring:message code="menu.manage.label.createMenu" /></a>
 </p>
 
 <c:choose>
@@ -33,9 +33,9 @@
               <td><joda:format value="${m.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
               <td>
               	<div class="btn-group">
-	                <a href="menus/${m.oid}/change" class="btn btn-sm btn-default"><spring:message code="action.change" /></a>
+	                <a href="${pageContext.request.contextPath}/cms/menus/${site.slug}/${m.oid}/change" class="btn btn-sm btn-default"><spring:message code="action.change" /></a>
 	                <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteMenuForm').submit();"><spring:message code="action.delete" /></a>
-					<form id="deleteMenuForm" action="menus/${m.oid}/delete" method="POST"></form>
+					<form id="deleteMenuForm" action="${pageContext.request.contextPath}/cms/menus/${site.slug}/${m.oid}/delete" method="POST"></form>
 				</div>
               </td>
             </tr>

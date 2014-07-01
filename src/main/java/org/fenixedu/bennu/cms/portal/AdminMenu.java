@@ -17,10 +17,10 @@ import pt.ist.fenixframework.Atomic;
 
 import com.google.common.base.Strings;
 
-@BennuSpringController(AdminPortal.class)
-@RequestMapping("/sites")
+@BennuSpringController(AdminSites.class)
+@RequestMapping("/cms/menus")
 public class AdminMenu {
-    @RequestMapping(value="{slug}/menus", method = RequestMethod.GET)
+    @RequestMapping(value="{slug}", method = RequestMethod.GET)
     public String posts(Model model, @PathVariable(value="slug") String slug){
         Site site = Site.fromSlug(slug);
         model.addAttribute("site", site);
@@ -28,23 +28,23 @@ public class AdminMenu {
         return "menus";
     }
 
-    @RequestMapping(value="{slug}/menus/create", method = RequestMethod.GET)
+    @RequestMapping(value="{slug}/create", method = RequestMethod.GET)
     public String createMenu(Model model, @PathVariable(value="slug") String slug){
         Site s = Site.fromSlug(slug);
         model.addAttribute("site", s);
         return "createMenu";
     }
 
-    @RequestMapping(value="{slug}/menus/create", method = RequestMethod.POST)
+    @RequestMapping(value="{slug}/create", method = RequestMethod.POST)
     public RedirectView createMenu(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
             RedirectAttributes redirectAttributes) {
         if (Strings.isNullOrEmpty(name)) {
             redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/manage/" + slug + "/menus/create", true);
+            return new RedirectView("/cms/menus/" + slug + "/create", true);
         } else {
             Site s = Site.fromSlug(slug);
             createMenu(s, name);
-            return new RedirectView("/cms/manage/" + s.getSlug() + "/menus", true);
+            return new RedirectView("/cms/menus/" + s.getSlug() + "", true);
         }
     }
 
@@ -55,10 +55,10 @@ public class AdminMenu {
         p.setName(new LocalizedString(I18N.getLocale(),name));
     }
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/delete", method = RequestMethod.POST)
+    @RequestMapping(value = "{slugSite}/{oidMenu}/delete", method = RequestMethod.POST)
     public RedirectView delete(Model model, @PathVariable(value="slugSite") String slugSite, @PathVariable(value="oidMenu") String oidMenu){
         Site s = Site.fromSlug(slugSite);
         s.menuForOid(oidMenu).delete();
-        return new RedirectView("/cms/manage/" + s.getSlug() + "/menus",true);
+        return new RedirectView("/cms/menus/" + s.getSlug() + "",true);
     }
 }

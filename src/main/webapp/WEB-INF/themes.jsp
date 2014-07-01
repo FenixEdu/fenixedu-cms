@@ -41,9 +41,9 @@
 					<td>${i.templatesSet.size()}</td>
 					<td>
 						<div class="btn-group">
-							<a class="btn btn-default" href="themes/${i.type}/see"><spring:message code="action.more" /></a>
+							<a class="btn btn-default" href="${pageContext.request.contextPath}/cms/themes/${i.type}/see"><spring:message code="action.more" /></a>
 							<a class="btn btn-default btn-danger" onclick="document.getElementById('deleteThemeForm').submit();"><spring:message code="action.delete" /></a>
-							<form id="deleteThemeForm" action="themes/${i.type}/delete" method="post"></form>
+							<form id="deleteThemeForm" action="${pageContext.request.contextPath}/cms/themes/${i.type}/delete" method="post"></form>
 						</div>
 					</td>
 				</tr>

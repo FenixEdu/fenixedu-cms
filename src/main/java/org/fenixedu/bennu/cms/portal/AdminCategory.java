@@ -17,10 +17,10 @@ import pt.ist.fenixframework.Atomic;
 
 import com.google.common.base.Strings;
 
-@BennuSpringController(AdminPortal.class)
-@RequestMapping("/sites")
+@BennuSpringController(AdminSites.class)
+@RequestMapping("/cms/categories")
 public class AdminCategory {
-    @RequestMapping(value = "{slug}/categories", method = RequestMethod.GET)
+    @RequestMapping(value = "{slug}", method = RequestMethod.GET)
     public String categories(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
         model.addAttribute("site", site);
@@ -28,23 +28,23 @@ public class AdminCategory {
         return "categories";
     }
 
-    @RequestMapping(value = "{slug}/categories/create", method = RequestMethod.GET)
+    @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
     public String createCategory(Model model, @PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
         model.addAttribute("site", s);
         return "createCategory";
     }
 
-    @RequestMapping(value = "{slug}/categories/create", method = RequestMethod.POST)
+    @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
     public RedirectView createCategory(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
             RedirectAttributes redirectAttributes) {
         if (Strings.isNullOrEmpty(name)) {
             redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/manage/" + slug + "/categories/create", true);
+            return new RedirectView("/cms/categories/" + slug + "/create", true);
         }
         Site s = Site.fromSlug(slug);
         createCategory(s, name);
-        return new RedirectView("/cms/manage/" + s.getSlug() + "/categories", true);
+        return new RedirectView("/cms/categories/" + s.getSlug() + "", true);
     }
 
     @Atomic
@@ -54,11 +54,11 @@ public class AdminCategory {
         p.setName(new LocalizedString(I18N.getLocale(), name));
     }
 
-    @RequestMapping(value = "{slugSite}/categories/{slugCategories}/delete", method = RequestMethod.POST)
+    @RequestMapping(value = "{slugSite}/{slugCategories}/delete", method = RequestMethod.POST)
     public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "slugCategories") String slugCategories) {
         Site s = Site.fromSlug(slugSite);
         s.categoryForSlug(slugCategories).delete();
-        return new RedirectView("/cms/manage/" + s.getSlug() + "/categories", true);
+        return new RedirectView("/cms/categories/" + s.getSlug() + "", true);
     }
 }

@@ -20,11 +20,11 @@ import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-@BennuSpringController(AdminPortal.class)
-@RequestMapping("/sites")
+@BennuSpringController(AdminSites.class)
+@RequestMapping("/cms/components")
 public class AdminComponents {
 
-    @RequestMapping(value = "{slugSite}/pages/{slugPage}/createComponent", method = RequestMethod.POST)
+    @RequestMapping(value = "{slugSite}/{slugPage}/createComponent", method = RequestMethod.POST)
     public RedirectView createComponent(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "slugPage") String slugPage, @RequestParam String componentType,
             @RequestParam(required = false) String menuOid, @RequestParam(required = false) String catSlug, @RequestParam(required = false) String postSlug) {
@@ -33,7 +33,7 @@ public class AdminComponents {
 
         createComponent(componentType, menuOid, postSlug,catSlug, s, p);
 
-        return new RedirectView("/cms/manage/" + s.getSlug() + "/pages/" + p.getSlug() + "/edit", true);
+        return new RedirectView("/cms/pages/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
     }
 
     @Atomic(mode = TxMode.WRITE)
@@ -60,7 +60,7 @@ public class AdminComponents {
         }
     }
 
-    @RequestMapping(value = "{slugSite}/pages/{slugPage}/deleteComponent/{oid}", method = RequestMethod.POST)
+    @RequestMapping(value = "{slugSite}/{slugPage}/deleteComponent/{oid}", method = RequestMethod.POST)
     public RedirectView deleteComponent(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "slugPage") String slugPage, @PathVariable(
                     value = "oid") String oid) {
@@ -69,6 +69,6 @@ public class AdminComponents {
         Page p = s.pageForSlug(slugPage);
         p.componentForOid(oid).delete();
 
-        return new RedirectView("/cms/manage/" + s.getSlug() + "/pages/" + p.getSlug() + "/edit", true);
+        return new RedirectView("/cms/pages/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
     }
 }

@@ -8,7 +8,7 @@
     <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="categories.create.label.name"/></label>
     <div class="col-sm-10">
       <input type="text" name="name" class="form-control" id="inputEmail3" placeholder="<spring:message code="categories.create.label.name"/>">
-      <c:if test="${emptyName}"><p class="text-danger"><spring:message code="categories.create.error.emptyName"/></p></c:if>
+      <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="categories.create.error.emptyName"/></p></c:if>
     </div>
   </div>
   

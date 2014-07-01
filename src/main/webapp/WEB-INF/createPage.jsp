@@ -1,7 +1,7 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<h1><spring:message code="menu.create.title" /></h1>
+<h1><spring:message code="page.create.title" /></h1>
 <p class="small"><spring:message code="menu.create.label.site" />: <strong>${site.name.content}</strong>  </p>
 <form class="form-horizontal" action="" method="post" role="form">
   <div class="${emptyName ? "form-group has-error" : "form-group"}">

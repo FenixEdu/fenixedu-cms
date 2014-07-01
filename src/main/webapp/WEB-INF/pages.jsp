@@ -5,7 +5,7 @@
 <h1><spring:message code="page.manage.title" /></h1>
 <p class="small"><spring:message code="page.manage.label.site" />: <a href="../"><strong>${site.name.content}</strong></a> </p>
 <p>
-<a href="pages/create" class="btn btn-default btn-primary"><spring:message code="page.manage.label.createPage" /></a>
+<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" class="btn btn-default btn-primary"><spring:message code="page.manage.label.createPage" /></a>
 </p>
 
 <c:choose>
@@ -34,10 +34,10 @@
               <td><joda:format value="${p.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
               <td>
                 <div class="btn-group">
-                  <a href="pages/${p.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
+                  <a href="${pageContext.request.contextPath}/cms/pages/${p.site.slug}/${p.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
                   <a href="${pageContext.request.contextPath}/${p.site.slug}/${p.slug}" class="btn btn-sm btn-default" target="_blank"><spring:message code="action.link" /></a>
 				  <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deletePageForm').submit();"><spring:message code="action.delete" /></a>
-               	  <form id="deletePageForm" action="pages/${p.slug}/delete" method="POST"></form>
+               	  <form id="deletePageForm" action="${pageContext.request.contextPath}/cms/pages/${p.site.slug}/${p.slug}/delete" method="POST"></form>
                 </div>
               </td>
             </tr>

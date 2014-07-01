@@ -10,7 +10,7 @@
     <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.name" /></label>
     <div class="col-sm-10">
       <input type="text" name="name" class="form-control" id="inputEmail3" placeholder="<spring:message code="page.edit.label.name" />" value="${page.name.content}" \>
-      <c:if test="${emptyName}"><p class="text-danger"><spring:message code="page.edit.error.emptyName" /></p></c:if>
+      <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="page.edit.error.emptyName" /></p></c:if>
     </div>
   </div>
   <div class="form-group">
@@ -46,18 +46,18 @@
     </button>
     <ul class="dropdown-menu">
       <li>
-        <form action="createComponent" method="post">
+        <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
           <input type="hidden" name="componentType" value="viewPost" />
         </form>
         <a onclick="$(this).prev().submit()" href="#"><spring:message code="page.edit.label.viewPost" /></a>
       </li>
       <li>
-        <form action="createComponent" method="post">
+        <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
           <input type="hidden" name="componentType" value="listCategories" />
         </form>
         <a onclick="$(this).prev().submit()" href="#"><spring:message code="page.edit.label.listOfCategories" /></a>
       <li>
-        <form action="createComponent" method="post">
+        <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
           <input type="hidden" name="componentType" value="listPost" />
         </form>
         <a onclick="$(this).prev().submit()" href="#"><spring:message code="page.edit.label.listOfPosts" /></a>
@@ -95,7 +95,7 @@
               <td><joda:format value="${m.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
               <td>
                 <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteComponentForm').submit();"><spring:message code="action.delete" /></a>
-               	<form id="deleteComponentForm" action="deleteComponent/${m.getExternalId()}" method="POST"></form>
+               	<form id="deleteComponentForm" action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/deleteComponent/${m.getExternalId()}" method="POST"></form>
               </td>
             </tr>
           </c:forEach>
@@ -106,7 +106,7 @@
 
 <div class="modal fade" id="listCategoryPosts" tabindex="-1" role="dialog" aria-labelledby="listCategoryPosts" aria-hidden="true">
   <div class="modal-dialog">
-    <form action="createComponent" method="post">
+    <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -136,7 +136,7 @@
 
 <div class="modal fade" id="menu" tabindex="-1" role="dialog" aria-labelledby="menu" aria-hidden="true">
   <div class="modal-dialog">
-    <form action="createComponent" method="post">
+    <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -165,7 +165,7 @@
 
 <div class="modal fade" id="staticPost" tabindex="-1" role="dialog" aria-labelledby="staticPost" aria-hidden="true">
   <div class="modal-dialog">
-    <form action="createComponent" method="post">
+    <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>

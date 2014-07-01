@@ -35,18 +35,18 @@
           <td><joda:format value="${i.creationDate}" pattern="MMM dd, yyyy"/></td>
           <td>
             <div class="btn-group">
-              <a href="sites/${i.slug}/posts" class="btn btn-sm btn-default"><spring:message code="site.manage.label.posts" /></a>
+              <a href="${pageContext.request.contextPath}/cms/posts/${i.slug}" class="btn btn-sm btn-default"><spring:message code="site.manage.label.posts" /></a>
 
-              <a href="sites/${i.slug}/pages" class="btn btn-sm btn-default"><spring:message code="site.manage.label.pages" /></a>
+              <a href="${pageContext.request.contextPath}/cms/pages/${i.slug}" class="btn btn-sm btn-default"><spring:message code="site.manage.label.pages" /></a>
 
-              <a href="sites/${i.slug}/categories" class="btn btn-sm btn-default"><spring:message code="site.manage.label.categories" /></a>
+              <a href="${pageContext.request.contextPath}/cms/categories/${i.slug}" class="btn btn-sm btn-default"><spring:message code="site.manage.label.categories" /></a>
 
-              <a href="sites/${i.slug}/menus" class="btn btn-sm btn-default"><spring:message code="site.manage.label.menus" /></a>
+              <a href="${pageContext.request.contextPath}/cms/menus/${i.slug}" class="btn btn-sm btn-default"><spring:message code="site.manage.label.menus" /></a>
 
-              <a href="sites/${i.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
+              <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
 
      	      <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteSiteForm').submit();"><spring:message code="action.delete" /></a>
-              <form id="deleteSiteForm" action="sites/${i.slug}/delete"" method="POST"></form>
+              <form id="deleteSiteForm" action="${pageContext.request.contextPath}/cms/sites/${i.slug}/delete"" method="POST"></form>
             </div>
 
           </td>

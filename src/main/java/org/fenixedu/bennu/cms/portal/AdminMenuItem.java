@@ -22,11 +22,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-@BennuSpringController(AdminPortal.class)
-@RequestMapping("/sites")
+@BennuSpringController(AdminSites.class)
+@RequestMapping("/cms/menus")
 public class AdminMenuItem {
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/change", method = RequestMethod.GET)
+    @RequestMapping(value = "{slugSite}/{oidMenu}/change", method = RequestMethod.GET)
     public String change(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu) {
         Site s = Site.fromSlug(slugSite);
@@ -56,7 +56,7 @@ public class AdminMenuItem {
         return root;
     }
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/data", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "{slugSite}/{oidMenu}/data", method = RequestMethod.GET, produces = "application/json")
     public @ResponseBody
     String data(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(value = "oidMenu") String oidMenu) {
         Site s = Site.fromSlug(slugSite);
@@ -83,7 +83,7 @@ public class AdminMenuItem {
         return top.toString();
     }
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/createItem", method = RequestMethod.POST)
+    @RequestMapping(value = "{slugSite}/{oidMenu}/createItem", method = RequestMethod.POST)
     public RedirectView create(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid, @RequestParam String name,
             @RequestParam String use, @RequestParam String url, @RequestParam String slugPage) {
@@ -91,7 +91,7 @@ public class AdminMenuItem {
         Menu m = s.menuForOid(oidMenu);
 
         createMenuItem(menuItemOid, name, use, url, slugPage, s, m);
-        return new RedirectView("/cms/manage/" + slugSite + "/menus/" + oidMenu + "/change", true);
+        return new RedirectView("/cms/menus/" + slugSite + "/" + oidMenu + "/change", true);
     }
 
     @Atomic
@@ -121,7 +121,7 @@ public class AdminMenuItem {
         }
     }
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/changeItem", method = RequestMethod.POST)
+    @RequestMapping(value = "{slugSite}/{oidMenu}/changeItem", method = RequestMethod.POST)
     public RedirectView change(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid,
             @RequestParam String menuItemOidParent, @RequestParam String name, @RequestParam String use,
@@ -142,7 +142,7 @@ public class AdminMenuItem {
 
             changeMenuItem(mi, menuItemOidParent, name, use, url, slugPage, s, m, position);
         }
-        return new RedirectView("/cms/manage/" + slugSite + "/menus/" + oidMenu + "/change", true);
+        return new RedirectView("/cms/menus/" + slugSite + "/" + oidMenu + "/change", true);
     }
 
     @Atomic
@@ -187,7 +187,7 @@ public class AdminMenuItem {
         }
     }
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/delete/{oidMenuItem}", method = RequestMethod.POST)
+    @RequestMapping(value = "{slugSite}/{oidMenu}/delete/{oidMenuItem}", method = RequestMethod.POST)
     public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu, @PathVariable(value = "oidMenuItem") String oidMenuItem) {
         Site s = Site.fromSlug(slugSite);
@@ -197,6 +197,6 @@ public class AdminMenuItem {
             throw new RuntimeException("Wrong Parents");
         }
         item.delete();
-        return new RedirectView("/cms/manage/" + slugSite + "/menus/" + oidMenu + "/change", true);
+        return new RedirectView("/cms/menus/" + slugSite + "/" + oidMenu + "/change", true);
     }
 }

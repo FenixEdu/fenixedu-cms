@@ -5,7 +5,7 @@
 <h1><spring:message code="categories.manage.title"/></h1>
 <p class="small"><spring:message code="categories.manage.site"/>: <a href="../"><strong>${site.name.content}</strong></a> </p>
 <p>
-<a href="categories/create" class="btn btn-default btn-primary"><spring:message code="categories.manage.createCategories"/></a>
+<a href="${pageContext.request.contextPath}/cms/categories/${site.slug}/create" class="btn btn-default btn-primary"><spring:message code="categories.manage.createCategories"/></a>
 </p>
 
 <c:choose>
@@ -34,10 +34,10 @@
               <td><joda:format value="${c.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
               <td>
               	<div class="btn-group">
-	                <a href="categories/${c.slug}/stuff" class="btn btn-sm btn-default"><spring:message code="action.stuff"/></a>
-	                <a href="${pageContext.request.contextPath}/${c.site.slug}/${c.slug}" class="btn btn-sm btn-default" target="_blank"><spring:message code="action.link"/></a>
+	                <a href="${pageContext.request.contextPath}/cms/categories/${c.slug}/stuff" class="btn btn-sm btn-default"><spring:message code="action.stuff"/></a>
+	                <a href="${pageContext.request.contextPath}/cms/categories/${c.site.slug}/${c.slug}" class="btn btn-sm btn-default" target="_blank"><spring:message code="action.link"/></a>
 	                <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteCategoryForm').submit();"><spring:message code="action.delete"/></a>
-					<form id="deleteCategoryForm" action="categories/${c.slug}/delete" method="POST"></form>
+					<form id="deleteCategoryForm" action="${pageContext.request.contextPath}/cms/categories/${c.site.slug}/${c.slug}/delete" method="POST"></form>
 				</div>
               </td>
             </tr>

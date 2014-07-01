@@ -8,7 +8,7 @@
         <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.create.label.name"/></label>
 
         <div class="col-sm-10">
-            <input localizedString required type="text" name="name" class="form-control" id="inputEmail3"
+            <input bennu-localized-string required type="text" name="name" class="form-control" id="inputEmail3"
                    placeholder="<spring:message code="site.create.label.name"/>">
             <c:if test="${emptyName !=null }"><p class="text-danger"><spring:message code="site.create.error.emptyName"/></p>
             </c:if>
@@ -19,7 +19,7 @@
         <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.create.label.description"/></label>
 
         <div class="col-sm-10">
-            <textarea localizedString required name="description"
+            <textarea bennu-localized-string required name="description"
                       placeholder="<spring:message code="site.create.label.description"/>" class="form-control"
                       rows="3"></textarea>
         </div>
@@ -36,7 +36,7 @@
         <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.create.label.useTemplate"/></label>
 
         <div class="col-sm-10">
-            <select name="template" id="">
+            <select name="template" id="" class="form-control">
                 <option value="null">&lt; <spring:message code="site.create.label.emptySite"/> &gt;</option>
 
                 <c:forEach items="${templates}" var="template">

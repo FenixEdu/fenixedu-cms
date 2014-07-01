@@ -17,10 +17,10 @@ import pt.ist.fenixframework.Atomic;
 
 import com.google.common.base.Strings;
 
-@BennuSpringController(AdminPortal.class)
-@RequestMapping("/sites")
+@BennuSpringController(AdminSites.class)
+@RequestMapping("/cms/posts")
 public class AdminPosts {
-    @RequestMapping(value="{slug}/posts", method = RequestMethod.GET)
+    @RequestMapping(value="{slug}", method = RequestMethod.GET)
     public String posts(Model model, @PathVariable(value="slug") String slug){
         Site site = Site.fromSlug(slug);
         model.addAttribute("site", site);
@@ -28,40 +28,40 @@ public class AdminPosts {
         return "posts";
     }
 
-    @RequestMapping(value="{slug}/posts/create", method = RequestMethod.GET)
+    @RequestMapping(value="{slug}/create", method = RequestMethod.GET)
     public String createPost(Model model, @PathVariable(value="slug") String slug){
         Site s = Site.fromSlug(slug);
         model.addAttribute("site", s);
         return "createPost";
     }
 
-    @RequestMapping(value="{slug}/posts/create", method = RequestMethod.POST)
-    public RedirectView createPost(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
-            @RequestParam String body, RedirectAttributes redirectAttributes) {
-        if (Strings.isNullOrEmpty(name)) {
+    @RequestMapping(value="{slug}/create", method = RequestMethod.POST)
+    public RedirectView createPost(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
+            @RequestParam LocalizedString body, RedirectAttributes redirectAttributes) {
+        if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/manage/" + slug + "/posts/create", true);
+            return new RedirectView("/cms/posts/" + slug + "/create", true);
         } else {
             Site s = Site.fromSlug(slug);
             createPost(s, name, body);
-            return new RedirectView("/cms/manage/" + s.getSlug() + "/posts", true);
+            return new RedirectView("/cms/posts/" + s.getSlug() + "", true);
         }
     }
 
     @Atomic
-    private void createPost(Site site, String name, String body) {
+    private void createPost(Site site, LocalizedString name, LocalizedString body) {
         Post p = new Post();
 
         p.setSite(site);
-        p.setName(new LocalizedString(I18N.getLocale(), name));
-        p.setBody(new LocalizedString(I18N.getLocale(), body));
+        p.setName(name);
+        p.setBody(body);
 
     }
 
-    @RequestMapping(value = "{slugSite}/posts/{slugPost}/delete", method = RequestMethod.POST)
+    @RequestMapping(value = "{slugSite}/{slugPost}/delete", method = RequestMethod.POST)
     public RedirectView delete(Model model, @PathVariable(value="slugSite") String slugSite, @PathVariable(value="slugPost") String slugPost){
         Site s = Site.fromSlug(slugSite);
         s.postForSlug(slugPost).delete();
-        return new RedirectView("/cms/manage/" + s.getSlug() + "/posts",true);
+        return new RedirectView("/cms/posts/" + s.getSlug() + "",true);
     }
 }
