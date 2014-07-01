@@ -16,6 +16,7 @@ import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Range;
+import com.google.common.collect.Sets;
 import com.mitchellbosecke.pebble.error.ParserException;
 import com.mitchellbosecke.pebble.extension.Extension;
 import com.mitchellbosecke.pebble.extension.Filter;
@@ -30,6 +31,21 @@ import com.mitchellbosecke.pebble.tokenParser.AbstractTokenParser;
 import com.mitchellbosecke.pebble.tokenParser.TokenParser;
 
 public class CMSExtensions implements Extension {
+    public class MapEntriesFunction implements Function {
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("map");
+        }
+
+        @Override
+        public Object execute(Map<String, Object> args) {
+            if (args.get("map") != null && args.get("map") instanceof Map) {
+                return ((Map) args.get("map")).entrySet();
+            }
+            return Sets.newLinkedHashSet();
+        }
+    }
+
     public class DateTimeFormaterFilter implements Filter {
 
         @Override
@@ -133,6 +149,7 @@ public class CMSExtensions implements Extension {
         Map<String, Function> functions = new HashMap<>();
         functions.put("i18n", new I18NFunction());
         functions.put("range", new RangeFunction());
+        functions.put("entries", new MapEntriesFunction());
         return functions;
     }
 
