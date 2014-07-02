@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -13,8 +13,8 @@
     <version>1.0.0-SNAPSHOT</version>
 
     <properties>
-        <version.org.fenixedu.bennu>3.2.0-SNAPSHOT</version.org.fenixedu.bennu>
-		<version.org.fenixedu.bennu.spring>1.1.0-SNAPSHOT</version.org.fenixedu.bennu.spring>
+        <version.org.fenixedu.bennu>3.1.0</version.org.fenixedu.bennu>
+        <version.org.fenixedu.bennu.spring>1.0.1</version.org.fenixedu.bennu.spring>
     </properties>
 
     <build>
@@ -27,7 +27,8 @@
                         <phase>prepare-package</phase>
                         <configuration>
                             <target>
-                                <zip destfile="${project.build.directory}/classes/META-INF/resources/WEB-INF/cms-default-theme.zip" basedir="${project.basedir}/src/main/webapp/WEB-INF/cms-default-theme"></zip>
+                                <zip destfile="${project.build.directory}/classes/META-INF/resources/WEB-INF/cms-default-theme.zip"
+                                     basedir="${project.basedir}/src/main/webapp/WEB-INF/cms-default-theme"></zip>
                             </target>
                         </configuration>
                         <goals>
@@ -36,9 +37,33 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.samaxes.maven</groupId>
+                <artifactId>minify-maven-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>toolkit</id>
+                        <phase>compile</phase>
+                        <configuration>
+                            <charset>utf-8</charset>
+                            <jsSourceDir>static/js/toolkit</jsSourceDir>
+                            <jsSourceIncludes>
+                                <jsSourceInclude>**</jsSourceInclude>
+                            </jsSourceIncludes>
+                            <webappTargetDir>${project.build.outputDirectory}/META-INF/resources/</webappTargetDir>
+                            <jsTargetDir>static/js</jsTargetDir>
+                            <jsFinalFile>toolkit.js</jsFinalFile>
+                            <nosuffix>true</nosuffix>
+                        </configuration>
+                        <goals>
+                            <goal>minify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-
     <dependencies>
         <dependency>
             <groupId>org.fenixedu</groupId>
@@ -66,30 +91,30 @@
             <version>${version.org.fenixedu.bennu.spring}</version>
         </dependency>
         <dependency>
-		    <groupId>com.github.slugify</groupId>
-		    <artifactId>slugify</artifactId>
-		    <version>2.1.2</version>
-		</dependency>
-		<dependency>
-		    <groupId>joda-time</groupId>
-		    <artifactId>joda-time-jsptags</artifactId>
-		    <version>1.1.1</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.google.guava</groupId>
-		    <artifactId>guava</artifactId>
-		    <version>16.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mitchellbosecke</groupId>
-			<artifactId>pebble</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-integration</artifactId>
-			<version>1.0.0.RELEASE</version>
-		</dependency>
+            <groupId>com.github.slugify</groupId>
+            <artifactId>slugify</artifactId>
+            <version>2.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time-jsptags</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>16.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mitchellbosecke</groupId>
+            <artifactId>pebble</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-integration</artifactId>
+            <version>1.0.0.RELEASE</version>
+        </dependency>
     </dependencies>
 
     <repositories>
