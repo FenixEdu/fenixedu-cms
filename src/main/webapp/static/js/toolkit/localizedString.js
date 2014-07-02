@@ -14,7 +14,7 @@
             val = "{}";
         }
         $(".bennu-localized-string-input,.bennu-localized-string-textarea", inputObject).val(JSON.parse(val)[locale.tag]);
-        $(".bennu-localized-string-language", inputObject).html(locale.displayName);
+        $(".bennu-localized-string-language", inputObject).html(locale.displayName || locale.tag);
         $(".bennu-localized-string-language", inputObject).data("locale", locale);
     }
 
@@ -32,7 +32,7 @@
                         dom.data("related", e);
                         for (var i = 0; i < d.locales.length; i++) {
                             var locale = d.locales[i];
-                            var menuOption = $("<li><a href='#'>" + locale.displayName + "</a>");
+                            var menuOption = $("<li><a href='#'>" + (locale.displayName || locale.tag) + "</a>");
                             menuOption.data("locale", locale);
                             menuOption.on("click", function (e) {
                                 changeData(dom, $(e.target).data("locale"));
