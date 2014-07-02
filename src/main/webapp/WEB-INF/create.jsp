@@ -53,4 +53,5 @@
     </div>
 </form>
 
-<script src="${pageContext.request.contextPath}/bennu-portal/js/toolkit.js"></script>
+<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
+

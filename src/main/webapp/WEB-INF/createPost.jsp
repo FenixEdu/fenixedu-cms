@@ -15,9 +15,11 @@
   <div class="form-group">
     <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.create.label.body" /></label>
     <div class="col-sm-10">
-      <textarea bennu-localized-string bennu-html-editor required name="body" class="form-control" rows="3"></textarea>
+      <textarea bennu-localized-string required name="body" class="form-control" rows="3"></textarea>
     </div>
   </div>
+
+
 
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
@@ -26,4 +28,4 @@
   </div>
 </form>
 
-<script src="${pageContext.request.contextPath}/bennu-portal/js/toolkit.js"></script>
+<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
