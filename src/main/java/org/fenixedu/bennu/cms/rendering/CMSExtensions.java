@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.lang.WordUtils;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
@@ -133,6 +134,26 @@ public class CMSExtensions implements Extension {
 
     }
 
+    public static class MatchTest implements Test {
+
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("regex");
+        }
+
+        @Override
+        public boolean apply(Object arg0, Map<String, Object> arg1) {
+            try {
+                if (arg0 instanceof String && arg1.get("regex") instanceof String) {
+                    return ((String) arg0).matches((String) arg1.get("regex"));
+                }
+            } catch (PatternSyntaxException e) {
+            }
+            return false;
+        }
+
+    }
+
     @Override
     public Map<String, Filter> getFilters() {
         return ImmutableMap.of("formatDate", new DateTimeFormaterFilter(), "title", new TitleFilter());
@@ -140,8 +161,7 @@ public class CMSExtensions implements Extension {
 
     @Override
     public Map<String, Test> getTests() {
-        // TODO Auto-generated method stub
-        return null;
+        return ImmutableMap.of("matches", new MatchTest());
     }
 
     @Override
