@@ -1,6 +1,8 @@
 package org.fenixedu.bennu.cms.rendering;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.mitchellbosecke.pebble.error.ParserException;
@@ -31,6 +34,25 @@ import com.mitchellbosecke.pebble.tokenParser.AbstractTokenParser;
 import com.mitchellbosecke.pebble.tokenParser.TokenParser;
 
 public class CMSExtensions implements Extension {
+    public class LengthFilter implements Filter {
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("collection");
+        }
+
+        @Override
+        public Object apply(Object input, Map<String, Object> args) {
+            if (input != null) {
+                if (input.getClass().isArray()) {
+                    return Array.getLength(input);
+                } else if (input instanceof Collection) {
+                    return ((Collection) input).size();
+                }
+            }
+            return 0;
+        }
+    }
+
     public class MapEntriesFunction implements Function {
         @Override
         public List<String> getArgumentNames() {
@@ -64,6 +86,34 @@ public class CMSExtensions implements Extension {
                 return fmt.print((DateTime) input);
             }
             return "";
+        }
+
+    }
+
+    public class IterableHeadFilter implements Filter {
+
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("iterable");
+        }
+
+        @Override
+        public Object apply(Object input, Map<String, Object> args) {
+            return input instanceof Iterable ? Iterables.getFirst((Iterable) input, null) : null;
+        }
+
+    }
+
+    public class IterableTaleFilter implements Filter {
+
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("iterable");
+        }
+
+        @Override
+        public Object apply(Object input, Map<String, Object> args) {
+            return input instanceof Iterable ? Iterables.skip((Iterable) input, 1) : null;
         }
 
     }
@@ -135,7 +185,8 @@ public class CMSExtensions implements Extension {
 
     @Override
     public Map<String, Filter> getFilters() {
-        return ImmutableMap.of("formatDate", new DateTimeFormaterFilter(), "title", new TitleFilter());
+        return ImmutableMap.of("formatDate", new DateTimeFormaterFilter(), "title", new TitleFilter(), "head",
+                new IterableHeadFilter(), "tale", new IterableTaleFilter(), "length", new LengthFilter());
     }
 
     @Override
