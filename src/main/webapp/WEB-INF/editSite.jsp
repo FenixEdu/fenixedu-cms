@@ -84,7 +84,5 @@
     </form>
 </div>
 
-<script src="${pageContext.request.contextPath}/bennu-portal/js/toolkit/jquery.hotkeys.js"></script>
-<script src="${pageContext.request.contextPath}/bennu-portal/js/toolkit/jquery.fullscreen.js"></script>
-<script src="${pageContext.request.contextPath}/bennu-portal/js/toolkit/localizedString.js"></script>
-<script src="${pageContext.request.contextPath}/bennu-portal/js/toolkit/wysiwyg.js"></script>
+<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
+
