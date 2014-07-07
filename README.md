@@ -1,4 +1,4 @@
 bennu-cms
 =========
 
-CMS System for the Bennu Framework
+Content Management System for the FenixEdu Application Family
