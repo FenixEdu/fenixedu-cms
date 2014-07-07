@@ -19,7 +19,10 @@
         <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.create.label.description"/></label>
 
         <div class="col-sm-10">
-            <textarea bennu-localized-string required name="description"
+            <!-- <textarea bennu-localized-string required name="description"
+                      placeholder="<spring:message code="site.create.label.description"/>" class="form-control"
+                      rows="3"></textarea> -->
+            <textarea bennu-html-editor toolbar="size,style,lists,align" name="description"
                       placeholder="<spring:message code="site.create.label.description"/>" class="form-control"
                       rows="3"></textarea>
         </div>
@@ -52,6 +55,6 @@
         </div>
     </div>
 </form>
-
-<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
-
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
+<!-- <script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script> -->
+<script src="http://localhost:8000/"></script>

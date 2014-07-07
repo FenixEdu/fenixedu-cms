@@ -202,10 +202,11 @@
 (function(){
     var attachCssToHead = function () {
         var newScript = document.createElement('style');
-        var content = document.createTextNode('[bennu-html-editor]{ display:none !important; }');
+        var content = document.createTextNode('[bennu-html-editor]{ display:none !important; } div.editor-input{ hieh');
         newScript.appendChild(content);
         var bodyClass = document.getElementsByTagName('head')[0];
         bodyClass.insertBefore(newScript, bodyClass.childNodes[2]);
+
     }
 
 
@@ -213,7 +214,7 @@
         attachCssToHead();
         $("[bennu-html-editor]").map(function (i, e) {
             e = $(e)
-            var dom = $('<div><div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor"></div><div id="editor" class="form-control" style="margin-top:30px;" contenteditable="true"></div></div>');
+            var dom = $('<div><div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor"></div><div id="editor" class="editor-input form-control" style="margin-top:15px;" contenteditable="true"></div></div>');
             var toolbarReqs = e.attr("toolbar")
             if (toolbarReqs === "" || toolbarReqs === undefined || toolbarReqs === null){
                 toolbarReqs = "size,style,lists,align,add,undo,fullscreen";
@@ -221,10 +222,31 @@
             toolbarReqs = toolbarReqs.split(",");
             for (var i = 0; i < toolbarReqs.length; i++) {
                 var c = toolbarReqs[i];
-                if(c === "site"){
-                    $(".btn-toolbar", e).append(
-                    '<div class="btn-group"><a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="" data-original-title="Font Size"><span class="glyphicon glyphicon-text-height"></span>&nbsp;<b class="caret"></b></a><ul class="dropdown-menu"><li><a data-edit="fontSize 5"><font size="5">Huge</font></a></li><li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li><li><a data-edit="fontSize 1"><font size="1">Small</font></a></li></ul></div>'
+                if(c === "size"){
+                    $(".btn-toolbar", dom).append(
+                        '<div class="btn-group"><a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="" data-original-title="Font Size"><span class="glyphicon glyphicon-text-height"></span>&nbsp;<b class="caret"></b></a><ul class="dropdown-menu"><li><a data-edit="fontSize 5"><font size="5">Huge</font></a></li><li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li><li><a data-edit="fontSize 1"><font size="1">Small</font></a></li></ul></div>'
                     );
+                }else if(c === "style"){
+                    $(".btn-toolbar", dom).append('<div class="btn-group">' +
+                            '<a class="btn btn-default" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><span class="glyphicon glyphicon-bold"></span></a>' +
+                            '<a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><span class="glyphicon glyphicon-italic"></span></a>' + 
+                            '<a class="btn btn-default" data-edit="strikethrough" title="" data-original-title="Strikethrough"><span class="fa fa-strikethrough"></span></a>' +
+                            '<a class="btn btn-default" data-edit="underline" title="" data-original-title="Underline (Ctrl/Cmd+U)"><span class="fa fa-underline"></span></a>' +
+                        '</div>');
+                }else if(c === "lists"){
+                    $(".btn-toolbar", dom).append('<div class="btn-group">' +
+                            '<a class="btn btn-default" data-edit="insertunorderedlist" title="" data-original-title="Bullet list"><span class="fa fa-list-ul"></span></a>' +
+                            '<a class="btn btn-default" data-edit="insertorderedlist" title="" data-original-title="Number list"><span class="fa fa-list-ol"></span></a>' +
+                            '<a class="btn btn-default" data-edit="outdent" title="" data-original-title="Reduce indent (Shift+Tab)"><span class="glyphicon glyphicon-indent-left"></span></a>' +
+                            '<a class="btn btn-default" data-edit="indent" title="" data-original-title="Indent (Tab)"><span class="glyphicon glyphicon-indent-right"></span></a>' +
+                        '</div>');
+                }else if(c === "align"){
+                    $(".btn-toolbar", dom).append('<div class="btn-group">' + 
+                            '<a class="btn btn-default btn-primary" data-edit="justifyleft" title="" data-original-title="Align Left (Ctrl/Cmd+L)"><span class="glyphicon glyphicon-align-left"></span></a>' + 
+                            '<a class="btn btn-default" data-edit="justifycenter" title="" data-original-title="Center (Ctrl/Cmd+E)"><span class="glyphicon glyphicon-align-center"></span></a>' + 
+                            '<a class="btn btn-default" data-edit="justifyright" title="" data-original-title="Align Right (Ctrl/Cmd+R)"><span class="glyphicon glyphicon-align-right"></span></a>' +
+                            '<a class="btn btn-default" data-edit="justifyfull" title="" data-original-title="Justify (Ctrl/Cmd+J)"><span class="glyphicon glyphicon-align-justify"></span></a>' +
+                        '</div>');
                 }
             };
             $(e).after(dom);
