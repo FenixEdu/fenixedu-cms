@@ -1,7 +1,9 @@
 package org.fenixedu.bennu.cms.rendering;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +106,7 @@ public class CMSExtensions implements Extension {
 
     }
 
-    public class IterableTaleFilter implements Filter {
+    public class IterableTailFilter implements Filter {
 
         @Override
         public List<String> getArgumentNames() {
@@ -132,6 +134,24 @@ public class CMSExtensions implements Extension {
             } else {
                 return "";
             }
+        }
+    }
+
+    public class ReverseFilter implements Filter {
+
+        @Override
+        public List<String> getArgumentNames() {
+            return null;
+        }
+
+        @Override
+        public Object apply(Object input, Map<String, Object> args) {
+            List<Object> list = new ArrayList<Object>();
+            if (input != null && input instanceof List) {
+                list.addAll((List<Object>) input);
+                Collections.reverse(list);
+            }
+            return list;
         }
     }
 
@@ -193,8 +213,14 @@ public class CMSExtensions implements Extension {
 
     @Override
     public Map<String, Filter> getFilters() {
-        return ImmutableMap.of("formatDate", new DateTimeFormaterFilter(), "title", new TitleFilter(), "head",
-                new IterableHeadFilter(), "tale", new IterableTaleFilter(), "length", new LengthFilter());
+        Map<String, Filter> map = new HashMap<String, Filter>();
+        map.put("formatDate", new DateTimeFormaterFilter());
+        map.put("title", new TitleFilter());
+        map.put("head", new IterableHeadFilter());
+        map.put("tail", new IterableTailFilter());
+        map.put("length", new LengthFilter());
+        map.put("reverse", new ReverseFilter());
+        return ImmutableMap.copyOf(map);
     }
 
     @Override

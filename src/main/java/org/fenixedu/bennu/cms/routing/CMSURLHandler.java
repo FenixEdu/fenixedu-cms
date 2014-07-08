@@ -73,7 +73,6 @@ final class CMSURLHandler implements SemanticURLHandler {
 
                     }
 
-
                     if (pageSlug.endsWith("/")) {
                         if (req.getMethod().equals("GET")) {
                             res.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
@@ -84,8 +83,7 @@ final class CMSURLHandler implements SemanticURLHandler {
                                 PebbleEngine engine = new PebbleEngine(new StringLoader());
                                 engine.addExtension(new CMSExtensions());
                                 PebbleTemplate compiledTemplate =
-                                        engine.getTemplate(
-                                                "<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
+                                        engine.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
 
                                 res.setStatus(500);
                                 res.setContentType("text/html");
@@ -249,6 +247,7 @@ final class CMSURLHandler implements SemanticURLHandler {
 
         result.put("url", getFullURL(req));
         result.put("contentType", req.getContentType());
+        result.put("contextPath", req.getContextPath());
 
         return result;
     }
@@ -301,8 +300,7 @@ final class CMSURLHandler implements SemanticURLHandler {
         if (cmsTheme == null || compiledTemplate == null) {
             PebbleEngine engine = new PebbleEngine(new StringLoader());
             engine.addExtension(new CMSExtensions());
-            compiledTemplate =
-                    engine.getTemplate("<html><head></head><body><h1>Forbiden</h1><b>Url:</b>{{url}}</body></html>");
+            compiledTemplate = engine.getTemplate("<html><head></head><body><h1>Forbiden</h1><b>Url:</b>{{url}}</body></html>");
         }
 
         res.setStatus(500);
