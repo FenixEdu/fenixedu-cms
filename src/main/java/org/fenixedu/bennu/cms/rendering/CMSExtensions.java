@@ -1,7 +1,6 @@
 package org.fenixedu.bennu.cms.rendering;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +17,7 @@ import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.mitchellbosecke.pebble.error.ParserException;
@@ -136,20 +136,28 @@ public class CMSExtensions implements Extension {
     }
 
     private static class I18NFunction implements Function {
+        final List<String> variableArgs = ImmutableList.of("arg0", "arg1", "arg2", "arg3", "arg4", "arg5");
+
         @Override
         public List<String> getArgumentNames() {
-            List<String> names = new ArrayList<>();
-            names.add("bundle");
-            names.add("key");
-            return names;
+            return ImmutableList.of("bundle", "key", "arg0", "arg1", "arg2", "arg3", "arg4", "arg5");
         }
 
         @Override
         public Object execute(Map<String, Object> args) {
             String bundle = (String) args.get("bundle");
             String key = args.get("key").toString();
+            return BundleUtil.getString(bundle, key, arguments(args));
+        }
 
-            return BundleUtil.getString(bundle, key);
+        public String[] arguments(Map<String, Object> args) {
+            List<String> values = Lists.newArrayList();
+            for (String variableArg : variableArgs) {
+                if (args.containsKey(variableArg) && args.get(variableArg) instanceof String) {
+                    values.add((String) args.get(variableArg));
+                }
+            }
+            return values.toArray(new String[] {});
         }
     }
 
