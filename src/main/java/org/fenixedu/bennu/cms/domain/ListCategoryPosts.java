@@ -21,7 +21,10 @@ import pt.ist.fenixframework.Atomic.TxMode;
 public class ListCategoryPosts extends ListCategoryPosts_Base {
 
     public ListCategoryPosts() {
-        super();
+    }
+
+    public ListCategoryPosts(Category category) {
+        this.setCategory(category);
     }
 
     @Override

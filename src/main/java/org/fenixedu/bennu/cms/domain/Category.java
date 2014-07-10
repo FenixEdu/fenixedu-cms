@@ -24,7 +24,7 @@ public class Category extends Category_Base {
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
     }
-    
+
     @Override
     public void setName(LocalizedString name) {
         LocalizedString prevName = getName();

@@ -12,6 +12,9 @@ import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
+
+import com.google.common.collect.Lists;
 
 /**
  * Models the items of a {@link Menu}
@@ -39,29 +42,23 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
      *            the position where the item should be added.
      */
     public void putAt(MenuItem item, int position) {
+
+        if (item.getPosition() != null) {
+            item.removeFromParent();
+        }
+
         if (position < 0){
             position = 0;
-        }
-        
-        if (position >= this.getChildrenSet().size()){
+        } else if (position > getChildrenSet().size()) {
             item.removeFromParent();
-            item.setPosition(this.getChildrenSet().size());
-            this.addChildren(item);
-            return;
+            position = getChildrenSet().size();
         }
         
-        if (item.getPosition() != null){
-            item.removeFromParent();
-        }
+        List<MenuItem> list = Lists.newArrayList(getChildrenSorted());
+        list.add(position, item);
         
-        List<MenuItem> list = getChildrenSorted();
-        
-        for (int i = position; i < list.size(); i++) {
-            MenuItem menuItem = list.get(i);
-            menuItem.setPosition(menuItem.getPosition() + 1);
-        }
-        
-        item.setPosition(position);
+        fixOrder(list);
+
         getChildrenSet().add(item);
     }
 
@@ -72,15 +69,10 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
      *            the children to be removed
      */
     public void remove(MenuItem mi){
-        int found = 0;
-        for(MenuItem item : new ArrayList<>(getChildrenSorted())){
-            if (item == mi){
-                found++;
-                getChildrenSet().remove(mi);
-            }else{
-                item.setPosition(item.getPosition() - found);
-            }
-        }
+        ArrayList<MenuItem> items = Lists.newArrayList(getChildrenSorted());
+        items.remove(mi);
+        fixOrder(items);
+        getChildrenSet().remove(mi);
     }
     
     /**
@@ -120,7 +112,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
     public String getAddress(){
         if (getUrl() != null){
             return getUrl();
-        }else{
+        } else {
             String path = CoreConfiguration.getConfiguration().applicationUrl();
             if (path.charAt(path.length()-1) != '/') {
                 path += "/";
@@ -130,12 +122,18 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
         }
     }
     
+    /**
+     * A MenuItem can not be linked with a {@link Menu} and a {@link MenuItem} at the same time
+     */
+    @ConsistencyPredicate
+    public boolean parentOrTop() {
+        return !(getTop() != null && getParent() != null);
+    }
+
     @Atomic
     public void delete(){
         this.removeFromParent();
-        for (MenuItem menuItem : getChildrenSet()) {
-            menuItem.delete();
-        }
+        getChildrenSet().stream().forEach(c -> c.delete());
         this.setParent(null);
         this.setCreatedBy(null);
         this.setMenu(null);
@@ -154,4 +152,9 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
         return Optional.ofNullable(super.getPosition()).orElse(0);
     }
 
+    public static void fixOrder(List<MenuItem> sortedItems) {
+        for (int i = 0; i < sortedItems.size(); ++i) {
+            sortedItems.get(i).setPosition(i);
+        }
+    }
 }

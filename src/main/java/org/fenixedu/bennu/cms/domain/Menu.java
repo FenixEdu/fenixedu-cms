@@ -1,6 +1,5 @@
 package org.fenixedu.bennu.cms.domain;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,6 +9,8 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.Atomic;
+
+import com.google.common.collect.Lists;
 
 /**
  * Model of a Menu for a given {@link Page}
@@ -58,24 +59,18 @@ public class Menu extends Menu_Base {
         
         if (position >= this.getToplevelItemsSet().size()){
             item.removeFromParent();
-            item.setPosition(this.getToplevelItemsSorted().size());
-            this.addToplevelItems(item);
-            this.addItems(item);
-            return;
+            position = getToplevelItemsSorted().size();
         }
         
         if (item.getPosition() != null){
             item.removeFromParent();
         }
         
-        List<MenuItem> list = getToplevelItemsSorted();
+        List<MenuItem> list = Lists.newArrayList(getToplevelItemsSorted());
+        list.add(position, item);
+
+        MenuItem.fixOrder(list);
         
-        for (int i = position; i < list.size(); i++) {
-            MenuItem menuItem = list.get(i);
-            menuItem.setPosition(menuItem.getPosition() + 1);
-        }
-        
-        item.setPosition(position);
         getToplevelItemsSet().add(item);
         getItemsSet().add(item);
     }
@@ -87,18 +82,13 @@ public class Menu extends Menu_Base {
      *            the {@link MenuItem} to be removed.
      */
     public void remove(MenuItem mi){
-        int found = 0;
-        for(MenuItem item : new ArrayList<>(getToplevelItemsSorted())){
-            if (item == mi){
-                found++;
-                getToplevelItemsSet().remove(mi);
-                getItemsSet().remove(mi);
-            }else{
-                item.setPosition(item.getPosition() - found);
-            }
-        }
+        getToplevelItemsSet().remove(mi);
+        MenuItem.fixOrder(Lists.newArrayList(getToplevelItemsSorted()));
+
+        getItemsSet().remove(mi);
+        MenuItem.fixOrder(Lists.newArrayList(getItemsSet()));
     }
-    
+
     /**
      * Adds a given {@link MenuItem} as the last item.
      * 

@@ -177,7 +177,7 @@ final class CMSURLHandler implements SemanticURLHandler {
         global.put("request", makeRequestWrapper(req));
         global.put("app", makeAppWrapper());
         global.put("site", makeSiteWrapper(site));
-        global.put("page", makePageWrapper(page));
+        global.put("page", page);
         global.put("staticDir", site.getStaticDirectory());
 
         List<TemplateContext> components = new ArrayList<TemplateContext>();
