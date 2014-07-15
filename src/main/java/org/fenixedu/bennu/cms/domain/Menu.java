@@ -11,6 +11,7 @@ import org.joda.time.DateTime;
 import pt.ist.fenixframework.Atomic;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Model of a Menu for a given {@link Page}
@@ -31,14 +32,8 @@ public class Menu extends Menu_Base {
 
     @Atomic
     public void delete() {
-        for(Component c : this.getComponentSet()){
-            c.delete();
-        }
-        
-        for (MenuItem menuItem : getItemsSet()) {
-            menuItem.delete();
-        }
-        
+        Sets.newHashSet(getComponentSet()).forEach(c -> c.delete());
+        Sets.newHashSet(getItemsSet()).forEach(i -> i.delete());
         this.setCreatedBy(null);
         this.setSite(null);
         this.deleteDomainObject();
@@ -56,25 +51,25 @@ public class Menu extends Menu_Base {
         if (position < 0){
             position = 0;
         }
-        
+
         if (position >= this.getToplevelItemsSet().size()){
             item.removeFromParent();
             position = getToplevelItemsSorted().size();
         }
-        
+
         if (item.getPosition() != null){
             item.removeFromParent();
         }
-        
+
         List<MenuItem> list = Lists.newArrayList(getToplevelItemsSorted());
         list.add(position, item);
 
         MenuItem.fixOrder(list);
-        
+
         getToplevelItemsSet().add(item);
         getItemsSet().add(item);
     }
-    
+
     /**
      * Removes a given {@link MenuItem} from the Menu.
      * 
@@ -83,10 +78,10 @@ public class Menu extends Menu_Base {
      */
     public void remove(MenuItem mi){
         getToplevelItemsSet().remove(mi);
-        MenuItem.fixOrder(Lists.newArrayList(getToplevelItemsSorted()));
+        MenuItem.fixOrder(getToplevelItemsSorted());
 
         getItemsSet().remove(mi);
-        MenuItem.fixOrder(Lists.newArrayList(getItemsSet()));
+        MenuItem.fixOrder(getItemsSorted());
     }
 
     /**
@@ -98,16 +93,20 @@ public class Menu extends Menu_Base {
     public void add(MenuItem mi){
         this.putAt(mi, getToplevelItemsSet().size());
     }
-    
+
     /**
      * @return the menu items sorted by position.
      */
     public List<MenuItem> getChildrenSorted(){
         return getToplevelItemsSorted();
     }
-    
+
     public List<MenuItem> getToplevelItemsSorted(){
         return getToplevelItemsSet().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
+    }
+
+    public List<MenuItem> getItemsSorted() {
+        return getItemsSet().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
     }
 
 }

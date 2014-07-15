@@ -72,7 +72,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
         ArrayList<MenuItem> items = Lists.newArrayList(getChildrenSorted());
         items.remove(mi);
         fixOrder(items);
-        getChildrenSet().remove(mi);
+        removeChildren(mi);
     }
     
     /**
@@ -92,10 +92,13 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
      * </p>
      */
     public void removeFromParent(){
-        if (this.getTop() != null){
+        if (this.getTop() != null) {
             this.getTop().remove(this);
-        }else if(this.getParent() != null){            
+            this.setTop(null);
+        }
+        if (this.getParent() != null) {
             this.getParent().remove(this);
+            this.setParent(null);
         }
     }
 
@@ -132,13 +135,15 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
 
     @Atomic
     public void delete(){
-        this.removeFromParent();
-        getChildrenSet().stream().forEach(c -> c.delete());
-        this.setParent(null);
+        List<MenuItem> items = Lists.newArrayList(getChildrenSet());
+        removeFromParent();
+
+        items.forEach(i -> remove(i));
+
         this.setCreatedBy(null);
         this.setMenu(null);
         this.setPage(null);
-        this.setTop(null);
+
         this.deleteDomainObject();
     }
 
