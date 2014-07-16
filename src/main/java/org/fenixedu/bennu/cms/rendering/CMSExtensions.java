@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.WordUtils;
-import org.fenixedu.bennu.cms.domain.MenuItem;
-import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -213,27 +211,6 @@ public class CMSExtensions implements Extension {
 
     }
 
-    public static class MenuItemIsOpen implements Function {
-
-        @Override
-        public List<String> getArgumentNames() {
-            return ImmutableList.of("item", "currentPage");
-        }
-
-        @Override
-        public Object execute(Map<String, Object> args) {
-            MenuItem menuItem = (MenuItem) args.get("item");
-            Page currentPage = (Page) args.get("currentPage");
-            return menuItem != null && currentPage != null && isOpen(menuItem, currentPage);
-        }
-
-        public boolean isOpen(MenuItem item, Page currentPage) {
-            boolean isOpenPage = item.getPage() != null && item.getPage().equals(currentPage);
-            return isOpenPage || item.getChildrenSorted().stream().anyMatch(children -> isOpen(children, currentPage));
-        }
-
-    }
-
     @Override
     public Map<String, Filter> getFilters() {
         Map<String, Filter> map = new HashMap<String, Filter>();
@@ -258,7 +235,6 @@ public class CMSExtensions implements Extension {
         functions.put("i18n", new I18NFunction());
         functions.put("range", new RangeFunction());
         functions.put("entries", new MapEntriesFunction());
-        functions.put("isOpen", new MenuItemIsOpen());
         return functions;
     }
 
