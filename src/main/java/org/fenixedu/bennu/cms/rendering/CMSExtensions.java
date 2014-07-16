@@ -223,10 +223,25 @@ public class CMSExtensions implements Extension {
         return ImmutableMap.copyOf(map);
     }
 
+    public class InTest implements Test {
+
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("collection");
+        }
+
+        @Override
+        public boolean apply(Object input, Map<String, Object> args) {
+            return ((Collection) args.get("collection")).contains(input);
+        }
+
+    }
+
     @Override
     public Map<String, Test> getTests() {
-        // TODO Auto-generated method stub
-        return null;
+        Map<String, Test> tests = new HashMap<>();
+        tests.put("in", new InTest());
+        return tests;
     }
 
     @Override
