@@ -41,6 +41,10 @@ class Post{
   String slug;
   LocalizedString body;
   DateTime creationDate;
+  Boolean active;
+  DateTime publicationBegin;
+  DateTime publicationEnd;
+  LocalizedString location;
 }
 
 class Component{
