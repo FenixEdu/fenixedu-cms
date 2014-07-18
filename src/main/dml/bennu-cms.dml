@@ -27,6 +27,7 @@ class Category{
 class Menu{
   DateTime creationDate;
   LocalizedString name;
+  Boolean topMenu;
 }
 
 class MenuItem{
@@ -34,6 +35,7 @@ class MenuItem{
   Integer position;
   LocalizedString name;
   String url;
+  Boolean folder;
 }
 
 class Post{
@@ -77,6 +79,8 @@ class ListCategoryPosts extends Component{}
 class ListOfCategories extends Component{}
 class StaticPost extends Component{}
 class MenuComponent extends Component{}
+class TopMenuComponent extends MenuComponent{}
+class SideMenuComponent extends MenuComponent{}
 
 relation ComponentUser{
   .org.fenixedu.bennu.core.domain.User playsRole createdBy{
@@ -262,6 +266,11 @@ relation SitePage {
     Page playsRole pages {
         multiplicity *;
     }
+}
+
+relation SiteInitialPage {
+    Site playsRole;
+    Page playsRole initialPage;
 }
 
 relation CategoryPost{

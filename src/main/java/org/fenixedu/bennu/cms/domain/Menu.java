@@ -2,14 +2,17 @@ package org.fenixedu.bennu.cms.domain;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.Atomic;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -17,6 +20,13 @@ import com.google.common.collect.Sets;
  * Model of a Menu for a given {@link Page}
  */
 public class Menu extends Menu_Base {
+
+    public Menu(Site site, LocalizedString name) {
+        this();
+        setSite(site);
+        setName(name);
+        setTopMenu(false);
+    }
 
     /**
      * Logged {@link User} creates a new Menu.
@@ -109,4 +119,7 @@ public class Menu extends Menu_Base {
         return getItemsSet().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
     }
 
+    public <T> Set<T> getComponentsOfClass(Class<T> clazz) {
+        return Sets.newHashSet(Iterables.filter(getComponentSet(), clazz));
+    }
 }

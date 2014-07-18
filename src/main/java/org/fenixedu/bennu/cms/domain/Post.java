@@ -16,8 +16,8 @@ import pt.ist.fenixframework.Atomic;
  */
 public class Post extends Post_Base {
 
-    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = (o1, o2) -> o1.getCreationDate().compareTo(
-            o2.getCreationDate());
+    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = (o1, o2) -> o2.getCreationDate().compareTo(
+            o1.getCreationDate());
 
     /**
      * The logged {@link User} creates a new Post.
@@ -90,5 +90,16 @@ public class Post extends Post_Base {
         boolean inPublicationPeriod =
                 !hasPublicationPeriod() || (getPublicationBegin().isAfterNow() && getPublicationEnd().isBeforeNow());
         return getActive() && inPublicationPeriod;
+    }
+
+    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category, boolean active) {
+        Post post = new Post();
+        post.setSite(site);
+        post.setName(name);
+        post.setBody(body);
+        post.setCreationDate(new DateTime());
+        post.addCategories(category);
+        post.setActive(active);
+        return post;
     }
 }

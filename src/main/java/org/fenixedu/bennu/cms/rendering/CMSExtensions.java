@@ -13,6 +13,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableList;
@@ -21,10 +22,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
+import com.mitchellbosecke.pebble.error.ParserException;
 import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
 import com.mitchellbosecke.pebble.extension.Test;
+import com.mitchellbosecke.pebble.lexer.Token;
+import com.mitchellbosecke.pebble.node.RenderableNode;
+import com.mitchellbosecke.pebble.tokenParser.AbstractTokenParser;
 
 public class CMSExtensions extends AbstractExtension {
     public class LengthFilter implements Filter {
@@ -190,6 +195,39 @@ public class CMSExtensions extends AbstractExtension {
         }
     }
 
+    private static class MapValueFunction implements Function {
+
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("map", "key");
+        }
+
+        @Override
+        public Object execute(Map<String, Object> args) {
+            Object mapObject = args.get("map");
+            Object keyObject = args.get("key");
+            Preconditions.checkArgument(mapObject != null && keyObject != null, "Please specify non empty 'map' and 'key'");
+            Preconditions.checkArgument(mapObject instanceof Map, "The first argument must be of type " + Map.class.getName());
+            return ((Map) mapObject).get(keyObject);
+        }
+
+    }
+
+    public static class RecursiveTreeToken extends AbstractTokenParser {
+
+        @Override
+        public String getTag() {
+            return "recursetree";
+        }
+
+        @Override
+        public RenderableNode parse(Token token) throws ParserException {
+
+            return null;
+        }
+
+    }
+
     public static class RangeFunction implements Function {
 
         @Override
@@ -244,6 +282,7 @@ public class CMSExtensions extends AbstractExtension {
         functions.put("i18n", new I18NFunction());
         functions.put("range", new RangeFunction());
         functions.put("entries", new MapEntriesFunction());
+        functions.put("getValue", new MapValueFunction());
         return functions;
     }
 

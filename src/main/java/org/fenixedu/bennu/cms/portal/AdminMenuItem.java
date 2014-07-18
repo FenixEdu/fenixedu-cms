@@ -1,5 +1,7 @@
 package org.fenixedu.bennu.cms.portal;
 
+import java.util.Optional;
+
 import org.fenixedu.bennu.cms.domain.Menu;
 import org.fenixedu.bennu.cms.domain.MenuItem;
 import org.fenixedu.bennu.cms.domain.Page;
@@ -43,6 +45,7 @@ public class AdminMenuItem {
         root.add("url", item.getUrl() == null ? null : new JsonPrimitive(item.getUrl()));
         root.add("page", item.getPage() == null ? null : new JsonPrimitive(item.getPage().getSlug()));
         root.add("position", new JsonPrimitive(item.getPosition()));
+        root.add("isFolder", new JsonPrimitive(Optional.ofNullable(item.getFolder()).orElse(false)));
 
         if (item.getChildrenSet().size() > 0) {
             root.add("folder", new JsonPrimitive(true));
@@ -112,6 +115,8 @@ public class AdminMenuItem {
 
         if (use.equals("url")) {
             mi.setUrl(url);
+        } else if (use.equals("folder")) {
+            mi.setFolder(true);
         } else {
             Page p = s.pageForSlug(slugPage);
             if (p == null) {
@@ -172,10 +177,16 @@ public class AdminMenuItem {
             mi.setParent(null);
         }
 
-        if (use.equals("url")) {
+        if (use.equals("folder")) {
+            mi.setFolder(true);
+            mi.setUrl(null);
+            mi.setPage(null);
+        } else if (use.equals("url")) {
+            mi.setFolder(false);
             mi.setUrl(url);
             mi.setPage(null);
         } else if (use.equals("page")) {
+            mi.setFolder(false);
             mi.setUrl(null);
             Page p = s.pageForSlug(slugPage);
 

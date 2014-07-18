@@ -50,25 +50,11 @@ public class BlogTemplate implements SiteTemplate {
         menuItem.setPage(categories);
         makeMenu.add(menuItem);
 
-        MenuComponent mc = new MenuComponent();
-        mc.setMenu(makeMenu);
-        homepage.addComponents(mc);
-
-        mc = new MenuComponent();
-        mc.setMenu(makeMenu);
-        about.addComponents(mc);
-
-        mc = new MenuComponent();
-        mc.setMenu(makeMenu);
-        postPage.addComponents(mc);
-
-        mc = new MenuComponent();
-        mc.setMenu(makeMenu);
-        categories.addComponents(mc);
-
-        mc = new MenuComponent();
-        mc.setMenu(makeMenu);
-        category.addComponents(mc);
+        new MenuComponent(makeMenu, homepage);
+        new MenuComponent(makeMenu, about);
+        new MenuComponent(makeMenu, postPage);
+        new MenuComponent(makeMenu, categories);
+        new MenuComponent(makeMenu, category);
 
     }
 
@@ -124,8 +110,8 @@ public class BlogTemplate implements SiteTemplate {
 
     private Page makeHomepage(Site site) {
         Page page = new Page();
-        page.setName(new LocalizedString(I18N.getLocale(), "Homepage"));
         page.setSite(site);
+        page.setName(new LocalizedString(I18N.getLocale(), "Homepage"));
         page.addComponents(new ListPosts());
         page.setTemplate(site.getTheme().templateForType("posts"));
         page.setSlug("");
@@ -134,8 +120,8 @@ public class BlogTemplate implements SiteTemplate {
 
     private Page makeAboutPage(Site site) {
         Page page = new Page();
-        page.setName(new LocalizedString(I18N.getLocale(), "About"));
         page.setSite(site);
+        page.setName(new LocalizedString(I18N.getLocale(), "About"));
         StaticPost components = new StaticPost();
         components.setPost(about);
         page.addComponents(components);
@@ -145,8 +131,8 @@ public class BlogTemplate implements SiteTemplate {
 
     private Page makePostPage(Site site) {
         Page page = new Page();
-        page.setName(new LocalizedString(I18N.getLocale(), "View"));
         page.setSite(site);
+        page.setName(new LocalizedString(I18N.getLocale(), "View"));
         page.addComponents(new ViewPost());
         page.setTemplate(site.getTheme().templateForType("view"));
         return page;
@@ -154,8 +140,8 @@ public class BlogTemplate implements SiteTemplate {
 
     private Page makeCategories(Site site) {
         Page page = new Page();
-        page.setName(new LocalizedString(I18N.getLocale(), "Categories"));
         page.setSite(site);
+        page.setName(new LocalizedString(I18N.getLocale(), "Categories"));
         page.addComponents(new ListOfCategories());
         page.setTemplate(site.getTheme().templateForType("categories"));
         return page;
@@ -163,11 +149,10 @@ public class BlogTemplate implements SiteTemplate {
 
     private Page makeCategoryPage(Site site) {
         Page page = new Page();
-        page.setName(new LocalizedString(I18N.getLocale(), "Category"));
         page.setSite(site);
+        page.setName(new LocalizedString(I18N.getLocale(), "Category"));
         page.addComponents(new ListCategoryPosts(site.categoryForSlug("random-text")));
         page.setTemplate(site.getTheme().templateForType("category"));
         return page;
     }
-
 }

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
+import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.Atomic;
@@ -31,6 +32,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
+        this.setFolder(false);
     }
 
     /**
@@ -113,6 +115,9 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
      * @return the URL address to visit the item.
      */
     public String getAddress() {
+        if (getFolder()) {
+            return "#";
+        }
         if (getUrl() != null) {
             return getUrl();
         } else {
@@ -161,5 +166,21 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
         for (int i = 0; i < sortedItems.size(); ++i) {
             sortedItems.get(i).setPosition(i);
         }
+    }
+
+    public static MenuItem create(Site site, Menu menu, Page page, LocalizedString name, MenuItem parent) {
+        MenuItem menuItem = new MenuItem();
+        menuItem.setName(name);
+        menuItem.setPage(page);
+        menuItem.setFolder(page == null);
+        menuItem.setMenu(menu);
+        if (menu != null) {
+            if (parent != null) {
+                parent.add(menuItem);
+            } else {
+                menu.add(menuItem);
+            }
+        }
+        return menuItem;
     }
 }

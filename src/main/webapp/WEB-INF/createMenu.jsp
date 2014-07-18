@@ -5,7 +5,7 @@
 <p class="small">Site: <strong>${site.name.content}</strong>  </p>
 <form class="form-horizontal" action="" method="post" role="form">
   <div class="${emptyName ? "form-group has-error" : "form-group"}">
-    <label for="inputEmail3" class="col-sm-2 control-label">Name</label>
+    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="menu.create.label.name" /></label>
     <div class="col-sm-10">
       <input type="text" name="name" class="form-control" id="inputEmail3" placeholder="<spring:message code="menu.create.label.name" />">
       <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="site.create.error.emptyName"/></p></c:if>

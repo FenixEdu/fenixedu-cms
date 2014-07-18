@@ -70,6 +70,13 @@
                         </div>
                     </div>
 
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="use" class="useFolder" value="folder">
+                            <spring:message code="menu.edit.label.folder"/>
+                        </label>
+                    </div>
+
                 </div>
 
                 <div class="form-group">
@@ -129,6 +136,14 @@
                                 </div>
                             </div>
 
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="use" class="useFolder" value="folder">
+                                    <spring:message code="menu.edit.label.folder"/>
+                                </label>
+                                <p><spring:message code="menu.edit.label.folderDescription"/></p>
+                            </div>
+
                         </div>
 
                     </div>
@@ -153,7 +168,18 @@
         if (data.node.data.root) {
             $("#menuitem-options").hide();
         } else {
-            if (data.node.data.url) {
+            if(data.node.data.isFolder){
+                $("#options input.useurl").prop("checked", false);
+                $("#options input.usepage").prop("checked", false);
+                $("#options input.useFolder").prop("checked", true);
+                $("#options input[name='url']").prop('readonly', true);
+                $("#options input[name='url']").val("");
+                $("#options  select option").filter(function () {
+                    //may want to use $.trim in here
+                    return $(this).text() == "-";
+                }).prop('selected', true);
+                $("#options .page-select").prop('readonly', true);
+            } else if (data.node.data.url) {
                 $("#options input.useurl").prop("checked", true)
                 $("#options input.usepage").prop("checked", false)
                 $("#options input[name='url']").prop('readonly', false);
@@ -163,10 +189,11 @@
                     return $(this).text() == "-";
                 }).prop('selected', true);
                 $("#options .page-select").prop('readonly', true);
-            } else {
-                $("#options input.useurl").prop("checked", false)
-                $("#options input.usepage").prop("checked", true)
-                $("#options input[name='url']").val("")
+            }
+            else {
+                $("#options input.useurl").prop("checked", false);
+                $("#options input.usepage").prop("checked", true);
+                $("#options input[name='url']").val("");
                 $("#options input[name='url']").prop('readonly', true);
                 $("#options  select option").filter(function () {
                     //may want to use $.trim in here
