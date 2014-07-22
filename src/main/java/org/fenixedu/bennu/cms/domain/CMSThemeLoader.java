@@ -1,33 +1,28 @@
 package org.fenixedu.bennu.cms.domain;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
-
-import org.apache.commons.io.FilenameUtils;
-import org.fenixedu.bennu.core.domain.Bennu;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.fenixedu.bennu.core.domain.Bennu;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.Atomic.TxMode;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 public class CMSThemeLoader {
 
@@ -217,7 +212,9 @@ public class CMSThemeLoader {
             HashMap<String, ByteArrayOutputStream> files, CMSTheme theme) {
         HashMap<String, CMSTemplateFile> processedFiles = new HashMap<>();
         for (String name : files.keySet()) {
-            CMSTemplateFile file = new CMSTemplateFile(FilenameUtils.getName(name), name, files.get(name).toByteArray());
+            Path p = Paths.get(name);
+            String filename = Optional.of(p.getFileName().toString()).orElse("");
+            CMSTemplateFile file = new CMSTemplateFile(filename, name, files.get(name).toByteArray());
             theme.addFiles(file);
             processedFiles.put(name, file);
         }

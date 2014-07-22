@@ -48,9 +48,17 @@
                         <configuration>
                             <charset>utf-8</charset>
                             <jsSourceDir>static/js/toolkit</jsSourceDir>
-                            <jsSourceIncludes>
-                                <jsSourceInclude>**</jsSourceInclude>
-                            </jsSourceIncludes>
+                            <jsSourceFiles>
+                                <jsSourceFile>jquery.fullscreen.js</jsSourceFile>
+                                <jsSourceFile>jquery.hotkeys.js</jsSourceFile>
+                                <jsSourceFile>MutationObserverPolyfill.js</jsSourceFile>
+                                <jsSourceFile>sanitize.js</jsSourceFile>
+                                <jsSourceFile>bootstrap-wysiwyg.js</jsSourceFile>
+                                <jsSourceFile>bennu.js</jsSourceFile>
+                                <jsSourceFile>validation.js</jsSourceFile>
+                                <jsSourceFile>localizedString.js</jsSourceFile>
+                                <jsSourceFile>htmlEditor.js</jsSourceFile>
+                            </jsSourceFiles>
                             <webappTargetDir>${project.build.outputDirectory}/META-INF/resources/</webappTargetDir>
                             <jsTargetDir>static/js</jsTargetDir>
                             <jsFinalFile>toolkit.js</jsFinalFile>
@@ -109,11 +117,6 @@
             <groupId>com.mitchellbosecke</groupId>
             <artifactId>pebble</artifactId>
             <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-integration</artifactId>
-            <version>1.0.0.RELEASE</version>
         </dependency>
     </dependencies>
 
