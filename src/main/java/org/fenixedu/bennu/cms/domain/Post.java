@@ -1,5 +1,6 @@
 package org.fenixedu.bennu.cms.domain;
 
+import java.util.Comparator;
 import java.util.HashSet;
 
 import org.fenixedu.bennu.core.domain.User;
@@ -15,6 +16,9 @@ import pt.ist.fenixframework.Atomic;
  */
 public class Post extends Post_Base {
 
+    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = (o1, o2) -> o1.getCreationDate().compareTo(
+            o2.getCreationDate());
+
     /**
      * The logged {@link User} creates a new Post.
      */
@@ -25,6 +29,7 @@ public class Post extends Post_Base {
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
+        this.setActive(true);
     }
 
     /**
@@ -69,5 +74,15 @@ public class Post extends Post_Base {
 
     public void removeCategories() {
         new HashSet<>(getCategoriesSet()).forEach(c -> removeCategories(c));
+    }
+
+    public boolean hasPublicationPeriod() {
+        return getPublicationBegin() != null && getPublicationEnd() != null;
+    }
+
+    public boolean isVisible() {
+        boolean inPublicationPeriod =
+                !hasPublicationPeriod() || (getPublicationBegin().isAfterNow() && getPublicationEnd().isBeforeNow());
+        return getActive() && inPublicationPeriod;
     }
 }

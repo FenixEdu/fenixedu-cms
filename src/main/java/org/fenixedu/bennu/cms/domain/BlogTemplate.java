@@ -168,7 +168,7 @@ public class BlogTemplate implements SiteTemplate {
         Page page = new Page();
         page.setName(new LocalizedString(I18N.getLocale(),"Category"));
         page.setSite(site);
-        page.addComponents(new ListCategoryPosts());
+        page.addComponents(new ListCategoryPosts(site.categoryForSlug("random-text")));
         page.setTemplate(site.getTheme().templateForType("category"));
         return page;
     }

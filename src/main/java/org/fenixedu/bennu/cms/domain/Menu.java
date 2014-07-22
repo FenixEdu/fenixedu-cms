@@ -1,6 +1,5 @@
 package org.fenixedu.bennu.cms.domain;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,6 +9,9 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.Atomic;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Model of a Menu for a given {@link Page}
@@ -30,14 +32,8 @@ public class Menu extends Menu_Base {
 
     @Atomic
     public void delete() {
-        for(Component c : this.getComponentSet()){
-            c.delete();
-        }
-        
-        for (MenuItem menuItem : getItemsSet()) {
-            menuItem.delete();
-        }
-        
+        Sets.newHashSet(getComponentSet()).forEach(c -> c.delete());
+        Sets.newHashSet(getItemsSet()).forEach(i -> i.delete());
         this.setCreatedBy(null);
         this.setSite(null);
         this.deleteDomainObject();
@@ -55,31 +51,25 @@ public class Menu extends Menu_Base {
         if (position < 0){
             position = 0;
         }
-        
+
         if (position >= this.getToplevelItemsSet().size()){
             item.removeFromParent();
-            item.setPosition(this.getToplevelItemsSorted().size());
-            this.addToplevelItems(item);
-            this.addItems(item);
-            return;
+            position = getToplevelItemsSorted().size();
         }
-        
+
         if (item.getPosition() != null){
             item.removeFromParent();
         }
-        
-        List<MenuItem> list = getToplevelItemsSorted();
-        
-        for (int i = position; i < list.size(); i++) {
-            MenuItem menuItem = list.get(i);
-            menuItem.setPosition(menuItem.getPosition() + 1);
-        }
-        
-        item.setPosition(position);
+
+        List<MenuItem> list = Lists.newArrayList(getToplevelItemsSorted());
+        list.add(position, item);
+
+        MenuItem.fixOrder(list);
+
         getToplevelItemsSet().add(item);
         getItemsSet().add(item);
     }
-    
+
     /**
      * Removes a given {@link MenuItem} from the Menu.
      * 
@@ -87,18 +77,13 @@ public class Menu extends Menu_Base {
      *            the {@link MenuItem} to be removed.
      */
     public void remove(MenuItem mi){
-        int found = 0;
-        for(MenuItem item : new ArrayList<>(getToplevelItemsSorted())){
-            if (item == mi){
-                found++;
-                getToplevelItemsSet().remove(mi);
-                getItemsSet().remove(mi);
-            }else{
-                item.setPosition(item.getPosition() - found);
-            }
-        }
+        getToplevelItemsSet().remove(mi);
+        MenuItem.fixOrder(getToplevelItemsSorted());
+
+        getItemsSet().remove(mi);
+        MenuItem.fixOrder(getItemsSorted());
     }
-    
+
     /**
      * Adds a given {@link MenuItem} as the last item.
      * 
@@ -108,16 +93,20 @@ public class Menu extends Menu_Base {
     public void add(MenuItem mi){
         this.putAt(mi, getToplevelItemsSet().size());
     }
-    
+
     /**
      * @return the menu items sorted by position.
      */
     public List<MenuItem> getChildrenSorted(){
         return getToplevelItemsSorted();
     }
-    
+
     public List<MenuItem> getToplevelItemsSorted(){
         return getToplevelItemsSet().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
+    }
+
+    public List<MenuItem> getItemsSorted() {
+        return getItemsSet().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
     }
 
 }

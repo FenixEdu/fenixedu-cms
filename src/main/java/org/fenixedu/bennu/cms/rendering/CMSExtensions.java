@@ -1,6 +1,9 @@
 package org.fenixedu.bennu.cms.rendering;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +18,8 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 import com.mitchellbosecke.pebble.error.ParserException;
@@ -31,6 +36,25 @@ import com.mitchellbosecke.pebble.tokenParser.AbstractTokenParser;
 import com.mitchellbosecke.pebble.tokenParser.TokenParser;
 
 public class CMSExtensions implements Extension {
+    public class LengthFilter implements Filter {
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("collection");
+        }
+
+        @Override
+        public Object apply(Object input, Map<String, Object> args) {
+            if (input != null) {
+                if (input.getClass().isArray()) {
+                    return Array.getLength(input);
+                } else if (input instanceof Collection) {
+                    return ((Collection) input).size();
+                }
+            }
+            return 0;
+        }
+    }
+
     public class MapEntriesFunction implements Function {
         @Override
         public List<String> getArgumentNames() {
@@ -68,6 +92,34 @@ public class CMSExtensions implements Extension {
 
     }
 
+    public class IterableHeadFilter implements Filter {
+
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("iterable");
+        }
+
+        @Override
+        public Object apply(Object input, Map<String, Object> args) {
+            return input instanceof Iterable ? Iterables.getFirst((Iterable) input, null) : null;
+        }
+
+    }
+
+    public class IterableTailFilter implements Filter {
+
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("iterable");
+        }
+
+        @Override
+        public Object apply(Object input, Map<String, Object> args) {
+            return input instanceof Iterable ? Iterables.skip((Iterable) input, 1) : null;
+        }
+
+    }
+
     public class TitleFilter implements Filter {
 
         @Override
@@ -85,21 +137,47 @@ public class CMSExtensions implements Extension {
         }
     }
 
-    private static class I18NFunction implements Function {
+    public class ReverseFilter implements Filter {
+
         @Override
         public List<String> getArgumentNames() {
-            List<String> names = new ArrayList<>();
-            names.add("bundle");
-            names.add("key");
-            return names;
+            return null;
+        }
+
+        @Override
+        public Object apply(Object input, Map<String, Object> args) {
+            List<Object> list = new ArrayList<Object>();
+            if (input != null && input instanceof List) {
+                list.addAll((List<Object>) input);
+                Collections.reverse(list);
+            }
+            return list;
+        }
+    }
+
+    private static class I18NFunction implements Function {
+        final List<String> variableArgs = ImmutableList.of("arg0", "arg1", "arg2", "arg3", "arg4", "arg5");
+
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("bundle", "key", "arg0", "arg1", "arg2", "arg3", "arg4", "arg5");
         }
 
         @Override
         public Object execute(Map<String, Object> args) {
             String bundle = (String) args.get("bundle");
             String key = args.get("key").toString();
+            return BundleUtil.getString(bundle, key, arguments(args));
+        }
 
-            return BundleUtil.getString(bundle, key);
+        public String[] arguments(Map<String, Object> args) {
+            List<String> values = Lists.newArrayList();
+            for (String variableArg : variableArgs) {
+                if (args.containsKey(variableArg) && args.get(variableArg) instanceof String) {
+                    values.add((String) args.get(variableArg));
+                }
+            }
+            return values.toArray(new String[] {});
         }
     }
 
@@ -135,13 +213,35 @@ public class CMSExtensions implements Extension {
 
     @Override
     public Map<String, Filter> getFilters() {
-        return ImmutableMap.of("formatDate", new DateTimeFormaterFilter(), "title", new TitleFilter());
+        Map<String, Filter> map = new HashMap<String, Filter>();
+        map.put("formatDate", new DateTimeFormaterFilter());
+        map.put("title", new TitleFilter());
+        map.put("head", new IterableHeadFilter());
+        map.put("tail", new IterableTailFilter());
+        map.put("length", new LengthFilter());
+        map.put("reverse", new ReverseFilter());
+        return ImmutableMap.copyOf(map);
+    }
+
+    public class InTest implements Test {
+
+        @Override
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("collection");
+        }
+
+        @Override
+        public boolean apply(Object input, Map<String, Object> args) {
+            return ((Collection) args.get("collection")).contains(input);
+        }
+
     }
 
     @Override
     public Map<String, Test> getTests() {
-        // TODO Auto-generated method stub
-        return null;
+        Map<String, Test> tests = new HashMap<>();
+        tests.put("in", new InTest());
+        return tests;
     }
 
     @Override

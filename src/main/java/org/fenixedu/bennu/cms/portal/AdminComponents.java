@@ -46,8 +46,7 @@ public class AdminComponents {
             p.addComponents(new ListOfCategories());
         } else if (componentType.equals("listCategoryPosts")) {
             Category cat = s.categoryForSlug(catSlug);
-            ListCategoryPosts lcp = new ListCategoryPosts();
-            lcp.setCategory(cat);
+            ListCategoryPosts lcp = new ListCategoryPosts(cat);
             p.addComponents(lcp);
         } else if (componentType.equals("menu")) {
             MenuComponent mc = new MenuComponent();

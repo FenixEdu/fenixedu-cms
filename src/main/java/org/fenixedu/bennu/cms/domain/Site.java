@@ -11,7 +11,6 @@ import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.core.groups.NobodyGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
@@ -121,12 +120,7 @@ public class Site extends Site_Base {
      *         the {@link Site} with the given slug if it exists, or null otherwise.
      */
     public static Site fromSlug(String slug) {
-        for (Site site : Bennu.getInstance().getSitesSet()) {
-            if (site.getSlug().equals(slug)) {
-                return site;
-            }
-        }
-        return null;
+        return Bennu.getInstance().getSitesSet().stream().filter(site -> site.getSlug().equals(slug)).findAny().orElse(null);
     }
 
     /**
@@ -138,12 +132,7 @@ public class Site extends Site_Base {
      *         the {@link Page} with the given slug if it exists on this site, or null otherwise.
      */
     public Page pageForSlug(String slug) {
-        for (Page page : getPagesSet()) {
-            if (page.getSlug().equals(slug)) {
-                return page;
-            }
-        }
-        return null;
+        return getPagesSet().stream().filter(page -> page.getSlug().equals(slug)).findAny().orElse(null);
     }
 
     /**
@@ -155,12 +144,7 @@ public class Site extends Site_Base {
      *         the {@link Post} with the given slug if it exists on this site, or null otherwise.
      */
     public Post postForSlug(String slug) {
-        for (Post post : getPostSet()) {
-            if (post.getSlug().equals(slug)) {
-                return post;
-            }
-        }
-        return null;
+        return getPostSet().stream().filter(post -> post.getSlug().equals(slug)).findAny().orElse(null);
     }
 
     /**
@@ -172,12 +156,7 @@ public class Site extends Site_Base {
      *         the {@link Category} with the given slug if it exists on this site, or null otherwise.
      */
     public Category categoryForSlug(String slug) {
-        for (Category category : getCategoriesSet()) {
-            if (category.getSlug().equals(slug)) {
-                return category;
-            }
-        }
-        return null;
+        return getCategoriesSet().stream().filter(category -> category.getSlug().equals(slug)).findAny().orElse(null);
     }
 
     public Category categoryForSlug(String slug, LocalizedString name) {
