@@ -44,23 +44,29 @@ public class Post extends Post_Base {
             setSlug(Site.slugify(name.getContent()));
         }
     }
-    
+
     /**
      * @return the URL link to the slug's page.
      */
     public String getAddress() {
-        String path = CoreConfiguration.getConfiguration().applicationUrl();
-        if (path.charAt(path.length()-1) != '/') {
-            path += "/";
+        Page page = this.getSite().getViewPostPage();;
+        if (page == null && !this.getComponentSet().isEmpty()) {
+            page = this.getComponentSet().iterator().next().getPage();
         }
-        Page page = this.getSite().getViewPostPage();
-        path += this.getSite().getSlug() + "/" + page.getSlug() + "?q=" + this.getSlug();
-        return path;
+        if (page != null) {
+            String path = CoreConfiguration.getConfiguration().applicationUrl();
+            if (path.charAt(path.length() - 1) != '/') {
+                path += "/";
+            }
+            path += this.getSite().getSlug() + "/" + page.getSlug() + "?q=" + this.getSlug();
+            return path;
+        }
+        return null;
     }
-    
+
     @Atomic
     public void delete() {
-        for(Component c : this.getComponentSet()){
+        for (Component c : this.getComponentSet()) {
             c.delete();
         }
         for (Category c : this.getCategoriesSet()) {
