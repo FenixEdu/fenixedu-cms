@@ -1,6 +1,8 @@
 (function () {
-    var ALLOW_VOICE = false;
+    var ALLOW_VOICE = true;
     var ALLOW_FULLSCREEN = true;
+
+    
 
     Bennu.htmlEditor = Bennu.htmlEditor || {};
     Bennu.htmlEditor.fullscreen = function(e){
@@ -15,8 +17,27 @@
             if (state == "off"){
                 $(".fullscreen").removeClass("fullscreen");
                 $(".fullscreen-button", a).removeClass("btn-primary");
+                $(".bennu-html-editor-tools", a).off("mouseover mouseout");
+                a.removeClass("visible");
             }
         });
+        var i;
+        function h(action) {
+            clearTimeout(i), 
+            a.hasClass("visible") && "show" !== action ? "autohide" !== action && 
+            a.removeClass("visible") : a.addClass("visible"), 
+            "autohide" === action && (i = setTimeout(function(){ a.removeClass('visible') }, 2e3))
+        }
+
+        $(".bennu-html-editor-tools", a).on("mouseover",function(){
+            h("show");
+        }).on("mouseout",function(){
+            h("autohide");
+        })
+        h("show");
+        i = setTimeout(function(){ a.removeClass('visible') }, 2e3);
+
+        $(".bennu-html-editor-editor", a).focus();
     }
 
     var attachCssToHead = function () {

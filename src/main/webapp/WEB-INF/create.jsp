@@ -70,8 +70,10 @@
         width: 800px;
         margin: auto;
         margin-top: 70px;
-        border: 1px dashed #ccc !important;
         border-radius: 0px;
+        border-style: dashed;
+        border-width: 1px;
+
     }
 
     .fullscreen .bennu-html-editor-editor{
@@ -80,7 +82,6 @@
 
     .fullscreen .bennu-html-editor-editor:focus{
         box-shadow: none !important;
-        border: 1px dashed #ccc !important;
     }
     .fullscreen .bennu-localized-string-group{
         display: inline;
@@ -95,7 +96,7 @@
     }
     .fullscreen .bennu-html-editor-tools{
         background: #f1f1f1;
-        border-bottom: 1px solid #E2E2E2;
+        border-bottom: 1px solid #e1e1e1;
         position:fixed;
         top:0;
         left:0;
@@ -104,5 +105,29 @@
         padding-top:10px;
         padding-left: 20px;
 
+        -webkit-transition-duration: .8s;
+        transition-duration: .8s;
+        opacity: 0;
+        filter: alpha(opacity=0)
+
+    }
+
+    .fullscreen.visible .bennu-html-editor-tools{
+        -webkit-transition-duration: .4s;
+        transition-duration: .4s;
+        opacity: 1;
+        filter: alpha(opacity=100)
+    }
+
+    .fullscreen .bennu-html-editor-editor {
+        -webkit-transition-duration: .8s;
+        transition-duration: .8s;
+        border-color: transparent
+    }
+
+    .fullscreen.visible .bennu-html-editor-editor{
+        -webkit-transition-duration: .4s;
+        transition-duration: .4s;
+        border-color: #ccc
     }
 </style>
