@@ -102,8 +102,13 @@ public class CMSTheme extends CMSTheme_Base {
             }
         } else {
             CMSTemplateFile file = this.fileForPath(t);
-            return file.getStream();
+            return file == null ? null : file.getStream();
         }
+    }
+
+    public boolean definesPath(String string) {
+        // FIXME Find a better way to do this!
+        return streamForPath(string) != null;
     }
 
     /**
@@ -148,4 +153,5 @@ public class CMSTheme extends CMSTheme_Base {
         this.deleteDomainObject();
 
     }
+
 }
