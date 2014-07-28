@@ -73,7 +73,7 @@ public class CMSTheme extends CMSTheme_Base {
      */
     public CMSTemplateFile fileForPath(String t) {
         for (CMSTemplateFile file : this.getFilesSet()) {
-            if (file.getDisplayName().equals(t)) {
+            if (file.getFullPath().equals(t)) {
                 return file;
             }
         }

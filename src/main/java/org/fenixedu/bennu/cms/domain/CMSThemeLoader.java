@@ -1,28 +1,34 @@
 package org.fenixedu.bennu.cms.domain;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.fenixedu.bennu.core.domain.Bennu;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+
+import org.fenixedu.bennu.core.domain.Bennu;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.Atomic.TxMode;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class CMSThemeLoader {
 
@@ -214,7 +220,7 @@ public class CMSThemeLoader {
         for (String name : files.keySet()) {
             Path p = Paths.get(name);
             String filename = Optional.of(p.getFileName().toString()).orElse("");
-            CMSTemplateFile file = new CMSTemplateFile(filename, name, files.get(name).toByteArray());
+            CMSTemplateFile file = new CMSTemplateFile(filename, name, name, files.get(name).toByteArray());
             theme.addFiles(file);
             processedFiles.put(name, file);
         }
@@ -245,7 +251,7 @@ public class CMSThemeLoader {
 
     private static class ZipEntryBean extends EntryBean {
 
-        private ByteArrayOutputStream bs = new ByteArrayOutputStream();
+        private final ByteArrayOutputStream bs = new ByteArrayOutputStream();
 
         public ZipEntryBean(ZipFile zipFile, ZipEntry zipEntry) {
             super(zipEntry.getName(), zipEntry.isDirectory());
@@ -281,7 +287,7 @@ public class CMSThemeLoader {
     }
 
     private static class FileEntryBean extends EntryBean {
-        private File file;
+        private final File file;
 
         public FileEntryBean(File file) {
             super(file.getName(), file.isDirectory());
