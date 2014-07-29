@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 @Component
 public @interface RegisterSiteTemplate {
     String name();
-    
+
     String description();
-    
+
     String type();
 }

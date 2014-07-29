@@ -7,9 +7,9 @@ import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-@ComponentType(type="staticPost", name="Static Post", description="Static Post")
+@ComponentType(type = "staticPost", name = "Static Post", description = "Static Post")
 public class StaticPost extends StaticPost_Base {
-    
+
     public StaticPost() {
         super();
     }
@@ -20,14 +20,14 @@ public class StaticPost extends StaticPost_Base {
         local.put("post", post);
         global.put("post", post);
     }
-    
+
     @Override
-    @Atomic(mode=TxMode.WRITE)
+    @Atomic(mode = TxMode.WRITE)
     public void delete() {
         this.setPost(null);
         super.delete();
     }
-    
+
     @Override
     public String getName() {
         String name = super.getName();

@@ -20,22 +20,22 @@ import com.google.common.base.Strings;
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/menus")
 public class AdminMenu {
-    @RequestMapping(value="{slug}", method = RequestMethod.GET)
-    public String posts(Model model, @PathVariable(value="slug") String slug){
+    @RequestMapping(value = "{slug}", method = RequestMethod.GET)
+    public String posts(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
         model.addAttribute("site", site);
         model.addAttribute("menus", site.getMenusSet());
         return "menus";
     }
 
-    @RequestMapping(value="{slug}/create", method = RequestMethod.GET)
-    public String createMenu(Model model, @PathVariable(value="slug") String slug){
+    @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
+    public String createMenu(Model model, @PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
         model.addAttribute("site", s);
         return "createMenu";
     }
 
-    @RequestMapping(value="{slug}/create", method = RequestMethod.POST)
+    @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
     public RedirectView createMenu(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
             RedirectAttributes redirectAttributes) {
         if (Strings.isNullOrEmpty(name)) {
@@ -52,13 +52,14 @@ public class AdminMenu {
     private void createMenu(Site site, String name) {
         Menu p = new Menu();
         p.setSite(site);
-        p.setName(new LocalizedString(I18N.getLocale(),name));
+        p.setName(new LocalizedString(I18N.getLocale(), name));
     }
 
     @RequestMapping(value = "{slugSite}/{oidMenu}/delete", method = RequestMethod.POST)
-    public RedirectView delete(Model model, @PathVariable(value="slugSite") String slugSite, @PathVariable(value="oidMenu") String oidMenu){
+    public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
+            @PathVariable(value = "oidMenu") String oidMenu) {
         Site s = Site.fromSlug(slugSite);
         s.menuForOid(oidMenu).delete();
-        return new RedirectView("/cms/menus/" + s.getSlug() + "",true);
+        return new RedirectView("/cms/menus/" + s.getSlug() + "", true);
     }
 }

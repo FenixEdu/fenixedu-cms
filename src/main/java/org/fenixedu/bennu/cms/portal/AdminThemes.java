@@ -68,7 +68,6 @@ public class AdminThemes {
         return new RedirectView("/cms/themes", true);
     }
 
-
     @RequestMapping(value = "{type}/editFile/**", method = RequestMethod.GET)
     public String editFile(Model model, @PathVariable(value = "type") String type, HttpServletRequest request) {
         CMSTheme theme = CMSTheme.forType(type);

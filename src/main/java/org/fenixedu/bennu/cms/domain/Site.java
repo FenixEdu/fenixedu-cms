@@ -61,7 +61,6 @@ public class Site extends Site_Base {
         }
     }
 
-
     /**
      * 
      * @return mapping between the type and description for all the registered {@link SiteTemplate}.
@@ -94,9 +93,9 @@ public class Site extends Site_Base {
      * returns the group of people who can view this site.
      *
      * @return group
-     *          the access group for this site
+     *         the access group for this site
      */
-    public Group getCanViewGroup(){
+    public Group getCanViewGroup() {
         return getViewGroup().toGroup();
     }
 
@@ -104,10 +103,10 @@ public class Site extends Site_Base {
      * sets the access group for this site
      *
      * @param group
-     *          the group of people who can view this site
+     *            the group of people who can view this site
      */
     @Atomic
-    public void setCanViewGroup(Group group){
+    public void setCanViewGroup(Group group) {
         setViewGroup(group.toPersistentGroup());
     }
 
@@ -212,7 +211,7 @@ public class Site extends Site_Base {
     }
 
     @Atomic
-    private void deleteMenuFunctionality(){
+    private void deleteMenuFunctionality() {
         MenuFunctionality mf = this.getFunctionality();
         this.setFunctionality(null);
         mf.delete();
@@ -274,7 +273,7 @@ public class Site extends Site_Base {
         }
         return null;
     }
-    
+
     /**
      * @return the {@link ListCategoryPosts} of this {@link Site} if it is defined, or null otherwise.
      */
@@ -288,7 +287,7 @@ public class Site extends Site_Base {
         }
         return null;
     }
-    
+
     /**
      * @return the static directory of this {@link Site}.
      */

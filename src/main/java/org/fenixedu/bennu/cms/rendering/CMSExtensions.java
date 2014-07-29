@@ -131,8 +131,7 @@ public class CMSExtensions extends AbstractExtension {
             char[] chars = str.toLowerCase().toCharArray();
             StringBuffer buffer = new StringBuffer(chars.length);
             boolean capitalizeNext = true;
-            for (int i = 0; i < chars.length; i++) {
-                char ch = chars[i];
+            for (char ch : chars) {
                 if (Character.isWhitespace(ch)) {
                     buffer.append(ch);
                     capitalizeNext = true;

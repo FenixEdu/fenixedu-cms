@@ -18,12 +18,12 @@ public class Page extends Page_Base {
     public Page() {
         super();
         this.setCreationDate(new DateTime());
-        if(Authenticate.getUser() == null){
+        if (Authenticate.getUser() == null) {
             throw new RuntimeException("Needs Login");
         }
         this.setCreatedBy(Authenticate.getUser());
     }
-    
+
     @Override
     public void setName(LocalizedString name) {
         LocalizedString prevName = getName();
@@ -33,7 +33,7 @@ public class Page extends Page_Base {
             setSlug(Site.slugify(name.getContent()));
         }
     }
-    
+
     /**
      * Searches a {@link Component} of this page by oid.
      * 
@@ -42,17 +42,17 @@ public class Page extends Page_Base {
      * @return
      *         the {@link Component} with the given oid if it is a component of this page and null otherwise.
      */
-    public Component componentForOid(String oid){
-        for (Component c : getComponentsSet()){
-            if (c.getExternalId().equals(oid)){
+    public Component componentForOid(String oid) {
+        for (Component c : getComponentsSet()) {
+            if (c.getExternalId().equals(oid)) {
                 return c;
             }
         }
         return null;
     }
-    
+
     @Atomic
-    public void delete(){
+    public void delete() {
         for (Component component : getComponentsSet()) {
             component.delete();
         }
@@ -67,7 +67,7 @@ public class Page extends Page_Base {
      */
     public String getAddress() {
         String path = CoreConfiguration.getConfiguration().applicationUrl();
-        if (path.charAt(path.length()-1) != '/') {
+        if (path.charAt(path.length() - 1) != '/') {
             path += "/";
         }
         path += getSite().getSlug() + "/" + getSlug();

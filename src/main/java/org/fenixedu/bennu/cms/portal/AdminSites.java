@@ -3,7 +3,6 @@ package org.fenixedu.bennu.cms.portal;
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.core.domain.Bennu;
-import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -39,8 +38,8 @@ public class AdminSites {
 
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
     public RedirectView edit(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
-            @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug,
-            @RequestParam(required = false) Boolean published, RedirectAttributes redirectAttributes) {
+            @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug, @RequestParam(
+                    required = false) Boolean published, RedirectAttributes redirectAttributes) {
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/sites/" + slug + "/edit", true);
@@ -54,8 +53,7 @@ public class AdminSites {
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private void editSite(LocalizedString name, LocalizedString description, String theme, String slug, Boolean published,
-            Site s) {
+    private void editSite(LocalizedString name, LocalizedString description, String theme, String slug, Boolean published, Site s) {
         s.setName(name);
         s.setDescription(description);
         s.setTheme(CMSTheme.forType(theme));

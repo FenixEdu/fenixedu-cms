@@ -43,11 +43,11 @@ public class AdminMenuItem {
         root.add("url", item.getUrl() == null ? null : new JsonPrimitive(item.getUrl()));
         root.add("page", item.getPage() == null ? null : new JsonPrimitive(item.getPage().getSlug()));
         root.add("position", new JsonPrimitive(item.getPosition()));
-        
+
         if (item.getChildrenSet().size() > 0) {
             root.add("folder", new JsonPrimitive(true));
             JsonArray child = new JsonArray();
-            
+
             for (MenuItem subitem : item.getChildrenSorted()) {
                 child.add(serialize(subitem));
             }
@@ -57,8 +57,8 @@ public class AdminMenuItem {
     }
 
     @RequestMapping(value = "{slugSite}/{oidMenu}/data", method = RequestMethod.GET, produces = "application/json")
-    public @ResponseBody
-    String data(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(value = "oidMenu") String oidMenu) {
+    public @ResponseBody String data(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+            value = "oidMenu") String oidMenu) {
         Site s = Site.fromSlug(slugSite);
         Menu m = s.menuForOid(oidMenu);
 

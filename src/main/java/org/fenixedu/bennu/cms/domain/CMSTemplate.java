@@ -1,7 +1,7 @@
 package org.fenixedu.bennu.cms.domain;
 
 public class CMSTemplate extends CMSTemplate_Base {
-    
+
     public CMSTemplate() {
         super();
     }
@@ -14,5 +14,5 @@ public class CMSTemplate extends CMSTemplate_Base {
         this.setTheme(null);
         this.deleteDomainObject();
     }
-    
+
 }

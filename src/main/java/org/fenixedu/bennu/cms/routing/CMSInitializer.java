@@ -7,7 +7,7 @@ import javax.servlet.annotation.WebListener;
 import org.fenixedu.bennu.portal.servlet.PortalBackendRegistry;
 
 @WebListener
-public class CMSInitializer implements ServletContextListener{
+public class CMSInitializer implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent arg0) {

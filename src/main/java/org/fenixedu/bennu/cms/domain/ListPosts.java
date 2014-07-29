@@ -19,7 +19,7 @@ public class ListPosts extends ListPosts_Base {
         PostsPresentationBean postsPresentation = new PostsPresentationBean(page.getSite().getPostSet());
         int currentPage = postsPresentation.currentPage(req.getParameter("p"));
         HashMap<String, Object> pagination = postsPresentation.paginate(page, currentPage, POSTS_PER_PAGE);
-        
+
         local.put("posts", postsPresentation.getVisiblePosts());
         local.put("pagination", pagination);
 
