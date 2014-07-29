@@ -22,20 +22,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
-import com.mitchellbosecke.pebble.error.ParserException;
-import com.mitchellbosecke.pebble.extension.Extension;
+import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
-import com.mitchellbosecke.pebble.extension.NodeVisitor;
 import com.mitchellbosecke.pebble.extension.Test;
-import com.mitchellbosecke.pebble.lexer.Token;
-import com.mitchellbosecke.pebble.node.RenderableNode;
-import com.mitchellbosecke.pebble.operator.BinaryOperator;
-import com.mitchellbosecke.pebble.operator.UnaryOperator;
-import com.mitchellbosecke.pebble.tokenParser.AbstractTokenParser;
-import com.mitchellbosecke.pebble.tokenParser.TokenParser;
 
-public class CMSExtensions implements Extension {
+public class CMSExtensions extends AbstractExtension {
     public class LengthFilter implements Filter {
         @Override
         public List<String> getArgumentNames() {
@@ -181,21 +173,6 @@ public class CMSExtensions implements Extension {
         }
     }
 
-    public static class RecursiveTreeToken extends AbstractTokenParser {
-
-        @Override
-        public String getTag() {
-            return "recursetree";
-        }
-
-        @Override
-        public RenderableNode parse(Token token) throws ParserException {
-
-            return null;
-        }
-
-    }
-
     public static class RangeFunction implements Function {
 
         @Override
@@ -251,36 +228,6 @@ public class CMSExtensions implements Extension {
         functions.put("range", new RangeFunction());
         functions.put("entries", new MapEntriesFunction());
         return functions;
-    }
-
-    @Override
-    public List<TokenParser> getTokenParsers() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<BinaryOperator> getBinaryOperators() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<UnaryOperator> getUnaryOperators() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> getGlobalVariables() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<NodeVisitor> getNodeVisitors() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }
