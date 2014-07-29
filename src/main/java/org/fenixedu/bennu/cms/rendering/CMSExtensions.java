@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.WordUtils;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -122,10 +121,29 @@ public class CMSExtensions extends AbstractExtension {
         @Override
         public Object apply(Object input, Map<String, Object> args) {
             if (input != null && input instanceof String) {
-                return WordUtils.capitalizeFully((String) input);
+                return capitalizeFully((String) input);
             } else {
                 return "";
             }
+        }
+
+        private String capitalizeFully(String str) {
+            char[] chars = str.toLowerCase().toCharArray();
+            StringBuffer buffer = new StringBuffer(chars.length);
+            boolean capitalizeNext = true;
+            for (int i = 0; i < chars.length; i++) {
+                char ch = chars[i];
+                if (Character.isWhitespace(ch)) {
+                    buffer.append(ch);
+                    capitalizeNext = true;
+                } else if (capitalizeNext) {
+                    buffer.append(Character.toTitleCase(ch));
+                    capitalizeNext = false;
+                } else {
+                    buffer.append(ch);
+                }
+            }
+            return buffer.toString();
         }
     }
 
