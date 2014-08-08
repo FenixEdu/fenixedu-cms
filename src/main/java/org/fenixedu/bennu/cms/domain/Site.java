@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import jvstm.cps.ConsistencyPredicate;
-
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.routing.CMSBackend;
 import org.fenixedu.bennu.core.domain.Bennu;
@@ -35,6 +33,9 @@ import pt.ist.fenixframework.FenixFramework;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
+
+import static java.util.stream.Collectors.toSet;
 
 public class Site extends Site_Base {
     /**
@@ -109,6 +110,7 @@ public class Site extends Site_Base {
      *
      * @return group
      *         the access group for this site
+
      */
     public Group getCanViewGroup() {
         return getViewGroup().toGroup();
@@ -130,7 +132,7 @@ public class Site extends Site_Base {
      *
      * @return the access group for this site
      */
-    public Group getCanPostGroup() {
+    public Group getCanPostGroup(){
         return getPostGroup().toGroup();
     }
 
@@ -138,10 +140,10 @@ public class Site extends Site_Base {
      * sets the access group of people who can post in this site
      *
      * @param group
-     *            the group of people who can view this site
+     *          the group of people who can view this site
      */
     @Atomic
-    public void setCanPostGroup(Group group) {
+    public void setCanPostGroup(Group group){
         setPostGroup(group.toPersistentGroup());
     }
 
@@ -150,7 +152,7 @@ public class Site extends Site_Base {
      *
      * @return the access group for this site
      */
-    public Group getCanAdminGroup() {
+    public Group getCanAdminGroup(){
         return getAdminGroup().toGroup();
     }
 
@@ -158,10 +160,10 @@ public class Site extends Site_Base {
      * sets the access group of people who can post in this site
      *
      * @param group
-     *            the group of people who can view this site
+     *          the group of people who can view this site
      */
     @Atomic
-    public void setCanAdminGroup(Group group) {
+    public void setCanAdminGroup(Group group){
         setAdminGroup(group.toPersistentGroup());
     }
 
@@ -257,23 +259,22 @@ public class Site extends Site_Base {
      */
     @Override
     public void setSlug(String slug) {
+        super.setSlug(slug);
+    }
+
+    public void updateMenuFunctionality() {
         Preconditions.checkNotNull(this.getDescription());
         Preconditions.checkNotNull(this.getName());
-
-        while (!isValidSlug(slug)) {
-            String randomSlug = UUID.randomUUID().toString().substring(0, 3);
-            slug = Joiner.on("-").join(slug, randomSlug);
-        }
-
-        super.setSlug(slug);
+        Preconditions.checkArgument(isValidSlug(getSlug()));
 
         if (getFolder() == null) {
             if (this.getFunctionality() != null) {
                 deleteMenuFunctionality();
             }
-            this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), false, slug,
-                    CMSBackend.BACKEND_KEY, "anyone", this.getDescription(), this.getName(), slug));
+            this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), false, getSlug(),
+                    CMSBackend.BACKEND_KEY, "anyone", this.getDescription(), this.getName(), getSlug()));
         }
+
     }
 
     @Atomic
@@ -339,13 +340,6 @@ public class Site extends Site_Base {
     }
 
     /**
-     * @return true if a site is the default site, meaning if this site should respond to '/' requests
-     */
-    public boolean isDefault() {
-        return Bennu.getInstance().getDefaultSite() == this;
-    }
-
-    /**
      * @return the static directory of this {@link Site}.
      */
     public String getStaticDirectory() {
@@ -363,6 +357,11 @@ public class Site extends Site_Base {
         Stream<MenuItem> menuItems = Bennu.getInstance().getConfiguration().getMenu().getOrderedChild().stream();
         Optional<String> existsEntry = menuItems.map(i -> i.getPath()).filter(path -> path.equals(slug)).findFirst();
         return !Strings.isNullOrEmpty(slug) && fromSlug(slug) == null && !existsEntry.isPresent();
+    }
+
+    @Override
+    public Page getInitialPage() {
+        return Optional.ofNullable(super.getInitialPage()).orElseGet(() -> getPagesSet().stream().findFirst().orElse(null));
     }
 
     public Set<Menu> getSideMenus() {

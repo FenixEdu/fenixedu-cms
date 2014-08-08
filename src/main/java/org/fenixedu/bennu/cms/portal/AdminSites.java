@@ -98,6 +98,7 @@ public class AdminSites {
         }
         if (!s.getSlug().equals(slug)) {
             s.setSlug(slug);
+            s.updateMenuFunctionality();
         }
         s.setPublished(published);
         s.setCanViewGroup(Group.parse(viewGroup));
