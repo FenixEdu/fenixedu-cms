@@ -55,6 +55,8 @@ class Post{
   Boolean active;
   DateTime publicationBegin;
   DateTime publicationEnd;
+  DateTime referedSubjectBegin;
+  DateTime referedSubjectEnd;
   LocalizedString location;
 }
 

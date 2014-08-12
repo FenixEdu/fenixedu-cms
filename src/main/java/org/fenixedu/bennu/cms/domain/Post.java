@@ -92,10 +92,22 @@ public class Post extends Post_Base {
         return getPublicationBegin() != null && getPublicationEnd() != null;
     }
 
+    public boolean hasReferedSubjectPeriod() { return getReferedSubjectBegin() !=null && getReferedSubjectEnd() != null; }
+
+    public boolean isInPublicationPeriod() {
+        boolean inBegin = getPublicationBegin() == null || getPublicationBegin().isAfterNow();
+        boolean inEnd = getPublicationEnd() == null || getPublicationEnd().isBeforeNow();
+        return inBegin && inEnd;
+    }
+
+    public boolean isInReferedSubjectPeriod() {
+        boolean inBegin = getReferedSubjectBegin() == null || getReferedSubjectBegin().isAfterNow();
+        boolean inEnd = getReferedSubjectEnd() == null || getReferedSubjectEnd().isBeforeNow();
+        return inBegin && inEnd;
+    }
+
     public boolean isVisible() {
-        boolean inPublicationPeriod =
-                !hasPublicationPeriod() || (getPublicationBegin().isAfterNow() && getPublicationEnd().isBeforeNow());
-        return getActive() && inPublicationPeriod;
+        return getActive() && (!hasPublicationPeriod() || isInPublicationPeriod());
     }
 
     /**

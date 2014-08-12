@@ -10,14 +10,13 @@
     </p>
 </c:if>
 
-
 <c:choose>
-      <c:when test="${sites.size() == 0}">
-      <spring:message code="site.manage.label.emptySites" />
-      </c:when>
+  <c:when test="${sites==null || sites.size() == 0}">
+    <spring:message code="site.manage.label.emptySites" />
+  </c:when>
 
-      <c:otherwise>
-        <table class="table table-striped table-bordered">
+  <c:otherwise>
+    <table class="table table-striped table-bordered">
       <thead>
         <tr>
           <th class="col-md-6"><spring:message code="site.manage.label.name" /></th>
@@ -72,46 +71,21 @@
 
        	      <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteSiteForm').submit();"><spring:message code="action.delete" /></a>
 
-              <form id="deleteSiteForm" action="${pageContext.request.contextPath}/cms/sites/${i.slug}/delete"" method="POST"></form>
+              <form id="deleteSiteForm" action="${pageContext.request.contextPath}/cms/sites/${i.slug}/delete" method="POST"></form>
             </div>
           </td>
         </tr>
       </c:forEach>
       </tbody>
     </table>
-        </table>
-      </c:otherwise>
-</c:choose>
-
-<div class="modal fade" id="defaultSite" tabindex="-1" role="dialog" aria-hidden="true">
-    <form action="${pageContext.request.contextPath}/cms/sites/default" class="form-horizontal" method="post">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                            class="sr-only">Close</span></button>
-                    <h4><spring:message code="action.set.default.site"/></h4>
-                </div>
-                <div class="modal-body">
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.site"/>:</label>
-                        <div class="col-sm-10">
-                            <select class="form-control" name="slug">
-                                <option value="">-</option>
-                                <c:forEach var="i"  items="${sites}">
-                                    <option value="${i.slug}">${i.name.content}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary"><spring:message code="label.save"/></button>
-                </div>
-            </div>
+    <div class="row">
+        <div class="col-md-2 col-md-offset-5">
+            <ul class="pagination">
+                <li class="${currentPage <= 0 ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page - 1}">«</a></li>
+                <li class="disabled"><a href="#">${currentPage} / ${numberOfPages}</a></li>
+                <li class="${currentPage >= numberOfPages ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page + 1}">»</a></li>
+            </ul>
         </div>
-    </form>
-</div>
-
+    </div>
+    </c:otherwise>
+</c:choose>

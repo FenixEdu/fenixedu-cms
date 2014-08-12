@@ -1,8 +1,7 @@
 package org.fenixedu.bennu.cms.portal;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
@@ -21,26 +20,46 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
+import pt.ist.fenixframework.FenixFramework;
 
-import com.google.common.base.Strings;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @SpringApplication(group = "anyone", path = "cms", title = "application.title")
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")
 @RequestMapping("/cms/sites")
 public class AdminSites {
 
+    private static final int ITEMS_PER_PAGE = 30;
+
     @RequestMapping
     public String list(Model model) {
-        User user = Authenticate.getUser();
-        List<Site> result =
-                Bennu.getInstance().getSitesSet().stream()
-                        .filter(s -> s.getCanAdminGroup().isMember(user) || s.getCanPostGroup().isMember(user))
-                        .collect(Collectors.toList());
-        model.addAttribute("sites", result);
+        return list(0, model);
+    }
+
+    @RequestMapping(value = "manage/{page}", method = RequestMethod.GET)
+    public String list(@PathVariable("page") Integer page, Model model) {
+        List<List<Site>> pages = Lists.partition(getSites(), ITEMS_PER_PAGE);
+        if(!pages.isEmpty()) {
+            int currentPage = Optional.of(page).orElse(0);
+            model.addAttribute("numberOfPages", pages.size());
+            model.addAttribute("currentPage", currentPage);
+            model.addAttribute("sites", pages.get(currentPage));
+        }
         return "manage";
+    }
+
+    private List<Site> getSites() {
+        User user = Authenticate.getUser();
+        Set<Site> allSites = Bennu.getInstance().getSitesSet();
+        Predicate<Site> isAdminMember = site -> site.getCanAdminGroup().isMember(user);
+        Predicate<Site> isPostsMember = site -> site.getCanPostGroup().isMember(user);
+        return allSites.stream().filter(isAdminMember.or(isPostsMember)).collect(Collectors.toList());
     }
 
     public static void canEdit(Site site) {
@@ -48,6 +67,7 @@ public class AdminSites {
             throw CmsDomainException.forbiden();
         }
     }
+
 
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.GET)
     public String edit(Model model, @PathVariable(value = "slug") String slug) {

@@ -299,9 +299,11 @@ public class Site extends Site_Base {
             cat.delete();
         }
 
+        this.setInitialPage(null);
         for (Page page : getPagesSet()) {
             page.delete();
         }
+
         this.setViewGroup(null);
         this.setPostGroup(null);
         this.setAdminGroup(null);
@@ -323,6 +325,13 @@ public class Site extends Site_Base {
             }
         }
         return null;
+    }
+
+    /**
+     * @return true if a site is the default site, meaning if this site should respond to '/' requests
+     */
+    public boolean isDefault() {
+        return Bennu.getInstance().getDefaultSite() == this;
     }
 
     /**

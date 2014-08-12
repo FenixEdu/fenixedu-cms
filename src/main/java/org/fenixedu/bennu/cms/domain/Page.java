@@ -155,7 +155,6 @@ public class Page extends Page_Base {
         if (menu != null) {
             MenuItem.create(site, menu, page, name, parent);
         }
-        log.info("[ Page created { name: " + page.getName().getContent() + ", address: " + page.getAddress() + " }");
         return page;
     }
 }

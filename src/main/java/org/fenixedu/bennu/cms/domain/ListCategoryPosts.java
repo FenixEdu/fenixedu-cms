@@ -2,6 +2,7 @@ package org.fenixedu.bennu.cms.domain;
 
 import java.util.HashMap;
 
+import com.google.common.collect.Lists;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
 import pt.ist.fenixframework.Atomic;
