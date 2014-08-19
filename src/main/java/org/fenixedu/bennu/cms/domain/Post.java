@@ -92,12 +92,18 @@ public class Post extends Post_Base {
         return getActive() && inPublicationPeriod;
     }
 
-    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category, boolean active) {
+    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category,
+            boolean active, User creator) {
         Post post = new Post();
         post.setSite(site);
         post.setName(name);
         post.setBody(body);
         post.setCreationDate(new DateTime());
+        if (creator == null) {
+            post.setCreatedBy(page.getCreatedBy());
+        } else {
+            post.setCreatedBy(creator);
+        }
         post.addCategories(category);
         post.setActive(active);
         return post;

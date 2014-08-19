@@ -46,7 +46,7 @@ public class Site extends Site_Base {
 
     /**
      * registers a new site template
-     * 
+     *
      * @param type
      *            the type of the template. This must be unique on the application.
      * @param c
@@ -58,7 +58,7 @@ public class Site extends Site_Base {
 
     /**
      * searches for a {@link SiteTemplate} by type.
-     * 
+     *
      * @param type
      *            the type of the {@link SiteTemplate} wanted.
      * @return
@@ -74,7 +74,7 @@ public class Site extends Site_Base {
     }
 
     /**
-     * 
+     *
      * @return mapping between the type and description for all the registered {@link SiteTemplate}.
      */
     public static HashMap<String, String> getTemplates() {
@@ -124,19 +124,20 @@ public class Site extends Site_Base {
 
     /**
      * searches for a {@link Site} by slug.
-     * 
+     *
      * @param slug
      *            the slug of the {@link Site} wanted.
      * @return
      *         the {@link Site} with the given slug if it exists, or null otherwise.
      */
     public static Site fromSlug(String slug) {
-        return Bennu.getInstance().getSitesSet().stream().filter(site -> site.getSlug().equals(slug)).findAny().orElse(null);
+        return Bennu.getInstance().getSitesSet().stream().filter(site -> site.getSlug() != null && site.getSlug().equals(slug))
+                .findAny().orElse(null);
     }
 
     /**
      * searches for a {@link Page} by slug on this {@link Site}.
-     * 
+     *
      * @param slug
      *            the slug of the {@link Page} wanted.
      * @return
@@ -152,7 +153,7 @@ public class Site extends Site_Base {
 
     /**
      * searches for a {@link Post} by slug on this {@link Site}.
-     * 
+     *
      * @param slug
      *            the slug of the {@link Post} wanted.
      * @return
@@ -164,7 +165,7 @@ public class Site extends Site_Base {
 
     /**
      * searches for a {@link Category} by slug on this {@link Site}.
-     * 
+     *
      * @param slug
      *            the slug of the {@link Category} wanted.
      * @return
@@ -187,7 +188,7 @@ public class Site extends Site_Base {
 
     /**
      * searches for a {@link Menu} by oid on this {@link Site}.
-     * 
+     *
      * @param oid
      *            the slug of the {@link Menu} wanted.
      * @return
@@ -236,7 +237,7 @@ public class Site extends Site_Base {
     /**
      * Updates the site's slug and it's respective MenuFunctionality.
      * It should be used after setting the site's description and name.
-     * 
+     *
      * @param slug
      *            the slug wanted. It must be the only site with this slug or else a random slug is generated.
      */
@@ -281,6 +282,7 @@ public class Site extends Site_Base {
             cat.delete();
         }
 
+        this.setInitialPage(null);
         for (Page page : getPagesSet()) {
             page.delete();
         }

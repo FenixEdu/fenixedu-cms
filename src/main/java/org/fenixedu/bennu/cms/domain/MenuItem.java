@@ -37,7 +37,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
 
     /**
      * Adds a children at a given position and shifts the existing items.
-     * 
+     *
      * @param item
      *            the {@link MenuItem} to be added.
      * @param position
@@ -66,7 +66,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
 
     /**
      * Removes a given {@link MenuItem}
-     * 
+     *
      * @param mi
      *            the children to be removed
      */
@@ -79,7 +79,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
 
     /**
      * Adds a new {@link MenuItem} has the last item.
-     * 
+     *
      * @param mi
      *            the {@link MenuItem} to be added.
      */
@@ -168,7 +168,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
         }
     }
 
-    public static MenuItem create(Site site, Menu menu, Page page, LocalizedString name, MenuItem parent) {
+    public static MenuItem create(Menu menu, Page page, LocalizedString name, MenuItem parent) {
         MenuItem menuItem = new MenuItem();
         menuItem.setName(name);
         menuItem.setPage(page);

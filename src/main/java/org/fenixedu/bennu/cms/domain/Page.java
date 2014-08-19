@@ -54,7 +54,7 @@ public class Page extends Page_Base {
 
     /**
      * A slug is valid if there are no other page on that site that have the same slug.
-     * 
+     *
      * @param slug
      * @return true if it is a valid slug.
      */
@@ -64,7 +64,7 @@ public class Page extends Page_Base {
 
     /**
      * Searches a {@link Component} of this page by oid.
-     * 
+     *
      * @param oid
      *            the oid of the {@link Component} to be searched.
      * @return
@@ -103,7 +103,7 @@ public class Page extends Page_Base {
     }
 
     public static Page create(Site site, Menu menu, MenuItem parent, LocalizedString name, boolean published, String template,
-            Component... components) {
+            User creator, Component... components) {
         Page page = new Page();
         page.setSite(site);
         page.setName(name);
@@ -113,11 +113,27 @@ public class Page extends Page_Base {
             }
         }
         page.setTemplate(site.getTheme().templateForType(template));
+        if (creator == null) {
+            page.setCreatedBy(site.getCreatedBy());
+        } else {
+            page.setCreatedBy(creator);
+        }
         page.setPublished(published);
         if (menu != null) {
-            MenuItem.create(site, menu, page, name, parent);
+            MenuItem.create(menu, page, name, parent);
         }
         log.info("[ Page created { name: " + page.getName().getContent() + ", address: " + page.getAddress() + " }");
+        return page;
+    }
+
+    public static Page createBasePage(CMSTemplate template, Component... components) {
+        Page page = new Page();
+        page.setTemplate(template);
+        if (components != null && components.length > 0) {
+            for (Component component : components) {
+                page.addComponents(component);
+            }
+        }
         return page;
     }
 }
