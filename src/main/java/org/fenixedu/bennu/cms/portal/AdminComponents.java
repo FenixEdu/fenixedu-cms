@@ -50,6 +50,7 @@ public class AdminComponents {
             ListCategoryPosts lcp = new ListCategoryPosts(cat);
             p.addComponents(lcp);
         } else if (componentType.equals("menu")) {
+            @SuppressWarnings("unused")
             MenuComponent mc = new MenuComponent(s.menuForOid(menuOid), p);
         } else if (componentType.equals("staticPost")) {
             StaticPost mc = new StaticPost();

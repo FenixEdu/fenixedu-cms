@@ -47,7 +47,7 @@ public class Site extends Site_Base {
      * @param c
      *            the class to be registered as a template.
      */
-    public static void register(String type, Class c) {
+    public static void register(String type, Class<?> c) {
         TEMPLATES.put(type, c);
     }
 
@@ -75,8 +75,8 @@ public class Site extends Site_Base {
     public static HashMap<String, String> getTemplates() {
         HashMap<String, String> map = new HashMap<>();
 
-        for (Class c : TEMPLATES.values()) {
-            RegisterSiteTemplate registerSiteTemplate = (RegisterSiteTemplate) c.getAnnotation(RegisterSiteTemplate.class);
+        for (Class<?> c : TEMPLATES.values()) {
+            RegisterSiteTemplate registerSiteTemplate = c.getAnnotation(RegisterSiteTemplate.class);
             map.put(registerSiteTemplate.type(), registerSiteTemplate.name() + " - " + registerSiteTemplate.description());
         }
 
