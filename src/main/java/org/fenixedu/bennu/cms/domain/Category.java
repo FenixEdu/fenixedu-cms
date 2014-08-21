@@ -2,6 +2,7 @@ package org.fenixedu.bennu.cms.domain;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
@@ -31,7 +32,7 @@ public class Category extends Category_Base {
         super.setName(name);
 
         if (prevName == null) {
-            setSlug(Site.slugify(name.getContent()));
+            setSlug(StringNormalizer.slugify(name.getContent()));
         }
     }
 

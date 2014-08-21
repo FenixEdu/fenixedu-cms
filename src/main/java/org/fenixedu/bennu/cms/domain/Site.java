@@ -2,14 +2,10 @@ package org.fenixedu.bennu.cms.domain;
 
 import static java.util.stream.Collectors.toSet;
 
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.fenixedu.bennu.cms.routing.CMSBackend;
@@ -34,7 +30,6 @@ import pt.ist.fenixframework.FenixFramework;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 
 public class Site extends Site_Base {
     /**
@@ -200,30 +195,6 @@ public class Site extends Site_Base {
         } else {
             return menu;
         }
-    }
-
-    public static String slugify(String... parts) {
-        return slugify(Lists.newArrayList(parts));
-    }
-
-    public static String slugify(Iterable<String> parts) {
-        return slugify(Joiner.on("-").join(parts));
-    }
-
-    // To Remove
-    @Deprecated
-    public static String slugify(String name) {
-        Preconditions.checkArgument(name != null && !name.isEmpty(), "Trying to slugify an empty name");
-        Pattern NONLATIN = Pattern.compile("[^\\w-]");
-        Pattern WHITESPACE = Pattern.compile("[\\s]");
-        name = name.trim();
-        name = Normalizer.normalize(name, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-        String nowhitespace = WHITESPACE.matcher(name).replaceAll("-");
-        String normalized = Normalizer.normalize(nowhitespace, Form.NFD);
-        String slug = NONLATIN.matcher(normalized).replaceAll("");
-        name = slug.toLowerCase(Locale.ENGLISH);
-
-        return name;
     }
 
     @Atomic
