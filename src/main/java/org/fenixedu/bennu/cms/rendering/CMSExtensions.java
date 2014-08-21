@@ -21,14 +21,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
-import com.mitchellbosecke.pebble.error.ParserException;
 import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
 import com.mitchellbosecke.pebble.extension.Test;
-import com.mitchellbosecke.pebble.lexer.Token;
-import com.mitchellbosecke.pebble.node.RenderableNode;
-import com.mitchellbosecke.pebble.tokenParser.AbstractTokenParser;
 
 public class CMSExtensions extends AbstractExtension {
     public class LengthFilter implements Filter {
@@ -208,21 +204,6 @@ public class CMSExtensions extends AbstractExtension {
             Preconditions.checkArgument(mapObject != null && keyObject != null, "Please specify non empty 'map' and 'key'");
             Preconditions.checkArgument(mapObject instanceof Map, "The first argument must be of type " + Map.class.getName());
             return ((Map<?, ?>) mapObject).get(keyObject);
-        }
-
-    }
-
-    public static class RecursiveTreeToken extends AbstractTokenParser {
-
-        @Override
-        public String getTag() {
-            return "recursetree";
-        }
-
-        @Override
-        public RenderableNode parse(Token token) throws ParserException {
-
-            return null;
         }
 
     }
