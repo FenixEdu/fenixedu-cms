@@ -126,7 +126,7 @@ public class Site extends Site_Base {
      *         the {@link Site} with the given slug if it exists, or null otherwise.
      */
     public static Site fromSlug(String slug) {
-        return Bennu.getInstance().getSitesSet().stream().filter(site -> site.getSlug().equals(slug)).findAny().orElse(null);
+        return Bennu.getInstance().getSitesSet().stream().filter(site -> slug.equals(site.getSlug())).findAny().orElse(null);
     }
 
     /**

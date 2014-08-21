@@ -45,6 +45,7 @@ public class CreateSite {
         site.setBennu(Bennu.getInstance());
         site.setDescription(description);
         site.setName(name);
+        site.setSlug(name.getContent());
         site.setPublished(published);
 
         if (!template.equals("null")) {
