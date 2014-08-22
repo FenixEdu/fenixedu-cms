@@ -13,8 +13,8 @@
     <version>1.0.0-SNAPSHOT</version>
 
     <properties>
-        <version.org.fenixedu.bennu>3.1.0</version.org.fenixedu.bennu>
-        <version.org.fenixedu.bennu.spring>1.0.1</version.org.fenixedu.bennu.spring>
+        <version.org.fenixedu.bennu>3.3.1</version.org.fenixedu.bennu>
+        <version.org.fenixedu.bennu.spring>1.1.0</version.org.fenixedu.bennu.spring>
     </properties>
 
     <build>
@@ -49,6 +49,8 @@
                             <charset>utf-8</charset>
                             <jsSourceDir>static/js/toolkit</jsSourceDir>
                             <jsSourceFiles>
+                                <jsSourceFile>moment.js</jsSourceFile>
+                                <jsSourceFile>datepicker.js</jsSourceFile>
                                 <jsSourceFile>jquery.fullscreen.js</jsSourceFile>
                                 <jsSourceFile>jquery.hotkeys.js</jsSourceFile>
                                 <jsSourceFile>MutationObserverPolyfill.js</jsSourceFile>
@@ -58,6 +60,8 @@
                                 <jsSourceFile>validation.js</jsSourceFile>
                                 <jsSourceFile>localizedString.js</jsSourceFile>
                                 <jsSourceFile>htmlEditor.js</jsSourceFile>
+                                <jsSourceFile>group.js</jsSourceFile>
+                                <jsSourceFile>datetime.js</jsSourceFile>
                             </jsSourceFiles>
                             <webappTargetDir>${project.build.outputDirectory}/META-INF/resources/</webappTargetDir>
                             <jsTargetDir>static/js</jsTargetDir>

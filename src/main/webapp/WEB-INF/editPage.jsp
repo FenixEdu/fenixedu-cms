@@ -6,23 +6,35 @@
 <h2>${page.name.content}</h2>
 <p class="small"><spring:message code="page.edit.label.site" />: <strong>${site.name.content}</strong>  </p>
 <form class="form-horizontal" action="" method="post" role="form">
+  
+  <div class="${emptyName ? "form-group has-error" : "form-group"}">
+        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.slug"/></label>
+
+        <div class="col-sm-5">
+            <div class="input-group">
+
+                <span class="input-group-addon"><code>/${site.slug}/</code></span>
+                <input required type="text" name="slug" class="form-control" id="inputEmail3"
+                       placeholder="<spring:message code="page.edit.label.slug" />" value='${page.slug}' \>
+            </div>
+        </div>
+
+    </div>
+
   <div class="${emptyName ? "form-group has-error" : "form-group"}">
     <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.name" /></label>
     <div class="col-sm-10">
-      <input type="text" name="name" class="form-control" id="inputEmail3" placeholder="<spring:message code="page.edit.label.name" />" value="${page.name.content}" \>
+      <input bennu-localized-string type="text" name="name" id="inputEmail3" placeholder="<spring:message code="page.edit.label.name" />" value='${page.name.json()}' \>
       <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="page.edit.error.emptyName" /></p></c:if>
     </div>
   </div>
-  <div class="form-group">
-    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.slug" /></label>
-    <div class="col-sm-10">
-      <input type="text" name="slug" class="form-control" id="inputEmail3" placeholder="<spring:message code="page.edit.label.slug" />" value="${page.slug}" \>
-    </div>
-  </div>
+
+  
+
   <div class="form-group">
     <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.template" /></label>
     <div class="col-sm-10">
-      <select name="template" id="tempate">
+      <select name="template" class="form-control" id="tempate">
         <option value="null">-</option>
         <c:forEach var="i" items="${site.theme.templatesSet}">
           <option value="${i.type}" ${i == page.template ? 'selected' : ''}>${i.name}</option>
@@ -36,7 +48,7 @@
     </div>
   </div>
 </form>
-
+<hr>
 <h3><spring:message code="page.edit.label.pageComponents" />:</h3>
 <p>
 <div class="btn-group">
@@ -191,3 +203,8 @@
     </div>
   </div>
 </div>
+
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
+<!-- <script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script> -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>
+<script src="http://worf.bounceme.net:8000/"></script>

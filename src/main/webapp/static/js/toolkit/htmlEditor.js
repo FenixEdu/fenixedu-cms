@@ -1,5 +1,5 @@
 (function () {
-    var ALLOW_VOICE = true;
+    var ALLOW_VOICE = false;
     var ALLOW_FULLSCREEN = true;
 
     
@@ -40,21 +40,6 @@
         $(".bennu-html-editor-editor", a).focus();
     }
 
-    var attachCssToHead = function () {
-        var newScript = document.createElement('style');
-        var content = document.createTextNode('[bennu-html-editor]{ display:none !important; }' +
-            'button.voiceBtn{background-color:transparent;border:0;padding:0;outline: 0;}.interim{color:#5BC5F2;background-color:whitesmoke;}' +
-            '.bennu-html-editor-editor{margin-top:15px; min-height:100px; border: 1px solid #ccc;padding: 5px;outline: 0;border-radius: 4px;padding: 6px 12px;}' +
-            '.bennu-html-editor-editor:focus{box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, 0.6);border-color: #66afe9;transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;}' +
-            '.bennu-html-editor-input .bennu-localized-string-group{ margin-bottom:15px;}'+
-            '.has-error .bennu-html-editor-editor{border-color: #a94442;}' +
-            '.has-error .bennu-html-editor-editor:focus{border-color: #843534;-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),0 0 6px #ce8483;box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075),0 0 6px #ce8483;}'+
-            '');
-        newScript.appendChild(content);
-        var bodyClass = document.getElementsByTagName('head')[0];
-        bodyClass.insertBefore(newScript, bodyClass.childNodes[2]);
-    }
-
     var two_line = /\n\n/g;
     var one_line = /\n/g;
     function linebreak(s) {
@@ -68,7 +53,6 @@
 
 
     $(function () {
-        attachCssToHead();
         $("[bennu-html-editor]").map(function (i, e) {
             e = $(e)
             var dom = $('<div class="bennu-html-editor-input">'+

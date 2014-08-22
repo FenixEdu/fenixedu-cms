@@ -1,6 +1,8 @@
 package org.fenixedu.bennu.cms.domain;
 
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.groups.AnyoneGroup;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -22,8 +24,9 @@ public class Page extends Page_Base {
             throw new RuntimeException("Needs Login");
         }
         this.setCreatedBy(Authenticate.getUser());
+        this.setCanViewGroup(AnyoneGroup.get());
     }
-    
+
     @Override
     public void setName(LocalizedString name) {
         LocalizedString prevName = getName();
@@ -33,7 +36,7 @@ public class Page extends Page_Base {
             setSlug(Site.slugify(name.getContent()));
         }
     }
-    
+
     /**
      * Searches a {@link Component} of this page by oid.
      * 
@@ -50,15 +53,22 @@ public class Page extends Page_Base {
         }
         return null;
     }
-    
+
     @Atomic
     public void delete(){
         for (Component component : getComponentsSet()) {
             component.delete();
+
         }
+
+        for (MenuItem mi : getMenuItemsSet()){
+            mi.delete();
+        }
+
         this.setTemplate(null);
         this.setSite(null);
         this.setCreatedBy(null);
+        this.setViewGroup(null);
         this.deleteDomainObject();
     }
 
@@ -72,5 +82,27 @@ public class Page extends Page_Base {
         }
         path += getSite().getSlug() + "/" + getSlug();
         return path;
+    }
+
+
+    /**
+     * returns the group of people who can view this site.
+     *
+     * @return group
+     *          the access group for this site
+     */
+    public Group getCanViewGroup(){
+        return getViewGroup().toGroup();
+    }
+
+    /**
+     * sets the access group for this site
+     *
+     * @param group
+     *          the group of people who can view this site
+     */
+    @Atomic
+    public void setCanViewGroup(Group group){
+        setViewGroup(group.toPersistentGroup());
     }
 }

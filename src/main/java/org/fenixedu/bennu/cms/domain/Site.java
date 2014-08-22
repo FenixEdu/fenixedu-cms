@@ -11,6 +11,7 @@ import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.core.groups.UserGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
@@ -87,14 +88,16 @@ public class Site extends Site_Base {
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
+
         this.setCanViewGroup(AnyoneGroup.get());
+        this.setCanPostGroup(UserGroup.of(Authenticate.getUser()));
+        this.setCanAdminGroup(UserGroup.of(Authenticate.getUser()));
     }
 
     /**
      * returns the group of people who can view this site.
      *
-     * @return group
-     *          the access group for this site
+     * @return the access group for this site
      */
     public Group getCanViewGroup(){
         return getViewGroup().toGroup();
@@ -109,6 +112,46 @@ public class Site extends Site_Base {
     @Atomic
     public void setCanViewGroup(Group group){
         setViewGroup(group.toPersistentGroup());
+    }
+
+    /**
+     * returns the group of people who can post this site.
+     *
+     * @return the access group for this site
+     */
+    public Group getCanPostGroup(){
+        return getPostGroup().toGroup();
+    }
+
+    /**
+     * sets the access group of people who can post in this site
+     *
+     * @param group
+     *          the group of people who can view this site
+     */
+    @Atomic
+    public void setCanPostGroup(Group group){
+        setPostGroup(group.toPersistentGroup());
+    }
+
+    /**
+     * returns the group of people who can post this site.
+     *
+     * @return the access group for this site
+     */
+    public Group getCanAdminGroup(){
+        return getPostGroup().toGroup();
+    }
+
+    /**
+     * sets the access group of people who can post in this site
+     *
+     * @param group
+     *          the group of people who can view this site
+     */
+    @Atomic
+    public void setCanAdminGroup(Group group){
+        setAdminGroup(group.toPersistentGroup());
     }
 
     /**
@@ -255,6 +298,8 @@ public class Site extends Site_Base {
             page.delete();
         }
         this.setViewGroup(null);
+        this.setPostGroup(null);
+        this.setAdminGroup(null);
         this.setTheme(null);
         this.setCreatedBy(null);
         this.setBennu(null);

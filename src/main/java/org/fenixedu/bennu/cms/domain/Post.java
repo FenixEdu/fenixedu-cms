@@ -4,6 +4,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.groups.AnyoneGroup;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -30,6 +32,7 @@ public class Post extends Post_Base {
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
         this.setActive(true);
+        this.setCanViewGroup(AnyoneGroup.get());
     }
 
     /**
@@ -75,6 +78,7 @@ public class Post extends Post_Base {
 
         this.setCreatedBy(null);
         this.setSite(null);
+        this.setViewGroup(null);
         this.deleteDomainObject();
     }
 
@@ -90,5 +94,27 @@ public class Post extends Post_Base {
         boolean inPublicationPeriod =
                 !hasPublicationPeriod() || (getPublicationBegin().isAfterNow() && getPublicationEnd().isBeforeNow());
         return getActive() && inPublicationPeriod;
+    }
+
+
+    /**
+     * returns the group of people who can view this site.
+     *
+     * @return group
+     *          the access group for this site
+     */
+    public Group getCanViewGroup(){
+        return getViewGroup().toGroup();
+    }
+
+    /**
+     * sets the access group for this site
+     *
+     * @param group
+     *          the group of people who can view this site
+     */
+    @Atomic
+    public void setCanViewGroup(Group group){
+        setViewGroup(group.toPersistentGroup());
     }
 }

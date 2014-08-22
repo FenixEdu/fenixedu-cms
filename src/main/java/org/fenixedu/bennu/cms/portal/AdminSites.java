@@ -3,6 +3,7 @@ package org.fenixedu.bennu.cms.portal;
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
@@ -40,7 +41,8 @@ public class AdminSites {
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
     public RedirectView edit(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
             @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug,
-            @RequestParam(required = false) Boolean published, RedirectAttributes redirectAttributes) {
+            @RequestParam(required = false) Boolean published, RedirectAttributes redirectAttributes,
+            @RequestParam String viewGroup, @RequestParam String postGroup, @RequestParam String adminGroup) {
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/sites/" + slug + "/edit", true);
@@ -48,14 +50,14 @@ public class AdminSites {
             if (published == null) {
                 published = false;
             }
-            editSite(name, description, theme, newSlug, published, Site.fromSlug(slug));
+            editSite(name, description, theme, newSlug, published, Site.fromSlug(slug), viewGroup, postGroup, adminGroup);
             return new RedirectView("/cms/sites", true);
         }
     }
 
     @Atomic(mode = TxMode.WRITE)
     private void editSite(LocalizedString name, LocalizedString description, String theme, String slug, Boolean published,
-            Site s) {
+            Site s, String viewGroup, String postGroup, String adminGroup) {
         s.setName(name);
         s.setDescription(description);
         s.setTheme(CMSTheme.forType(theme));
@@ -63,9 +65,11 @@ public class AdminSites {
             s.setSlug(slug);
         }
         s.setPublished(published);
+        s.setCanViewGroup(Group.parse(viewGroup));
+        s.setCanPostGroup(Group.parse(postGroup));
+        s.setCanAdminGroup(Group.parse(adminGroup));
     }
 
-    //THIS NEEDS REVEIEW
     @RequestMapping(value = "{slug}/delete", method = RequestMethod.POST)
     public RedirectView delete(@PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);

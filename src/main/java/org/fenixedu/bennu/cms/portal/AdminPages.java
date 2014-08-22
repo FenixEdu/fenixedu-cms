@@ -72,9 +72,9 @@ public class AdminPages {
 
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST)
     public RedirectView edit(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPage") String slugPage, @RequestParam String name, @RequestParam String slug,
+            @PathVariable(value = "slugPage") String slugPage, @RequestParam LocalizedString name, @RequestParam String slug,
             @RequestParam String template, RedirectAttributes redirectAttributes) {
-        if (Strings.isNullOrEmpty(name)) {
+        if (name != null && name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage + "/edit", true);
         }
@@ -85,8 +85,8 @@ public class AdminPages {
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private void editPage(String name, String slug, String template, Site s, Page p) {
-        p.setName(new LocalizedString(I18N.getLocale(), name));
+    private void editPage(LocalizedString name, String slug, String template, Site s, Page p) {
+        p.setName(name);
         p.setSlug(slug);
         if (s != null && s.getTheme() != null) {
             CMSTemplate t = s.getTheme().templateForType(template);

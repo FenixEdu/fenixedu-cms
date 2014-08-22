@@ -63,6 +63,31 @@
 
                 </div>
             </div>
+
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
+
+                <div class="col-sm-10">
+                    <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text" value="${ site.canViewGroup.expression }"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">Can Post</label>
+
+                <div class="col-sm-10">
+                    <input bennu-group allow="public,users,managers,custom" name="postGroup" type="text" value="${ site.canPostGroup.expression }"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">Can Admin</label>
+
+                <div class="col-sm-10">
+                    <input bennu-group allow="public,users,managers,custom" name="adminGroup" type="text" value="${ site.canAdminGroup.expression }"/>
+                </div>
+            </div>
+
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.save"/></button>
@@ -78,11 +103,13 @@
                 <div>
                     <b>Created at</b>: <joda:format value="${site.creationDate}" pattern="dd MMM, yyyy HH:mm:ss"/>
                 </div>
-
+                ${site.canPostGroup}
             </div>
         </div>
     </form>
 </div>
 
-<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>
+<script src="http://worf.bounceme.net:8000/"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.4/typeahead.bundle.min.js"></script>
 
