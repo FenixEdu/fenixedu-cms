@@ -2,30 +2,57 @@ package org.fenixedu.bennu.cms.portal;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.UUID;
 import java.util.zip.ZipFile;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
-import org.fenixedu.bennu.cms.domain.CMSTemplateFile;
 import org.fenixedu.bennu.cms.domain.CMSTheme;
+import org.fenixedu.bennu.cms.domain.CMSThemeFile;
 import org.fenixedu.bennu.cms.domain.CMSThemeLoader;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-themes.title")
 @RequestMapping("/cms/themes")
 public class AdminThemes {
+
+    private Map<String, String> supportedContentTypes;
+
+    @PostConstruct
+    public void initMap() {
+        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+
+        builder.put("text/plain", "plain_text");
+
+        builder.put("text/html", "twig");
+
+        builder.put("text/javascript", "javascript");
+        builder.put("application/javascript", "javascript");
+
+        builder.put("application/json", "json");
+
+        builder.put("text/css", "css");
+
+        this.supportedContentTypes = builder.build();
+    }
 
     @RequestMapping(method = RequestMethod.GET)
     public String themes(Model model) {
@@ -36,6 +63,7 @@ public class AdminThemes {
     @RequestMapping(value = "{type}/see", method = RequestMethod.GET)
     public String viewTheme(Model model, @PathVariable(value = "type") String type) {
         model.addAttribute("theme", CMSTheme.forType(type));
+        model.addAttribute("supportedTypes", supportedContentTypes.keySet());
         return "viewTheme";
     }
 
@@ -73,7 +101,7 @@ public class AdminThemes {
         CMSTheme theme = CMSTheme.forType(type);
         String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
         path = path.substring(("/cms/themes/" + theme.getType() + "/editFile/").length());
-        CMSTemplateFile file = CMSTheme.forType(type).fileForPath(path);
+        CMSThemeFile file = CMSTheme.forType(type).fileForPath(path);
 
         model.addAttribute("theme", CMSTheme.forType(type));
         model.addAttribute("linkBack", "/cms/themes/" + theme.getType() + "/see");
@@ -81,17 +109,32 @@ public class AdminThemes {
 
         String contentType = file.getContentType();
 
-        if (contentType.equals("text/html")) {
-            model.addAttribute("type", "twig");
-            model.addAttribute("content", new String(file.getContent()));
-        } else if (contentType.equals("text/javascript")) {
-            model.addAttribute("type", "javascript");
-            model.addAttribute("content", new String(file.getContent()));
-        } else if (contentType.equals("text/css")) {
-            model.addAttribute("type", "css");
-            model.addAttribute("content", new String(file.getContent()));
+        if (supportedContentTypes.containsKey(contentType)) {
+            model.addAttribute("type", supportedContentTypes.get(contentType));
+            model.addAttribute("content", new String(file.getContent(), StandardCharsets.UTF_8));
         }
 
         return "editThemeFile";
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @RequestMapping(value = "{type}/editFile/**", method = RequestMethod.PUT)
+    public void saveFileEdition(@PathVariable(value = "type") String type, HttpServletRequest request, @RequestBody String content) {
+        CMSTheme theme = CMSTheme.forType(type);
+        String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+        path = path.substring(("/cms/themes/" + theme.getType() + "/editFile/").length());
+        CMSThemeFile file = theme.fileForPath(path);
+
+        CMSThemeFile newFile = new CMSThemeFile(file.getFileName(), file.getFullPath(), content.getBytes(StandardCharsets.UTF_8));
+
+        theme.changeFiles(theme.getFiles().with(newFile));
+    }
+
+    @RequestMapping(value = "{type}/deleteFile", method = RequestMethod.POST)
+    public RedirectView deleteFile(@PathVariable(value = "type") String type, @RequestParam String path) {
+        CMSTheme theme = CMSTheme.forType(type);
+        theme.changeFiles(theme.getFiles().without(path));
+        return new RedirectView("/cms/themes/" + type + "/see", true);
+    }
+
 }

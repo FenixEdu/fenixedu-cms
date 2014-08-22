@@ -1,8 +1,8 @@
 package org.fenixedu.bennu.cms.routing;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -20,8 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.fenixedu.bennu.cms.CMSConfigurationManager;
-import org.fenixedu.bennu.cms.domain.CMSTemplateFile;
 import org.fenixedu.bennu.cms.domain.CMSTheme;
+import org.fenixedu.bennu.cms.domain.CMSThemeFile;
 import org.fenixedu.bennu.cms.domain.Component;
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.domain.Site;
@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.ByteStreams;
 import com.mitchellbosecke.pebble.PebbleEngine;
 import com.mitchellbosecke.pebble.error.LoaderException;
 import com.mitchellbosecke.pebble.error.PebbleException;
@@ -63,11 +62,11 @@ final class CMSURLHandler implements SemanticURLHandler {
                 throw new IllegalArgumentException("Theme " + parts[0] + " not found!");
             }
 
-            InputStream stream = theme.streamForPath(parts[1]);
-            if (stream == null) {
+            byte[] bytes = theme.contentForPath(parts[1]);
+            if (bytes == null) {
                 throw new IllegalArgumentException("Theme " + parts[0] + " does not contain resource '" + parts[1] + '"');
             }
-            return new InputStreamReader(stream, StandardCharsets.UTF_8);
+            return new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8);
         }
     });
 
@@ -123,11 +122,11 @@ final class CMSURLHandler implements SemanticURLHandler {
     private void handleStaticResource(final HttpServletRequest req, HttpServletResponse res, Site sites,
             ByteArrayOutputStream buf, Writer bufWriter, String pageSlug) throws IOException, ServletException {
         pageSlug = pageSlug.replaceFirst("/", "");
-        InputStream stream = sites.getTheme().streamForPath(pageSlug);
-        if (stream != null) {
-            CMSTemplateFile templateFile = sites.getTheme().fileForPath(pageSlug);
-            long size = ByteStreams.copy(stream, buf);
-            res.setContentLength((int) size);
+        byte[] bytes = sites.getTheme().contentForPath(pageSlug);
+        if (bytes != null) {
+            CMSThemeFile templateFile = sites.getTheme().fileForPath(pageSlug);
+            buf.write(bytes);
+            res.setContentLength(bytes.length);
             if (templateFile != null) {
                 res.setContentType(templateFile.getContentType());
             } else {
@@ -211,8 +210,7 @@ final class CMSURLHandler implements SemanticURLHandler {
 
         global.put("components", makePageWrapper(page));
 
-        PebbleTemplate compiledTemplate =
-                engine.getTemplate(site.getTheme().getType() + "/" + page.getTemplate().getFile().getDisplayName());
+        PebbleTemplate compiledTemplate = engine.getTemplate(site.getTheme().getType() + "/" + page.getTemplate().getFilePath());
 
         res.setStatus(200);
         res.setContentType("text/html");

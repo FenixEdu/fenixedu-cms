@@ -1,5 +1,11 @@
 package org.fenixedu.bennu.cms.domain;
 
+valueType org.fenixedu.bennu.cms.domain.CMSThemeFiles as CMSThemeFiles {
+    externalizeWith {
+        bytearray externalize();
+    }
+}
+
 class Site{
   String alternativeSite;
   String style;
@@ -59,19 +65,15 @@ class CMSTheme{
   String name;
   String description;
   String type;
-
+  CMSThemeFiles files;
 }
 
 class CMSTemplate{
+  String filePath;
   String name;
   String description;
   String type;
 }
-
-class CMSTemplateFile extends .org.fenixedu.bennu.io.domain.GenericFile {
-    protected String fullPath;
-}
-
 
 class ViewPost extends Component{}
 class ListPosts extends Component{}
@@ -119,16 +121,6 @@ relation CMSTemplateCMSTheme{
   }
 }
 
-relation CMSTemplateCMSTH{
-  CMSTemplateFile playsRole file{
-    multiplicity 1..1;
-  }
-
-  CMSTemplate playsRole template{
-    multiplicity 0..1;
-  }
-}
-
 relation CMSThemeUser{
   .org.fenixedu.bennu.core.domain.User playsRole createdBy{
     multiplicity 0..1;
@@ -165,16 +157,6 @@ relation CMSTemplatePage{
   }
 
   Page playsRole pages{
-    multiplicity *;
-  }
-}
-
-relation CMSThemeCMSTemplateFile{
-  protected CMSTheme playsRole theme{
-    multiplicity 1..1;
-  }
-
-  CMSTemplateFile playsRole files{
     multiplicity *;
   }
 }
