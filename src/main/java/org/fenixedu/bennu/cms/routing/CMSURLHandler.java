@@ -45,7 +45,7 @@ import com.mitchellbosecke.pebble.loader.ClasspathLoader;
 import com.mitchellbosecke.pebble.loader.StringLoader;
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
-final class CMSURLHandler implements SemanticURLHandler {
+public final class CMSURLHandler implements SemanticURLHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CMSURLHandler.class);
 
@@ -286,6 +286,10 @@ final class CMSURLHandler implements SemanticURLHandler {
         } else {
             res.sendError(errorCode, req.getRequestURI());
         }
+    }
+
+    public void invalidateEntry(String key) {
+        engine.getTemplateCache().invalidate(key);
     }
 
 }

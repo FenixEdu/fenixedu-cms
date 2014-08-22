@@ -23,7 +23,7 @@
 				<tr>
 					<td><code title="${i.contentType}">${i.fileName}</code></td>
 					<td>${cms.prettySize(i.fileSize)}</td>
-					<td>${i.lastModified.toString('dd-MM-YYYY hh:mm:ss')}</td>
+					<td>${i.lastModified.toString('dd-MM-YYYY HH:mm:ss')}</td>
 					<td>
 						<button class="btn btn-danger btn-sm" data-toggle="modal" data-file="${i.fullPath}" data-target="#fileDeleteModal">
 							<spring:message code="action.delete" />

@@ -7,14 +7,15 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.zip.ZipFile;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.CMSThemeFile;
 import org.fenixedu.bennu.cms.domain.CMSThemeLoader;
+import org.fenixedu.bennu.cms.routing.CMSURLHandler;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,10 +35,13 @@ import com.google.common.io.Files;
 @RequestMapping("/cms/themes")
 public class AdminThemes {
 
-    private Map<String, String> supportedContentTypes;
+    private final Map<String, String> supportedContentTypes;
+    private final CMSURLHandler urlHandler;
 
-    @PostConstruct
-    public void initMap() {
+    @Autowired
+    public AdminThemes(CMSURLHandler urlHandler) {
+        this.urlHandler = urlHandler;
+
         ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
 
         builder.put("text/plain", "plain_text");
@@ -128,6 +132,8 @@ public class AdminThemes {
         CMSThemeFile newFile = new CMSThemeFile(file.getFileName(), file.getFullPath(), content.getBytes(StandardCharsets.UTF_8));
 
         theme.changeFiles(theme.getFiles().with(newFile));
+
+        urlHandler.invalidateEntry(type + "/" + file.getFullPath());
     }
 
     @RequestMapping(value = "{type}/deleteFile", method = RequestMethod.POST)

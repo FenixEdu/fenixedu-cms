@@ -7,7 +7,11 @@ public class CMSBackend implements PortalBackend {
 
     public static final String BACKEND_KEY = "cms";
 
-    private final CMSURLHandler handler = new CMSURLHandler();
+    private final CMSURLHandler handler;
+
+    public CMSBackend(CMSURLHandler cmsUrlHandler) {
+        this.handler = cmsUrlHandler;
+    }
 
     @Override
     public String getBackendKey() {
