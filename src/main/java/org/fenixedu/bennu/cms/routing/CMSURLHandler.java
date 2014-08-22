@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.FilterChain;
@@ -37,6 +38,7 @@ import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.mitchellbosecke.pebble.PebbleEngine;
 import com.mitchellbosecke.pebble.error.LoaderException;
@@ -75,6 +77,8 @@ public final class CMSURLHandler implements SemanticURLHandler {
         if (CMSConfigurationManager.isInThemeDevelopmentMode()) {
             engine.setTemplateCache(null);
             logger.info("CMS Theme Development Mode enabled!");
+        } else {
+            engine.setTemplateCache(CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build());
         }
     }
 
