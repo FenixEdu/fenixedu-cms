@@ -373,5 +373,4 @@ public class Site extends Site_Base {
     public Set<Menu> getTopMenus() {
         return getMenusSet().stream().filter(m -> !m.getComponentsOfClass(TopMenuComponent.class).isEmpty()).collect(toSet());
     }
-
 }

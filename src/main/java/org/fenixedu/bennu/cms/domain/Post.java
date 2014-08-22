@@ -114,8 +114,9 @@ public class Post extends Post_Base {
      *          the group of people who can view this site
      */
     @Atomic
-    public void setCanViewGroup(Group group){
+    public void setCanViewGroup(Group group) {
         setViewGroup(group.toPersistentGroup());
+    }
 
     public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category, boolean active) {
         Post post = new Post();
