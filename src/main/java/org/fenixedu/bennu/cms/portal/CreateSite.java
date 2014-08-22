@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+
 import pt.ist.fenixframework.Atomic;
 
 @SpringFunctionality(app = AdminSites.class, title = "application.create-site.title")
@@ -44,12 +45,12 @@ public class CreateSite {
         site.setBennu(Bennu.getInstance());
         site.setDescription(description);
         site.setName(name);
+        site.setSlug(name.getContent());
         site.setPublished(published);
 
         if (!template.equals("null")) {
             Site.templateFor(template).makeIt(site);
         }
     }
-
 
 }

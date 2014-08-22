@@ -1,5 +1,11 @@
 package org.fenixedu.bennu.cms.domain;
 
+valueType org.fenixedu.bennu.cms.domain.CMSThemeFiles as CMSThemeFiles {
+    externalizeWith {
+        bytearray externalize();
+    }
+}
+
 class Site{
   String alternativeSite;
   String style;
@@ -27,6 +33,7 @@ class Category{
 class Menu{
   DateTime creationDate;
   LocalizedString name;
+  Boolean topMenu;
 }
 
 class MenuItem{
@@ -34,6 +41,7 @@ class MenuItem{
   Integer position;
   LocalizedString name;
   String url;
+  Boolean folder;
 }
 
 class Post{
@@ -57,17 +65,15 @@ class CMSTheme{
   String name;
   String description;
   String type;
-
+  CMSThemeFiles files;
 }
 
 class CMSTemplate{
+  String filePath;
   String name;
   String description;
   String type;
 }
-
-class CMSTemplateFile extends .org.fenixedu.bennu.io.domain.GenericFile{}
-
 
 class ViewPost extends Component{}
 class ListPosts extends Component{}
@@ -75,6 +81,8 @@ class ListCategoryPosts extends Component{}
 class ListOfCategories extends Component{}
 class StaticPost extends Component{}
 class MenuComponent extends Component{}
+class TopMenuComponent extends MenuComponent{}
+class SideMenuComponent extends MenuComponent{}
 
 relation ComponentUser{
   .org.fenixedu.bennu.core.domain.User playsRole createdBy{
@@ -110,16 +118,6 @@ relation CMSTemplateCMSTheme{
   }
   CMSTemplate playsRole templates{
     multiplicity *;
-  }
-}
-
-relation CMSTemplateCMSTH{
-  CMSTemplateFile playsRole file{
-    multiplicity 1..1;
-  }
-
-  CMSTemplate playsRole template{
-    multiplicity 0..1;
   }
 }
 
@@ -159,16 +157,6 @@ relation CMSTemplatePage{
   }
 
   Page playsRole pages{
-    multiplicity *;
-  }
-}
-
-relation CMSThemeCMSTemplateFile{
-  protected CMSTheme playsRole theme{
-    multiplicity 1..1;
-  }
-
-  CMSTemplateFile playsRole files{
     multiplicity *;
   }
 }
@@ -260,6 +248,11 @@ relation SitePage {
     Page playsRole pages {
         multiplicity *;
     }
+}
+
+relation SiteInitialPage {
+    Site playsRole;
+    Page playsRole initialPage;
 }
 
 relation CategoryPost{

@@ -4,7 +4,6 @@ import org.fenixedu.bennu.cms.domain.CMSTemplate;
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;

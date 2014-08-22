@@ -1,10 +1,12 @@
 package org.fenixedu.bennu.cms.domain;
 
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
+import static java.util.stream.Collectors.toSet;
+
 import java.util.HashMap;
-import java.util.Locale;
-import java.util.regex.Pattern;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.fenixedu.bennu.cms.routing.CMSBackend;
 import org.fenixedu.bennu.core.domain.Bennu;
@@ -15,6 +17,7 @@ import org.fenixedu.bennu.core.groups.UserGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
+import org.fenixedu.bennu.portal.domain.MenuItem;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
@@ -24,6 +27,10 @@ import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 public class Site extends Site_Base {
     /**
@@ -41,7 +48,7 @@ public class Site extends Site_Base {
      * @param c
      *            the class to be registered as a template.
      */
-    public static void register(String type, Class c) {
+    public static void register(String type, Class<?> c) {
         TEMPLATES.put(type, c);
     }
 
@@ -62,7 +69,6 @@ public class Site extends Site_Base {
         }
     }
 
-
     /**
      * 
      * @return mapping between the type and description for all the registered {@link SiteTemplate}.
@@ -70,8 +76,8 @@ public class Site extends Site_Base {
     public static HashMap<String, String> getTemplates() {
         HashMap<String, String> map = new HashMap<>();
 
-        for (Class c : TEMPLATES.values()) {
-            RegisterSiteTemplate registerSiteTemplate = (RegisterSiteTemplate) c.getAnnotation(RegisterSiteTemplate.class);
+        for (Class<?> c : TEMPLATES.values()) {
+            RegisterSiteTemplate registerSiteTemplate = c.getAnnotation(RegisterSiteTemplate.class);
             map.put(registerSiteTemplate.type(), registerSiteTemplate.name() + " - " + registerSiteTemplate.description());
         }
 
@@ -97,9 +103,11 @@ public class Site extends Site_Base {
     /**
      * returns the group of people who can view this site.
      *
-     * @return the access group for this site
+     * @return group
+     *         the access group for this site
+
      */
-    public Group getCanViewGroup(){
+    public Group getCanViewGroup() {
         return getViewGroup().toGroup();
     }
 
@@ -107,10 +115,10 @@ public class Site extends Site_Base {
      * sets the access group for this site
      *
      * @param group
-     *          the group of people who can view this site
+     *            the group of people who can view this site
      */
     @Atomic
-    public void setCanViewGroup(Group group){
+    public void setCanViewGroup(Group group) {
         setViewGroup(group.toPersistentGroup());
     }
 
@@ -163,7 +171,7 @@ public class Site extends Site_Base {
      *         the {@link Site} with the given slug if it exists, or null otherwise.
      */
     public static Site fromSlug(String slug) {
-        return Bennu.getInstance().getSitesSet().stream().filter(site -> site.getSlug().equals(slug)).findAny().orElse(null);
+        return Bennu.getInstance().getSitesSet().stream().filter(site -> slug.equals(site.getSlug())).findAny().orElse(null);
     }
 
     /**
@@ -175,7 +183,11 @@ public class Site extends Site_Base {
      *         the {@link Page} with the given slug if it exists on this site, or null otherwise.
      */
     public Page pageForSlug(String slug) {
-        return getPagesSet().stream().filter(page -> page.getSlug().equals(slug)).findAny().orElse(null);
+        if ((Strings.isNullOrEmpty(slug) || slug.startsWith("/")) && getInitialPage() != null) {
+            return getInitialPage();
+        } else {
+            return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElse(null);
+        }
     }
 
     /**
@@ -230,41 +242,32 @@ public class Site extends Site_Base {
         }
     }
 
-    // To Remove
-    @Deprecated
-    public static String slugify(String name) {
-        Pattern NONLATIN = Pattern.compile("[^\\w-]");
-        Pattern WHITESPACE = Pattern.compile("[\\s]");
-        name = name.trim();
-        name = Normalizer.normalize(name, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-        String nowhitespace = WHITESPACE.matcher(name).replaceAll("-");
-        String normalized = Normalizer.normalize(nowhitespace, Form.NFD);
-        String slug = NONLATIN.matcher(normalized).replaceAll("");
-        name = slug.toLowerCase(Locale.ENGLISH);
-        return name;
-    }
-
-    @Override
-    public void setName(LocalizedString name) {
-        LocalizedString prevName = getName();
-        super.setName(name);
-
-        if (prevName == null) {
-            setSlug(slugify(name.getContent()));
-        }
-    }
-
     @Atomic
-    private void deleteMenuFunctionality(){
+    private void deleteMenuFunctionality() {
         MenuFunctionality mf = this.getFunctionality();
         this.setFunctionality(null);
         mf.delete();
     }
 
+    /**
+     * Updates the site's slug and it's respective MenuFunctionality.
+     * It should be used after setting the site's description and name.
+     * 
+     * @param slug
+     *            the slug wanted. It must be the only site with this slug or else a random slug is generated.
+     */
     @Override
-    // TODO: either prevent setting duplicated slugs or attach postfix.
     public void setSlug(String slug) {
+        Preconditions.checkNotNull(this.getDescription());
+        Preconditions.checkNotNull(this.getName());
+
+        while (!isValidSlug(slug)) {
+            String randomSlug = UUID.randomUUID().toString().substring(0, 3);
+            slug = Joiner.on("-").join(slug, randomSlug);
+        }
+
         super.setSlug(slug);
+
         if (this.getFunctionality() != null) {
             deleteMenuFunctionality();
         }
@@ -319,7 +322,7 @@ public class Site extends Site_Base {
         }
         return null;
     }
-    
+
     /**
      * @return the {@link ListCategoryPosts} of this {@link Site} if it is defined, or null otherwise.
      */
@@ -333,7 +336,7 @@ public class Site extends Site_Base {
         }
         return null;
     }
-    
+
     /**
      * @return the static directory of this {@link Site}.
      */
@@ -351,4 +354,24 @@ public class Site extends Site_Base {
     public DomainObject getObject() {
         return null;
     }
+
+    public static boolean isValidSlug(String slug) {
+        Stream<MenuItem> menuItems = Bennu.getInstance().getConfiguration().getMenu().getOrderedChild().stream();
+        Optional<String> existsEntry = menuItems.map(i -> i.getPath()).filter(path -> path.equals(slug)).findFirst();
+        return !Strings.isNullOrEmpty(slug) && fromSlug(slug) == null && !existsEntry.isPresent();
+    }
+
+    @Override
+    public Page getInitialPage() {
+        return Optional.ofNullable(super.getInitialPage()).orElseGet(() -> getPagesSet().stream().findFirst().orElse(null));
+    }
+
+    public Set<Menu> getSideMenus() {
+        return getMenusSet().stream().filter(m -> !m.getComponentsOfClass(SideMenuComponent.class).isEmpty()).collect(toSet());
+    }
+
+    public Set<Menu> getTopMenus() {
+        return getMenusSet().stream().filter(m -> !m.getComponentsOfClass(TopMenuComponent.class).isEmpty()).collect(toSet());
+    }
+
 }

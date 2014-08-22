@@ -27,17 +27,18 @@ public class AdminComponents {
     @RequestMapping(value = "{slugSite}/{slugPage}/createComponent", method = RequestMethod.POST)
     public RedirectView createComponent(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "slugPage") String slugPage, @RequestParam String componentType,
-            @RequestParam(required = false) String menuOid, @RequestParam(required = false) String catSlug, @RequestParam(required = false) String postSlug) {
+            @RequestParam(required = false) String menuOid, @RequestParam(required = false) String catSlug, @RequestParam(
+                    required = false) String postSlug) {
         Site s = Site.fromSlug(slugSite);
         Page p = s.pageForSlug(slugPage);
 
-        createComponent(componentType, menuOid, postSlug,catSlug, s, p);
+        createComponent(componentType, menuOid, postSlug, catSlug, s, p);
 
         return new RedirectView("/cms/pages/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private void createComponent(String componentType, String menuOid, String postSlug,String catSlug, Site s, Page p) {
+    private void createComponent(String componentType, String menuOid, String postSlug, String catSlug, Site s, Page p) {
         if (componentType.equals("viewPost")) {
             p.addComponents(new ViewPost());
         } else if (componentType.equals("listPost")) {
@@ -49,9 +50,8 @@ public class AdminComponents {
             ListCategoryPosts lcp = new ListCategoryPosts(cat);
             p.addComponents(lcp);
         } else if (componentType.equals("menu")) {
-            MenuComponent mc = new MenuComponent();
-            mc.setMenu(s.menuForOid(menuOid));
-            p.addComponents(mc);
+            @SuppressWarnings("unused")
+            MenuComponent mc = new MenuComponent(s.menuForOid(menuOid), p);
         } else if (componentType.equals("staticPost")) {
             StaticPost mc = new StaticPost();
             mc.setPost(s.postForSlug(postSlug));
@@ -61,9 +61,8 @@ public class AdminComponents {
 
     @RequestMapping(value = "{slugSite}/{slugPage}/deleteComponent/{oid}", method = RequestMethod.POST)
     public RedirectView deleteComponent(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
-            value = "slugPage") String slugPage, @PathVariable(
-                    value = "oid") String oid) {
-        
+            value = "slugPage") String slugPage, @PathVariable(value = "oid") String oid) {
+
         Site s = Site.fromSlug(slugSite);
         Page p = s.pageForSlug(slugPage);
         p.componentForOid(oid).delete();

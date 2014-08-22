@@ -2,6 +2,7 @@ package org.fenixedu.bennu.cms.domain;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
@@ -18,7 +19,7 @@ public class Category extends Category_Base {
      */
     public Category() {
         super();
-        if(Authenticate.getUser() == null){
+        if (Authenticate.getUser() == null) {
             throw new RuntimeException("Needs Login");
         }
         this.setCreatedBy(Authenticate.getUser());
@@ -31,17 +32,17 @@ public class Category extends Category_Base {
         super.setName(name);
 
         if (prevName == null) {
-            setSlug(Site.slugify(name.getContent()));
+            setSlug(StringNormalizer.slugify(name.getContent()));
         }
     }
-    
-    public String getAddress(){
+
+    public String getAddress() {
         return this.getSite().getViewCategoryPage().getAddress() + "?c=" + this.getSlug();
     }
-   
+
     @Atomic
     public void delete() {
-        for(Component c : this.getComponentsSet()){
+        for (Component c : this.getComponentsSet()) {
             c.delete();
         }
         this.setCreatedBy(null);

@@ -21,11 +21,11 @@ public class ViewPost extends ViewPost_Base {
     @Override
     public void handle(Page page, HttpServletRequest req, TemplateContext local, TemplateContext global) {
         String post = req.getParameter("q");
-        if (post != null){
+        if (post != null) {
             Post p = page.getSite().postForSlug(post);
             local.put("post", p);
             global.put("post", p);
-        }else{
+        } else {
             throw new ResourceNotFoundException();
         }
     }

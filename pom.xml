@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.fenixedu</groupId>
         <artifactId>fenix-framework-project</artifactId>
-        <version>2.0.1</version>
+        <version>2.1.0</version>
     </parent>
 
     <artifactId>bennu-cms</artifactId>
@@ -27,8 +27,9 @@
                         <phase>prepare-package</phase>
                         <configuration>
                             <target>
-                                <zip destfile="${project.build.directory}/classes/META-INF/resources/WEB-INF/cms-default-theme.zip"
-                                     basedir="${project.basedir}/src/main/webapp/WEB-INF/cms-default-theme"></zip>
+                                <zip
+                                    destfile="${project.build.directory}/classes/META-INF/resources/WEB-INF/cms-default-theme.zip"
+                                    basedir="${project.basedir}/src/main/webapp/WEB-INF/cms-default-theme"></zip>
                             </target>
                         </configuration>
                         <goals>
@@ -89,11 +90,6 @@
         </dependency>
         <dependency>
             <groupId>org.fenixedu</groupId>
-            <artifactId>bennu-io-ui</artifactId>
-            <version>${version.org.fenixedu.bennu}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.fenixedu</groupId>
             <artifactId>bennu-portal</artifactId>
             <version>${version.org.fenixedu.bennu}</version>
         </dependency>
@@ -103,11 +99,6 @@
             <version>${version.org.fenixedu.bennu.spring}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.slugify</groupId>
-            <artifactId>slugify</artifactId>
-            <version>2.1.2</version>
-        </dependency>
-        <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time-jsptags</artifactId>
             <version>1.1.1</version>
@@ -115,7 +106,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>16.0.1</version>
+            <version>17.0</version>
         </dependency>
         <dependency>
             <groupId>com.mitchellbosecke</groupId>

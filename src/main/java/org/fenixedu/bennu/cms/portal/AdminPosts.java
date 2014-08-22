@@ -3,7 +3,6 @@ package org.fenixedu.bennu.cms.portal;
 import org.fenixedu.bennu.cms.domain.Post;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +13,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import pt.ist.fenixframework.Atomic;
-
-import com.google.common.base.Strings;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/posts")

@@ -8,6 +8,7 @@ import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
+import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
@@ -18,8 +19,8 @@ import pt.ist.fenixframework.Atomic;
  */
 public class Post extends Post_Base {
 
-    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = (o1, o2) -> o1.getCreationDate().compareTo(
-            o2.getCreationDate());
+    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = (o1, o2) -> o2.getCreationDate().compareTo(
+            o1.getCreationDate());
 
     /**
      * The logged {@link User} creates a new Post.
@@ -44,7 +45,7 @@ public class Post extends Post_Base {
         super.setName(name);
 
         if (prevName == null) {
-            setSlug(Site.slugify(name.getContent()));
+            setSlug(StringNormalizer.slugify(name.getContent()));
         }
     }
 
@@ -96,7 +97,6 @@ public class Post extends Post_Base {
         return getActive() && inPublicationPeriod;
     }
 
-
     /**
      * returns the group of people who can view this site.
      *
@@ -116,5 +116,16 @@ public class Post extends Post_Base {
     @Atomic
     public void setCanViewGroup(Group group){
         setViewGroup(group.toPersistentGroup());
+
+    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category, boolean active) {
+        Post post = new Post();
+        post.setSite(site);
+        post.setName(name);
+        post.setBody(body);
+        post.setCreationDate(new DateTime());
+        post.addCategories(category);
+        post.setActive(active);
+        return post;
+
     }
 }

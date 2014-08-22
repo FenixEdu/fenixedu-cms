@@ -8,34 +8,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.WordUtils;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
-import com.mitchellbosecke.pebble.error.ParserException;
-import com.mitchellbosecke.pebble.extension.Extension;
+import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
-import com.mitchellbosecke.pebble.extension.NodeVisitor;
 import com.mitchellbosecke.pebble.extension.Test;
-import com.mitchellbosecke.pebble.lexer.Token;
-import com.mitchellbosecke.pebble.node.RenderableNode;
-import com.mitchellbosecke.pebble.operator.BinaryOperator;
-import com.mitchellbosecke.pebble.operator.UnaryOperator;
-import com.mitchellbosecke.pebble.tokenParser.AbstractTokenParser;
-import com.mitchellbosecke.pebble.tokenParser.TokenParser;
 
-public class CMSExtensions implements Extension {
+public class CMSExtensions extends AbstractExtension {
     public class LengthFilter implements Filter {
         @Override
         public List<String> getArgumentNames() {
@@ -48,7 +39,7 @@ public class CMSExtensions implements Extension {
                 if (input.getClass().isArray()) {
                     return Array.getLength(input);
                 } else if (input instanceof Collection) {
-                    return ((Collection) input).size();
+                    return ((Collection<?>) input).size();
                 }
             }
             return 0;
@@ -64,7 +55,7 @@ public class CMSExtensions implements Extension {
         @Override
         public Object execute(Map<String, Object> args) {
             if (args.get("map") != null && args.get("map") instanceof Map) {
-                return ((Map) args.get("map")).entrySet();
+                return ((Map<?, ?>) args.get("map")).entrySet();
             }
             return Sets.newLinkedHashSet();
         }
@@ -101,7 +92,7 @@ public class CMSExtensions implements Extension {
 
         @Override
         public Object apply(Object input, Map<String, Object> args) {
-            return input instanceof Iterable ? Iterables.getFirst((Iterable) input, null) : null;
+            return input instanceof Iterable ? Iterables.getFirst((Iterable<?>) input, null) : null;
         }
 
     }
@@ -115,7 +106,7 @@ public class CMSExtensions implements Extension {
 
         @Override
         public Object apply(Object input, Map<String, Object> args) {
-            return input instanceof Iterable ? Iterables.skip((Iterable) input, 1) : null;
+            return input instanceof Iterable ? Iterables.skip((Iterable<?>) input, 1) : null;
         }
 
     }
@@ -130,10 +121,28 @@ public class CMSExtensions implements Extension {
         @Override
         public Object apply(Object input, Map<String, Object> args) {
             if (input != null && input instanceof String) {
-                return WordUtils.capitalizeFully((String) input);
+                return capitalizeFully((String) input);
             } else {
                 return "";
             }
+        }
+
+        private String capitalizeFully(String str) {
+            char[] chars = str.toLowerCase().toCharArray();
+            StringBuffer buffer = new StringBuffer(chars.length);
+            boolean capitalizeNext = true;
+            for (char ch : chars) {
+                if (Character.isWhitespace(ch)) {
+                    buffer.append(ch);
+                    capitalizeNext = true;
+                } else if (capitalizeNext) {
+                    buffer.append(Character.toTitleCase(ch));
+                    capitalizeNext = false;
+                } else {
+                    buffer.append(ch);
+                }
+            }
+            return buffer.toString();
         }
     }
 
@@ -148,7 +157,7 @@ public class CMSExtensions implements Extension {
         public Object apply(Object input, Map<String, Object> args) {
             List<Object> list = new ArrayList<Object>();
             if (input != null && input instanceof List) {
-                list.addAll((List<Object>) input);
+                list.addAll((List<?>) input);
                 Collections.reverse(list);
             }
             return list;
@@ -171,7 +180,7 @@ public class CMSExtensions implements Extension {
         }
 
         public String[] arguments(Map<String, Object> args) {
-            List<String> values = Lists.newArrayList();
+            List<String> values = new ArrayList<>();
             for (String variableArg : variableArgs) {
                 if (args.containsKey(variableArg) && args.get(variableArg) instanceof String) {
                     values.add((String) args.get(variableArg));
@@ -181,17 +190,20 @@ public class CMSExtensions implements Extension {
         }
     }
 
-    public static class RecursiveTreeToken extends AbstractTokenParser {
+    private static class MapValueFunction implements Function {
 
         @Override
-        public String getTag() {
-            return "recursetree";
+        public List<String> getArgumentNames() {
+            return ImmutableList.of("map", "key");
         }
 
         @Override
-        public RenderableNode parse(Token token) throws ParserException {
-
-            return null;
+        public Object execute(Map<String, Object> args) {
+            Object mapObject = args.get("map");
+            Object keyObject = args.get("key");
+            Preconditions.checkArgument(mapObject != null && keyObject != null, "Please specify non empty 'map' and 'key'");
+            Preconditions.checkArgument(mapObject instanceof Map, "The first argument must be of type " + Map.class.getName());
+            return ((Map<?, ?>) mapObject).get(keyObject);
         }
 
     }
@@ -232,7 +244,7 @@ public class CMSExtensions implements Extension {
 
         @Override
         public boolean apply(Object input, Map<String, Object> args) {
-            return ((Collection) args.get("collection")).contains(input);
+            return ((Collection<?>) args.get("collection")).contains(input);
         }
 
     }
@@ -250,37 +262,8 @@ public class CMSExtensions implements Extension {
         functions.put("i18n", new I18NFunction());
         functions.put("range", new RangeFunction());
         functions.put("entries", new MapEntriesFunction());
+        functions.put("getValue", new MapValueFunction());
         return functions;
-    }
-
-    @Override
-    public List<TokenParser> getTokenParsers() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<BinaryOperator> getBinaryOperators() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<UnaryOperator> getUnaryOperators() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> getGlobalVariables() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<NodeVisitor> getNodeVisitors() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

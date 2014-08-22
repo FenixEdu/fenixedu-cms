@@ -1,11 +1,16 @@
 package org.fenixedu.bennu.cms.domain;
 
-import java.util.ArrayList;
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
+import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.commons.i18n.LocalizedString;
+import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
@@ -18,50 +23,42 @@ import com.google.common.collect.Lists;
 @ComponentType(type = "menu", name = "Menu", description = "Attaches a Menu to a Page")
 public class MenuComponent extends MenuComponent_Base {
 
+    public MenuComponent() {
+        setCreatedBy(Authenticate.getUser());
+        setCreationDate(new DateTime());
+    }
+
+    public MenuComponent(Menu menu, Page page) {
+        this();
+        init(menu, page);
+    }
+
+    public void init(Menu menu, Page page) {
+        setMenu(menu);
+        setPage(page);
+    }
+
     @Override
-    public void handle(Page page, HttpServletRequest req, TemplateContext local, TemplateContext global) {
-        ArrayList<Menu> menus = (ArrayList<Menu>) global.get("menus");
-
-        if (menus == null) {
-            menus = new ArrayList<>();
+    public void handle(Page currentPage, HttpServletRequest req, TemplateContext local, TemplateContext global) {
+        if (!getMenu().getChildrenSorted().isEmpty()) {
+            handleMenu(getMenu(), "menus", currentPage, global);
+            local.put("menu", menuWrapper(getMenu(), currentPage));
         }
-
-        Menu menu = getMenu();
-        menus.add(menu);
-
-        local.put("menu", menu);
-        global.put("menus", menus);
-        global.put("menuItemsOpen", open(menus, page));
     }
 
-    private List<MenuItem> open(List<Menu> menus, Page currentPage) {
-        List<MenuItem> items = Lists.newArrayList();
-        for (Menu menu : menus) {
-            items.addAll(openItems(menu.getChildrenSorted(), currentPage));
-        }
-        return items;
+    @SuppressWarnings("unchecked")
+    public void handleMenu(Menu menu, String menuType, Page currentPage, TemplateContext global) {
+        List<MenuWrapper> menus = (List<MenuWrapper>) global.getOrDefault(menuType, Lists.newArrayList());
+        menus.add(menuWrapper(menu, currentPage));
+        global.put(menuType, menus);
     }
 
-    private List<MenuItem> openItems(List<MenuItem> items, Page currentPage) {
-        for (MenuItem child : items) {
-            List<MenuItem> openItems = openItems(child, currentPage);
-            if (!openItems.isEmpty()) {
-                return openItems;
-            }
-        }
-        return Lists.newArrayList();
+    public MenuWrapper menuWrapper(Menu menu, Page currentPage) {
+        return new MenuWrapper(menu.getName(), menuItemWrappers(menu.getChildrenSorted(), currentPage));
     }
 
-    private List<MenuItem> openItems(MenuItem item, Page currentPage) {
-        if (item.getPage().equals(currentPage)) {
-            return Lists.newArrayList(item);
-        } else {
-            List<MenuItem> openItems = openItems(item.getChildrenSorted(), currentPage);
-            if (!openItems.isEmpty()) {
-                openItems.add(item);
-            }
-            return openItems;
-        }
+    private static List<MenuItemWrapper> menuItemWrappers(List<MenuItem> menuItems, Page currentPage) {
+        return menuItems.stream().map(menuItem -> new MenuItemWrapper(menuItem, currentPage)).collect(toList());
     }
 
     @Override
@@ -75,5 +72,45 @@ public class MenuComponent extends MenuComponent_Base {
     public String getName() {
         String name = super.getName();
         return name + " (" + getMenu().getName().getContent() + ")";
+    }
+
+    public static class MenuItemWrapper {
+        public LocalizedString name;
+        public Boolean isFolder;
+        public String address;
+        public Boolean isActive;
+        public Boolean isOpen;
+        public List<MenuItemWrapper> children;
+
+        public MenuItemWrapper(MenuItem menuItem, Page currentPage) {
+            this.name = menuItem.getName();
+            this.isFolder = Optional.ofNullable(menuItem.getFolder()).orElse(false);
+            this.address = menuItem.getAddress();
+            this.isActive = isActive(menuItem, currentPage);
+            this.children = menuItemWrappers(menuItem.getChildrenSorted(), currentPage);
+            this.isOpen = isOpen(menuItem, currentPage);
+        }
+
+        private boolean isOpen(List<MenuItem> children, Page currentPage) {
+            return children.stream().filter(child -> isOpen(child, currentPage)).findAny().isPresent();
+        }
+
+        private boolean isOpen(MenuItem menuItem, Page currentPage) {
+            return isActive(menuItem, currentPage) || isOpen(menuItem.getChildrenSorted(), currentPage);
+        }
+
+        private boolean isActive(MenuItem menuItem, Page currentPage) {
+            return menuItem.getPage() != null && menuItem.getPage().equals(currentPage);
+        }
+    }
+
+    public static class MenuWrapper {
+        public LocalizedString name;
+        public List<MenuItemWrapper> children;
+
+        public MenuWrapper(LocalizedString name, List<MenuItemWrapper> children) {
+            this.name = name;
+            this.children = children;
+        }
     }
 }

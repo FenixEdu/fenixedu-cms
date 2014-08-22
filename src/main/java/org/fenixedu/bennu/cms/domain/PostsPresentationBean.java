@@ -47,8 +47,8 @@ public class PostsPresentationBean {
     }
 
     public List<Post> getVisiblePosts() {
-        return allPosts.stream().filter(p-> p.getComponentSet().isEmpty() && p.isVisible()).sorted(Post.CREATION_DATE_COMPARATOR)
-                .collect(Collectors.toList());
+        return allPosts.stream().filter(p -> p.getComponentSet().isEmpty() && p.isVisible())
+                .sorted(Post.CREATION_DATE_COMPARATOR).collect(Collectors.toList());
     }
 
     public int currentPage(String currentPageString) {

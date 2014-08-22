@@ -4,7 +4,6 @@ import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
@@ -43,6 +41,7 @@ public class AdminSites {
             @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug,
             @RequestParam(required = false) Boolean published, RedirectAttributes redirectAttributes,
             @RequestParam String viewGroup, @RequestParam String postGroup, @RequestParam String adminGroup) {
+
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/sites/" + slug + "/edit", true);

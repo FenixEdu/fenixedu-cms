@@ -26,7 +26,7 @@ public abstract class Component extends Component_Base {
      * @param c
      *            the class being registered as a component.
      */
-    public static void register(String type, Class c) {
+    public static void register(String type, Class<?> c) {
         COMPONENTS.put(type, c);
     }
 
@@ -38,7 +38,7 @@ public abstract class Component extends Component_Base {
      * @return
      *         the class of the component with the given type.
      */
-    public static Class forType(String type) {
+    public static Class<?> forType(String type) {
         return COMPONENTS.get(type);
     }
 

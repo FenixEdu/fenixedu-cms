@@ -27,7 +27,14 @@
       <c:forEach var="i" items="${sites}">
         <tr>
           <td>
-            <h5>${i.getName().getContent()}</h5>
+            <c:choose>
+              <c:when test="${i.getInitialPage()!=null}">
+                <h5><a href="${i.getInitialPage().getAddress()}">${i.getName().getContent()}</a></h5>
+              </c:when>
+              <c:otherwise>
+                <h5>${i.getName().getContent()}</h5>
+              </c:otherwise>
+            </c:choose>
             <div><small>Url: <code>${i.slug}</code></small></div>
             <div><small>${i.getDescription().getContent()}</small></div>
           </td>
@@ -45,10 +52,10 @@
 
               <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
 
-     	      <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteSiteForm').submit();"><spring:message code="action.delete" /></a>
+       	      <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteSiteForm').submit();"><spring:message code="action.delete" /></a>
+
               <form id="deleteSiteForm" action="${pageContext.request.contextPath}/cms/sites/${i.slug}/delete"" method="POST"></form>
             </div>
-
           </td>
         </tr>
       </c:forEach>

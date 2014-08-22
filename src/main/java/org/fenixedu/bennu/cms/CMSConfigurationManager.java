@@ -1,8 +1,11 @@
 package org.fenixedu.bennu.cms;
 
+import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.commons.configuration.ConfigurationInvocationHandler;
 import org.fenixedu.commons.configuration.ConfigurationManager;
 import org.fenixedu.commons.configuration.ConfigurationProperty;
+
+import com.google.common.base.Strings;
 
 public class CMSConfigurationManager {
     @ConfigurationManager(description = "General CMS Configuration")
@@ -15,5 +18,10 @@ public class CMSConfigurationManager {
 
     public static ConfigurationProperties getConfiguration() {
         return ConfigurationInvocationHandler.getConfiguration(ConfigurationProperties.class);
+    }
+
+    public static boolean isInThemeDevelopmentMode() {
+        return CoreConfiguration.getConfiguration().developmentMode()
+                && !Strings.isNullOrEmpty(getConfiguration().themeDevelopmentDirectory());
     }
 }
