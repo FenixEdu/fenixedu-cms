@@ -102,39 +102,36 @@ public class CMSThemeLoader {
 
     @Atomic(mode = TxMode.WRITE)
     private static CMSTheme getOrCreateTheme(CMSThemeFiles files, JsonObject themeDef) {
-        try {
-            String themeType = themeDef.get("type").getAsString();
-
-            CMSTheme theme = Optional.ofNullable(CMSTheme.forType(themeType)).orElseGet(() -> new CMSTheme());
-            theme.setDescription(themeDef.get("description").getAsString());
-            theme.setName(themeDef.get("name").getAsString());
-            theme.setBennu(Bennu.getInstance());
-            theme.setType(themeType);
-
-            HashSet<CMSTemplate> refused = Sets.newHashSet(theme.getTemplatesSet());
-
-            loadExtends(themeDef, theme);
-            loadPageTemplates(themeDef, theme, refused, files);
-
-            for (CMSTemplate t : refused) {
-                if (t.getPagesSet().size() != 0) {
-                    throw new RuntimeException("Cannot replace theme, '" + t.getType()
-                            + "' is being used in some pages but is not included in new theme.");
-                } else {
-                    t.delete();
-                }
-            }
-
-            theme.setFiles(files);
-            if (Bennu.getInstance().getCMSThemesSet().size() == 1) {
-                Bennu.getInstance().setDefaultCMSTheme(theme);
-            }
+        String themeType = themeDef.get("type").getAsString();
+        CMSTheme theme = CMSTheme.forType(themeType);
+        if (theme != null) {
             return theme;
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            e.printStackTrace();
-            return null;
         }
+        theme = new CMSTheme();
+        theme.setDescription(themeDef.get("description").getAsString());
+        theme.setName(themeDef.get("name").getAsString());
+        theme.setBennu(Bennu.getInstance());
+        theme.setType(themeType);
+
+        HashSet<CMSTemplate> refused = Sets.newHashSet(theme.getTemplatesSet());
+
+        loadExtends(themeDef, theme);
+        loadPageTemplates(themeDef, theme, refused, files);
+
+        for (CMSTemplate t : refused) {
+            if (t.getPagesSet().size() != 0) {
+                throw new RuntimeException("Cannot replace theme, '" + t.getType()
+                        + "' is being used in some pages but is not included in new theme.");
+            } else {
+                t.delete();
+            }
+        }
+
+        theme.setFiles(files);
+        if (Bennu.getInstance().getCMSThemesSet().size() == 1) {
+            Bennu.getInstance().setDefaultCMSTheme(theme);
+        }
+        return theme;
     }
 
     private static void loadExtends(JsonObject themeDef, CMSTheme theme) {

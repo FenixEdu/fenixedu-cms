@@ -13,6 +13,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.hash.Hashing;
 import com.google.common.io.ByteStreams;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -21,13 +22,24 @@ import com.google.gson.JsonParser;
 public class CMSThemeFiles {
 
     private final Map<String, CMSThemeFile> files;
+    private final String checksum;
 
     public CMSThemeFiles(Map<String, CMSThemeFile> files) {
         this.files = ImmutableMap.copyOf(files);
+        this.checksum = computeChecksum();
     }
 
     public CMSThemeFiles(byte[] bytes) {
         this.files = getMapFromStream(bytes);
+        this.checksum = computeChecksum();
+    }
+
+    private String computeChecksum() {
+        StringBuilder builder = new StringBuilder();
+        this.files.values().forEach(file -> {
+            builder.append(Hashing.sha256().hashBytes(file.getContent()).toString());
+        });
+        return Hashing.sha256().hashString(builder, StandardCharsets.UTF_8).toString();
     }
 
     public CMSThemeFile getFileForPath(String path) {
@@ -89,5 +101,9 @@ public class CMSThemeFiles {
 
     public long getTotalSize() {
         return files.values().stream().mapToLong(CMSThemeFile::getFileSize).sum();
+    }
+
+    public boolean checksumMatches(CMSThemeFiles files) {
+        return this.checksum.equals(files.checksum);
     }
 }
