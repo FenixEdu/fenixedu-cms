@@ -70,9 +70,11 @@
 
     <div class="row tab-pane" id="templates">
         <div class="col-sm-12">
+            <c:if test="${theme.files.files.size() > 0}">
             <p>
-                <button class="btn btn-sm btn-default">Create New Template</button>
+                <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#templateNewModal">Create New Template</button>
             </p>
+            </c:if>
             <c:choose>
                 <c:when test="${theme.templatesSet.size() > 0}">
                     <table class="table table-striped table-bordered">
@@ -97,7 +99,7 @@
                                 <td><code>${template.type}</code></td>
                                 <td><code>${template.filePath}</code></td>
                                 <td>
-                                    <button class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-trash"></span></button>
+                                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#templateDeleteModal" data-file="${template.type}"><span class="glyphicon glyphicon-trash"></span></button>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -126,6 +128,28 @@
             <div class="modal-footer">
                 <form action="deleteFile" id="fileDeleteForm" method="POST">
                     <input type="hidden" name="path"/>
+                    <button type="submit" class="btn btn-danger"><spring:message code="label.yes"/></button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="label.no"/></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="templateDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4><spring:message code="action.deleteTemplate"/></h4>
+            </div>
+            <div class="modal-body">
+                <spring:message code="theme.view.label.delete.confirmation"/> <code id="templateType"></code>?
+            </div>
+            <div class="modal-footer">
+                <form action="deleteTemplate" id="templateDeleteForm" method="POST">
+                    <input type="hidden" name="type"/>
                     <button type="submit" class="btn btn-danger"><spring:message code="label.yes"/></button>
                     <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="label.no"/></button>
                 </form>
@@ -166,7 +190,7 @@
 </div>
 
 <div class="modal fade" id="templateNewModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <form action="newFile" class="form-horizontal" method="post">
+    <form action="newTemplate" class="form-horizontal" method="post">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -177,16 +201,39 @@
                 <div class="modal-body">
 
                     <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                                code="theme.view.fileName"/>:</label>
-
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.type"/>:</label>
                         <div class="col-sm-10">
-                            <input type="text" name="filename" class="form-control">
-
-                            <p class="help-block">Use the full path, with directories, here.</p>
+                            <input type="text" name="type" class="form-control" placeholder="Type">
                         </div>
-
                     </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.name"/>:</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="name" class="form-control" placeholder="Name">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.description"/>:</label>
+                        <div class="col-sm-10">
+                            <textarea name="description" class="form-control" placeholder="Description">
+
+                            </textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.file"/>:</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" name="filename" id="">
+                                <c:forEach var="i" items="${theme.files.files}">
+                                    <option value="${i.fullPath}">${i.fullPath}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary"><spring:message code="label.make"/></button>
@@ -237,8 +284,22 @@
 
 <script>
     $("button[data-target='#fileDeleteModal']").on('click', function (event) {
-        var fileName = $(event.target).attr('data-file');
+        var fileName = $(event.target).closest("[data-file]").attr('data-file');
         $('#fileName').html(fileName);
         $('#fileDeleteForm')[0].path.value = fileName;
     });
+</script>
+
+<script>
+    $("button[data-target='#templateDeleteModal']").on('click', function (event) {
+        var fileName = $(event.target).closest("[data-file]").attr('data-file');
+        $('#templateType').html(fileName);
+        $('#templateDeleteForm')[0].type.value = fileName;
+    });
+</script>
+
+<script>
+    if(window.location.hash === "#templates"){
+        $("[href='#templates']").tab('show')
+    }
 </script>
