@@ -145,6 +145,7 @@ public class AdminThemes {
 
     @RequestMapping(value = "new", method = RequestMethod.GET)
     public String newTheme(Model model) {
+        model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
         return "newTheme";
     }
 
