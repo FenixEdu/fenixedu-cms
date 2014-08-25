@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -34,7 +35,7 @@ public class Menu extends Menu_Base {
     public Menu() {
         super();
         if (Authenticate.getUser() == null) {
-            throw new RuntimeException("Needs Login");
+            throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());

@@ -26,22 +26,6 @@
     </div>
 
     <div class="form-group">
-        <label for="inputEmail3" class="col-sm-2 control-label">Quando</label>
-
-        <div class="col-sm-10">
-            <input bennu-datetime type='text'/>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.create.label.published"/></label>
-
-        <div class="col-sm-10">
-            <input name="published" type="checkbox">
-        </div>
-    </div>
-
-    <div class="form-group">
         <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.create.label.useTemplate"/></label>
 
         <div class="col-sm-10">

@@ -3,6 +3,7 @@ package org.fenixedu.bennu.cms.portal;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
+import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.Atomic;
 
 @SpringFunctionality(app = AdminSites.class, title = "application.create-site.title")
@@ -45,7 +45,7 @@ public class CreateSite {
         site.setBennu(Bennu.getInstance());
         site.setDescription(description);
         site.setName(name);
-        site.setSlug(name.getContent());
+        site.setSlug(StringNormalizer.slugify(name.getContent()));
         site.setPublished(published);
 
         if (!template.equals("null")) {

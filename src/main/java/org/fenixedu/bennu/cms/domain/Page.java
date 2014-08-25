@@ -2,6 +2,7 @@ package org.fenixedu.bennu.cms.domain;
 
 import java.util.UUID;
 
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
@@ -31,7 +32,7 @@ public class Page extends Page_Base {
         super();
         this.setCreationDate(new DateTime());
         if (Authenticate.getUser() == null) {
-            throw new RuntimeException("Needs Login");
+            throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCanViewGroup(AnyoneGroup.get());

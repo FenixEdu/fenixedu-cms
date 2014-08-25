@@ -3,6 +3,7 @@ package org.fenixedu.bennu.cms.portal;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.zip.ZipFile;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.CMSThemeFile;
+import org.fenixedu.bennu.cms.domain.CMSThemeFiles;
 import org.fenixedu.bennu.cms.domain.CMSThemeLoader;
 import org.fenixedu.bennu.cms.routing.CMSURLHandler;
 import org.fenixedu.bennu.core.domain.Bennu;
@@ -30,6 +32,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
+import pt.ist.fenixframework.Atomic;
 
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-themes.title")
 @RequestMapping("/cms/themes")
@@ -140,6 +143,47 @@ public class AdminThemes {
     public RedirectView deleteFile(@PathVariable(value = "type") String type, @RequestParam String path) {
         CMSTheme theme = CMSTheme.forType(type);
         theme.changeFiles(theme.getFiles().without(path));
+        return new RedirectView("/cms/themes/" + type + "/see", true);
+    }
+
+    @RequestMapping(value = "new", method = RequestMethod.GET)
+    public String newTheme(Model model) {
+        return "newTheme";
+    }
+
+    @RequestMapping(value = "new", method = RequestMethod.POST)
+    public RedirectView newTheme(Model model, @RequestParam String type, @RequestParam String name,
+            @RequestParam String description) {
+        newTheme(type, name, description);
+        return new RedirectView("/cms/themes/" + type + "/see", true);
+    }
+
+    @Atomic
+    public void newTheme(String type, String name, String description){
+        CMSTheme theme = new CMSTheme();
+        theme.setType(type);
+        theme.setName(name);
+        theme.setDescription(description);
+        theme.setBennu(Bennu.getInstance());
+        theme.changeFiles(new CMSThemeFiles(new HashMap<String, CMSThemeFile>()));
+    }
+
+    @RequestMapping(value = "{type}/newFile", method = RequestMethod.POST)
+    public RedirectView newFile(@PathVariable(value = "type") String type, @RequestParam String filename){
+        CMSTheme theme = CMSTheme.forType(type);
+        String[] r = filename.split("/");
+        CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename, new byte[0]);
+        theme.changeFiles(theme.getFiles().with(newFile));
+        return new RedirectView("/cms/themes/" + type + "/editFile/" + filename, true);
+    }
+
+    @RequestMapping(value = "{type}/importFile", method = RequestMethod.POST)
+    public RedirectView importTheme(@PathVariable(value = "type") String type, @RequestParam String filename, @RequestParam("uploadedFile") MultipartFile uploadedFile)
+            throws IOException {
+        CMSTheme theme = CMSTheme.forType(type);
+        String[] r = filename.split("/");
+        CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename, uploadedFile.getBytes());
+        theme.changeFiles(theme.getFiles().with(newFile));
         return new RedirectView("/cms/themes/" + type + "/see", true);
     }
 

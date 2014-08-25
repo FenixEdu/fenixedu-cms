@@ -8,10 +8,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.routing.CMSBackend;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
+import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.groups.UserGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -90,14 +92,14 @@ public class Site extends Site_Base {
     public Site() {
         super();
         if (Authenticate.getUser() == null) {
-            throw new RuntimeException("Needs Login");
+            throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
 
         this.setCanViewGroup(AnyoneGroup.get());
         this.setCanPostGroup(UserGroup.of(Authenticate.getUser()));
-        this.setCanAdminGroup(UserGroup.of(Authenticate.getUser()));
+        this.setCanAdminGroup(DynamicGroup.get("managers"));
     }
 
     /**
@@ -148,7 +150,7 @@ public class Site extends Site_Base {
      * @return the access group for this site
      */
     public Group getCanAdminGroup(){
-        return getPostGroup().toGroup();
+        return getAdminGroup().toGroup();
     }
 
     /**

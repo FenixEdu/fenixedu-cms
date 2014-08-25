@@ -146,7 +146,7 @@ public class CMSTheme extends CMSTheme_Base {
 
     @Atomic
     public void changeFiles(CMSThemeFiles files) {
-        if (!getFiles().checksumMatches(files)) {
+        if (getFiles() == null || !getFiles().checksumMatches(files)) {
             setFiles(files);
         }
     }

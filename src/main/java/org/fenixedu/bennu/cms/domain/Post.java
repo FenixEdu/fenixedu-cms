@@ -3,6 +3,7 @@ package org.fenixedu.bennu.cms.domain;
 import java.util.Comparator;
 import java.util.HashSet;
 
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
@@ -28,7 +29,7 @@ public class Post extends Post_Base {
     public Post() {
         super();
         if (Authenticate.getUser() == null) {
-            throw new RuntimeException("Needs Login");
+            throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());

@@ -76,7 +76,7 @@
                 <label for="inputEmail3" class="col-sm-2 control-label">Can Post</label>
 
                 <div class="col-sm-10">
-                    <input bennu-group allow="public,users,managers,custom" name="postGroup" type="text" value="${ site.canPostGroup.expression }"/>
+                    <input bennu-group allow="managers,custom" name="postGroup" type="text" value="${ site.canPostGroup.expression }"/>
                 </div>
             </div>
 
@@ -84,7 +84,7 @@
                 <label for="inputEmail3" class="col-sm-2 control-label">Can Admin</label>
 
                 <div class="col-sm-10">
-                    <input bennu-group allow="public,users,managers,custom" name="adminGroup" type="text" value="${ site.canAdminGroup.expression }"/>
+                    <input bennu-group allow="managers,custom" name="adminGroup" type="text" value="${ site.canAdminGroup.expression }"/>
                 </div>
             </div>
 

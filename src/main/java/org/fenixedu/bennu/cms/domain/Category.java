@@ -1,5 +1,6 @@
 package org.fenixedu.bennu.cms.domain;
 
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.StringNormalizer;
@@ -20,7 +21,7 @@ public class Category extends Category_Base {
     public Category() {
         super();
         if (Authenticate.getUser() == null) {
-            throw new RuntimeException("Needs Login");
+            throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());

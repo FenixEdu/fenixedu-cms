@@ -26,6 +26,9 @@ public class AdminPages {
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
     public String pages(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
+
+        AdminSites.canEdit(site);
+
         model.addAttribute("site", site);
         model.addAttribute("pages", site.getPagesSet());
         return "pages";
@@ -34,6 +37,9 @@ public class AdminPages {
     @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
     public String createPage(Model model, @PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
+
+        AdminSites.canEdit(s);
+
         model.addAttribute("site", s);
         return "createPage";
     }
@@ -46,6 +52,9 @@ public class AdminPages {
             return new RedirectView("/cms/pages/" + slug + "/create", true);
         } else {
             Site s = Site.fromSlug(slug);
+
+            AdminSites.canEdit(s);
+
             createPage(name, s);
             return new RedirectView("/cms/pages/" + s.getSlug(), true);
         }
@@ -62,6 +71,9 @@ public class AdminPages {
     public String edit(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "slugPage") String slugPage) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Page p = s.pageForSlug(slugPage);
         model.addAttribute("site", s);
         model.addAttribute("page", p);
@@ -78,6 +90,9 @@ public class AdminPages {
             return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage + "/edit", true);
         }
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Page p = s.pageForSlug(slugPage);
         editPage(name, slug, template, s, p);
         return new RedirectView("/cms/pages/" + s.getSlug() + "", true);
@@ -97,6 +112,9 @@ public class AdminPages {
     public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "slugPage") String slugPage) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         s.pageForSlug(slugPage).delete();
         return new RedirectView("/cms/pages/" + s.getSlug() + "", true);
     }

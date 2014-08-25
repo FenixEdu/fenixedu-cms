@@ -2,8 +2,11 @@ package org.fenixedu.bennu.cms.portal;
 
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.Site;
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -17,6 +20,9 @@ import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @SpringApplication(group = "anyone", path = "cms", title = "application.title")
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")
 @RequestMapping("/cms/sites")
@@ -24,16 +30,29 @@ public class AdminSites {
 
     @RequestMapping
     public String list(Model model) {
-        model.addAttribute("sites", Bennu.getInstance().getSitesSet());
+        User user = Authenticate.getUser();
+        List<Site> result = Bennu.getInstance().getSitesSet().stream().filter(s -> s.getCanAdminGroup().isMember(user) || s.getCanPostGroup().isMember(user))
+                .collect(Collectors.toList());
+        model.addAttribute("sites", result);
         return "manage";
     }
 
+    public static void canEdit(Site site){
+        if (!(site.getCanAdminGroup().isMember(Authenticate.getUser()))) {
+            throw CmsDomainException.forbiden();
+        }
+    }
+
+
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.GET)
     public String edit(Model model, @PathVariable(value = "slug") String slug) {
-        model.addAttribute("site", Site.fromSlug(slug));
+        Site site = Site.fromSlug(slug);
+
+        AdminSites.canEdit(site);
+
+        model.addAttribute("site", site);
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
         return "editSite";
-
     }
 
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
@@ -49,7 +68,11 @@ public class AdminSites {
             if (published == null) {
                 published = false;
             }
-            editSite(name, description, theme, newSlug, published, Site.fromSlug(slug), viewGroup, postGroup, adminGroup);
+            Site s = Site.fromSlug(slug);
+
+            AdminSites.canEdit(s);
+
+            editSite(name, description, theme, newSlug, published, s, viewGroup, postGroup, adminGroup);
             return new RedirectView("/cms/sites", true);
         }
     }
@@ -72,6 +95,9 @@ public class AdminSites {
     @RequestMapping(value = "{slug}/delete", method = RequestMethod.POST)
     public RedirectView delete(@PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
+
+        AdminSites.canEdit(s);
+
         s.delete();
         return new RedirectView("/cms/sites", true);
     }

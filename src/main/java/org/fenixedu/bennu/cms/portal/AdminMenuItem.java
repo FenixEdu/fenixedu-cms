@@ -32,6 +32,9 @@ public class AdminMenuItem {
     public String change(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         model.addAttribute("site", s);
         model.addAttribute("menu", s.menuForOid(oidMenu));
         return "changeMenu";
@@ -63,6 +66,9 @@ public class AdminMenuItem {
     public @ResponseBody String data(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "oidMenu") String oidMenu) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Menu m = s.menuForOid(oidMenu);
 
         JsonObject root = new JsonObject();
@@ -91,6 +97,9 @@ public class AdminMenuItem {
             @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid, @RequestParam String name,
             @RequestParam String use, @RequestParam String url, @RequestParam String slugPage) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Menu m = s.menuForOid(oidMenu);
 
         createMenuItem(menuItemOid, name, use, url, slugPage, s, m);
@@ -133,6 +142,9 @@ public class AdminMenuItem {
             @RequestParam String url, @RequestParam String slugPage, @RequestParam Integer position) {
 
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Menu m = s.menuForOid(oidMenu);
 
         if (menuItemOid.equals("null") && menuItemOidParent.equals("null")) {
@@ -202,6 +214,9 @@ public class AdminMenuItem {
     public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu, @PathVariable(value = "oidMenuItem") String oidMenuItem) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Menu m = s.menuForOid(oidMenu);
         MenuItem item = FenixFramework.getDomainObject(oidMenuItem);
         if (item.getMenu() != m) {

@@ -18,7 +18,7 @@
       <thead>
         <tr>
           <th class="col-md-6"><spring:message code="site.manage.label.name" /></th>
-          <th><spring:message code="site.manage.label.createdBy" /></th>
+          <th><spring:message code="site.manage.label.status" /></th>
           <th><spring:message code="site.manage.label.creationDate" /></th>
           <th><spring:message code="site.manage.label.operations" /></th>
         </tr>
@@ -38,7 +38,16 @@
             <div><small>Url: <code>${i.slug}</code></small></div>
             <div><small>${i.getDescription().getContent()}</small></div>
           </td>
-          <td>${i.createdBy.username}</td>
+          <td>
+              <c:choose>
+                  <c:when test="${ i.published }">
+                      <span class="label label-primary">Available</span>
+                  </c:when>
+                  <c:otherwise>
+                      <span class="label label-default">Unavailable</span>
+                  </c:otherwise>
+              </c:choose>
+          </td>
           <td><joda:format value="${i.creationDate}" pattern="MMM dd, yyyy"/></td>
           <td>
             <div class="btn-group">

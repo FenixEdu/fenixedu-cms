@@ -20,6 +20,9 @@ public class AdminPosts {
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
     public String posts(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
+
+        AdminSites.canEdit(site);
+
         model.addAttribute("site", site);
         model.addAttribute("posts", site.getPostSet());
         return "posts";
@@ -28,6 +31,9 @@ public class AdminPosts {
     @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
     public String createPost(Model model, @PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
+
+        AdminSites.canEdit(s);
+
         model.addAttribute("site", s);
         return "createPost";
     }
@@ -40,6 +46,9 @@ public class AdminPosts {
             return new RedirectView("/cms/posts/" + slug + "/create", true);
         } else {
             Site s = Site.fromSlug(slug);
+
+            AdminSites.canEdit(s);
+
             createPost(s, name, body);
             return new RedirectView("/cms/posts/" + s.getSlug() + "", true);
         }
@@ -59,6 +68,9 @@ public class AdminPosts {
     public String editPost(Model model, @PathVariable(value = "slug") String slug,
             @PathVariable(value = "postSlug") String postSlug) {
         Site s = Site.fromSlug(slug);
+
+        AdminSites.canEdit(s);
+
         Post p = s.postForSlug(postSlug);
         model.addAttribute("site", s);
         model.addAttribute("post", p);
@@ -94,6 +106,9 @@ public class AdminPosts {
     public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "slugPost") String slugPost) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         s.postForSlug(slugPost).delete();
         return new RedirectView("/cms/posts/" + s.getSlug() + "", true);
     }
