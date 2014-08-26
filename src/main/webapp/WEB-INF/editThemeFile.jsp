@@ -23,16 +23,16 @@
     <button type="button" id="saveBtn" class="btn btn-sm btn-success">
       <span id="txt"><spring:message code="action.save" /></span> <span class="glyphicon glyphicon glyphicon-save"></span>
     </button>
-    <button type="button" class="btn btn-sm btn-default"><spring:message code="action.move.file" /></button>
+    <!-- <button type="button" class="btn btn-sm btn-default"><spring:message code="action.move.file" /></button> -->
   </div>
   <div class="btn-group">
-    <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown"><spring:message code="file.edit.label.highlight" /> <span class="caret"></span></button>
+    <!-- <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown"><spring:message code="file.edit.label.highlight" /> <span class="caret"></span></button>
     <ul class="dropdown-menu" role="menu">
         <li><a href="#"><spring:message code="file.edit.label.text" /></a></li>
         <li><a href="#"><spring:message code="file.edit.label.html" /></a></li>
         <li><a href="#"><spring:message code="file.edit.label.css" /></a></li>
         <li><a href="#"><spring:message code="file.edit.label.javascript" /></a></li>
-      </ul>
+      </ul> -->
   </div>
 </div>
 </p>

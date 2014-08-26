@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.zip.ZipFile;
 
@@ -151,18 +152,20 @@ public class AdminThemes {
 
     @RequestMapping(value = "new", method = RequestMethod.POST)
     public RedirectView newTheme(Model model, @RequestParam String type, @RequestParam String name,
-            @RequestParam String description) {
-        newTheme(type, name, description);
+            @RequestParam String description, @RequestParam(value="extends") String ext) {
+        CMSTheme theme = CMSTheme.forType(ext);
+        newTheme(type, name, description, theme);
         return new RedirectView("/cms/themes/" + type + "/see", true);
     }
 
     @Atomic
-    public void newTheme(String type, String name, String description){
+    public void newTheme(String type, String name, String description, CMSTheme ext){
         CMSTheme theme = new CMSTheme();
         theme.setType(type);
         theme.setName(name);
         theme.setDescription(description);
         theme.setBennu(Bennu.getInstance());
+        theme.setExtended(ext);
         theme.changeFiles(new CMSThemeFiles(new HashMap<String, CMSThemeFile>()));
     }
 
@@ -224,5 +227,50 @@ public class AdminThemes {
     @Atomic
     private void deleteTemplate(String templateType, CMSTheme theme) {
         theme.templateForType(templateType).delete();
+    }
+
+    @RequestMapping(value = "{type}/duplicate", method = RequestMethod.POST)
+    public RedirectView duplicateTheme(Model model, @PathVariable String type, @RequestParam(value="newThemeType") String newThemeType, @RequestParam String name,
+            @RequestParam String description) {
+        CMSTheme orig = CMSTheme.forType(type);
+        duplicateTheme(orig, newThemeType, name, description);
+        return new RedirectView("/cms/themes/" + newThemeType + "/see", true);
+    }
+
+    @Atomic
+    public void duplicateTheme(CMSTheme orig, String type, String name, String description){
+        CMSTheme theme = new CMSTheme();
+        theme.setType(type);
+        theme.setName(name);
+        theme.setDescription(description);
+        theme.setBennu(orig.getBennu());
+        theme.setExtended(orig.getExtended());
+        theme.changeFiles(orig.getFiles());
+        for(CMSTemplate originalTemplate : orig.getTemplatesSet()){
+            CMSTemplate tp = new CMSTemplate();
+            tp.setTheme(theme);
+            tp.setFilePath(originalTemplate.getFilePath());
+            tp.setType(originalTemplate.getType());
+            tp.setDescription(originalTemplate.getDescription());
+            tp.setName(originalTemplate.getName());
+        }
+    }
+
+    @RequestMapping(value = "{type}/moveFile", method = RequestMethod.POST)
+    public RedirectView moveFile(Model model, @PathVariable String type, @RequestParam String origFilename,
+            @RequestParam String filename) {
+        CMSTheme theme = CMSTheme.forType(type);
+        CMSThemeFile file = theme.fileForPath(origFilename);
+
+        moveFile(filename, file, theme);
+
+        return new RedirectView("/cms/themes/" + type + "/see", true);
+    }
+
+    @Atomic
+    private void moveFile(String filename, CMSThemeFile file, CMSTheme theme) {
+        String[] r = filename.split("/");
+        CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename, file.getContent());
+        theme.changeFiles(theme.getFiles().without(file.getFullPath()).with(newFile));
     }
 }

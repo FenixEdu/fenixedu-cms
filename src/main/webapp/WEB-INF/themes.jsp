@@ -28,15 +28,15 @@
 	      	</thead>
 			<tbody>
 				<c:forEach var="i" items="${themes}">
-				<tr>
+				<tr class="item-theme">
 					<td>
-						<h5>${i.getName()}
-							<c:if test="${true}">
+						<h5><span class="item-theme-name">${i.getName()}</span>
+							<c:if test="${i.isDefault()}">
 								<span class="label label-success"><spring:message code="site.manage.label.default" /></span>
 							</c:if>
 						</h5>
-						<div><small><spring:message code="site.manage.label.type" />:<code>${i.type}</code></small></div>
-						<div><small>${i.getDescription()}</small></div>
+						<div><small><spring:message code="site.manage.label.type" />:<code class="item-theme-type">${i.type}</code></small></div>
+						<div><small class="item-theme-description">${i.getDescription()}</small></div>
 					</td>
 					<td>
 
@@ -55,7 +55,7 @@
                             <a class="btn btn-danger btn-sm" onclick="document.getElementById('deleteThemeForm').submit();"><span class="glyphicon glyphicon-trash"></a>
 							<a class="btn btn-default btn-sm" href="${pageContext.request.contextPath}/cms/themes/${i.type}/see"><spring:message code="action.more" /></a>
 						</div>
-                        <a class="btn btn-default btn-sm" href="${pageContext.request.contextPath}/cms/themes/${i.type}/see"><spring:message code="action.duplicate" /></a>
+                        <a class="btn btn-default btn-sm btn-duplicate" href="#" ><spring:message code="action.duplicate" /></a>
                         <form id="deleteThemeForm" action="${pageContext.request.contextPath}/cms/themes/${i.type}/delete" method="post"></form>
 					</td>
 				</tr>
@@ -65,3 +65,65 @@
         </table>
       </c:otherwise>
 </c:choose>
+
+
+<div class="modal fade" id="duplicateModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <form action="" class="form-horizontal" method="post">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                            class="sr-only">Close</span></button>
+                    <h4><spring:message code="action.newTemplate"/></h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.type"/>:</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="newThemeType" class="form-control" placeholder="Type">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.name"/>:</label>
+                        <div class="col-sm-10">
+                            <input type="text" name="name" class="form-control" placeholder="Name">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.description"/>:</label>
+                        <div class="col-sm-10">
+                            <textarea name="description" class="form-control" placeholder="Description">
+
+                            </textarea>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary"><spring:message code="label.make"/></button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function showDuplicateModal(e){
+        e = $(e.target);
+
+        var item = e.closest(".item-theme");
+        var origType = $(".item-theme-type",item).html();
+        var name = $(".item-theme-name",item).html();
+        var description = $(".item-theme-description",item).html();
+        var modal = $("#duplicateModal");
+        $("form", modal).attr("action","themes/" + origType + "/duplicate");
+        $("input[name='newThemeType']", modal).val("");
+        $("input[name='name']", modal).val(name);
+        $("textarea[name='description']", modal).val(description);
+        modal.modal('show');
+    }
+    $(".btn-duplicate").on("click",showDuplicateModal)
+</script>

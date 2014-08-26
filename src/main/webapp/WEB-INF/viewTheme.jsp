@@ -4,7 +4,11 @@
 
 <h1><spring:message code="theme.view.title"/></h1>
 
-<b>${theme.name}</b>
+<b>${theme.name} <c:if test="${theme.isDefault()}"><span class="label label-success"><spring:message
+        code="site.manage.label.default"/></span></c:if></b>
+
+<p><c:if test="${theme.extended != null}"> Extends: <b><a
+        href="../${theme.extended.type}/see">${theme.extended.name}</a></b></c:if></p>
 
 <p>${theme.description}</p>
 
@@ -51,6 +55,10 @@
                                     data-target="#fileDeleteModal">
                                 <span class="glyphicon glyphicon-trash"></span>
                             </button>
+                            <button class="btn btn-default btn-sm" data-toggle="modal" data-file="${i.fullPath}"
+                                    data-target="#moveFile">
+                                Move
+                            </button>
                             <c:if test="${supportedTypes.contains(i.contentType)}">
                                 <a href="editFile/${i.fullPath}" class="btn btn-default btn-sm"><spring:message
                                         code="action.edit"/></a>
@@ -71,9 +79,11 @@
     <div class="row tab-pane" id="templates">
         <div class="col-sm-12">
             <c:if test="${theme.files.files.size() > 0}">
-            <p>
-                <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#templateNewModal">Create New Template</button>
-            </p>
+                <p>
+                    <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#templateNewModal">Create New
+                        Template
+                    </button>
+                </p>
             </c:if>
             <c:choose>
                 <c:when test="${theme.templatesSet.size() > 0}">
@@ -99,7 +109,8 @@
                                 <td><code>${template.type}</code></td>
                                 <td><code>${template.filePath}</code></td>
                                 <td>
-                                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#templateDeleteModal" data-file="${template.type}"><span class="glyphicon glyphicon-trash"></span></button>
+                                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#templateDeleteModal"
+                                            data-file="${template.type}"><span class="glyphicon glyphicon-trash"></span></button>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -201,21 +212,27 @@
                 <div class="modal-body">
 
                     <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.type"/>:</label>
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                                code="theme.new.label.type"/>:</label>
+
                         <div class="col-sm-10">
                             <input type="text" name="type" class="form-control" placeholder="Type">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.name"/>:</label>
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                                code="theme.new.label.name"/>:</label>
+
                         <div class="col-sm-10">
                             <input type="text" name="name" class="form-control" placeholder="Name">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.description"/>:</label>
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                                code="theme.new.label.description"/>:</label>
+
                         <div class="col-sm-10">
                             <textarea name="description" class="form-control" placeholder="Description">
 
@@ -224,7 +241,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.file"/>:</label>
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                                code="theme.new.label.file"/>:</label>
+
                         <div class="col-sm-10">
                             <select class="form-control" name="filename" id="">
                                 <c:forEach var="i" items="${theme.files.files}">
@@ -267,7 +286,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.add.label.file"/>:</label>
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                                code="theme.add.label.file"/>:</label>
 
                         <div class="col-sm-10">
                             <input type="file" name="uploadedFile" class="form-control" id="inputEmail3" placeholder="Name">
@@ -276,6 +296,44 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary"><spring:message code="label.import"/></button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="moveFile" tabindex="-1" role="dialog" aria-hidden="true">
+    <form action="moveFile" class="form-horizontal" method="post">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                            class="sr-only">Close</span></button>
+                    <h4><spring:message code="action.move"/></h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                                code="theme.view.orig.filename"/>:</label>
+
+                        <div class="col-sm-10">
+                            <input type="hidden" name="origFilename" class="form-control">
+                            <pre></pre>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                                code="theme.view.fileName"/>:</label>
+
+                        <div class="col-sm-10">
+                            <input type="text" name="filename" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary"><spring:message code="label.move"/></button>
                 </div>
             </div>
         </div>
@@ -299,7 +357,19 @@
 </script>
 
 <script>
-    if(window.location.hash === "#templates"){
+    $("button[data-target='#moveFile']").on('click', function (event) {
+        var fileName = $(event.target).closest("[data-file]").attr('data-file');
+        $('#moveFile pre').html(fileName);
+        $('#moveFile input').val(fileName);
+    });
+</script>
+
+<script>
+
+</script>
+
+<script>
+    if (window.location.hash === "#templates") {
         $("[href='#templates']").tab('show')
     }
 </script>

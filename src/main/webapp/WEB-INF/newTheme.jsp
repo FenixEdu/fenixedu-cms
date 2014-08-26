@@ -27,7 +27,7 @@
     </div>
 
     <div class="form-group">
-        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.description"/>:</label>
+        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.extends"/>:</label>
         <div class="col-sm-10">
             <select class="form-control" name="extends" id="">
                 <option value="">-</option>
