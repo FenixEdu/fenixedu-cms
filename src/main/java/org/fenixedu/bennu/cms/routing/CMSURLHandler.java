@@ -1,5 +1,6 @@
 package org.fenixedu.bennu.cms.routing;
 
+import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.mitchellbosecke.pebble.PebbleEngine;
@@ -89,8 +90,11 @@ public final class CMSURLHandler implements SemanticURLHandler {
         if (site.getCanViewGroup().isMember(Authenticate.getUser())) {
             if (site.getPublished()) {
                 try {
-                    String pageSlug = req.getRequestURI().substring(req.getContextPath().length() + menu.getFullPath().length());
-                    if (pageSlug.endsWith("/")) {
+                    String pageSlug = req.getRequestURI().substring(req.getContextPath().length());
+                    if (pageSlug.startsWith(menu.getFullPath())){
+                        pageSlug = pageSlug.substring(menu.getFullPath().length());
+                    }
+                    if (pageSlug.endsWith("/") && !req.getRequestURI().equals(req.getContextPath() + "/")) {
                         handleLeadingSlash(req, res, site, bufWriter);
                     } else if (pageSlug.startsWith("/static/")) {
                         handleStaticResource(req, res, site, buf, bufWriter, pageSlug);
@@ -134,7 +138,13 @@ public final class CMSURLHandler implements SemanticURLHandler {
             String pageSlug) throws ServletException, IOException, PebbleException {
         pageSlug = pageSlug.replace("/", "");
 
-        Page page = sites.pageForSlug(pageSlug);
+        Page page;
+        if ((Strings.isNullOrEmpty(pageSlug) || pageSlug.startsWith("/")) && sites.getInitialPage() != null) {
+            page = sites.getInitialPage();
+        } else {
+            final String finalPageSlug = pageSlug;
+            page = sites.getPagesSet().stream().filter(p -> finalPageSlug.equals(p.getSlug())).findAny().orElse(null);
+        }
 
         if (page == null || page.getTemplate() == null) {
             errorPage(req, res, bufWriter, sites, 404);
@@ -190,7 +200,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
         global.put("request", makeRequestWrapper(req));
         global.put("app", makeAppWrapper());
         global.put("site", makeSiteWrapper(site));
-        global.put("page", page);
+        global.put("page", makePageWrapper(page));
         global.put("staticDir", site.getStaticDirectory());
 
         List<TemplateContext> components = new ArrayList<TemplateContext>();
@@ -201,7 +211,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
             components.add(local);
         }
 
-        global.put("components", makePageWrapper(page));
+        global.put("components", components);
 
         PebbleTemplate compiledTemplate = engine.getTemplate(site.getTheme().getType() + "/" + page.getTemplate().getFilePath());
 

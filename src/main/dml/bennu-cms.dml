@@ -103,6 +103,15 @@ relation PrimaryCMSThemeBennu{
   }
 }
 
+relation PrimarySite{
+  protected .org.fenixedu.bennu.core.domain.Bennu playsRole primaryBennu{
+    multiplicity 0..1;
+  }
+  Site playsRole defaultSite{
+    multiplicity 0..1;
+  }
+}
+
 relation CMSThemeBennu{
   .org.fenixedu.bennu.core.domain.Bennu playsRole bennu{
     multiplicity 1..1;
@@ -137,6 +146,16 @@ relation CMSThemeCMSTheme{
 
   CMSTheme playsRole children{
     multiplicity *;
+  }
+}
+
+relation FilePost{
+  .org.fenixedu.bennu.io.domain.GenericFile playsRole files{
+    multiplicity 0..*;
+  }
+
+  Post playsRole post{
+    multiplicity 1;
   }
 }
 

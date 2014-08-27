@@ -50,11 +50,22 @@ public class Page extends Page_Base {
 
     @Override
     public void setSlug(String slug) {
+        if (slug == null){
+            slug = "";
+        }
+
+        slug = StringNormalizer.slugify(slug);
+
         while (!isValidSlug(slug)) {
             String randomSlug = UUID.randomUUID().toString().substring(0, 3);
             slug = Joiner.on("-").join(slug, randomSlug);
         }
+
         super.setSlug(slug);
+
+        if(slug == "" && getSite().getInitialPage() == null){
+            getSite().setInitialPage(this);
+        }
     }
 
     /**
@@ -64,7 +75,7 @@ public class Page extends Page_Base {
      * @return true if it is a valid slug.
      */
     private boolean isValidSlug(String slug) {
-        return !Strings.isNullOrEmpty(slug) && getSite().pageForSlug(slug) == null;
+        return getSite().pageForSlug(slug) == null;
     }
 
     /**

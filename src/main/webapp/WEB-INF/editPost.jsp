@@ -42,6 +42,6 @@
 </form>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
-<!-- <script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script> -->
+<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>
-<script src="http://worf.bounceme.net:8000/"></script>
+

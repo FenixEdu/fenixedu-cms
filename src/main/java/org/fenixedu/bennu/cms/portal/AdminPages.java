@@ -1,8 +1,6 @@
 package org.fenixedu.bennu.cms.portal;
 
-import org.fenixedu.bennu.cms.domain.CMSTemplate;
-import org.fenixedu.bennu.cms.domain.Page;
-import org.fenixedu.bennu.cms.domain.Site;
+import org.fenixedu.bennu.cms.domain.*;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -74,6 +72,10 @@ public class AdminPages {
 
         AdminSites.canEdit(s);
 
+        if (slugPage.equals("--**--")){
+            slugPage = "";
+        }
+
         Page p = s.pageForSlug(slugPage);
         model.addAttribute("site", s);
         model.addAttribute("page", p);
@@ -118,4 +120,21 @@ public class AdminPages {
         s.pageForSlug(slugPage).delete();
         return new RedirectView("/cms/pages/" + s.getSlug() + "", true);
     }
+
+    @RequestMapping(value = "{type}/defaultPage", method = RequestMethod.POST)
+    public RedirectView moveFile(Model model, @PathVariable String type, @RequestParam String page) {
+        Site s = Site.fromSlug(type);
+
+        AdminSites.canEdit(s);
+
+        setInitialPage(page, s);
+
+        return new RedirectView("/cms/pages/" + type , true);
+    }
+
+    @Atomic
+    private void setInitialPage(String page, Site s) {
+        s.setInitialPage(s.pageForSlug(page));
+    }
+
 }

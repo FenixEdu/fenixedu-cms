@@ -26,7 +26,7 @@
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.edit.label.name"/></label>
 
                 <div class="col-sm-10">
-                    <input bennu-localized-string required type="text" name="name" class="form-control" id="inputEmail3"
+                    <input bennu-localized-string required-any type="text" name="name" class="form-control" id="inputEmail3"
                            placeholder="<spring:message code="site.edit.label.name" />" value='${site.name.json()}' \>
                     <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
                             code="site.edit.error.emptyName"/></p></c:if>
@@ -38,7 +38,7 @@
                         code="site.edit.label.description"/></label>
 
                 <div class="col-sm-10">
-                    <textarea bennu-localized-string required name="description" class="form-control"
+                    <textarea bennu-localized-string required-any name="description" class="form-control"
                               rows="3">${site.description.json()}</textarea>
                 </div>
             </div>
@@ -109,7 +109,9 @@
     </form>
 </div>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
+<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>
-<script src="http://worf.bounceme.net:8000/"></script>
+
 <script src="//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.4/typeahead.bundle.min.js"></script>
 

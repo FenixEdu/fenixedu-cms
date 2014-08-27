@@ -4,9 +4,12 @@
 
 <h1><spring:message code="site.manage.title" /></h1>
 
-<c:if test="">
-
+<c:if test="${sites.size() != 0}">
+    <p>
+        <a href="#" data-toggle="modal" data-target="#defaultSite" class="btn btn-default">Set default site</a>
+    </p>
 </c:if>
+
 
 <c:choose>
       <c:when test="${sites.size() == 0}">
@@ -29,7 +32,13 @@
           <td>
             <c:choose>
               <c:when test="${i.getInitialPage()!=null}">
-                <h5><a href="${i.getInitialPage().getAddress()}">${i.getName().getContent()}</a></h5>
+                <h5><a href="${i.getInitialPage().getAddress()}">${i.getName().getContent()}</a>
+
+                    <c:if test="${i.isDefault()}">
+                        <span class="label label-success"><spring:message code="site.manage.label.default"/></span>
+                    </c:if>
+
+                </h5>
               </c:when>
               <c:otherwise>
                 <h5>${i.getName().getContent()}</h5>
@@ -73,3 +82,36 @@
         </table>
       </c:otherwise>
 </c:choose>
+
+<div class="modal fade" id="defaultSite" tabindex="-1" role="dialog" aria-hidden="true">
+    <form action="${pageContext.request.contextPath}/cms/sites/default" class="form-horizontal" method="post">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                            class="sr-only">Close</span></button>
+                    <h4><spring:message code="action.set.default.site"/></h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.site"/>:</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" name="slug">
+                                <option value="">-</option>
+                                <c:forEach var="i"  items="${sites}">
+                                    <option value="${i.slug}">${i.name.content}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary"><spring:message code="label.save"/></button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+

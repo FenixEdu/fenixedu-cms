@@ -10,7 +10,7 @@
   <li><a href="{{item.address}}">{{ item.name.content }}</a></li>
   {% if item.childrenSet.size != 0 %}
     <ol class="list-unstyled">
-      {{menuChildren(item.childrenSorted)}}
+      {{menuChildren(item.children)}}
     </ol>
   {% endif %}
 {% endmacro %}
@@ -62,7 +62,7 @@
             <div class="sidebar-module">
               <h4>{{menu.name.content}}</h4>
               <ol class="list-unstyled">
-              {{menuChildren(menu.childrenSorted)}}
+              {{menuChildren(menu.children)}}
               </ol>
             </div>
           {% endfor %}

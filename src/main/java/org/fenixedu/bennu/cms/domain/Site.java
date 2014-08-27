@@ -185,11 +185,7 @@ public class Site extends Site_Base {
      *         the {@link Page} with the given slug if it exists on this site, or null otherwise.
      */
     public Page pageForSlug(String slug) {
-        if ((Strings.isNullOrEmpty(slug) || slug.startsWith("/")) && getInitialPage() != null) {
-            return getInitialPage();
-        } else {
             return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElse(null);
-        }
     }
 
     /**
@@ -340,6 +336,13 @@ public class Site extends Site_Base {
     }
 
     /**
+     * @return true if a site is the default site, meaning if this site should respond to '/' requests
+     */
+    public boolean isDefault() {
+        return Bennu.getInstance().getDefaultSite() == this;
+    }
+
+    /**
      * @return the static directory of this {@link Site}.
      */
     public String getStaticDirectory() {
@@ -361,11 +364,6 @@ public class Site extends Site_Base {
         Stream<MenuItem> menuItems = Bennu.getInstance().getConfiguration().getMenu().getOrderedChild().stream();
         Optional<String> existsEntry = menuItems.map(i -> i.getPath()).filter(path -> path.equals(slug)).findFirst();
         return !Strings.isNullOrEmpty(slug) && fromSlug(slug) == null && !existsEntry.isPresent();
-    }
-
-    @Override
-    public Page getInitialPage() {
-        return Optional.ofNullable(super.getInitialPage()).orElseGet(() -> getPagesSet().stream().findFirst().orElse(null));
     }
 
     public Set<Menu> getSideMenus() {

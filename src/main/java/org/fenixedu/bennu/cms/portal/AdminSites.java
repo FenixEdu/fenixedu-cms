@@ -5,6 +5,7 @@ import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
@@ -19,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
+import pt.ist.fenixframework.FenixFramework;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -100,6 +102,24 @@ public class AdminSites {
 
         s.delete();
         return new RedirectView("/cms/sites", true);
+    }
+
+    @RequestMapping(value = "default", method = RequestMethod.POST)
+    public RedirectView setAsDefault(@RequestParam String slug) {
+        Site s = Site.fromSlug(slug);
+
+        if (!DynamicGroup.get("managers").isMember(Authenticate.getUser())){
+            throw CmsDomainException.forbiden();
+        }
+
+        makeDefaultSite(s);
+
+        return new RedirectView("/cms/sites", true);
+    }
+
+    @Atomic
+    private void makeDefaultSite(Site s) {
+        Bennu.getInstance().setDefaultSite(s);
     }
 
 }
