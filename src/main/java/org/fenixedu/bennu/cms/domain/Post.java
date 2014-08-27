@@ -63,7 +63,7 @@ public class Post extends Post_Base {
             if (path.charAt(path.length() - 1) != '/') {
                 path += "/";
             }
-            path += this.getSite().getSlug() + "/" + page.getSlug() + "?q=" + this.getSlug();
+            path += this.getSite().getSlug() + "/" + page.getSlug() + "/" + this.getSlug();
             return path;
         }
         return null;
@@ -102,9 +102,9 @@ public class Post extends Post_Base {
      * returns the group of people who can view this site.
      *
      * @return group
-     *          the access group for this site
+     *         the access group for this site
      */
-    public Group getCanViewGroup(){
+    public Group getCanViewGroup() {
         return getViewGroup().toGroup();
     }
 
@@ -112,7 +112,7 @@ public class Post extends Post_Base {
      * sets the access group for this site
      *
      * @param group
-     *          the group of people who can view this site
+     *            the group of people who can view this site
      */
     @Atomic
     public void setCanViewGroup(Group group) {

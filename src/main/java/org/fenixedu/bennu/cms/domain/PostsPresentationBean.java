@@ -34,7 +34,7 @@ public class PostsPresentationBean {
 
         for (int i = 0; i < pages; i++) {
             HashMap<String, Object> info = new HashMap<String, Object>();
-            info.put("url", page.getAddress() + "?p=" + (i + 1));
+            info.put("url", "?p=" + (i + 1));
             info.put("number", (i + 1));
             pageList.add(info);
         }
