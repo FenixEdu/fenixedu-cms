@@ -35,7 +35,7 @@
               <td>
                 <div class="btn-group">
                   <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${p.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
-                  <a href="${pageContext.request.contextPath}/${p.site.slug}/${p.slug}" class="btn btn-sm btn-default" target="_blank"><spring:message code="action.link" /></a>
+                  <a href="${p.site.viewPostPage.address}/${p.slug}" class="btn btn-sm btn-default" target="_blank"><spring:message code="action.link" /></a>
                	  <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteForm').submit();"><spring:message code="action.delete" /></a>
                	  <form id="deleteForm" action="${pageContext.request.contextPath}/cms/posts/${site.slug}/${p.slug}/delete" method="POST"></form>
                 </div>

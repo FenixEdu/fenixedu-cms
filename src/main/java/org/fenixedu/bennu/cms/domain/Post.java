@@ -8,7 +8,6 @@ import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
@@ -54,17 +53,12 @@ public class Post extends Post_Base {
      * @return the URL link to the slug's page.
      */
     public String getAddress() {
-        Page page = this.getSite().getViewPostPage();;
+        Page page = this.getSite().getViewPostPage();
         if (page == null && !this.getComponentSet().isEmpty()) {
             page = this.getComponentSet().iterator().next().getPage();
         }
         if (page != null) {
-            String path = CoreConfiguration.getConfiguration().applicationUrl();
-            if (path.charAt(path.length() - 1) != '/') {
-                path += "/";
-            }
-            path += this.getSite().getSlug() + "/" + page.getSlug() + "/" + this.getSlug();
-            return path;
+            return page.getAddress() + "/" + this.getSlug();
         }
         return null;
     }

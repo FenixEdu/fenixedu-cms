@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.Atomic;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
 
 /**
  * Model for a page on a given Site.
@@ -50,7 +49,7 @@ public class Page extends Page_Base {
 
     @Override
     public void setSlug(String slug) {
-        if (slug == null){
+        if (slug == null) {
             slug = "";
         }
 
@@ -63,7 +62,7 @@ public class Page extends Page_Base {
 
         super.setSlug(slug);
 
-        if(slug == "" && getSite().getInitialPage() == null){
+        if (slug == "" && getSite().getInitialPage() == null) {
             getSite().setInitialPage(this);
         }
     }
@@ -102,7 +101,7 @@ public class Page extends Page_Base {
 
         }
 
-        for (MenuItem mi : getMenuItemsSet()){
+        for (MenuItem mi : getMenuItemsSet()) {
             mi.delete();
         }
 
@@ -117,23 +116,16 @@ public class Page extends Page_Base {
      * @return the URL link for this page.
      */
     public String getAddress() {
-        String path = CoreConfiguration.getConfiguration().applicationUrl();
-        if (path.charAt(path.length() - 1) != '/') {
-            path += "/";
-        }
-        path += getSite().getSlug() + "/" + getSlug();
-        return path;
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/" + getSite().getBaseUrl() + "/" + getSlug();
     }
-
-
 
     /**
      * returns the group of people who can view this site.
      *
      * @return group
-     *          the access group for this site
+     *         the access group for this site
      */
-    public Group getCanViewGroup(){
+    public Group getCanViewGroup() {
         return getViewGroup().toGroup();
     }
 
@@ -141,7 +133,7 @@ public class Page extends Page_Base {
      * sets the access group for this site
      *
      * @param group
-     *          the group of people who can view this site
+     *            the group of people who can view this site
      */
     @Atomic
     public void setCanViewGroup(Group group) {

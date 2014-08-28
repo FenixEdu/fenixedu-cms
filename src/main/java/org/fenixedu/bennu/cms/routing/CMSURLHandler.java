@@ -95,16 +95,22 @@ public final class CMSURLHandler implements SemanticURLHandler {
     @Override
     public void handleRequest(MenuFunctionality menu, final HttpServletRequest req, HttpServletResponse res, FilterChain fc)
             throws IOException, ServletException {
-        Site site = menu.getSites();
+        String pageSlug = req.getRequestURI().substring(req.getContextPath().length());
+        Site site = getSite(menu, pageSlug);
+        if (site == null) {
+            res.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         Writer bufWriter = new OutputStreamWriter(buf);
 
         if (site.getCanViewGroup().isMember(Authenticate.getUser())) {
             if (site.getPublished()) {
                 try {
-                    String pageSlug = req.getRequestURI().substring(req.getContextPath().length());
-                    if (pageSlug.startsWith(menu.getFullPath())) {
-                        pageSlug = pageSlug.substring(menu.getFullPath().length());
+                    String baseUrl = "/" + site.getBaseUrl();
+                    if (pageSlug.startsWith(baseUrl)) {
+                        pageSlug = pageSlug.substring(baseUrl.length());
                     }
                     if (pageSlug.endsWith("/") && !req.getRequestURI().equals(req.getContextPath() + "/")) {
                         handleLeadingSlash(req, res, site, bufWriter);
@@ -126,6 +132,13 @@ public final class CMSURLHandler implements SemanticURLHandler {
             return;
         }
         res.getOutputStream().write(buf.toByteArray(), 0, buf.size());
+    }
+
+    private Site getSite(MenuFunctionality menu, String url) {
+        if (menu.getSites() != null) {
+            return menu.getSites();
+        }
+        return menu.getCmsFolder().resolveSite(url);
     }
 
     private void handleStaticResource(final HttpServletRequest req, HttpServletResponse res, Site sites,

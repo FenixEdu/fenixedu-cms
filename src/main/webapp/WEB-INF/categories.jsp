@@ -27,7 +27,7 @@
           <c:forEach var="c" items="${categories}">
             <tr>
               <td>
-                <h5><a target="_blank" href="${pageContext.request.contextPath}/${c.site.slug}/${c.slug}">${c.getName().getContent()}</a></h5>
+                <h5><a target="_blank" href="${c.site.viewCategoryPage.address}/${c.slug}">${c.getName().getContent()}</a></h5>
                 <div><small><spring:message code="categories.manage.label.url"/>:<code>${c.getSlug()}</code></small></div>
               </td>
               <td>${c.createdBy.username}</td>

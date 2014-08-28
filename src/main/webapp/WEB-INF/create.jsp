@@ -40,6 +40,20 @@
     </div>
 
     <div class="form-group">
+        <label for="folder" class="col-sm-2 control-label"><spring:message code="site.create.label.folder"/></label>
+
+        <div class="col-sm-10">
+            <select name="folder" id="" class="form-control">
+                <option value>--</option>
+
+                <c:forEach items="${folders}" var="folder">
+                    <option value="${folder.externalId}">${folder.functionality.description.content}</option>
+                </c:forEach>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
             <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.create"/></button>
         </div>

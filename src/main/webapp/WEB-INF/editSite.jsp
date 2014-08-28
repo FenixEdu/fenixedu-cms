@@ -11,10 +11,10 @@
             <div class="${emptyName ? "form-group has-error" : "form-group"}">
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.edit.label.slug"/></label>
 
-                <div class="col-sm-2">
+                <div class="col-sm-4">
                     <div class="input-group">
 
-                        <span class="input-group-addon"><code>/</code></span>
+                        <span class="input-group-addon"><code>${site.folder == null ? '' : site.folder.functionality.fullPath}/</code></span>
                         <input required type="text" name="newSlug" class="form-control" id="inputEmail3"
                                placeholder="<spring:message code="site.edit.label.slug" />" value='${site.slug}' \>
                     </div>
@@ -54,6 +54,21 @@
                     </select>
                 </div>
             </div>
+
+            <div class="form-group">
+                <label for="folder" class="col-sm-2 control-label"><spring:message code="site.edit.label.folder"/></label>
+
+                <div class="col-sm-10">
+                    <select name="folder" id="" class="form-control">
+                        <option value ${site.folder == null ? 'selected': ''}>--</option>
+
+                        <c:forEach items="${folders}" var="folder">
+                            <option value="${folder.externalId}" ${site.folder == folder ? 'selected': ''}>${folder.functionality.description.content}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
                         code="site.create.label.published"/></label>

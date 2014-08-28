@@ -16,6 +16,9 @@ class Site{
   Boolean published;
 }
 
+public class CMSFolder {
+}
+
 class Page{
   DateTime creationDate;
   LocalizedString name;
@@ -292,9 +295,30 @@ relation BennuSite{
   }
 }
 
+relation FolderMenuFunctionality {
+    protected .org.fenixedu.bennu.portal.domain.MenuFunctionality playsRole functionality {
+        multiplicity 1..1;
+    }
+    public CMSFolder playsRole cmsFolder;
+}
+
+relation FolderHasSites {
+    public CMSFolder playsRole folder;
+    public Site playsRole site {
+        multiplicity *;
+    }
+}
+
+relation FolderRoot {
+    protected .org.fenixedu.bennu.core.domain.Bennu playsRole bennu;
+    public CMSFolder playsRole cmsFolder {
+        multiplicity *;
+    }
+}
+
 relation SiteMenuFunctionality{
   .org.fenixedu.bennu.portal.domain.MenuFunctionality playsRole functionality{
-    multiplicity 1..1;
+    multiplicity 0..1;
   }
   Site playsRole sites{
     multiplicity 0..1;

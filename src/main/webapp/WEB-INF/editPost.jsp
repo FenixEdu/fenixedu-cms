@@ -10,7 +10,7 @@
         <div class="col-sm-5">
             <div class="input-group">
 
-                <span class="input-group-addon"><code>/${site.slug}/</code></span>
+                <span class="input-group-addon"><code>/${site.baseUrl}/${site.viewPostPage.slug}/</code></span>
                 <input required type="text" name="newSlug" class="form-control" id="inputEmail3"
                        placeholder="<spring:message code="site.edit.label.slug" />" value='${post.slug}' \>
             </div>
