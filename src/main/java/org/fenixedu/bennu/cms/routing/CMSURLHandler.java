@@ -101,7 +101,11 @@ public final class CMSURLHandler implements SemanticURLHandler {
             res.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
+        handleRequest(site, req, res, pageSlug);
+    }
 
+    public void handleRequest(Site site, HttpServletRequest req, HttpServletResponse res, String pageSlug) throws IOException,
+            ServletException {
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         Writer bufWriter = new OutputStreamWriter(buf);
 
