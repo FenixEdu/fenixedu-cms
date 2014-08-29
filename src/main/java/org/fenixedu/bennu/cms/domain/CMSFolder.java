@@ -37,4 +37,8 @@ public class CMSFolder extends CMSFolder_Base {
     public MenuFunctionality getFunctionality() {
         return super.getFunctionality();
     }
+
+    public String getBaseUrl(Site site) {
+        return getFunctionality().getFullPath().substring(1) + "/" + site.getSlug();
+    }
 }

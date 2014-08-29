@@ -375,7 +375,7 @@ public class Site extends Site_Base {
 
     public String getBaseUrl() {
         if (getFolder() != null) {
-            return getFolder().getFunctionality().getFullPath().substring(1) + "/" + getSlug();
+            return getFolder().getBaseUrl(this);
         } else {
             return getSlug();
         }
