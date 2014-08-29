@@ -4,7 +4,7 @@
 
 <h1><spring:message code="page.manage.title"/></h1>
 
-<p class="small"><spring:message code="page.manage.label.site"/>: <a href="../"><strong>${site.name.content}</strong></a></p>
+<p class="small"><spring:message code="page.manage.label.site"/>: <a href="${pageContext.request.contextPath}/cms/sites"><strong>${site.name.content}</strong></a></p>
 
 <p>
     <a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" class="btn btn-default btn-primary"><spring:message
@@ -33,7 +33,7 @@
                 <tr>
                     <td>
                         <h5><a target="_blank"
-                               href="${pageContext.request.contextPath}/${p.site.slug}/${p.slug}">${p.getName().getContent()}</a>
+                               href="${p.address}">${p.getName().getContent()}</a>
                             <c:if test="${p.site.initialPage == p}">
                                 <span class="label label-success"><spring:message code="site.manage.label.default"/></span>
                             </c:if>
@@ -66,7 +66,7 @@
                                        class="btn btn-sm btn-default"><spring:message code="action.edit"/></a>
                                 </c:otherwise>
                             </c:choose>
-                            <a href="${pageContext.request.contextPath}/${p.site.slug}/${p.slug}" class="btn btn-sm btn-default"
+                            <a href="${p.address}" class="btn btn-sm btn-default"
                                target="_blank"><spring:message code="action.link"/></a>
                             <a href="#" class="btn btn-danger btn-sm"
                                onclick="document.getElementById('deletePageForm').submit();"><spring:message

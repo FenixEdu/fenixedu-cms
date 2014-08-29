@@ -59,17 +59,12 @@ public class Post extends Post_Base {
      * @return the URL link to the slug's page.
      */
     public String getAddress() {
-        Page page = this.getSite().getViewPostPage();;
+        Page page = this.getSite().getViewPostPage();
         if (page == null && !this.getComponentSet().isEmpty()) {
             page = this.getComponentSet().iterator().next().getPage();
         }
         if (page != null) {
-            String path = CoreConfiguration.getConfiguration().applicationUrl();
-            if (path.charAt(path.length() - 1) != '/') {
-                path += "/";
-            }
-            path += this.getSite().getSlug() + "/" + page.getSlug() + "?q=" + this.getSlug();
-            return path;
+            return page.getAddress() + "/" + this.getSlug();
         }
         return null;
     }
@@ -107,9 +102,9 @@ public class Post extends Post_Base {
      * returns the group of people who can view this site.
      *
      * @return group
-     *          the access group for this site
+     *         the access group for this site
      */
-    public Group getCanViewGroup(){
+    public Group getCanViewGroup() {
         return getViewGroup().toGroup();
     }
 
@@ -117,7 +112,7 @@ public class Post extends Post_Base {
      * sets the access group for this site
      *
      * @param group
-     *          the group of people who can view this site
+     *            the group of people who can view this site
      */
     @Atomic
     public void setCanViewGroup(Group group) {

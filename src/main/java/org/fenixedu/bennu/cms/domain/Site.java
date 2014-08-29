@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import jvstm.cps.ConsistencyPredicate;
+
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.routing.CMSBackend;
 import org.fenixedu.bennu.core.domain.Bennu;
@@ -107,7 +109,6 @@ public class Site extends Site_Base {
      *
      * @return group
      *         the access group for this site
-
      */
     public Group getCanViewGroup() {
         return getViewGroup().toGroup();
@@ -129,7 +130,7 @@ public class Site extends Site_Base {
      *
      * @return the access group for this site
      */
-    public Group getCanPostGroup(){
+    public Group getCanPostGroup() {
         return getPostGroup().toGroup();
     }
 
@@ -137,10 +138,10 @@ public class Site extends Site_Base {
      * sets the access group of people who can post in this site
      *
      * @param group
-     *          the group of people who can view this site
+     *            the group of people who can view this site
      */
     @Atomic
-    public void setCanPostGroup(Group group){
+    public void setCanPostGroup(Group group) {
         setPostGroup(group.toPersistentGroup());
     }
 
@@ -149,7 +150,7 @@ public class Site extends Site_Base {
      *
      * @return the access group for this site
      */
-    public Group getCanAdminGroup(){
+    public Group getCanAdminGroup() {
         return getAdminGroup().toGroup();
     }
 
@@ -157,10 +158,10 @@ public class Site extends Site_Base {
      * sets the access group of people who can post in this site
      *
      * @param group
-     *          the group of people who can view this site
+     *            the group of people who can view this site
      */
     @Atomic
-    public void setCanAdminGroup(Group group){
+    public void setCanAdminGroup(Group group) {
         setAdminGroup(group.toPersistentGroup());
     }
 
@@ -185,7 +186,7 @@ public class Site extends Site_Base {
      *         the {@link Page} with the given slug if it exists on this site, or null otherwise.
      */
     public Page pageForSlug(String slug) {
-            return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElse(null);
+        return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElse(null);
     }
 
     /**
@@ -266,18 +267,20 @@ public class Site extends Site_Base {
 
         super.setSlug(slug);
 
-        if (this.getFunctionality() != null) {
-            deleteMenuFunctionality();
+        if (getFolder() == null) {
+            if (this.getFunctionality() != null) {
+                deleteMenuFunctionality();
+            }
+            this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), false, slug,
+                    CMSBackend.BACKEND_KEY, "anyone", this.getDescription(), this.getName(), slug));
         }
-
-        this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), false, slug,
-                CMSBackend.BACKEND_KEY, "anyone", this.getDescription(), this.getName(), slug));
     }
 
     @Atomic
     public void delete() {
         MenuFunctionality mf = this.getFunctionality();
         this.setFunctionality(null);
+        this.setFolder(null);
 
         if (mf != null) {
             mf.delete();
@@ -346,11 +349,7 @@ public class Site extends Site_Base {
      * @return the static directory of this {@link Site}.
      */
     public String getStaticDirectory() {
-        String path = CoreConfiguration.getConfiguration().applicationUrl();
-        if (!path.endsWith("/")) {
-            path = path + "/";
-        }
-        return path + this.getSlug() + "/static";
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/" + getBaseUrl() + "/static";
     }
 
     /**
@@ -372,5 +371,26 @@ public class Site extends Site_Base {
 
     public Set<Menu> getTopMenus() {
         return getMenusSet().stream().filter(m -> !m.getComponentsOfClass(TopMenuComponent.class).isEmpty()).collect(toSet());
+    }
+
+    public String getBaseUrl() {
+        if (getFolder() != null) {
+            return getFolder().getBaseUrl(this);
+        } else {
+            return getSlug();
+        }
+    }
+
+    @Override
+    public void setFolder(CMSFolder folder) {
+        super.setFolder(folder);
+        if (folder != null && getFunctionality() != null) {
+            deleteMenuFunctionality();
+        }
+    }
+
+    @ConsistencyPredicate
+    public boolean checkHasEitherFunctionalityOrFolder() {
+        return getFunctionality() != null || getFolder() != null;
     }
 }

@@ -1,16 +1,31 @@
 package org.fenixedu.bennu.cms.routing;
 
-import com.google.common.base.Strings;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableMap;
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.error.LoaderException;
-import com.mitchellbosecke.pebble.error.PebbleException;
-import com.mitchellbosecke.pebble.loader.ClasspathLoader;
-import com.mitchellbosecke.pebble.loader.StringLoader;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.fenixedu.bennu.cms.CMSConfigurationManager;
-import org.fenixedu.bennu.cms.domain.*;
+import org.fenixedu.bennu.cms.domain.CMSTheme;
+import org.fenixedu.bennu.cms.domain.CMSThemeFile;
+import org.fenixedu.bennu.cms.domain.Component;
+import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.bennu.cms.rendering.CMSExtensions;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
@@ -23,18 +38,15 @@ import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableMap;
+import com.mitchellbosecke.pebble.PebbleEngine;
+import com.mitchellbosecke.pebble.error.LoaderException;
+import com.mitchellbosecke.pebble.error.PebbleException;
+import com.mitchellbosecke.pebble.loader.ClasspathLoader;
+import com.mitchellbosecke.pebble.loader.StringLoader;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 public final class CMSURLHandler implements SemanticURLHandler {
 
@@ -83,16 +95,26 @@ public final class CMSURLHandler implements SemanticURLHandler {
     @Override
     public void handleRequest(MenuFunctionality menu, final HttpServletRequest req, HttpServletResponse res, FilterChain fc)
             throws IOException, ServletException {
-        Site site = menu.getSites();
+        String pageSlug = req.getRequestURI().substring(req.getContextPath().length());
+        Site site = getSite(menu, pageSlug);
+        if (site == null) {
+            res.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        handleRequest(site, req, res, pageSlug);
+    }
+
+    public void handleRequest(Site site, HttpServletRequest req, HttpServletResponse res, String pageSlug) throws IOException,
+            ServletException {
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         Writer bufWriter = new OutputStreamWriter(buf);
 
         if (site.getCanViewGroup().isMember(Authenticate.getUser())) {
             if (site.getPublished()) {
                 try {
-                    String pageSlug = req.getRequestURI().substring(req.getContextPath().length());
-                    if (pageSlug.startsWith(menu.getFullPath())){
-                        pageSlug = pageSlug.substring(menu.getFullPath().length());
+                    String baseUrl = "/" + site.getBaseUrl();
+                    if (pageSlug.startsWith(baseUrl)) {
+                        pageSlug = pageSlug.substring(baseUrl.length());
                     }
                     if (pageSlug.endsWith("/") && !req.getRequestURI().equals(req.getContextPath() + "/")) {
                         handleLeadingSlash(req, res, site, bufWriter);
@@ -116,6 +138,13 @@ public final class CMSURLHandler implements SemanticURLHandler {
         res.getOutputStream().write(buf.toByteArray(), 0, buf.size());
     }
 
+    private Site getSite(MenuFunctionality menu, String url) {
+        if (menu.getSites() != null) {
+            return menu.getSites();
+        }
+        return menu.getCmsFolder().resolveSite(url);
+    }
+
     private void handleStaticResource(final HttpServletRequest req, HttpServletResponse res, Site sites,
             ByteArrayOutputStream buf, Writer bufWriter, String pageSlug) throws IOException, ServletException {
         pageSlug = pageSlug.replaceFirst("/", "");
@@ -136,21 +165,25 @@ public final class CMSURLHandler implements SemanticURLHandler {
 
     private void renderCMSPage(final HttpServletRequest req, HttpServletResponse res, Site sites, Writer bufWriter,
             String pageSlug) throws ServletException, IOException, PebbleException {
-        pageSlug = pageSlug.replace("/", "");
+        if (pageSlug.startsWith("/")) {
+            pageSlug = pageSlug.substring(1);
+        }
+        String[] parts = pageSlug.split("/");
+
+        String pageName = parts[0];
 
         Page page;
-        if ((Strings.isNullOrEmpty(pageSlug) || pageSlug.startsWith("/")) && sites.getInitialPage() != null) {
+        if (Strings.isNullOrEmpty(pageName) && sites.getInitialPage() != null) {
             page = sites.getInitialPage();
         } else {
-            final String finalPageSlug = pageSlug;
-            page = sites.getPagesSet().stream().filter(p -> finalPageSlug.equals(p.getSlug())).findAny().orElse(null);
+            page = sites.getPagesSet().stream().filter(p -> pageName.equals(p.getSlug())).findAny().orElse(null);
         }
 
         if (page == null || page.getTemplate() == null) {
             errorPage(req, res, bufWriter, sites, 404);
         } else {
             try {
-                renderPage(req, pageSlug, res, bufWriter, sites, page);
+                renderPage(req, pageSlug, res, bufWriter, sites, page, parts);
             } catch (ResourceNotFoundException e) {
                 errorPage(req, res, bufWriter, sites, 404);
             }
@@ -193,9 +226,13 @@ public final class CMSURLHandler implements SemanticURLHandler {
     }
 
     private void renderPage(final HttpServletRequest req, String reqPagePath, HttpServletResponse res, Writer bufWriter,
-            Site site, Page page) throws PebbleException, IOException {
+            Site site, Page page, String[] requestContext) throws PebbleException, IOException {
 
         TemplateContext global = new TemplateContext();
+        global.setRequestContext(requestContext);
+        for (String key : req.getParameterMap().keySet()) {
+            global.put(key, req.getParameter(key));
+        }
 
         global.put("request", makeRequestWrapper(req));
         global.put("app", makeAppWrapper());
@@ -207,7 +244,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
 
         for (Component component : page.getComponentsSet()) {
             TemplateContext local = new TemplateContext();
-            component.handle(page, req, local, global);
+            component.handle(page, local, global);
             components.add(local);
         }
 

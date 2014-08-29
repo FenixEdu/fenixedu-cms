@@ -15,7 +15,7 @@ public class PostsPresentationBean {
 
     public HashMap<String, Object> paginate(Page page, int currentPage, int postsPerPage) {
         List<Post> posts = getVisiblePosts();
-        int pages = (posts.size() / postsPerPage) + 1;
+        int pages = (int) Math.ceil(posts.size() / (double) postsPerPage);
         HashMap<String, Object> pagination = new HashMap<>();
 
         if (currentPage < 1) {
@@ -34,7 +34,7 @@ public class PostsPresentationBean {
 
         for (int i = 0; i < pages; i++) {
             HashMap<String, Object> info = new HashMap<String, Object>();
-            info.put("url", page.getAddress() + "?p=" + (i + 1));
+            info.put("url", "?p=" + (i + 1));
             info.put("number", (i + 1));
             pageList.add(info);
         }

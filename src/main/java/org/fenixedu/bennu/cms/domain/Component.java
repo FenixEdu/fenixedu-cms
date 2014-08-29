@@ -2,8 +2,6 @@ package org.fenixedu.bennu.cms.domain;
 
 import java.util.HashMap;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.core.domain.User;
@@ -88,14 +86,12 @@ public abstract class Component extends Component_Base {
      * 
      * @param page
      *            the page where the component will be rendered.
-     * @param req
-     *            request to render the page and the component.
      * @param componentContext
      *            local context for the component.
      * @param globalContext
      *            global context where the component is being rendered.
      */
-    public abstract void handle(Page page, HttpServletRequest req, TemplateContext componentContext, TemplateContext globalContext);
+    public abstract void handle(Page page, TemplateContext componentContext, TemplateContext globalContext);
 
     @Atomic(mode = TxMode.WRITE)
     public void delete() {

@@ -1,5 +1,8 @@
 package org.fenixedu.bennu.cms.portal;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
@@ -18,11 +21,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.google.common.base.Strings;
 
 @SpringApplication(group = "anyone", path = "cms", title = "application.title")
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")
@@ -32,18 +35,19 @@ public class AdminSites {
     @RequestMapping
     public String list(Model model) {
         User user = Authenticate.getUser();
-        List<Site> result = Bennu.getInstance().getSitesSet().stream().filter(s -> s.getCanAdminGroup().isMember(user) || s.getCanPostGroup().isMember(user))
-                .collect(Collectors.toList());
+        List<Site> result =
+                Bennu.getInstance().getSitesSet().stream()
+                        .filter(s -> s.getCanAdminGroup().isMember(user) || s.getCanPostGroup().isMember(user))
+                        .collect(Collectors.toList());
         model.addAttribute("sites", result);
         return "manage";
     }
 
-    public static void canEdit(Site site){
+    public static void canEdit(Site site) {
         if (!(site.getCanAdminGroup().isMember(Authenticate.getUser()))) {
             throw CmsDomainException.forbiden();
         }
     }
-
 
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.GET)
     public String edit(Model model, @PathVariable(value = "slug") String slug) {
@@ -53,14 +57,15 @@ public class AdminSites {
 
         model.addAttribute("site", site);
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
+        model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet());
         return "editSite";
     }
 
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
     public RedirectView edit(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
-            @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug,
-            @RequestParam(required = false) Boolean published, RedirectAttributes redirectAttributes,
-            @RequestParam String viewGroup, @RequestParam String postGroup, @RequestParam String adminGroup) {
+            @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug, @RequestParam(
+                    required = false) Boolean published, RedirectAttributes redirectAttributes, @RequestParam String viewGroup,
+            @RequestParam String postGroup, @RequestParam String adminGroup, @RequestParam String folder) {
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
@@ -73,17 +78,24 @@ public class AdminSites {
 
             AdminSites.canEdit(s);
 
-            editSite(name, description, theme, newSlug, published, s, viewGroup, postGroup, adminGroup);
+            editSite(name, description, theme, newSlug, published, s, viewGroup, postGroup, adminGroup, folder);
             return new RedirectView("/cms/sites", true);
         }
     }
 
     @Atomic(mode = TxMode.WRITE)
     private void editSite(LocalizedString name, LocalizedString description, String theme, String slug, Boolean published,
-            Site s, String viewGroup, String postGroup, String adminGroup) {
+            Site s, String viewGroup, String postGroup, String adminGroup, String folder) {
         s.setName(name);
         s.setDescription(description);
         s.setTheme(CMSTheme.forType(theme));
+        if (!Strings.isNullOrEmpty(folder)) {
+            s.setFolder(FenixFramework.getDomainObject(folder));
+        } else {
+            // Remove the folder and set the new slug, so the MenuFunctionality will be created
+            s.setFolder(null);
+            s.setSlug(slug);
+        }
         if (!s.getSlug().equals(slug)) {
             s.setSlug(slug);
         }
@@ -107,7 +119,7 @@ public class AdminSites {
     public RedirectView setAsDefault(@RequestParam String slug) {
         Site s = Site.fromSlug(slug);
 
-        if (!DynamicGroup.get("managers").isMember(Authenticate.getUser())){
+        if (!DynamicGroup.get("managers").isMember(Authenticate.getUser())) {
             throw CmsDomainException.forbiden();
         }
 

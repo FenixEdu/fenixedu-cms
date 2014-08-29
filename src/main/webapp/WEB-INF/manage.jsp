@@ -32,7 +32,7 @@
           <td>
             <c:choose>
               <c:when test="${i.getInitialPage()!=null}">
-                <h5><a href="${i.getInitialPage().getAddress()}">${i.getName().getContent()}</a>
+                <h5><a href="${i.getInitialPage().getAddress()}" target="_blank">${i.getName().getContent()}</a>
 
                     <c:if test="${i.isDefault()}">
                         <span class="label label-success"><spring:message code="site.manage.label.default"/></span>
@@ -44,7 +44,7 @@
                 <h5>${i.getName().getContent()}</h5>
               </c:otherwise>
             </c:choose>
-            <div><small>Url: <code>${i.slug}</code></small></div>
+            <div><small>Url: <code>${i.baseUrl}</code></small></div>
             <div><small>${i.getDescription().getContent()}</small></div>
           </td>
           <td>

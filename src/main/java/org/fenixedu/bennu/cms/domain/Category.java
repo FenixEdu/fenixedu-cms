@@ -38,7 +38,7 @@ public class Category extends Category_Base {
     }
 
     public String getAddress() {
-        return this.getSite().getViewCategoryPage().getAddress() + "?c=" + this.getSlug();
+        return this.getSite().getViewCategoryPage().getAddress() + "/" + this.getSlug();
     }
 
     @Atomic
