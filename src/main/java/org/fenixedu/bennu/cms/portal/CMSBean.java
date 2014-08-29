@@ -1,5 +1,8 @@
 package org.fenixedu.bennu.cms.portal;
 
+import org.fenixedu.bennu.io.domain.GenericFile;
+import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
+
 import java.text.DecimalFormat;
 
 public class CMSBean {
@@ -11,6 +14,10 @@ public class CMSBean {
         final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
         int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    }
+
+    public String downloadUrl(GenericFile file){
+        return FileDownloadServlet.getDownloadUrl(file);
     }
 
 }

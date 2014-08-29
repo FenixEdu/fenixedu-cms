@@ -84,6 +84,10 @@ class MenuComponent extends Component{}
 class TopMenuComponent extends MenuComponent{}
 class SideMenuComponent extends MenuComponent{}
 
+class PostFile{
+    Integer index;
+}
+
 relation ComponentUser{
   .org.fenixedu.bennu.core.domain.User playsRole createdBy{
     multiplicity 1..1;
@@ -149,15 +153,37 @@ relation CMSThemeCMSTheme{
   }
 }
 
-relation FilePost{
-  .org.fenixedu.bennu.io.domain.GenericFile playsRole files{
-    multiplicity 0..*;
+relation FilePostFile{
+  .org.fenixedu.bennu.io.domain.GroupBasedFile playsRole files{
+    multiplicity 0..1;
   }
 
-  Post playsRole post{
-    multiplicity 1;
+  PostFile playsRole postFile{
+    multiplicity 0..1;
   }
 }
+
+relation PostAttachments{
+  Post playsRole post{
+    multiplicity 1..1;
+  }
+
+  protected PostFile playsRole attachements{
+    multiplicity 0..*;
+  }
+}
+
+relation PostFile{
+  Post playsRole post{
+    multiplicity 0..1;
+  }
+
+  .org.fenixedu.bennu.io.domain.GroupBasedFile playsRole files{
+    multiplicity 0..*;
+  }
+}
+
+
 
 
 relation CMSThemeSite{
