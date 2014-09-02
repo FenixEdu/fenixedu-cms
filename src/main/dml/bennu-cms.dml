@@ -12,6 +12,7 @@ class Site{
 
 class Page{
   DateTime creationDate;
+  DateTime modificationDate;
   LocalizedString name;
   String slug;
 
@@ -43,6 +44,7 @@ class Post{
   String slug;
   LocalizedString body;
   DateTime creationDate;
+  DateTime modificationDate;
   Boolean active;
   DateTime publicationBegin;
   DateTime publicationEnd;

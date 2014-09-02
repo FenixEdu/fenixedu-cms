@@ -28,7 +28,9 @@ public class Post extends Post_Base {
             throw new RuntimeException("Needs Login");
         }
         this.setCreatedBy(Authenticate.getUser());
-        this.setCreationDate(new DateTime());
+        DateTime now = new DateTime();
+        this.setCreationDate(now);
+        this.setModificationDate(now);
         this.setActive(true);
     }
 
@@ -39,7 +41,7 @@ public class Post extends Post_Base {
     public void setName(LocalizedString name) {
         LocalizedString prevName = getName();
         super.setName(name);
-
+        this.setModificationDate(new DateTime());
         if (prevName == null) {
             setSlug(Site.slugify(name.getContent()));
         }
@@ -79,7 +81,16 @@ public class Post extends Post_Base {
     }
 
     public void removeCategories() {
-        new HashSet<>(getCategoriesSet()).forEach(c -> removeCategories(c));
+        DateTime now = new DateTime();
+        new HashSet<>(getCategoriesSet()).forEach(c -> {
+            removeCategories(c);
+            c.getComponentsSet().forEach(component -> {
+                if (component.getPage() != null) {
+                    component.getPage().setModificationDate(now);
+                }
+            });
+        });
+        setModificationDate(now);
     }
 
     public boolean hasPublicationPeriod() {
@@ -108,4 +119,47 @@ public class Post extends Post_Base {
         post.setActive(active);
         return post;
     }
+
+    @Override
+    public void addCategories(Category categories) {
+        DateTime now = new DateTime();
+        super.addCategories(categories);
+        categories.getComponentsSet().forEach(component -> {
+            if (component.getPage() != null) {
+                component.getPage().setModificationDate(now);
+            }
+        });
+        setModificationDate(now);
+    }
+
+    @Override
+    public void setActive(Boolean active) {
+        super.setActive(active);
+        setModificationDate(new DateTime());
+    }
+
+    @Override
+    public void setBody(LocalizedString body) {
+        super.setBody(body);
+        setModificationDate(new DateTime());
+    }
+
+    @Override
+    public void setLocation(LocalizedString location) {
+        super.setLocation(location);
+        setModificationDate(new DateTime());
+    }
+
+    @Override
+    public void setPublicationEnd(DateTime publicationEnd) {
+        super.setPublicationEnd(publicationEnd);
+        setModificationDate(new DateTime());
+    }
+
+    @Override
+    public void setPublicationBegin(DateTime publicationBegin) {
+        super.setPublicationBegin(publicationBegin);
+        setModificationDate(new DateTime());
+    }
+
 }

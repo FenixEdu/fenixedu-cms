@@ -26,7 +26,9 @@ public class Page extends Page_Base {
      */
     public Page() {
         super();
-        this.setCreationDate(new DateTime());
+        DateTime now = new DateTime();
+        this.setCreationDate(now);
+        this.setModificationDate(now);
         if (Authenticate.getUser() == null) {
             throw new RuntimeException("Needs Login");
         }
@@ -38,6 +40,7 @@ public class Page extends Page_Base {
         LocalizedString prevName = getName();
         super.setName(name);
 
+        this.setModificationDate(new DateTime());
         if (prevName == null) {
             setSlug(Site.slugify(name.getContent()));
         }
@@ -135,5 +138,17 @@ public class Page extends Page_Base {
             }
         }
         return page;
+    }
+
+    @Override
+    public void setPublished(Boolean published) {
+        setModificationDate(new DateTime());
+        super.setPublished(published);
+    }
+
+    @Override
+    public void setTemplate(CMSTemplate template) {
+        setModificationDate(new DateTime());
+        super.setTemplate(template);
     }
 }
