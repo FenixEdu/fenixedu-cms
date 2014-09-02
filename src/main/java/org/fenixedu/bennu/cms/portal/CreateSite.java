@@ -31,7 +31,7 @@ public class CreateSite {
     @RequestMapping(method = RequestMethod.POST)
     public RedirectView create(Model model, @RequestParam LocalizedString name, @RequestParam LocalizedString description,
             @RequestParam String template, @RequestParam(required = false, defaultValue = "false") Boolean published,
-            @RequestParam String folder, RedirectAttributes redirectAttributes) {
+            @RequestParam String folder, @RequestParam(required = false) boolean embedded, RedirectAttributes redirectAttributes) {
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/sites/new", true);
@@ -39,18 +39,20 @@ public class CreateSite {
             if (published == null) {
                 published = false;
             }
-            createSite(name, description, published, template, folder);
+            createSite(name, description, published, template, folder, embedded);
             return new RedirectView("/cms/sites/", true);
         }
     }
 
     @Atomic
-    private void createSite(LocalizedString name, LocalizedString description, boolean published, String template, String folder) {
+    private void createSite(LocalizedString name, LocalizedString description, boolean published, String template, String folder,
+            boolean embedded) {
         Site site = new Site();
         site.setBennu(Bennu.getInstance());
         if (!Strings.isNullOrEmpty(folder)) {
             site.setFolder(FenixFramework.getDomainObject(folder));
         }
+        site.setEmbedded(embedded);
         site.setDescription(description);
         site.setName(name);
         site.setSlug(StringNormalizer.slugify(name.getContent()));

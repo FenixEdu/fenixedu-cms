@@ -54,6 +54,14 @@
     </div>
 
     <div class="form-group">
+        <label for="embedded" class="col-sm-2 control-label"><spring:message code="label.embedded"/></label>
+        <div class="col-sm-2">
+            <input type="checkbox" name="embedded" value="true" />
+        </div>
+    </div>
+
+
+    <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
             <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.create"/></button>
         </div>

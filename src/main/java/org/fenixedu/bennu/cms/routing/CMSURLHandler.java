@@ -1,12 +1,9 @@
 package org.fenixedu.bennu.cms.routing;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -106,8 +103,6 @@ public final class CMSURLHandler implements SemanticURLHandler {
 
     public void handleRequest(Site site, HttpServletRequest req, HttpServletResponse res, String pageSlug) throws IOException,
             ServletException {
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        Writer bufWriter = new OutputStreamWriter(buf);
 
         if (site.getCanViewGroup().isMember(Authenticate.getUser())) {
             if (site.getPublished()) {
@@ -117,25 +112,27 @@ public final class CMSURLHandler implements SemanticURLHandler {
                         pageSlug = pageSlug.substring(baseUrl.length());
                     }
                     if (pageSlug.endsWith("/") && !req.getRequestURI().equals(req.getContextPath() + "/")) {
-                        handleLeadingSlash(req, res, site, bufWriter);
+                        handleLeadingSlash(req, res, site);
                     } else if (pageSlug.startsWith("/static/")) {
-                        handleStaticResource(req, res, site, buf, bufWriter, pageSlug);
+                        handleStaticResource(req, res, site, pageSlug);
                     } else {
-                        renderCMSPage(req, res, site, bufWriter, pageSlug);
+                        renderCMSPage(req, res, site, pageSlug);
                     }
                 } catch (Exception e) {
-                    buf.reset();
                     logger.error("Exception while rendering CMS page " + req.getRequestURI(), e);
-                    errorPage(req, res, bufWriter, site, 500);
+                    if (res.isCommitted()) {
+                        return;
+                    }
+                    res.reset();
+                    errorPage(req, res, site, 500);
                 }
             } else {
-                errorPage(req, res, bufWriter, site, 404);
+                errorPage(req, res, site, 404);
             }
         } else {
             res.sendError(404);
             return;
         }
-        res.getOutputStream().write(buf.toByteArray(), 0, buf.size());
     }
 
     private Site getSite(MenuFunctionality menu, String url) {
@@ -145,26 +142,26 @@ public final class CMSURLHandler implements SemanticURLHandler {
         return menu.getCmsFolder().resolveSite(url);
     }
 
-    private void handleStaticResource(final HttpServletRequest req, HttpServletResponse res, Site sites,
-            ByteArrayOutputStream buf, Writer bufWriter, String pageSlug) throws IOException, ServletException {
+    private void handleStaticResource(final HttpServletRequest req, HttpServletResponse res, Site sites, String pageSlug)
+            throws IOException, ServletException {
         pageSlug = pageSlug.replaceFirst("/", "");
         byte[] bytes = sites.getTheme().contentForPath(pageSlug);
         if (bytes != null) {
             CMSThemeFile templateFile = sites.getTheme().fileForPath(pageSlug);
-            buf.write(bytes);
             res.setContentLength(bytes.length);
             if (templateFile != null) {
                 res.setContentType(templateFile.getContentType());
             } else {
                 res.setContentType(new MimetypesFileTypeMap().getContentType(pageSlug));
             }
+            res.getOutputStream().write(bytes);
         } else {
-            errorPage(req, res, bufWriter, sites, 404);
+            errorPage(req, res, sites, 404);
         }
     }
 
-    private void renderCMSPage(final HttpServletRequest req, HttpServletResponse res, Site sites, Writer bufWriter,
-            String pageSlug) throws ServletException, IOException, PebbleException {
+    private void renderCMSPage(final HttpServletRequest req, HttpServletResponse res, Site sites, String pageSlug)
+            throws ServletException, IOException, PebbleException {
         if (pageSlug.startsWith("/")) {
             pageSlug = pageSlug.substring(1);
         }
@@ -180,18 +177,18 @@ public final class CMSURLHandler implements SemanticURLHandler {
         }
 
         if (page == null || page.getTemplate() == null) {
-            errorPage(req, res, bufWriter, sites, 404);
+            errorPage(req, res, sites, 404);
         } else {
             try {
-                renderPage(req, pageSlug, res, bufWriter, sites, page, parts);
+                renderPage(req, pageSlug, res, sites, page, parts);
             } catch (ResourceNotFoundException e) {
-                errorPage(req, res, bufWriter, sites, 404);
+                errorPage(req, res, sites, 404);
             }
         }
     }
 
-    private void handleLeadingSlash(final HttpServletRequest req, HttpServletResponse res, Site sites, Writer bufWriter)
-            throws PebbleException, IOException, ServletException {
+    private void handleLeadingSlash(final HttpServletRequest req, HttpServletResponse res, Site sites) throws PebbleException,
+            IOException, ServletException {
         if (req.getMethod().equals("GET")) {
             res.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
             res.setHeader("Location", rewritePageUrl(req));
@@ -202,12 +199,11 @@ public final class CMSURLHandler implements SemanticURLHandler {
                 engine.addExtension(new CMSExtensions());
                 PebbleTemplate compiledTemplate =
                         engine.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
-
                 res.setStatus(500);
                 res.setContentType("text/html");
-                compiledTemplate.evaluate(bufWriter);
+                compiledTemplate.evaluate(res.getWriter());
             } else {
-                errorPage(req, res, bufWriter, sites, 500);
+                errorPage(req, res, sites, 500);
             }
         }
     }
@@ -225,8 +221,8 @@ public final class CMSURLHandler implements SemanticURLHandler {
         return ImmutableMap.of("username", user.getUsername());
     }
 
-    private void renderPage(final HttpServletRequest req, String reqPagePath, HttpServletResponse res, Writer bufWriter,
-            Site site, Page page, String[] requestContext) throws PebbleException, IOException {
+    private void renderPage(final HttpServletRequest req, String reqPagePath, HttpServletResponse res, Site site, Page page,
+            String[] requestContext) throws PebbleException, IOException {
 
         TemplateContext global = new TemplateContext();
         global.setRequestContext(requestContext);
@@ -254,7 +250,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
 
         res.setStatus(200);
         res.setContentType("text/html");
-        compiledTemplate.evaluate(bufWriter, global);
+        compiledTemplate.evaluate(res.getWriter(), global);
     }
 
     private Map<String, Object> makeAppWrapper() {
@@ -307,7 +303,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
         return result;
     }
 
-    private void errorPage(final HttpServletRequest req, HttpServletResponse res, Writer bufWriter, Site site, int errorCode)
+    private void errorPage(final HttpServletRequest req, HttpServletResponse res, Site site, int errorCode)
             throws ServletException, IOException {
         CMSTheme cmsTheme = site.getTheme();
         if (cmsTheme != null && cmsTheme.definesPath(errorCode + ".html")) {
@@ -319,7 +315,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
                 global.put("staticDir", site.getStaticDirectory());
                 res.setStatus(errorCode);
                 res.setContentType("text/html");
-                compiledTemplate.evaluate(bufWriter, global);
+                compiledTemplate.evaluate(res.getWriter(), global);
             } catch (PebbleException e) {
                 throw new ServletException("Could not render error page for " + errorCode);
             }

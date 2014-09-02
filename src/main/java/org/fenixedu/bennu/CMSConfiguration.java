@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.fenixedu.bennu.cms.portal.CMSBean;
 import org.fenixedu.bennu.cms.routing.CMSBackend;
+import org.fenixedu.bennu.cms.routing.CMSEmbeddedBackend;
 import org.fenixedu.bennu.cms.routing.CMSURLHandler;
 import org.fenixedu.bennu.portal.servlet.PortalBackendRegistry;
 import org.fenixedu.bennu.spring.BennuSpringModule;
@@ -27,9 +28,15 @@ public class CMSConfiguration {
         return new CMSBackend(cmsUrlHandler());
     }
 
+    @Bean
+    public CMSEmbeddedBackend cmsEmbeddedBackend() {
+        return new CMSEmbeddedBackend(cmsUrlHandler());
+    }
+
     @PostConstruct
     public void initBackend() {
         PortalBackendRegistry.registerPortalBackend(cmsBackend());
+        PortalBackendRegistry.registerPortalBackend(cmsEmbeddedBackend());
     }
 
 }

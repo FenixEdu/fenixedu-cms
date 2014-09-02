@@ -46,7 +46,7 @@
             <div><small>Url: <code>${i.baseUrl}</code></small></div>
             <div><small>${i.getDescription().getContent()}</small></div>
           </td>
-          <td>
+          <td class="text-center">
               <c:choose>
                   <c:when test="${ i.published }">
                       <span class="label label-primary">Available</span>
@@ -55,6 +55,9 @@
                       <span class="label label-default">Unavailable</span>
                   </c:otherwise>
               </c:choose>
+              <c:if test="${i.getEmbedded()}">
+                  <p><span class="label label-info">Embedded</span></p>
+              </c:if>
           </td>
           <td><joda:format value="${i.creationDate}" pattern="MMM dd, yyyy"/></td>
           <td>

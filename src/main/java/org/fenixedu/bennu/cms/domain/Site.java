@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.routing.CMSBackend;
+import org.fenixedu.bennu.cms.routing.CMSEmbeddedBackend;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
@@ -99,6 +100,8 @@ public class Site extends Site_Base {
         this.setCanViewGroup(AnyoneGroup.get());
         this.setCanPostGroup(UserGroup.of(Authenticate.getUser()));
         this.setCanAdminGroup(DynamicGroup.get("managers"));
+
+        new PersistentSiteViewersGroup(this);
     }
 
     /**
@@ -267,8 +270,10 @@ public class Site extends Site_Base {
             if (this.getFunctionality() != null) {
                 deleteMenuFunctionality();
             }
-            this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), false, getSlug(),
-                    CMSBackend.BACKEND_KEY, "anyone", this.getDescription(), this.getName(), getSlug()));
+            this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), getEmbedded(), getSlug(),
+                    getEmbedded() ? CMSEmbeddedBackend.BACKEND_KEY : CMSBackend.BACKEND_KEY, "anyone", this.getDescription(),
+                    this.getName(), getSlug()));
+            getFunctionality().setAccessGroup(SiteViewersGroup.get(this));
         }
 
     }
