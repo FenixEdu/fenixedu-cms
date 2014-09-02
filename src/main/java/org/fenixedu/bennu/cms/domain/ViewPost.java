@@ -1,7 +1,5 @@
 package org.fenixedu.bennu.cms.domain;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.fenixedu.bennu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
@@ -19,10 +17,10 @@ public class ViewPost extends ViewPost_Base {
      * fetches a post based on the 'q' parameter of the request and saves that post on the local and global context as 'post'
      */
     @Override
-    public void handle(Page page, HttpServletRequest req, TemplateContext local, TemplateContext global) {
-        String post = req.getParameter("q");
-        if (post != null) {
-            Post p = page.getSite().postForSlug(post);
+    public void handle(Page page, TemplateContext local, TemplateContext global) {
+        String[] ctx = global.getRequestContext();
+        if (ctx.length > 1) {
+            Post p = page.getSite().postForSlug(ctx[1]);
             local.put("post", p);
             global.put("post", p);
         } else {

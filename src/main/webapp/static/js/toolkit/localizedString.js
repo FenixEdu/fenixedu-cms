@@ -2,14 +2,6 @@
     Bennu.localizedString = Bennu.localizedString || {};
     Bennu.localizedString.attr = "bennu-localized-string";
 
-    var attachCssToHead = function () {
-        var newScript = document.createElement('style');
-        var content = document.createTextNode('[' + Bennu.localizedString.attr + ']{ display:none !important; }');
-        newScript.appendChild(content);
-        var bodyClass = document.getElementsByTagName('head')[0];
-        bodyClass.insertBefore(newScript, bodyClass.childNodes[2]);
-    };
-
     Bennu.localizedString.changeData = function (locale, localeButton, inputField, widget) {
         widget = $(widget);
         var val = $(widget.data("related")).val();
@@ -79,8 +71,6 @@
     };
 
     $(function () {
-        attachCssToHead();
-
         $("[bennu-localized-string]").map(function(i,e){
             Bennu.localizedString.createWidget(e);
         });

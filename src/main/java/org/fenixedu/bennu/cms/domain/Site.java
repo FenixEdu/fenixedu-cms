@@ -2,21 +2,19 @@ package org.fenixedu.bennu.cms.domain;
 
 import static java.util.stream.Collectors.toSet;
 
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.routing.CMSBackend;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
+import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.core.groups.UserGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
@@ -30,11 +28,10 @@ import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
+import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 
 public class Site extends Site_Base {
     /**
@@ -52,7 +49,7 @@ public class Site extends Site_Base {
      * @param c
      *            the class to be registered as a template.
      */
-    public static void register(String type, Class c) {
+    public static void register(String type, Class<?> c) {
         TEMPLATES.put(type, c);
     }
 
@@ -80,8 +77,8 @@ public class Site extends Site_Base {
     public static HashMap<String, String> getTemplates() {
         HashMap<String, String> map = new HashMap<>();
 
-        for (Class c : TEMPLATES.values()) {
-            RegisterSiteTemplate registerSiteTemplate = (RegisterSiteTemplate) c.getAnnotation(RegisterSiteTemplate.class);
+        for (Class<?> c : TEMPLATES.values()) {
+            RegisterSiteTemplate registerSiteTemplate = c.getAnnotation(RegisterSiteTemplate.class);
             map.put(registerSiteTemplate.type(), registerSiteTemplate.name() + " - " + registerSiteTemplate.description());
         }
 
@@ -94,11 +91,14 @@ public class Site extends Site_Base {
     public Site() {
         super();
         if (Authenticate.getUser() == null) {
-            throw new RuntimeException("Needs Login");
+            throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
+
         this.setCanViewGroup(AnyoneGroup.get());
+        this.setCanPostGroup(UserGroup.of(Authenticate.getUser()));
+        this.setCanAdminGroup(DynamicGroup.get("managers"));
     }
 
     /**
@@ -123,6 +123,46 @@ public class Site extends Site_Base {
     }
 
     /**
+     * returns the group of people who can post this site.
+     *
+     * @return the access group for this site
+     */
+    public Group getCanPostGroup() {
+        return getPostGroup().toGroup();
+    }
+
+    /**
+     * sets the access group of people who can post in this site
+     *
+     * @param group
+     *            the group of people who can view this site
+     */
+    @Atomic
+    public void setCanPostGroup(Group group) {
+        setPostGroup(group.toPersistentGroup());
+    }
+
+    /**
+     * returns the group of people who can post this site.
+     *
+     * @return the access group for this site
+     */
+    public Group getCanAdminGroup() {
+        return getAdminGroup().toGroup();
+    }
+
+    /**
+     * sets the access group of people who can post in this site
+     *
+     * @param group
+     *            the group of people who can view this site
+     */
+    @Atomic
+    public void setCanAdminGroup(Group group) {
+        setAdminGroup(group.toPersistentGroup());
+    }
+
+    /**
      * searches for a {@link Site} by slug.
      *
      * @param slug
@@ -144,11 +184,7 @@ public class Site extends Site_Base {
      *         the {@link Page} with the given slug if it exists on this site, or null otherwise.
      */
     public Page pageForSlug(String slug) {
-        if ((Strings.isNullOrEmpty(slug) || slug.startsWith("/")) && getInitialPage() != null) {
-            return getInitialPage();
-        } else {
-            return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElse(null);
-        }
+        return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElse(null);
     }
 
     /**
@@ -203,30 +239,6 @@ public class Site extends Site_Base {
         }
     }
 
-    public static String slugify(String... parts) {
-        return slugify(Lists.newArrayList(parts));
-    }
-
-    public static String slugify(Iterable<String> parts) {
-        return slugify(Joiner.on("-").join(parts));
-    }
-
-    // To Remove
-    @Deprecated
-    public static String slugify(String name) {
-        Preconditions.checkArgument(name != null && !name.isEmpty(), "Trying to slugify an empty name");
-        Pattern NONLATIN = Pattern.compile("[^\\w-]");
-        Pattern WHITESPACE = Pattern.compile("[\\s]");
-        name = name.trim();
-        name = Normalizer.normalize(name, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-        String nowhitespace = WHITESPACE.matcher(name).replaceAll("-");
-        String normalized = Normalizer.normalize(nowhitespace, Form.NFD);
-        String slug = NONLATIN.matcher(normalized).replaceAll("");
-        name = slug.toLowerCase(Locale.ENGLISH);
-
-        return name;
-    }
-
     @Atomic
     private void deleteMenuFunctionality() {
         MenuFunctionality mf = this.getFunctionality();
@@ -243,28 +255,29 @@ public class Site extends Site_Base {
      */
     @Override
     public void setSlug(String slug) {
+        super.setSlug(slug);
+    }
+
+    public void updateMenuFunctionality() {
         Preconditions.checkNotNull(this.getDescription());
         Preconditions.checkNotNull(this.getName());
+        Preconditions.checkArgument(isValidSlug(getSlug()));
 
-        while (!isValidSlug(slug)) {
-            String randomSlug = UUID.randomUUID().toString().substring(0, 3);
-            slug = Joiner.on("-").join(slug, randomSlug);
+        if (getFolder() == null) {
+            if (this.getFunctionality() != null) {
+                deleteMenuFunctionality();
+            }
+            this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), false, getSlug(),
+                    CMSBackend.BACKEND_KEY, "anyone", this.getDescription(), this.getName(), getSlug()));
         }
 
-        super.setSlug(slug);
-
-        if (this.getFunctionality() != null) {
-            deleteMenuFunctionality();
-        }
-
-        this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), false, slug,
-                CMSBackend.BACKEND_KEY, "anyone", this.getDescription(), this.getName(), slug));
     }
 
     @Atomic
     public void delete() {
         MenuFunctionality mf = this.getFunctionality();
         this.setFunctionality(null);
+        this.setFolder(null);
 
         if (mf != null) {
             mf.delete();
@@ -286,7 +299,10 @@ public class Site extends Site_Base {
         for (Page page : getPagesSet()) {
             page.delete();
         }
+
         this.setViewGroup(null);
+        this.setPostGroup(null);
+        this.setAdminGroup(null);
         this.setTheme(null);
         this.setCreatedBy(null);
         this.setBennu(null);
@@ -308,6 +324,13 @@ public class Site extends Site_Base {
     }
 
     /**
+     * @return true if a site is the default site, meaning if this site should respond to '/' requests
+     */
+    public boolean isDefault() {
+        return Bennu.getInstance().getDefaultSite() == this;
+    }
+
+    /**
      * @return the {@link ListCategoryPosts} of this {@link Site} if it is defined, or null otherwise.
      */
     public Page getViewCategoryPage() {
@@ -325,11 +348,7 @@ public class Site extends Site_Base {
      * @return the static directory of this {@link Site}.
      */
     public String getStaticDirectory() {
-        String path = CoreConfiguration.getConfiguration().applicationUrl();
-        if (!path.endsWith("/")) {
-            path = path + "/";
-        }
-        return path + this.getSlug() + "/static";
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/" + getBaseUrl() + "/static";
     }
 
     /**
@@ -358,4 +377,24 @@ public class Site extends Site_Base {
         return getMenusSet().stream().filter(m -> !m.getComponentsOfClass(TopMenuComponent.class).isEmpty()).collect(toSet());
     }
 
+    public String getBaseUrl() {
+        if (getFolder() != null) {
+            return getFolder().getBaseUrl(this);
+        } else {
+            return getSlug();
+        }
+    }
+
+    @Override
+    public void setFolder(CMSFolder folder) {
+        super.setFolder(folder);
+        if (folder != null && getFunctionality() != null) {
+            deleteMenuFunctionality();
+        }
+    }
+
+    @ConsistencyPredicate
+    public boolean checkHasEitherFunctionalityOrFolder() {
+        return getFunctionality() != null || getFolder() != null;
+    }
 }

@@ -11,10 +11,10 @@
             <div class="${emptyName ? "form-group has-error" : "form-group"}">
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.edit.label.slug"/></label>
 
-                <div class="col-sm-2">
+                <div class="col-sm-4">
                     <div class="input-group">
 
-                        <span class="input-group-addon"><code>/</code></span>
+                        <span class="input-group-addon"><code>${site.folder == null ? '' : site.folder.functionality.fullPath}/</code></span>
                         <input required type="text" name="newSlug" class="form-control" id="inputEmail3"
                                placeholder="<spring:message code="site.edit.label.slug" />" value='${site.slug}' \>
                     </div>
@@ -26,7 +26,7 @@
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.edit.label.name"/></label>
 
                 <div class="col-sm-10">
-                    <input bennu-localized-string required type="text" name="name" class="form-control" id="inputEmail3"
+                    <input bennu-localized-string required-any type="text" name="name" class="form-control" id="inputEmail3"
                            placeholder="<spring:message code="site.edit.label.name" />" value='${site.name.json()}' \>
                     <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
                             code="site.edit.error.emptyName"/></p></c:if>
@@ -38,7 +38,7 @@
                         code="site.edit.label.description"/></label>
 
                 <div class="col-sm-10">
-                    <textarea bennu-localized-string required name="description" class="form-control"
+                    <textarea bennu-localized-string required-any name="description" class="form-control"
                               rows="3">${site.description.json()}</textarea>
                 </div>
             </div>
@@ -54,6 +54,21 @@
                     </select>
                 </div>
             </div>
+
+            <div class="form-group">
+                <label for="folder" class="col-sm-2 control-label"><spring:message code="site.edit.label.folder"/></label>
+
+                <div class="col-sm-10">
+                    <select name="folder" id="" class="form-control">
+                        <option value ${site.folder == null ? 'selected': ''}>--</option>
+
+                        <c:forEach items="${folders}" var="folder">
+                            <option value="${folder.externalId}" ${site.folder == folder ? 'selected': ''}>${folder.functionality.description.content}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
                         code="site.create.label.published"/></label>
@@ -63,6 +78,31 @@
 
                 </div>
             </div>
+
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
+
+                <div class="col-sm-10">
+                    <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text" value="${ site.canViewGroup.expression }"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">Can Post</label>
+
+                <div class="col-sm-10">
+                    <input bennu-group allow="managers,custom" name="postGroup" type="text" value="${ site.canPostGroup.expression }"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">Can Admin</label>
+
+                <div class="col-sm-10">
+                    <input bennu-group allow="managers,custom" name="adminGroup" type="text" value="${ site.canAdminGroup.expression }"/>
+                </div>
+            </div>
+
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.save"/></button>
@@ -78,11 +118,15 @@
                 <div>
                     <b>Created at</b>: <joda:format value="${site.creationDate}" pattern="dd MMM, yyyy HH:mm:ss"/>
                 </div>
-
+                ${site.canPostGroup}
             </div>
         </div>
     </form>
 </div>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
 <script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.4/typeahead.bundle.min.js"></script>
 

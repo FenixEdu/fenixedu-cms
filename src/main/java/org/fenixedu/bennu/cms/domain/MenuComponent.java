@@ -5,8 +5,6 @@ import static java.util.stream.Collectors.toList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -39,7 +37,7 @@ public class MenuComponent extends MenuComponent_Base {
     }
 
     @Override
-    public void handle(Page currentPage, HttpServletRequest req, TemplateContext local, TemplateContext global) {
+    public void handle(Page currentPage, TemplateContext local, TemplateContext global) {
         if (!getMenu().getChildrenSorted().isEmpty()) {
             handleMenu(getMenu(), "menus", currentPage, global);
             local.put("menu", menuWrapper(getMenu(), currentPage));

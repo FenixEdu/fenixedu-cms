@@ -19,17 +19,12 @@ import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
-import com.mitchellbosecke.pebble.error.ParserException;
 import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
 import com.mitchellbosecke.pebble.extension.Test;
-import com.mitchellbosecke.pebble.lexer.Token;
-import com.mitchellbosecke.pebble.node.RenderableNode;
-import com.mitchellbosecke.pebble.tokenParser.AbstractTokenParser;
 
 public class CMSExtensions extends AbstractExtension {
     public class LengthFilter implements Filter {
@@ -44,7 +39,7 @@ public class CMSExtensions extends AbstractExtension {
                 if (input.getClass().isArray()) {
                     return Array.getLength(input);
                 } else if (input instanceof Collection) {
-                    return ((Collection) input).size();
+                    return ((Collection<?>) input).size();
                 }
             }
             return 0;
@@ -60,7 +55,7 @@ public class CMSExtensions extends AbstractExtension {
         @Override
         public Object execute(Map<String, Object> args) {
             if (args.get("map") != null && args.get("map") instanceof Map) {
-                return ((Map) args.get("map")).entrySet();
+                return ((Map<?, ?>) args.get("map")).entrySet();
             }
             return Sets.newLinkedHashSet();
         }
@@ -97,7 +92,7 @@ public class CMSExtensions extends AbstractExtension {
 
         @Override
         public Object apply(Object input, Map<String, Object> args) {
-            return input instanceof Iterable ? Iterables.getFirst((Iterable) input, null) : null;
+            return input instanceof Iterable ? Iterables.getFirst((Iterable<?>) input, null) : null;
         }
 
     }
@@ -111,7 +106,7 @@ public class CMSExtensions extends AbstractExtension {
 
         @Override
         public Object apply(Object input, Map<String, Object> args) {
-            return input instanceof Iterable ? Iterables.skip((Iterable) input, 1) : null;
+            return input instanceof Iterable ? Iterables.skip((Iterable<?>) input, 1) : null;
         }
 
     }
@@ -162,7 +157,7 @@ public class CMSExtensions extends AbstractExtension {
         public Object apply(Object input, Map<String, Object> args) {
             List<Object> list = new ArrayList<Object>();
             if (input != null && input instanceof List) {
-                list.addAll((List<Object>) input);
+                list.addAll((List<?>) input);
                 Collections.reverse(list);
             }
             return list;
@@ -185,7 +180,7 @@ public class CMSExtensions extends AbstractExtension {
         }
 
         public String[] arguments(Map<String, Object> args) {
-            List<String> values = Lists.newArrayList();
+            List<String> values = new ArrayList<>();
             for (String variableArg : variableArgs) {
                 if (args.containsKey(variableArg) && args.get(variableArg) instanceof String) {
                     values.add((String) args.get(variableArg));
@@ -208,22 +203,7 @@ public class CMSExtensions extends AbstractExtension {
             Object keyObject = args.get("key");
             Preconditions.checkArgument(mapObject != null && keyObject != null, "Please specify non empty 'map' and 'key'");
             Preconditions.checkArgument(mapObject instanceof Map, "The first argument must be of type " + Map.class.getName());
-            return ((Map) mapObject).get(keyObject);
-        }
-
-    }
-
-    public static class RecursiveTreeToken extends AbstractTokenParser {
-
-        @Override
-        public String getTag() {
-            return "recursetree";
-        }
-
-        @Override
-        public RenderableNode parse(Token token) throws ParserException {
-
-            return null;
+            return ((Map<?, ?>) mapObject).get(keyObject);
         }
 
     }
@@ -264,7 +244,7 @@ public class CMSExtensions extends AbstractExtension {
 
         @Override
         public boolean apply(Object input, Map<String, Object> args) {
-            return ((Collection) args.get("collection")).contains(input);
+            return ((Collection<?>) args.get("collection")).contains(input);
         }
 
     }

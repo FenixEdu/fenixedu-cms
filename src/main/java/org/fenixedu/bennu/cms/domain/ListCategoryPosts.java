@@ -1,10 +1,8 @@
 package org.fenixedu.bennu.cms.domain;
 
 import java.util.HashMap;
-import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.common.collect.Lists;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
 import pt.ist.fenixframework.Atomic;
@@ -23,13 +21,14 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
     }
 
     @Override
-    public void handle(Page page, HttpServletRequest req, TemplateContext local, TemplateContext global) {
-        Category category = Optional.of(getCategory()).orElseGet(() -> page.getSite().categoryForSlug(req.getParameter("c")));
+    public void handle(Page page, TemplateContext local, TemplateContext global) {
+        String slug = global.getRequestContext().length > 1 ? global.getRequestContext()[1] : null;
+        Category category = getCategory() != null ? getCategory() : page.getSite().categoryForSlug(slug);
         local.put("category", category);
         global.put("category", category);
 
         PostsPresentationBean postsPresentation = new PostsPresentationBean(category.getPostsSet());
-        int currentPage = postsPresentation.currentPage(req.getParameter("p"));
+        int currentPage = postsPresentation.currentPage(global.getParameter("p"));
         HashMap<String, Object> pagination = postsPresentation.paginate(page, currentPage, POSTS_PER_PAGE);
 
         local.put("posts", postsPresentation.getVisiblePosts());

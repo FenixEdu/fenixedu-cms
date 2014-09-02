@@ -23,6 +23,9 @@ public class AdminMenu {
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
     public String posts(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
+
+        AdminSites.canEdit(site);
+
         model.addAttribute("site", site);
         model.addAttribute("menus", site.getMenusSet());
         return "menus";
@@ -31,6 +34,9 @@ public class AdminMenu {
     @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
     public String createMenu(Model model, @PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
+
+        AdminSites.canEdit(s);
+
         model.addAttribute("site", s);
         return "createMenu";
     }

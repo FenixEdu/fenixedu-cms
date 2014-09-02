@@ -2,9 +2,13 @@ package org.fenixedu.bennu.cms.domain;
 
 import java.util.UUID;
 
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.groups.AnyoneGroup;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
+import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -13,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.Atomic;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
 
 /**
  * Model for a page on a given Site.
@@ -30,9 +33,10 @@ public class Page extends Page_Base {
         this.setCreationDate(now);
         this.setModificationDate(now);
         if (Authenticate.getUser() == null) {
-            throw new RuntimeException("Needs Login");
+            throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
+        this.setCanViewGroup(AnyoneGroup.get());
     }
 
     @Override
@@ -42,17 +46,28 @@ public class Page extends Page_Base {
 
         this.setModificationDate(new DateTime());
         if (prevName == null) {
-            setSlug(Site.slugify(name.getContent()));
+            setSlug(StringNormalizer.slugify(name.getContent()));
         }
     }
 
     @Override
     public void setSlug(String slug) {
+        if (slug == null) {
+            slug = "";
+        }
+
+        slug = StringNormalizer.slugify(slug);
+
         while (!isValidSlug(slug)) {
             String randomSlug = UUID.randomUUID().toString().substring(0, 3);
             slug = Joiner.on("-").join(slug, randomSlug);
         }
+
         super.setSlug(slug);
+
+        if (slug == "" && getSite().getInitialPage() == null) {
+            getSite().setInitialPage(this);
+        }
     }
 
     /**
@@ -62,7 +77,7 @@ public class Page extends Page_Base {
      * @return true if it is a valid slug.
      */
     private boolean isValidSlug(String slug) {
-        return !Strings.isNullOrEmpty(slug) && getSite().pageForSlug(slug) == null;
+        return getSite().pageForSlug(slug) == null;
     }
 
     /**
@@ -86,10 +101,17 @@ public class Page extends Page_Base {
     public void delete() {
         for (Component component : getComponentsSet()) {
             component.delete();
+
         }
+
+        for (MenuItem mi : getMenuItemsSet()) {
+            mi.delete();
+        }
+
         this.setTemplate(null);
         this.setSite(null);
         this.setCreatedBy(null);
+        this.setViewGroup(null);
         this.deleteDomainObject();
     }
 
@@ -97,12 +119,28 @@ public class Page extends Page_Base {
      * @return the URL link for this page.
      */
     public String getAddress() {
-        String path = CoreConfiguration.getConfiguration().applicationUrl();
-        if (path.charAt(path.length() - 1) != '/') {
-            path += "/";
-        }
-        path += getSite().getSlug() + "/" + getSlug();
-        return path;
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/" + getSite().getBaseUrl() + "/" + getSlug();
+    }
+
+    /**
+     * returns the group of people who can view this site.
+     *
+     * @return group
+     *         the access group for this site
+     */
+    public Group getCanViewGroup() {
+        return getViewGroup().toGroup();
+    }
+
+    /**
+     * sets the access group for this site
+     *
+     * @param group
+     *            the group of people who can view this site
+     */
+    @Atomic
+    public void setCanViewGroup(Group group) {
+        setViewGroup(group.toPersistentGroup());
     }
 
     public static Page create(Site site, Menu menu, MenuItem parent, LocalizedString name, boolean published, String template,
@@ -125,7 +163,6 @@ public class Page extends Page_Base {
         if (menu != null) {
             MenuItem.create(menu, page, name, parent);
         }
-        log.info("[ Page created { name: " + page.getName().getContent() + ", address: " + page.getAddress() + " }");
         return page;
     }
 

@@ -3,7 +3,7 @@ package org.fenixedu.bennu.cms.domain;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.fenixedu.bennu.cms.CMSConfigurationManager;
@@ -16,6 +16,7 @@ import org.joda.time.DateTime;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
+import com.google.common.io.ByteStreams;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -64,20 +65,15 @@ public class CMSTheme extends CMSTheme_Base {
     }
 
     /**
-     * Searches for a {@link CMSTemplateFile} with a given name on this theme.
+     * Searches for a {@link CMSThemeFile} with a given name on this theme.
      * 
-     * @param t
-     *            the displayName of the wanted {@link CMSTemplateFile}.
+     * @param path
+     *            the displayName of the wanted {@link CMSThemeFile}.
      * @return
-     *         the {@link CMSTemplateFile} with the given displayName if it exists, or null otherwise.
+     *         the {@link CMSThemeFile} with the given displayName if it exists, or null otherwise.
      */
-    public CMSTemplateFile fileForPath(String t) {
-        for (CMSTemplateFile file : this.getFilesSet()) {
-            if (file.getFullPath().equals(t)) {
-                return file;
-            }
-        }
-        return null;
+    public CMSThemeFile fileForPath(String path) {
+        return getFiles().getFileForPath(path);
     }
 
     private static String getTypeForThemeFolder(String path) {
@@ -91,24 +87,24 @@ public class CMSTheme extends CMSTheme_Base {
         }
     }
 
-    public InputStream streamForPath(String t) {
+    public byte[] contentForPath(String t) {
         String themeDevelopmentDirectory = CMSConfigurationManager.getConfiguration().themeDevelopmentDirectory();
         if (CoreConfiguration.getConfiguration().developmentMode() && themeDevelopmentDirectory != null
                 && this.getType().equals(getTypeForThemeFolder(themeDevelopmentDirectory))) {
             try {
-                return new FileInputStream(themeDevelopmentDirectory + t);
-            } catch (FileNotFoundException e) {
+                return ByteStreams.toByteArray(new FileInputStream(themeDevelopmentDirectory + t));
+            } catch (IOException e) {
                 return null;
             }
         } else {
-            CMSTemplateFile file = this.fileForPath(t);
-            return file == null ? null : file.getStream();
+            CMSThemeFile file = this.fileForPath(t);
+            return file == null ? null : file.getContent();
         }
     }
 
     public boolean definesPath(String string) {
         // FIXME Find a better way to do this!
-        return streamForPath(string) != null;
+        return contentForPath(string) != null;
     }
 
     /**
@@ -144,14 +140,15 @@ public class CMSTheme extends CMSTheme_Base {
             template.delete();
         }
 
-        for (CMSTemplateFile file : this.getFilesSet()) {
-            file.setTemplate(null);
-            file.setTheme(null);
-            file.delete();
-        }
-
         this.deleteDomainObject();
 
+    }
+
+    @Atomic
+    public void changeFiles(CMSThemeFiles files) {
+        if (getFiles() == null || !getFiles().checksumMatches(files)) {
+            setFiles(files);
+        }
     }
 
 }

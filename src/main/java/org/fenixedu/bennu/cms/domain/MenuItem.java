@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
@@ -28,7 +28,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
     public MenuItem() {
         super();
         if (Authenticate.getUser() == null) {
-            throw new RuntimeException("Needs Login");
+            throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
@@ -121,12 +121,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
         if (getUrl() != null) {
             return getUrl();
         } else {
-            String path = CoreConfiguration.getConfiguration().applicationUrl();
-            if (path.charAt(path.length() - 1) != '/') {
-                path += "/";
-            }
-            path += this.getMenu().getSite().getSlug() + "/" + this.getPage().getSlug();
-            return path;
+            return getPage().getAddress();
         }
     }
 

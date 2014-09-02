@@ -10,7 +10,6 @@ public class CMSTemplate extends CMSTemplate_Base {
         for (Page page : getPagesSet()) {
             page.setTemplate(null);
         }
-        this.setFile(null);
         this.setTheme(null);
         this.deleteDomainObject();
     }

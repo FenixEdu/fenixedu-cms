@@ -1,0 +1,27 @@
+{% if pagination.pages.size != 1 %}
+<center>
+<ul class="pagination pagination-sm">
+
+  {% if pagination.current != 1 %}
+    <li><a href="?p={{pagination.current - 1}}">&laquo;</a></li>
+  {% else %}
+    <li class="disabled"><a>&laquo;</a></li>
+  {% endif %}
+
+  {% for i in pagination.pages %}
+    {% if loop.index + 1 == pagination.current %}
+      <li class="active"><a href="{{ i.url }}">{{loop.index + 1}}</a></li>
+    {% else %}
+      <li><a href="{{ i.url }}">{{loop.index + 1}}</a></li>
+    {% endif %}
+  {% endfor %}
+
+  {% if pagination.current != pagination.pages.size %}
+    <li><a href="?p={{pagination.current + 1}}">&raquo;</a></li>
+  {% else %}
+    <li class="disabled"><a>&raquo;</a></li>
+  {% endif %}
+
+</ul>
+</center>
+{% endif %}

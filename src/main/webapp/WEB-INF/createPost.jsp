@@ -7,7 +7,7 @@
   <div class="${emptyName ? "form-group has-error" : "form-group"}">
     <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.create.label.name" /></label>
     <div class="col-sm-10">
-      <input bennu-localized-string required type="text" name="name" class="form-control" id="inputEmail3" placeholder="<spring:message code="post.create.label.name" />">
+      <input bennu-localized-string required name="name" id="inputEmail3" placeholder="<spring:message code="post.create.label.name" />">
       <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="post.create.error.emptyName"/></p></c:if>
     </div>
   </div>
@@ -15,10 +15,10 @@
   <div class="form-group">
     <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.create.label.body" /></label>
     <div class="col-sm-10">
-      <textarea bennu-localized-string required name="body" class="form-control" rows="3"></textarea>
+      <textarea bennu-html-editor bennu-localized-string required name="body" rows="3"></textarea>
     </div>
   </div>
-
+adsfasdfsd
 
 
   <div class="form-group">
@@ -28,4 +28,6 @@
   </div>
 </form>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
 <script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>

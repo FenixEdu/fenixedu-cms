@@ -23,6 +23,9 @@ public class AdminCategory {
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
     public String categories(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
+
+        AdminSites.canEdit(site);
+
         model.addAttribute("site", site);
         model.addAttribute("categories", site.getCategoriesSet());
         return "categories";
@@ -31,6 +34,9 @@ public class AdminCategory {
     @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
     public String createCategory(Model model, @PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
+
+        AdminSites.canEdit(s);
+
         model.addAttribute("site", s);
         return "createCategory";
     }
@@ -43,6 +49,9 @@ public class AdminCategory {
             return new RedirectView("/cms/categories/" + slug + "/create", true);
         }
         Site s = Site.fromSlug(slug);
+
+        AdminSites.canEdit(s);
+
         createCategory(s, name);
         return new RedirectView("/cms/categories/" + s.getSlug() + "", true);
     }
@@ -58,6 +67,9 @@ public class AdminCategory {
     public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "slugCategories") String slugCategories) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         s.categoryForSlug(slugCategories).delete();
         return new RedirectView("/cms/categories/" + s.getSlug() + "", true);
     }

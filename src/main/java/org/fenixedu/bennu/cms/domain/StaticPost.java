@@ -1,7 +1,5 @@
 package org.fenixedu.bennu.cms.domain;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
 import pt.ist.fenixframework.Atomic;
@@ -15,7 +13,7 @@ public class StaticPost extends StaticPost_Base {
     }
 
     @Override
-    public void handle(Page page, HttpServletRequest req, TemplateContext local, TemplateContext global) {
+    public void handle(Page page, TemplateContext local, TemplateContext global) {
         Post post = this.getPost();
         local.put("post", post);
         global.put("post", post);

@@ -1,5 +1,11 @@
 package org.fenixedu.bennu.cms.domain;
 
+valueType org.fenixedu.bennu.cms.domain.CMSThemeFiles as CMSThemeFiles {
+    externalizeWith {
+        bytearray externalize();
+    }
+}
+
 class Site{
   String alternativeSite;
   String style;
@@ -8,6 +14,9 @@ class Site{
   LocalizedString description;
   String slug;
   Boolean published;
+}
+
+public class CMSFolder {
 }
 
 class Page{
@@ -48,6 +57,8 @@ class Post{
   Boolean active;
   DateTime publicationBegin;
   DateTime publicationEnd;
+  DateTime referedSubjectBegin;
+  DateTime referedSubjectEnd;
   LocalizedString location;
 }
 
@@ -61,19 +72,15 @@ class CMSTheme{
   String name;
   String description;
   String type;
-
+  CMSThemeFiles files;
 }
 
 class CMSTemplate{
+  String filePath;
   String name;
   String description;
   String type;
 }
-
-class CMSTemplateFile extends .org.fenixedu.bennu.io.domain.GenericFile {
-    protected String fullPath;
-}
-
 
 class ViewPost extends Component{}
 class ListPosts extends Component{}
@@ -83,6 +90,10 @@ class StaticPost extends Component{}
 class MenuComponent extends Component{}
 class TopMenuComponent extends MenuComponent{}
 class SideMenuComponent extends MenuComponent{}
+
+class PostFile{
+    Integer index;
+}
 
 relation ComponentUser{
   .org.fenixedu.bennu.core.domain.User playsRole createdBy{
@@ -99,6 +110,15 @@ relation PrimaryCMSThemeBennu{
     multiplicity 0..1;
   }
   CMSTheme playsRole defaultCMSTheme{
+    multiplicity 0..1;
+  }
+}
+
+relation PrimarySite{
+  protected .org.fenixedu.bennu.core.domain.Bennu playsRole primaryBennu{
+    multiplicity 0..1;
+  }
+  Site playsRole defaultSite{
     multiplicity 0..1;
   }
 }
@@ -121,16 +141,6 @@ relation CMSTemplateCMSTheme{
   }
 }
 
-relation CMSTemplateCMSTH{
-  CMSTemplateFile playsRole file{
-    multiplicity 1..1;
-  }
-
-  CMSTemplate playsRole template{
-    multiplicity 0..1;
-  }
-}
-
 relation CMSThemeUser{
   .org.fenixedu.bennu.core.domain.User playsRole createdBy{
     multiplicity 0..1;
@@ -150,6 +160,38 @@ relation CMSThemeCMSTheme{
   }
 }
 
+relation FilePostFile{
+  .org.fenixedu.bennu.io.domain.GroupBasedFile playsRole files{
+    multiplicity 0..1;
+  }
+
+  PostFile playsRole postFile{
+    multiplicity 0..1;
+  }
+}
+
+relation PostAttachments{
+  Post playsRole post{
+    multiplicity 1..1;
+  }
+
+  protected PostFile playsRole attachements{
+    multiplicity 0..*;
+  }
+}
+
+relation PostFile{
+  Post playsRole post{
+    multiplicity 0..1;
+  }
+
+  .org.fenixedu.bennu.io.domain.GroupBasedFile playsRole files{
+    multiplicity 0..*;
+  }
+}
+
+
+
 
 relation CMSThemeSite{
   CMSTheme playsRole theme{
@@ -167,16 +209,6 @@ relation CMSTemplatePage{
   }
 
   Page playsRole pages{
-    multiplicity *;
-  }
-}
-
-relation CMSThemeCMSTemplateFile{
-  protected CMSTheme playsRole theme{
-    multiplicity 1..1;
-  }
-
-  CMSTemplateFile playsRole files{
     multiplicity *;
   }
 }
@@ -293,9 +325,30 @@ relation BennuSite{
   }
 }
 
+relation FolderMenuFunctionality {
+    protected .org.fenixedu.bennu.portal.domain.MenuFunctionality playsRole functionality {
+        multiplicity 1..1;
+    }
+    public CMSFolder playsRole cmsFolder;
+}
+
+relation FolderHasSites {
+    public CMSFolder playsRole folder;
+    public Site playsRole site {
+        multiplicity *;
+    }
+}
+
+relation FolderRoot {
+    protected .org.fenixedu.bennu.core.domain.Bennu playsRole bennu;
+    public CMSFolder playsRole cmsFolder {
+        multiplicity *;
+    }
+}
+
 relation SiteMenuFunctionality{
   .org.fenixedu.bennu.portal.domain.MenuFunctionality playsRole functionality{
-    multiplicity 1..1;
+    multiplicity 0..1;
   }
   Site playsRole sites{
     multiplicity 0..1;
@@ -371,3 +424,42 @@ relation SiteViewGroup {
     }
 }
 
+relation SiteEditGroup {
+    protected Site playsRole sitePostGroup {
+        multiplicity *;
+    }
+
+    protected .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole postGroup {
+        multiplicity 1..1;
+    }
+}
+
+relation SiteAdminGroup {
+    protected Site playsRole siteAdminGroup {
+        multiplicity *;
+    }
+
+    protected .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole adminGroup {
+        multiplicity 1..1;
+    }
+}
+
+relation PageViewGroup {
+    protected Page playsRole pageViewGroup {
+        multiplicity *;
+    }
+
+    protected .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole viewGroup {
+        multiplicity 1..1;
+    }
+}
+
+relation PostViewGroup {
+    protected Post playsRole postViewGroup {
+        multiplicity *;
+    }
+
+    protected .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole viewGroup {
+        multiplicity 1..1;
+    }
+}

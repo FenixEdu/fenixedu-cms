@@ -1,8 +1,6 @@
 package org.fenixedu.bennu.cms.portal;
 
-import org.fenixedu.bennu.cms.domain.CMSTemplate;
-import org.fenixedu.bennu.cms.domain.Page;
-import org.fenixedu.bennu.cms.domain.Site;
+import org.fenixedu.bennu.cms.domain.*;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -26,6 +24,9 @@ public class AdminPages {
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
     public String pages(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
+
+        AdminSites.canEdit(site);
+
         model.addAttribute("site", site);
         model.addAttribute("pages", site.getPagesSet());
         return "pages";
@@ -34,6 +35,9 @@ public class AdminPages {
     @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
     public String createPage(Model model, @PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
+
+        AdminSites.canEdit(s);
+
         model.addAttribute("site", s);
         return "createPage";
     }
@@ -46,6 +50,9 @@ public class AdminPages {
             return new RedirectView("/cms/pages/" + slug + "/create", true);
         } else {
             Site s = Site.fromSlug(slug);
+
+            AdminSites.canEdit(s);
+
             createPage(name, s);
             return new RedirectView("/cms/pages/" + s.getSlug(), true);
         }
@@ -62,6 +69,13 @@ public class AdminPages {
     public String edit(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "slugPage") String slugPage) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
+        if (slugPage.equals("--**--")){
+            slugPage = "";
+        }
+
         Page p = s.pageForSlug(slugPage);
         model.addAttribute("site", s);
         model.addAttribute("page", p);
@@ -71,21 +85,24 @@ public class AdminPages {
 
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST)
     public RedirectView edit(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPage") String slugPage, @RequestParam String name, @RequestParam String slug,
+            @PathVariable(value = "slugPage") String slugPage, @RequestParam LocalizedString name, @RequestParam String slug,
             @RequestParam String template, RedirectAttributes redirectAttributes) {
-        if (Strings.isNullOrEmpty(name)) {
+        if (name != null && name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage + "/edit", true);
         }
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Page p = s.pageForSlug(slugPage);
         editPage(name, slug, template, s, p);
         return new RedirectView("/cms/pages/" + s.getSlug() + "", true);
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private void editPage(String name, String slug, String template, Site s, Page p) {
-        p.setName(new LocalizedString(I18N.getLocale(), name));
+    private void editPage(LocalizedString name, String slug, String template, Site s, Page p) {
+        p.setName(name);
         p.setSlug(slug);
         if (s != null && s.getTheme() != null) {
             CMSTemplate t = s.getTheme().templateForType(template);
@@ -97,7 +114,27 @@ public class AdminPages {
     public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "slugPage") String slugPage) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         s.pageForSlug(slugPage).delete();
         return new RedirectView("/cms/pages/" + s.getSlug() + "", true);
     }
+
+    @RequestMapping(value = "{type}/defaultPage", method = RequestMethod.POST)
+    public RedirectView moveFile(Model model, @PathVariable String type, @RequestParam String page) {
+        Site s = Site.fromSlug(type);
+
+        AdminSites.canEdit(s);
+
+        setInitialPage(page, s);
+
+        return new RedirectView("/cms/pages/" + type , true);
+    }
+
+    @Atomic
+    private void setInitialPage(String page, Site s) {
+        s.setInitialPage(s.pageForSlug(page));
+    }
+
 }

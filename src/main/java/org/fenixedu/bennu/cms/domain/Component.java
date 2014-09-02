@@ -2,8 +2,7 @@ package org.fenixedu.bennu.cms.domain;
 
 import java.util.HashMap;
 
-import javax.servlet.http.HttpServletRequest;
-
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -26,7 +25,7 @@ public abstract class Component extends Component_Base {
      * @param c
      *            the class being registered as a component.
      */
-    public static void register(String type, Class c) {
+    public static void register(String type, Class<?> c) {
         COMPONENTS.put(type, c);
     }
 
@@ -38,7 +37,7 @@ public abstract class Component extends Component_Base {
      * @return
      *         the class of the component with the given type.
      */
-    public static Class forType(String type) {
+    public static Class<?> forType(String type) {
         return COMPONENTS.get(type);
     }
 
@@ -48,7 +47,7 @@ public abstract class Component extends Component_Base {
     public Component() {
         super();
         if (Authenticate.getUser() == null) {
-            throw new RuntimeException("Needs Login");
+            throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
@@ -87,14 +86,12 @@ public abstract class Component extends Component_Base {
      * 
      * @param page
      *            the page where the component will be rendered.
-     * @param req
-     *            request to render the page and the component.
      * @param componentContext
      *            local context for the component.
      * @param globalContext
      *            global context where the component is being rendered.
      */
-    public abstract void handle(Page page, HttpServletRequest req, TemplateContext componentContext, TemplateContext globalContext);
+    public abstract void handle(Page page, TemplateContext componentContext, TemplateContext globalContext);
 
     @Atomic(mode = TxMode.WRITE)
     public void delete() {

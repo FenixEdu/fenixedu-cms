@@ -30,6 +30,8 @@ public class AdminComponents {
             @RequestParam(required = false) String menuOid, @RequestParam(required = false) String catSlug, @RequestParam(
                     required = false) String postSlug) {
         Site s = Site.fromSlug(slugSite);
+        AdminSites.canEdit(s);
+
         Page p = s.pageForSlug(slugPage);
 
         createComponent(componentType, menuOid, postSlug, catSlug, s, p);
@@ -50,6 +52,7 @@ public class AdminComponents {
             ListCategoryPosts lcp = new ListCategoryPosts(cat);
             p.addComponents(lcp);
         } else if (componentType.equals("menu")) {
+            @SuppressWarnings("unused")
             MenuComponent mc = new MenuComponent(s.menuForOid(menuOid), p);
         } else if (componentType.equals("staticPost")) {
             StaticPost mc = new StaticPost();
@@ -63,6 +66,9 @@ public class AdminComponents {
             value = "slugPage") String slugPage, @PathVariable(value = "oid") String oid) {
 
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Page p = s.pageForSlug(slugPage);
         p.componentForOid(oid).delete();
 
