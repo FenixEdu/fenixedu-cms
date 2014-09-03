@@ -56,6 +56,7 @@ public class CreateSite {
         site.setDescription(description);
         site.setName(name);
         site.setSlug(StringNormalizer.slugify(name.getContent()));
+        site.updateMenuFunctionality();
         site.setPublished(published);
 
         if (!template.equals("null")) {

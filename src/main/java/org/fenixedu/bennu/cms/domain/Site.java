@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toSet;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
@@ -31,8 +32,12 @@ import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
+
+import static java.util.stream.Collectors.toSet;
 
 public class Site extends Site_Base {
     /**
@@ -44,7 +49,7 @@ public class Site extends Site_Base {
 
     /**
      * registers a new site template
-     *
+     * 
      * @param type
      *            the type of the template. This must be unique on the application.
      * @param c
@@ -56,7 +61,7 @@ public class Site extends Site_Base {
 
     /**
      * searches for a {@link SiteTemplate} by type.
-     *
+     * 
      * @param type
      *            the type of the {@link SiteTemplate} wanted.
      * @return
@@ -72,7 +77,7 @@ public class Site extends Site_Base {
     }
 
     /**
-     *
+     * 
      * @return mapping between the type and description for all the registered {@link SiteTemplate}.
      */
     public static HashMap<String, String> getTemplates() {
@@ -109,6 +114,7 @@ public class Site extends Site_Base {
      *
      * @return group
      *         the access group for this site
+
      */
     public Group getCanViewGroup() {
         return getViewGroup().toGroup();
@@ -130,7 +136,7 @@ public class Site extends Site_Base {
      *
      * @return the access group for this site
      */
-    public Group getCanPostGroup() {
+    public Group getCanPostGroup(){
         return getPostGroup().toGroup();
     }
 
@@ -167,7 +173,7 @@ public class Site extends Site_Base {
 
     /**
      * searches for a {@link Site} by slug.
-     *
+     * 
      * @param slug
      *            the slug of the {@link Site} wanted.
      * @return
@@ -180,7 +186,7 @@ public class Site extends Site_Base {
 
     /**
      * searches for a {@link Page} by slug on this {@link Site}.
-     *
+     * 
      * @param slug
      *            the slug of the {@link Page} wanted.
      * @return
@@ -192,7 +198,7 @@ public class Site extends Site_Base {
 
     /**
      * searches for a {@link Post} by slug on this {@link Site}.
-     *
+     * 
      * @param slug
      *            the slug of the {@link Post} wanted.
      * @return
@@ -204,7 +210,7 @@ public class Site extends Site_Base {
 
     /**
      * searches for a {@link Category} by slug on this {@link Site}.
-     *
+     * 
      * @param slug
      *            the slug of the {@link Category} wanted.
      * @return
@@ -227,7 +233,7 @@ public class Site extends Site_Base {
 
     /**
      * searches for a {@link Menu} by oid on this {@link Site}.
-     *
+     * 
      * @param oid
      *            the slug of the {@link Menu} wanted.
      * @return
@@ -251,29 +257,22 @@ public class Site extends Site_Base {
 
     /**
      * Updates the site's slug and it's respective MenuFunctionality.
-     * It should be used after setting the site's description and name.
-     *
-     * @param slug
-     *            the slug wanted. It must be the only site with this slug or else a random slug is generated.
+     * It should be used after setting the site's description, name and slug.
+     * 
      */
-    @Override
-    public void setSlug(String slug) {
-        super.setSlug(slug);
-    }
 
     public void updateMenuFunctionality() {
-        Preconditions.checkNotNull(this.getDescription());
-        Preconditions.checkNotNull(this.getName());
+        Preconditions.checkNotNull(getDescription());
+        Preconditions.checkNotNull(getName());
+        Preconditions.checkNotNull(getSlug());
         Preconditions.checkArgument(isValidSlug(getSlug()));
 
         if (getFolder() == null) {
-            if (this.getFunctionality() != null) {
+            if (getFunctionality() != null) {
                 deleteMenuFunctionality();
             }
-            this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), getEmbedded(), getSlug(),
-                    getEmbedded() ? CMSEmbeddedBackend.BACKEND_KEY : CMSBackend.BACKEND_KEY, "anyone", this.getDescription(),
-                    this.getName(), getSlug()));
-            getFunctionality().setAccessGroup(SiteViewersGroup.get(this));
+            this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), false, getSlug(),
+                    CMSBackend.BACKEND_KEY, "anyone", getDescription(), getName(), getSlug()));
         }
 
     }
@@ -365,8 +364,7 @@ public class Site extends Site_Base {
 
     public static boolean isValidSlug(String slug) {
         Stream<MenuItem> menuItems = Bennu.getInstance().getConfiguration().getMenu().getOrderedChild().stream();
-        Optional<String> existsEntry = menuItems.map(i -> i.getPath()).filter(path -> path.equals(slug)).findFirst();
-        return !Strings.isNullOrEmpty(slug) && fromSlug(slug) == null && !existsEntry.isPresent();
+        return !Strings.isNullOrEmpty(slug) && menuItems.map(MenuItem::getPath).noneMatch(path -> path.equals(slug));
     }
 
     @Override

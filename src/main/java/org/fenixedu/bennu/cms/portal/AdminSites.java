@@ -115,11 +115,14 @@ public class AdminSites {
             // Remove the folder and set the new slug, so the MenuFunctionality will be created
             s.setFolder(null);
             s.setSlug(slug);
+            s.updateMenuFunctionality();
         }
+
         if (!s.getSlug().equals(slug)) {
             s.setSlug(slug);
             s.updateMenuFunctionality();
         }
+
         s.setPublished(published);
         s.setCanViewGroup(Group.parse(viewGroup));
         s.setCanPostGroup(Group.parse(postGroup));
