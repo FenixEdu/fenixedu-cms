@@ -1,8 +1,11 @@
 package org.fenixedu.bennu.cms.portal;
 
+import static pt.ist.fenixframework.FenixFramework.atomic;
+
 import org.fenixedu.bennu.cms.domain.Category;
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.domain.Site;
+import org.fenixedu.bennu.cms.domain.component.Component;
 import org.fenixedu.bennu.cms.domain.component.ListCategoryPosts;
 import org.fenixedu.bennu.cms.domain.component.ListOfCategories;
 import org.fenixedu.bennu.cms.domain.component.ListPosts;
@@ -71,7 +74,15 @@ public class AdminComponents {
         AdminSites.canEdit(s);
 
         Page p = s.pageForSlug(slugPage);
-        p.componentForOid(oid).delete();
+        Component component = p.componentForOid(oid);
+
+        atomic(() -> {
+            if (component.getInstalledPageSet().size() == 1) {
+                component.delete();
+            } else {
+                component.removeInstalledPage(p);
+            }
+        });
 
         return new RedirectView("/cms/pages/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
     }
