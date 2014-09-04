@@ -1,5 +1,7 @@
-package org.fenixedu.bennu.cms.domain;
+package org.fenixedu.bennu.cms.domain.component;
 
+import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Post;
 import org.fenixedu.bennu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
@@ -7,11 +9,7 @@ import org.fenixedu.bennu.cms.rendering.TemplateContext;
  * Component that obtains the necessary info about a {@link Post}
  */
 @ComponentType(type = "viewPost", name = "View Post", description = "View a Single Post")
-public class ViewPost extends ViewPost_Base {
-
-    public ViewPost() {
-        super();
-    }
+public class ViewPost implements CMSComponent {
 
     /**
      * fetches a post based on the 'q' parameter of the request and saves that post on the local and global context as 'post'

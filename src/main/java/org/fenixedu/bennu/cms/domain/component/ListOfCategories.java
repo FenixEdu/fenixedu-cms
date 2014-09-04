@@ -1,12 +1,14 @@
-package org.fenixedu.bennu.cms.domain;
+package org.fenixedu.bennu.cms.domain.component;
 
+import org.fenixedu.bennu.cms.domain.Category;
+import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
 /**
  * Component that lists all the {@link Category} of a given site.
  */
 @ComponentType(type = "listCategories", name = "List Categories", description = "List all Categories for this site")
-public class ListOfCategories extends ListOfCategories_Base {
+public class ListOfCategories implements CMSComponent {
 
     public ListOfCategories() {
         super();

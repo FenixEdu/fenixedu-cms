@@ -1,14 +1,15 @@
 package org.fenixedu.bennu.cms.portal;
 
 import org.fenixedu.bennu.cms.domain.Category;
-import org.fenixedu.bennu.cms.domain.ListCategoryPosts;
-import org.fenixedu.bennu.cms.domain.ListOfCategories;
-import org.fenixedu.bennu.cms.domain.ListPosts;
-import org.fenixedu.bennu.cms.domain.MenuComponent;
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.domain.Site;
-import org.fenixedu.bennu.cms.domain.StaticPost;
-import org.fenixedu.bennu.cms.domain.ViewPost;
+import org.fenixedu.bennu.cms.domain.component.ListCategoryPosts;
+import org.fenixedu.bennu.cms.domain.component.ListOfCategories;
+import org.fenixedu.bennu.cms.domain.component.ListPosts;
+import org.fenixedu.bennu.cms.domain.component.MenuComponent;
+import org.fenixedu.bennu.cms.domain.component.StaticPost;
+import org.fenixedu.bennu.cms.domain.component.StrategyBasedComponent;
+import org.fenixedu.bennu.cms.domain.component.ViewPost;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,11 +43,11 @@ public class AdminComponents {
     @Atomic(mode = TxMode.WRITE)
     private void createComponent(String componentType, String menuOid, String postSlug, String catSlug, Site s, Page p) {
         if (componentType.equals("viewPost")) {
-            p.addComponents(new ViewPost());
+            p.addComponents(StrategyBasedComponent.forType(ViewPost.class));
         } else if (componentType.equals("listPost")) {
-            p.addComponents(new ListPosts());
+            p.addComponents(StrategyBasedComponent.forType(ListPosts.class));
         } else if (componentType.equals("listCategories")) {
-            p.addComponents(new ListOfCategories());
+            p.addComponents(StrategyBasedComponent.forType(ListOfCategories.class));
         } else if (componentType.equals("listCategoryPosts")) {
             Category cat = s.categoryForSlug(catSlug);
             ListCategoryPosts lcp = new ListCategoryPosts(cat);

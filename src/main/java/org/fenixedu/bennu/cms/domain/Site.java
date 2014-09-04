@@ -8,6 +8,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.fenixedu.bennu.cms.domain.component.Component;
+import org.fenixedu.bennu.cms.domain.component.ListCategoryPosts;
+import org.fenixedu.bennu.cms.domain.component.SideMenuComponent;
+import org.fenixedu.bennu.cms.domain.component.TopMenuComponent;
+import org.fenixedu.bennu.cms.domain.component.ViewPost;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.routing.CMSBackend;
 import org.fenixedu.bennu.cms.routing.CMSEmbeddedBackend;
@@ -319,7 +324,7 @@ public class Site extends Site_Base {
     public Page getViewPostPage() {
         for (Page page : getPagesSet()) {
             for (Component component : page.getComponentsSet()) {
-                if (component.getClass() == ViewPost.class) {
+                if (component.componentType() == ViewPost.class) {
                     return page;
                 }
             }

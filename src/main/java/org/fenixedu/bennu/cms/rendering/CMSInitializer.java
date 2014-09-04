@@ -10,10 +10,10 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
 
 import org.fenixedu.bennu.cms.domain.CMSThemeLoader;
-import org.fenixedu.bennu.cms.domain.Component;
-import org.fenixedu.bennu.cms.domain.ComponentType;
 import org.fenixedu.bennu.cms.domain.RegisterSiteTemplate;
 import org.fenixedu.bennu.cms.domain.Site;
+import org.fenixedu.bennu.cms.domain.component.Component;
+import org.fenixedu.bennu.cms.domain.component.ComponentType;
 
 @HandlesTypes({ ComponentType.class, RegisterSiteTemplate.class })
 public class CMSInitializer implements ServletContainerInitializer {

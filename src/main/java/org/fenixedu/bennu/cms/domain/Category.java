@@ -1,5 +1,6 @@
 package org.fenixedu.bennu.cms.domain;
 
+import org.fenixedu.bennu.cms.domain.component.Component;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;

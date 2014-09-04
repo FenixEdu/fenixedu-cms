@@ -6,6 +6,13 @@ valueType org.fenixedu.bennu.cms.domain.CMSThemeFiles as CMSThemeFiles {
     }
 }
 
+valueType org.fenixedu.bennu.cms.domain.component.CMSComponent as CMSComponent {
+    externalizeWith {
+        String externalize();
+    }
+    internalizeWith internalize();
+}
+
 class Site{
   String alternativeSite;
   String style;
@@ -65,7 +72,7 @@ class Post{
   LocalizedString location;
 }
 
-class Component{
+public class component.Component{
   DateTime creationDate;
   String type;
 }
@@ -85,14 +92,14 @@ class CMSTemplate{
   String type;
 }
 
-class ViewPost extends Component{}
-class ListPosts extends Component{}
-class ListCategoryPosts extends Component{}
-class ListOfCategories extends Component{}
-class StaticPost extends Component{}
-class MenuComponent extends Component{}
-class TopMenuComponent extends MenuComponent{}
-class SideMenuComponent extends MenuComponent{}
+public class component.StrategyBasedComponent extends component.Component {
+    protected CMSComponent component;
+}
+class component.ListCategoryPosts extends component.Component{}
+class component.StaticPost extends component.Component{}
+class component.MenuComponent extends component.Component{}
+class component.TopMenuComponent extends component.MenuComponent{}
+class component.SideMenuComponent extends component.MenuComponent{}
 
 class PostFile{
     Integer index;
@@ -112,9 +119,16 @@ relation ComponentUser{
     multiplicity 1..1;
   }
 
-  protected Component playsRole componentsCreated{
+  protected component.Component playsRole componentsCreated{
     multiplicity *;
   }
+}
+
+relation ComponentRoot {
+    public component.StrategyBasedComponent playsRole cmsComponents {
+        multiplicity *;
+    }
+    protected .org.fenixedu.bennu.core.domain.Bennu playsRole bennu;
 }
 
 relation PrimaryCMSThemeBennu{
@@ -226,7 +240,7 @@ relation CMSTemplatePage{
 }
 
 relation ListCategoryPostsCategory{
-  protected ListCategoryPosts playsRole components{
+  protected component.ListCategoryPosts playsRole components{
     multiplicity *;
   }
   Category playsRole category{
@@ -234,15 +248,17 @@ relation ListCategoryPostsCategory{
   }
 }
 
-relation ComponentPage{
-  Component playsRole components{
+relation ComponentPage {
+    component.Component playsRole components{
     multiplicity *;
   }
-  Page playsRole page;
+  Page playsRole installedPage {
+      multiplicity *;
+  }
 }
 
 relation StaticPostPost{
-  StaticPost playsRole component{
+  component.StaticPost playsRole component{
     multiplicity *;
   }
   Post playsRole post{
@@ -251,7 +267,7 @@ relation StaticPostPost{
 }
 
 relation MenuComponentMenu{
-  MenuComponent playsRole component{
+  component.MenuComponent playsRole component{
     multiplicity *;
   }
   Menu playsRole menu{

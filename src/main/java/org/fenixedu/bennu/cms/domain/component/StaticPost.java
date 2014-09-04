@@ -1,5 +1,7 @@
-package org.fenixedu.bennu.cms.domain;
+package org.fenixedu.bennu.cms.domain.component;
 
+import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Post;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
 import pt.ist.fenixframework.Atomic;
@@ -30,5 +32,13 @@ public class StaticPost extends StaticPost_Base {
     public String getName() {
         String name = super.getName();
         return name + " (" + getPost().getName().getContent() + ")";
+    }
+
+    public Page getPage() {
+        if (getInstalledPageSet().isEmpty()) {
+            return null;
+        } else {
+            return getInstalledPageSet().iterator().next();
+        }
     }
 }

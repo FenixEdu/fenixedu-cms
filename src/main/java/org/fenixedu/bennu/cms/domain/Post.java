@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.fenixedu.bennu.cms.domain.component.Component;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;

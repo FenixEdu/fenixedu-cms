@@ -1,5 +1,12 @@
 package org.fenixedu.bennu.cms.domain;
 
+import org.fenixedu.bennu.cms.domain.component.ListCategoryPosts;
+import org.fenixedu.bennu.cms.domain.component.ListOfCategories;
+import org.fenixedu.bennu.cms.domain.component.ListPosts;
+import org.fenixedu.bennu.cms.domain.component.MenuComponent;
+import org.fenixedu.bennu.cms.domain.component.StaticPost;
+import org.fenixedu.bennu.cms.domain.component.StrategyBasedComponent;
+import org.fenixedu.bennu.cms.domain.component.ViewPost;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 
@@ -50,11 +57,13 @@ public class BlogTemplate implements SiteTemplate {
         menuItem.setPage(categories);
         makeMenu.add(menuItem);
 
-        new MenuComponent(makeMenu, homepage);
-        new MenuComponent(makeMenu, about);
-        new MenuComponent(makeMenu, postPage);
-        new MenuComponent(makeMenu, categories);
-        new MenuComponent(makeMenu, category);
+        MenuComponent menu = new MenuComponent(makeMenu);
+
+        homepage.addComponents(menu);
+        about.addComponents(menu);
+        postPage.addComponents(menu);
+        categories.addComponents(menu);
+        category.addComponents(menu);
 
     }
 
@@ -112,7 +121,7 @@ public class BlogTemplate implements SiteTemplate {
         Page page = new Page();
         page.setSite(site);
         page.setName(new LocalizedString(I18N.getLocale(), "Homepage"));
-        page.addComponents(new ListPosts());
+        page.addComponents(StrategyBasedComponent.forType(ListPosts.class));
         page.setTemplate(site.getTheme().templateForType("posts"));
         page.setSlug("");
         return page;
@@ -133,7 +142,7 @@ public class BlogTemplate implements SiteTemplate {
         Page page = new Page();
         page.setSite(site);
         page.setName(new LocalizedString(I18N.getLocale(), "View"));
-        page.addComponents(new ViewPost());
+        page.addComponents(StrategyBasedComponent.forType(ViewPost.class));
         page.setTemplate(site.getTheme().templateForType("view"));
         return page;
     }
@@ -142,7 +151,7 @@ public class BlogTemplate implements SiteTemplate {
         Page page = new Page();
         page.setSite(site);
         page.setName(new LocalizedString(I18N.getLocale(), "Categories"));
-        page.addComponents(new ListOfCategories());
+        page.addComponents(StrategyBasedComponent.forType(ListOfCategories.class));
         page.setTemplate(site.getTheme().templateForType("categories"));
         return page;
     }

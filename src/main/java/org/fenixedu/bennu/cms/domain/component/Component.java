@@ -1,7 +1,8 @@
-package org.fenixedu.bennu.cms.domain;
+package org.fenixedu.bennu.cms.domain.component;
 
 import java.util.HashMap;
 
+import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.core.domain.User;
@@ -11,10 +12,8 @@ import org.joda.time.DateTime;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-/**
- * Component for a given page with some associated metadata.
- */
 public abstract class Component extends Component_Base {
+
     protected static final HashMap<String, Class<?>> COMPONENTS = new HashMap<>();
 
     /**
@@ -60,7 +59,7 @@ public abstract class Component extends Component_Base {
      *         the name of the component.
      */
     public String getName() {
-        return this.getClass().getAnnotation(ComponentType.class).name();
+        return componentType().getAnnotation(ComponentType.class).name();
     }
 
     /**
@@ -69,7 +68,7 @@ public abstract class Component extends Component_Base {
      *         the description of the component.
      */
     public String getDescription() {
-        return this.getClass().getAnnotation(ComponentType.class).description();
+        return componentType().getAnnotation(ComponentType.class).description();
     }
 
     /**
@@ -78,7 +77,7 @@ public abstract class Component extends Component_Base {
      */
     @Override
     public String getType() {
-        return this.getClass().getAnnotation(ComponentType.class).type();
+        return componentType().getAnnotation(ComponentType.class).type();
     }
 
     /**
@@ -96,7 +95,13 @@ public abstract class Component extends Component_Base {
     @Atomic(mode = TxMode.WRITE)
     public void delete() {
         this.setCreatedBy(null);
-        this.setPage(null);
+        for (Page page : getInstalledPageSet()) {
+            page.removeComponents(this);
+        }
         this.deleteDomainObject();
+    }
+
+    public Class<?> componentType() {
+        return this.getClass();
     }
 }

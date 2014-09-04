@@ -1,8 +1,11 @@
-package org.fenixedu.bennu.cms.domain;
+package org.fenixedu.bennu.cms.domain.component;
 
 import java.util.HashMap;
 
-import com.google.common.collect.Lists;
+import org.fenixedu.bennu.cms.domain.Category;
+import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Post;
+import org.fenixedu.bennu.cms.domain.PostsPresentationBean;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
 import pt.ist.fenixframework.Atomic;
@@ -55,4 +58,11 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
         }
     }
 
+    public Page getPage() {
+        if (getInstalledPageSet().isEmpty()) {
+            return null;
+        } else {
+            return getInstalledPageSet().iterator().next();
+        }
+    }
 }

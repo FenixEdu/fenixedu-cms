@@ -1,10 +1,13 @@
-package org.fenixedu.bennu.cms.domain;
+package org.fenixedu.bennu.cms.domain.component;
 
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.Optional;
 
+import org.fenixedu.bennu.cms.domain.Menu;
+import org.fenixedu.bennu.cms.domain.MenuItem;
+import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -26,6 +29,11 @@ public class MenuComponent extends MenuComponent_Base {
         setCreationDate(new DateTime());
     }
 
+    public MenuComponent(Menu menu) {
+        this();
+        setMenu(menu);
+    }
+
     public MenuComponent(Menu menu, Page page) {
         this();
         init(menu, page);
@@ -33,7 +41,7 @@ public class MenuComponent extends MenuComponent_Base {
 
     public void init(Menu menu, Page page) {
         setMenu(menu);
-        setPage(page);
+        addInstalledPage(page);
     }
 
     @Override

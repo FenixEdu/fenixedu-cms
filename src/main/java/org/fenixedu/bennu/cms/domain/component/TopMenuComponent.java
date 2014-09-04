@@ -1,5 +1,7 @@
-package org.fenixedu.bennu.cms.domain;
+package org.fenixedu.bennu.cms.domain.component;
 
+import org.fenixedu.bennu.cms.domain.Menu;
+import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
 @ComponentType(type = "topMenu", name = "Top Menu", description = "Attaches a Top Menu to a Page")

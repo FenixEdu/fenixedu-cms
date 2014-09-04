@@ -1,4 +1,4 @@
-package org.fenixedu.bennu.cms.domain;
+package org.fenixedu.bennu.cms.domain.component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
