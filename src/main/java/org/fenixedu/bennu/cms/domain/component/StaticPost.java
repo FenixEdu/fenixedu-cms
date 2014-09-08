@@ -1,5 +1,7 @@
 package org.fenixedu.bennu.cms.domain.component;
 
+import java.util.Collection;
+
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.domain.Post;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
@@ -7,11 +9,13 @@ import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-@ComponentType(type = "staticPost", name = "Static Post", description = "Static Post")
+@ComponentType(name = "Static Post", description = "Static Post")
 public class StaticPost extends StaticPost_Base {
 
-    public StaticPost() {
+    @DynamicComponent
+    public StaticPost(@ComponentParameter(value = "Post", provider = PostsForSite.class) Post post) {
         super();
+        setPost(post);
     }
 
     @Override
@@ -41,4 +45,17 @@ public class StaticPost extends StaticPost_Base {
             return getInstalledPageSet().iterator().next();
         }
     }
+
+    public static class PostsForSite implements ComponentContextProvider<Post> {
+        @Override
+        public Collection<Post> provide(Page page) {
+            return page.getSite().getPostSet();
+        }
+
+        @Override
+        public String present(Post post) {
+            return post.getName().getContent();
+        }
+    }
+
 }

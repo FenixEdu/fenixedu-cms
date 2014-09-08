@@ -8,10 +8,6 @@ import java.lang.annotation.Target;
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ComponentType {
-    /**
-     * The type of the component, this should be unique for the application.
-     */
-    String type();
 
     String name();
 

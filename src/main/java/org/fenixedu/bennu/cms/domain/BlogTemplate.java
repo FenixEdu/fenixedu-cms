@@ -131,8 +131,7 @@ public class BlogTemplate implements SiteTemplate {
         Page page = new Page();
         page.setSite(site);
         page.setName(new LocalizedString(I18N.getLocale(), "About"));
-        StaticPost components = new StaticPost();
-        components.setPost(about);
+        StaticPost components = new StaticPost(about);
         page.addComponents(components);
         page.setTemplate(site.getTheme().templateForType("view"));
         return page;

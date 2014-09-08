@@ -2,6 +2,7 @@ package org.fenixedu.bennu.cms.domain.component;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +22,7 @@ import com.google.common.collect.Lists;
 /**
  * Component that provides a {@link Menu} for a given {@link Page}
  */
-@ComponentType(type = "menu", name = "Menu", description = "Attaches a Menu to a Page")
+@ComponentType(name = "Menu", description = "Attaches a Menu to a Page")
 public class MenuComponent extends MenuComponent_Base {
 
     public MenuComponent() {
@@ -29,19 +30,10 @@ public class MenuComponent extends MenuComponent_Base {
         setCreationDate(new DateTime());
     }
 
-    public MenuComponent(Menu menu) {
+    @DynamicComponent
+    public MenuComponent(@ComponentParameter(value = "Menu", provider = MenusForSite.class) Menu menu) {
         this();
         setMenu(menu);
-    }
-
-    public MenuComponent(Menu menu, Page page) {
-        this();
-        init(menu, page);
-    }
-
-    public void init(Menu menu, Page page) {
-        setMenu(menu);
-        addInstalledPage(page);
     }
 
     @Override
@@ -49,6 +41,18 @@ public class MenuComponent extends MenuComponent_Base {
         if (!getMenu().getChildrenSorted().isEmpty()) {
             handleMenu(getMenu(), "menus", currentPage, global);
             local.put("menu", menuWrapper(getMenu(), currentPage));
+        }
+    }
+
+    public static class MenusForSite implements ComponentContextProvider<Menu> {
+        @Override
+        public Collection<Menu> provide(Page page) {
+            return page.getSite().getMenusSet();
+        }
+
+        @Override
+        public String present(Menu menu) {
+            return menu.getName().getContent();
         }
     }
 

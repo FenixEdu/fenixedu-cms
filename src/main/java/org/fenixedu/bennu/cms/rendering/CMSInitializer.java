@@ -23,8 +23,7 @@ public class CMSInitializer implements ServletContainerInitializer {
         if (c != null) {
             for (Class<?> type : c) {
                 if (type.isAnnotationPresent(ComponentType.class)) {
-                    ComponentType annotation = type.getAnnotation(ComponentType.class);
-                    Component.register(annotation.type(), type);
+                    Component.register(type);
                 }
                 if (type.isAnnotationPresent(RegisterSiteTemplate.class)) {
                     RegisterSiteTemplate annotation = type.getAnnotation(RegisterSiteTemplate.class);

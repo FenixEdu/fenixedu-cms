@@ -8,7 +8,7 @@ import org.fenixedu.bennu.cms.rendering.TemplateContext;
 /**
  * Component that obtains the necessary info about a {@link Post}
  */
-@ComponentType(type = "viewPost", name = "View Post", description = "View a Single Post")
+@ComponentType(name = "View Post", description = "View a Single Post")
 public class ViewPost implements CMSComponent {
 
     /**

@@ -1,6 +1,9 @@
 package org.fenixedu.bennu.cms.portal;
 
-import org.fenixedu.bennu.cms.domain.*;
+import org.fenixedu.bennu.cms.domain.CMSTemplate;
+import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Site;
+import org.fenixedu.bennu.cms.domain.component.Component;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -72,13 +75,14 @@ public class AdminPages {
 
         AdminSites.canEdit(s);
 
-        if (slugPage.equals("--**--")){
+        if (slugPage.equals("--**--")) {
             slugPage = "";
         }
 
         Page p = s.pageForSlug(slugPage);
         model.addAttribute("site", s);
         model.addAttribute("page", p);
+        model.addAttribute("availableComponents", Component.availableComponents());
 
         return "editPage";
     }
@@ -129,7 +133,7 @@ public class AdminPages {
 
         setInitialPage(page, s);
 
-        return new RedirectView("/cms/pages/" + type , true);
+        return new RedirectView("/cms/pages/" + type, true);
     }
 
     @Atomic

@@ -4,12 +4,13 @@ import org.fenixedu.bennu.cms.domain.Menu;
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
-@ComponentType(type = "sideMenu", name = "Side Menu", description = "Attaches a Side Menu to a Page")
+@ComponentType(name = "Side Menu", description = "Attaches a Side Menu to a Page")
 public class SideMenuComponent extends SideMenuComponent_Base {
 
-    public SideMenuComponent(Menu menu, Page page) {
+    @DynamicComponent
+    public SideMenuComponent(@ComponentParameter(value = "Menu", provider = MenusForSite.class) Menu menu) {
         super();
-        init(menu, page);
+        setMenu(menu);
     }
 
     @Override

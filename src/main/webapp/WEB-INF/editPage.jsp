@@ -2,6 +2,7 @@
 <%@ taglib prefix="joda" uri="http://www.joda.org/joda/time/tags" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 
+<div ng-app="componentsApp" ng-controller="ComponentController">
 <h1><spring:message code="page.edit.title" /></h1>
 <h2>${page.name.content}</h2>
 <p class="small"><spring:message code="page.edit.label.site" />: <strong>${site.name.content}</strong>  </p>
@@ -57,26 +58,10 @@
       <span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
-      <li>
-        <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
-          <input type="hidden" name="componentType" value="viewPost" />
-        </form>
-        <a onclick="$(this).prev().submit()" href="#"><spring:message code="page.edit.label.viewPost" /></a>
+      <li ng-repeat="component in components">
+        <a href="#" ng-if="component.stateless" ng-click="installStateless(component)">{{component.name}}</a>
+        <a href="#" ng-if="!component.stateless" ng-click="openModal(component)">{{component.name}}</a>
       </li>
-      <li>
-        <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
-          <input type="hidden" name="componentType" value="listCategories" />
-        </form>
-        <a onclick="$(this).prev().submit()" href="#"><spring:message code="page.edit.label.listOfCategories" /></a>
-      <li>
-        <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
-          <input type="hidden" name="componentType" value="listPost" />
-        </form>
-        <a onclick="$(this).prev().submit()" href="#"><spring:message code="page.edit.label.listOfPosts" /></a>
-      </li>
-      <li><a data-toggle="modal" data-target="#listCategoryPosts" href="#"><spring:message code="page.edit.label.listOfPostsByCategory" /></a></li>
-      <li><a data-toggle="modal" data-target="#staticPost" href="#"><spring:message code="page.edit.label.staticPost" /></a></li>
-      <li><a data-toggle="modal" data-target="#menu" href="#"><spring:message code="page.edit.label.menu" /></a></li>
     </ul>
   </div>
 </p>
@@ -116,94 +101,66 @@
       </c:otherwise>
 </c:choose>
 
-<div class="modal fade" id="listCategoryPosts" tabindex="-1" role="dialog" aria-labelledby="listCategoryPosts" aria-hidden="true">
-  <div class="modal-dialog">
-    <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
+<div class="modal fade" id="componentModal" tabindex="-1" role="dialog" aria-labelledby="componentModal" aria-hidden="true">
+  <form class="modal-dialog form-horizontal" ng-submit="createComponent()">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="listCategoryPostsLabel"><spring:message code="page.edit.label.listOfPostsByCategory" /></h4>
+        <h4 class="modal-title">{{component.name}}</h4>
       </div>
       <div class="modal-body">
-          <input type="hidden" name="componentType" value="listCategoryPosts" />
-
-          <div class="form-group">
-            <label class="control-label" for="inputSuccess1"><spring:message code="page.edit.label.category" /></label>
-            <select name="catSlug">
-              <option value="null">&lt; <spring:message code="page.edit.label.dynamic" /> &gt;</option>
-              <c:forEach var="c" items="${site.categoriesSet}">
-                <option value="${ c.slug }">${ c.name.content }</option>
-              </c:forEach>
-            </select>
+          <div class="form-group" ng-repeat="item in data">
+            <label for="{{item.key}}" class="col-sm-2 control-label">{{item.title}} <span style="color: red" ng-if="item.required">*</span></label>
+            <div class="col-sm-10" ng-if="isSelect(item)">
+                <select class="form-control" ng-model="selected[item.key]" ng-required="item.required" ng-options="value.value as value.label for value in item.values">
+                  <option value="">-- Pick One --</option>
+                </select>
+            </div>
+            <div class="col-sm-10" ng-if="!isSelect(item) && item.type != 'BOOLEAN'">
+                <input type="{{item.type}}" ng-model="selected[item.key]" class="form-control" ng-required="item.required"/>
+            </div>
+            <div class="col-sm-10" ng-if="item.type == 'BOOLEAN'">
+                <input type="checkbox" ng-model="selected[item.key]"/>
+            </div>
           </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="action.close" /></button>
-        <button type="submit" class="btn btn-primary"><spring:message code="action.save" /></button>
+        <button type="submit" class="btn btn-primary"><spring:message code="action.create" /></button>
       </div>
-      </form>
     </div>
-  </div>
+  </form>
+</div>
 </div>
 
-<div class="modal fade" id="menu" tabindex="-1" role="dialog" aria-labelledby="menu" aria-hidden="true">
-  <div class="modal-dialog">
-    <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="menuLabel"><spring:message code="action.add.menu" /></h4>
-      </div>
-      <div class="modal-body">
-          <input type="hidden" name="componentType" value="menu" />
-
-          <div class="form-group">
-            <label class="control-label" for="inputSuccess1"><spring:message code="page.edit.label.menu" /></label>
-            <select name="menuOid">
-              <c:forEach var="m" items="${site.menusSet}">
-                <option value="${ m.oid }">${ m.name.content }</option>
-              </c:forEach>
-            </select>
-          </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="action.close" /></button>
-        <button type="submit" class="btn btn-primary"><spring:message code="action.save" /></button>
-      </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="staticPost" tabindex="-1" role="dialog" aria-labelledby="staticPost" aria-hidden="true">
-  <div class="modal-dialog">
-    <form action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent" method="post">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="staticPostLabel"><spring:message code="page.edit.label.addStaticPost" /></h4>
-      </div>
-      <div class="modal-body">
-          <input type="hidden" name="componentType" value="staticPost" />
-
-          <div class="form-group">
-            <label class="control-label" for="inputSuccess1"><spring:message code="page.edit.label.post" /></label>
-            <select name="postSlug">
-              <c:forEach var="m" items="${site.postSet}">
-                <option value="${ m.slug }">${ m.name.content }</option>
-              </c:forEach>
-            </select>
-          </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="action.close" /></button>
-        <button type="submit" class="btn btn-primary"><spring:message code="action.save" /></button>
-      </div>
-      </form>
-    </div>
-  </div>
-</div>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
 <script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>
+<script src="${pageContext.request.contextPath}/bennu-core/js/angular.min.js"></script>
+
+<script type="text/javascript">
+  angular.module('componentsApp', []).controller('ComponentController', [ '$scope', '$http', function($scope, $http) {
+    $scope.components = ${availableComponents};
+    $scope.installStateless = function(component) {
+      $http.post('${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent', {type: component.type}).
+      success(function() { location.reload(); });
+    };
+    $scope.openModal = function(component) {
+      $scope.component = component; $("#componentModal").modal('show'); $scope.selected = {};
+      $http.post('${pageContext.request.contextPath}/cms/components/componentArguments/${page.externalId}?type=' + component.type).
+      success(function (data) {
+        $scope.data = data;
+      });
+    };
+    $scope.createComponent = function() {
+      $http.post('${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent',
+                 {type: $scope.component.type, parameters: $scope.selected}).success(function () {
+        location.reload();
+      });
+    }
+    $scope.isSelect = function(item) {
+      return item.type == 'DOMAIN_OBJECT' || item.type == 'ENUM' || item.values.length > 0;
+    }
+  }]);
+</script>

@@ -12,9 +12,11 @@ import org.joda.time.DateTime;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
+import com.google.gson.JsonArray;
+
 public abstract class Component extends Component_Base {
 
-    protected static final HashMap<String, Class<?>> COMPONENTS = new HashMap<>();
+    protected static final HashMap<String, ComponentDescriptor> COMPONENTS = new HashMap<>();
 
     /**
      * Registers a new class has a component.
@@ -24,8 +26,8 @@ public abstract class Component extends Component_Base {
      * @param c
      *            the class being registered as a component.
      */
-    public static void register(String type, Class<?> c) {
-        COMPONENTS.put(type, c);
+    public static void register(Class<?> c) {
+        COMPONENTS.put(c.getName(), new ComponentDescriptor(c));
     }
 
     /**
@@ -36,8 +38,14 @@ public abstract class Component extends Component_Base {
      * @return
      *         the class of the component with the given type.
      */
-    public static Class<?> forType(String type) {
+    public static ComponentDescriptor forType(String type) {
         return COMPONENTS.get(type);
+    }
+
+    public static JsonArray availableComponents() {
+        JsonArray array = new JsonArray();
+        COMPONENTS.values().stream().map(ComponentDescriptor::toJson).forEach(obj -> array.add(obj));
+        return array;
     }
 
     /**
@@ -77,7 +85,7 @@ public abstract class Component extends Component_Base {
      */
     @Override
     public String getType() {
-        return componentType().getAnnotation(ComponentType.class).type();
+        return componentType().getName();
     }
 
     /**

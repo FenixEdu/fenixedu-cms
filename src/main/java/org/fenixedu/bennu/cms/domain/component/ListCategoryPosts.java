@@ -1,5 +1,6 @@
 package org.fenixedu.bennu.cms.domain.component;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 import org.fenixedu.bennu.cms.domain.Category;
@@ -14,13 +15,15 @@ import pt.ist.fenixframework.Atomic.TxMode;
 /**
  * Component that lists the {@link Post} of a given category.
  */
-@ComponentType(type = "listCategoryPosts", name = "List Category Posts", description = "Lists the Posts from a given category")
+@ComponentType(name = "List Category Posts", description = "Lists the Posts from a given category")
 public class ListCategoryPosts extends ListCategoryPosts_Base {
 
     private static final int POSTS_PER_PAGE = 5;
 
-    public ListCategoryPosts(Category category) {
-        this.setCategory(category);
+    @DynamicComponent
+    public ListCategoryPosts(
+            @ComponentParameter(provider = CategoriesForSite.class, value = "Category", required = false) Category cat) {
+        setCategory(cat);
     }
 
     @Override
@@ -65,4 +68,17 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
             return getInstalledPageSet().iterator().next();
         }
     }
+
+    public static class CategoriesForSite implements ComponentContextProvider<Category> {
+        @Override
+        public Collection<Category> provide(Page page) {
+            return page.getSite().getCategoriesSet();
+        }
+
+        @Override
+        public String present(Category category) {
+            return category.getName().getContent();
+        }
+    }
+
 }
