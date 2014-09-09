@@ -387,6 +387,14 @@ public class Site extends Site_Base {
         }
     }
 
+    public String getFullUrl() {
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/" + getBaseUrl();
+    }
+
+    public String getRssUrl() {
+        return getFullUrl() + "/rss";
+    }
+
     @Override
     public void setFolder(CMSFolder folder) {
         super.setFolder(folder);

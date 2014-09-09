@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -16,22 +17,26 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLStreamException;
 
 import org.fenixedu.bennu.cms.CMSConfigurationManager;
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.CMSThemeFile;
+import org.fenixedu.bennu.cms.domain.Category;
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.domain.component.Component;
 import org.fenixedu.bennu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.bennu.cms.rendering.CMSExtensions;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
+import org.fenixedu.bennu.cms.rss.RSSService;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
+import org.fenixedu.commons.i18n.I18N;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,6 +120,8 @@ public final class CMSURLHandler implements SemanticURLHandler {
                         handleLeadingSlash(req, res, site);
                     } else if (pageSlug.startsWith("/static/")) {
                         handleStaticResource(req, res, site, pageSlug);
+                    } else if (pageSlug.startsWith("/rss")) {
+                        handleRSS(req, res, site, pageSlug);
                     } else {
                         renderCMSPage(req, res, site, pageSlug);
                     }
@@ -133,6 +140,31 @@ public final class CMSURLHandler implements SemanticURLHandler {
             res.sendError(404);
             return;
         }
+    }
+
+    private void handleRSS(HttpServletRequest req, HttpServletResponse res, Site site, String slug) throws IOException,
+            XMLStreamException, ServletException {
+        slug = slug.replaceFirst("/", "");
+
+        Locale locale =
+                Strings.isNullOrEmpty(req.getParameter("locale")) ? I18N.getLocale() : new Locale.Builder().setLanguageTag(
+                        req.getParameter("locale")).build();
+
+        String[] parts = slug.split("/");
+
+        if (parts.length == 1) {
+            res.setContentType("application/rss+xml;charset=UTF-8");
+            res.getOutputStream().write(RSSService.generateRSSForSite(site, locale).getBytes(StandardCharsets.UTF_8));
+        } else {
+            Category category = site.categoryForSlug(parts[1]);
+            if (category == null) {
+                errorPage(req, res, site, 404);
+            } else {
+                res.setContentType("application/rss+xml;charset=UTF-8");
+                res.getOutputStream().write(RSSService.generateRSSForCategory(category, locale).getBytes(StandardCharsets.UTF_8));
+            }
+        }
+
     }
 
     private Site getSite(MenuFunctionality menu, String url) {
@@ -270,6 +302,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
         result.put("createdBy", makeForUser(site.getCreatedBy()));
         result.put("creationDate", site.getCreationDate());
         result.put("siteObject", site.getObject());
+        result.put("rssUrl", site.getRssUrl());
 
         return result;
     }

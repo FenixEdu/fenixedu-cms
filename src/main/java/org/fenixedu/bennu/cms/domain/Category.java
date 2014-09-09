@@ -42,6 +42,10 @@ public class Category extends Category_Base {
         return this.getSite().getViewCategoryPage().getAddress() + "/" + this.getSlug();
     }
 
+    public String getRssUrl() {
+        return getSite().getRssUrl() + "/" + getSlug();
+    }
+
     @Atomic
     public void delete() {
         for (Component c : this.getComponentsSet()) {
