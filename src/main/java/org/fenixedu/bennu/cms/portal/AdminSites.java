@@ -1,7 +1,11 @@
 package org.fenixedu.bennu.cms.portal;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
@@ -20,15 +24,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 
 @SpringApplication(group = "anyone", path = "cms", title = "application.title")
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")
@@ -45,7 +47,7 @@ public class AdminSites {
     @RequestMapping(value = "manage/{page}", method = RequestMethod.GET)
     public String list(@PathVariable("page") Integer page, Model model) {
         List<List<Site>> pages = Lists.partition(getSites(), ITEMS_PER_PAGE);
-        if(!pages.isEmpty()) {
+        if (!pages.isEmpty()) {
             int currentPage = Optional.of(page).orElse(0);
             model.addAttribute("numberOfPages", pages.size());
             model.addAttribute("currentPage", currentPage);
@@ -67,7 +69,6 @@ public class AdminSites {
             throw CmsDomainException.forbiden();
         }
     }
-
 
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.GET)
     public String edit(Model model, @PathVariable(value = "slug") String slug) {
@@ -111,7 +112,7 @@ public class AdminSites {
         s.setTheme(CMSTheme.forType(theme));
         if (!Strings.isNullOrEmpty(folder)) {
             s.setFolder(FenixFramework.getDomainObject(folder));
-        } else {
+        } else if (s.getFolder() != null) {
             // Remove the folder and set the new slug, so the MenuFunctionality will be created
             s.setFolder(null);
             s.setSlug(slug);
