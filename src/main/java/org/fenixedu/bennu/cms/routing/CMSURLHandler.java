@@ -290,7 +290,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
         PortalConfiguration configuration = PortalConfiguration.getInstance();
         result.put("title", configuration.getApplicationTitle());
         result.put("subtitle", configuration.getApplicationSubTitle());
-        result.put("copyright", configuration.getApplicationSubTitle());
+        result.put("copyright", configuration.getApplicationCopyright());
         return result;
     }
 

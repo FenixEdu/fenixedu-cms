@@ -82,7 +82,10 @@
           {% endfor %}
           <div class="sidebar-module">
             <h4>Subscribe</h4>
-            <p><a href="{{site.rssUrl}}"><img src="{{staticDir}}/image/rss.svg" height="16" /> RSS</a></p>
+            <p><a href="{{site.rssUrl}}"><img src="{{staticDir}}/image/rss.svg" height="16" /> RSS for {{site.name.content}}</a></p>
+            {% if category != null %}
+              <a href="{{category.rssUrl}}"><img src="{{staticDir}}/image/rss.svg" height="16" /> RSS for {{category.name.content}}</a>
+            {% endif %}
           </div>
         </div><!-- /.blog-sidebar -->
 
@@ -90,11 +93,10 @@
 
     </div><!-- /.container -->
 
-    <div style="margin-top:50px;"class="blog-footer container">
-      <p>{{app.title.content}}</p>
-      <p class="small">{{app.title.content}}</p>
-      <p class="small">{{app.title.copyright}}</p>
-      </p>
+    <div style="margin-top:30px; margin-bottom: 10px;"class="blog-footer container">
+        <hr />
+        {{app.title.content}}
+        <span class="small pull-right">{{app.copyright.content}}</span>
     </div>
 
 
