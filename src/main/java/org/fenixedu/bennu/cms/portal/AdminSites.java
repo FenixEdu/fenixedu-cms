@@ -86,7 +86,8 @@ public class AdminSites {
     public RedirectView edit(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
             @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug, @RequestParam(
                     required = false) Boolean published, RedirectAttributes redirectAttributes, @RequestParam String viewGroup,
-            @RequestParam String postGroup, @RequestParam String adminGroup, @RequestParam String folder) {
+            @RequestParam String postGroup, @RequestParam String adminGroup, @RequestParam String folder,
+            @RequestParam String analyticsCode) {
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
@@ -99,14 +100,14 @@ public class AdminSites {
 
             AdminSites.canEdit(s);
 
-            editSite(name, description, theme, newSlug, published, s, viewGroup, postGroup, adminGroup, folder);
+            editSite(name, description, theme, newSlug, published, s, viewGroup, postGroup, adminGroup, folder, analyticsCode);
             return new RedirectView("/cms/sites", true);
         }
     }
 
     @Atomic(mode = TxMode.WRITE)
     private void editSite(LocalizedString name, LocalizedString description, String theme, String slug, Boolean published,
-            Site s, String viewGroup, String postGroup, String adminGroup, String folder) {
+            Site s, String viewGroup, String postGroup, String adminGroup, String folder, String analyticsCode) {
         s.setName(name);
         s.setDescription(description);
         s.setTheme(CMSTheme.forType(theme));
@@ -123,6 +124,8 @@ public class AdminSites {
             s.setSlug(slug);
             s.updateMenuFunctionality();
         }
+
+        s.setAnalyticsCode(analyticsCode);
 
         s.setPublished(published);
         s.setCanViewGroup(Group.parse(viewGroup));

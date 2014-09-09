@@ -303,6 +303,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
         result.put("creationDate", site.getCreationDate());
         result.put("siteObject", site.getObject());
         result.put("rssUrl", site.getRssUrl());
+        result.put("analyticsCode", site.getAnalyticsCode());
 
         return result;
     }
