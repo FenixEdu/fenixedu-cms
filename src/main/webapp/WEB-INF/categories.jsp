@@ -20,6 +20,7 @@
               <th><spring:message code="categories.manage.label.name"/></th>
               <th><spring:message code="categories.manage.label.createdBy"/></th>
               <th><spring:message code="categories.manage.label.creationDate"/></th>
+              <th>Posts</th>
               <th><spring:message code="categories.manage.label.operations"/></th>
             </tr>
           </thead>
@@ -32,10 +33,10 @@
               </td>
               <td>${c.createdBy.username}</td>
               <td><joda:format value="${c.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
+              <td>${c.postsSet.size()}</td>
               <td>
               	<div class="btn-group">
-	                <a href="${pageContext.request.contextPath}/cms/categories/${c.slug}/stuff" class="btn btn-sm btn-default"><spring:message code="action.stuff"/></a>
-	                <a href="${pageContext.request.contextPath}/cms/categories/${c.site.slug}/${c.slug}" class="btn btn-sm btn-default" target="_blank"><spring:message code="action.link"/></a>
+	                <a href="${c.address}" class="btn btn-sm btn-default" target="_blank"><spring:message code="action.link"/></a>
 	                <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteCategoryForm').submit();"><spring:message code="action.delete"/></a>
 					<form id="deleteCategoryForm" action="${pageContext.request.contextPath}/cms/categories/${c.site.slug}/${c.slug}/delete" method="POST"></form>
 				</div>
