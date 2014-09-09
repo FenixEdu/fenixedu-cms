@@ -95,20 +95,21 @@ public class RSSService {
         writer.add(eventFactory.createEndElement("", "", "atom:link"));
         writer.add(nl);
 
-        createNode(writer, "title", title);
-        createNode(writer, "link", url);
-        createNode(writer, "description", description);
-        createNode(writer, "language", locale.toLanguageTag());
-        createNode(writer, "copyright", PortalConfiguration.getInstance().getApplicationCopyright().getContent(locale));
-        createNode(writer, "webMaster", PortalConfiguration.getInstance().getSupportEmailAddress() + " ("
+        createNode(writer, eventFactory, "title", title);
+        createNode(writer, eventFactory, "link", url);
+        createNode(writer, eventFactory, "description", description);
+        createNode(writer, eventFactory, "language", locale.toLanguageTag());
+        createNode(writer, eventFactory, "copyright",
+                PortalConfiguration.getInstance().getApplicationCopyright().getContent(locale));
+        createNode(writer, eventFactory, "webMaster", PortalConfiguration.getInstance().getSupportEmailAddress() + " ("
                 + PortalConfiguration.getInstance().getApplicationTitle().getContent(locale) + ")");
-        createNode(writer, "generator", "FenixEdu CMS " + CMS_VERSION);
-        createNode(writer, "docs", "http://blogs.law.harvard.edu/tech/rss");
-        createNode(writer, "ttl", "60");
+        createNode(writer, eventFactory, "generator", "FenixEdu CMS " + CMS_VERSION);
+        createNode(writer, eventFactory, "docs", "http://blogs.law.harvard.edu/tech/rss");
+        createNode(writer, eventFactory, "ttl", "60");
         writer.add(nl);
 
         for (Post post : posts) {
-            writePost(locale, writer, post);
+            writePost(locale, writer, post, eventFactory);
         }
 
         writer.add(eventFactory.createEndElement("", "", "channel"));
@@ -121,21 +122,23 @@ public class RSSService {
         return strWriter.toString();
     }
 
-    private static void writePost(Locale locale, XMLEventWriter writer, Post post) throws XMLStreamException {
-        XMLEventFactory eventFactory = XMLEventFactory.newInstance();
+    private static void writePost(Locale locale, XMLEventWriter writer, Post post, XMLEventFactory eventFactory)
+            throws XMLStreamException {
         writer.add(eventFactory.createStartElement("", "", "item"));
         writer.add(eventFactory.createDTD("\n"));
-        createNode(writer, "title", post.getName().getContent(locale));
-        createNode(writer, "description", post.getBody().getContent(locale));
-        createNode(writer, "link", post.getAddress());
-        createNode(writer, "author", post.getCreatedBy().getProfile().getEmail() + " (" + post.getCreatedBy().getName() + ")");
-        createNode(writer, "guid", post.getAddress() + "#" + post.getExternalId());
+        createNode(writer, eventFactory, "title", post.getName().getContent(locale));
+        createNode(writer, eventFactory, "description", post.getBody().getContent(locale));
+        createNode(writer, eventFactory, "link", post.getAddress());
+        createNode(writer, eventFactory, "author", post.getCreatedBy().getProfile().getEmail() + " ("
+                + post.getCreatedBy().getName() + ")");
+        createNode(writer, eventFactory, "guid", post.getAddress() + "#" + post.getExternalId());
         if (!post.getCategoriesSet().isEmpty()) {
-            createNode(writer, "category",
+            createNode(writer, eventFactory, "category",
                     post.getCategoriesSet().stream().map(cat -> cat.getName().getContent(locale))
                             .collect(Collectors.joining("/")));
         }
-        createNode(writer, "pubDate", post.getCreationDate().toString("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH));
+        createNode(writer, eventFactory, "pubDate", post.getCreationDate()
+                .toString("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH));
 
         writer.add(eventFactory.createDTD("\n"));
         writer.add(eventFactory.createEndElement("", "", "item"));
@@ -151,8 +154,8 @@ public class RSSService {
         }
     }
 
-    private static void createNode(XMLEventWriter eventWriter, String name, String value) throws XMLStreamException {
-        XMLEventFactory eventFactory = XMLEventFactory.newInstance();
+    private static void createNode(XMLEventWriter eventWriter, XMLEventFactory eventFactory, String name, String value)
+            throws XMLStreamException {
         eventWriter.add(eventFactory.createDTD("\t"));
         eventWriter.add(eventFactory.createStartElement("", "", name));
         eventWriter.add(eventFactory.createCharacters(value));
