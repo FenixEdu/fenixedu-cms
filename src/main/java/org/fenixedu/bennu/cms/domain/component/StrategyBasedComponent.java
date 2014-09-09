@@ -35,4 +35,8 @@ public final class StrategyBasedComponent extends StrategyBasedComponent_Base {
                 });
     }
 
+    @Override
+    public void delete() {
+    }
+
 }

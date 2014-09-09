@@ -101,8 +101,8 @@ public class Page extends Page_Base {
     @Atomic
     public void delete() {
         for (Component component : getComponentsSet()) {
+            this.removeComponents(component);
             component.delete();
-
         }
 
         for (MenuItem mi : getMenuItemsSet()) {

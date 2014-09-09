@@ -14,4 +14,11 @@ public final class PersistentSiteViewersGroup extends PersistentSiteViewersGroup
         return SiteViewersGroup.get(getSite());
     }
 
+    public void delete() {
+        this.setSite(null);
+        this.setRoot(null);
+        this.setNegation(null);
+        this.deleteDomainObject();
+    }
+
 }
