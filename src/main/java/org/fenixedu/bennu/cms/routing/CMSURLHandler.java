@@ -1,37 +1,5 @@
 package org.fenixedu.bennu.cms.routing;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.fenixedu.bennu.cms.CMSConfigurationManager;
-import org.fenixedu.bennu.cms.domain.*;
-import org.fenixedu.bennu.cms.domain.component.Component;
-import org.fenixedu.bennu.cms.domain.wraps.UserWrap;
-import org.fenixedu.bennu.cms.exceptions.ResourceNotFoundException;
-import org.fenixedu.bennu.cms.rendering.CMSExtensions;
-import org.fenixedu.bennu.cms.rendering.TemplateContext;
-import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.bennu.core.util.CoreConfiguration;
-import org.fenixedu.bennu.portal.domain.MenuFunctionality;
-import org.fenixedu.bennu.portal.domain.PortalConfiguration;
-import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
@@ -41,6 +9,36 @@ import com.mitchellbosecke.pebble.error.PebbleException;
 import com.mitchellbosecke.pebble.loader.ClasspathLoader;
 import com.mitchellbosecke.pebble.loader.StringLoader;
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import org.fenixedu.bennu.cms.CMSConfigurationManager;
+import org.fenixedu.bennu.cms.domain.*;
+import org.fenixedu.bennu.cms.domain.component.Component;
+import org.fenixedu.bennu.cms.domain.wraps.UserWrap;
+import org.fenixedu.bennu.cms.exceptions.ResourceNotFoundException;
+import org.fenixedu.bennu.cms.rendering.CMSExtensions;
+import org.fenixedu.bennu.cms.rendering.TemplateContext;
+import org.fenixedu.bennu.cms.rss.RSSService;
+import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.core.util.CoreConfiguration;
+import org.fenixedu.bennu.portal.domain.MenuFunctionality;
+import org.fenixedu.bennu.portal.domain.PortalConfiguration;
+import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
+import org.fenixedu.commons.i18n.I18N;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLStreamException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public final class CMSURLHandler implements SemanticURLHandler {
 
@@ -112,6 +110,8 @@ public final class CMSURLHandler implements SemanticURLHandler {
                         handleLeadingSlash(req, res, site);
                     } else if (pageSlug.startsWith("/static/")) {
                         handleStaticResource(req, res, site, pageSlug);
+                    } else if (pageSlug.startsWith("/rss")) {
+                        handleRSS(req, res, site, pageSlug);
                     } else {
                         renderCMSPage(req, res, site, pageSlug);
                     }
@@ -130,6 +130,31 @@ public final class CMSURLHandler implements SemanticURLHandler {
             res.sendError(404);
             return;
         }
+    }
+
+    private void handleRSS(HttpServletRequest req, HttpServletResponse res, Site site, String slug) throws IOException,
+            XMLStreamException, ServletException {
+        slug = slug.replaceFirst("/", "");
+
+        Locale locale =
+                Strings.isNullOrEmpty(req.getParameter("locale")) ? I18N.getLocale() : new Locale.Builder().setLanguageTag(
+                        req.getParameter("locale")).build();
+
+        String[] parts = slug.split("/");
+
+        if (parts.length == 1) {
+            res.setContentType("application/rss+xml;charset=UTF-8");
+            res.getOutputStream().write(RSSService.generateRSSForSite(site, locale).getBytes(StandardCharsets.UTF_8));
+        } else {
+            Category category = site.categoryForSlug(parts[1]);
+            if (category == null) {
+                errorPage(req, res, site, 404);
+            } else {
+                res.setContentType("application/rss+xml;charset=UTF-8");
+                res.getOutputStream().write(RSSService.generateRSSForCategory(category, locale).getBytes(StandardCharsets.UTF_8));
+            }
+        }
+
     }
 
     private Site getSite(MenuFunctionality menu, String url) {
@@ -251,7 +276,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
         PortalConfiguration configuration = PortalConfiguration.getInstance();
         result.put("title", configuration.getApplicationTitle());
         result.put("subtitle", configuration.getApplicationSubTitle());
-        result.put("copyright", configuration.getApplicationSubTitle());
+        result.put("copyright", configuration.getApplicationCopyright());
         return result;
     }
 

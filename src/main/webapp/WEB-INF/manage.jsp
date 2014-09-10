@@ -81,14 +81,16 @@
       </c:forEach>
       </tbody>
     </table>
+    <c:if test="${numberOfPages == 1}">
     <div class="row">
         <div class="col-md-2 col-md-offset-5">
             <ul class="pagination">
                 <li class="${currentPage <= 0 ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page - 1}">«</a></li>
-                <li class="disabled"><a href="#">${currentPage} / ${numberOfPages}</a></li>
-                <li class="${currentPage >= numberOfPages ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page + 1}">»</a></li>
+                <li class="disabled"><a href="#">${currentPage + 1} / ${numberOfPages}</a></li>
+                <li class="${currentPage + 1 >= numberOfPages ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page + 1}">»</a></li>
             </ul>
         </div>
     </div>
+    </c:if>
     </c:otherwise>
 </c:choose>

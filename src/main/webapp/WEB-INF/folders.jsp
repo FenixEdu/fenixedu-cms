@@ -19,13 +19,21 @@
 			<c:forEach var="folder" items="${folders}">
 				<tr>
 					<td>${folder.functionality.description.content}</td>
-					<td><code>${folder.functionality.fullPath}</code></td>
+					<td>
+						<code>${folder.functionality.fullPath}</code>
+						<c:if test="${folder.resolver != null}">
+							<span class="badge">Custom Resolver</span>
+						</c:if>
+					</td>
 					<td>${folder.siteSet.size()}</td>
 					<td>
-						<a href="${pageContext.request.contextPath}/cms/folders/delete/${folder.externalId}" class="btn btn-danger"
-						   ${folder.siteSet.size() > 0 ? 'disabled' : ''}>
-							<spring:message code="action.delete"/>
-						</a>
+						<div class="btn-group">
+							<a href="${pageContext.request.contextPath}/cms/folders/resolver/${folder.externalId}" class="btn btn-default">Resolver</a>
+							<a href="${pageContext.request.contextPath}/cms/folders/delete/${folder.externalId}" class="btn btn-danger"
+							   ${folder.siteSet.size() > 0 ? 'disabled' : ''}>
+								<spring:message code="action.delete"/>
+							</a>
+						</div>
 					</td>
 				</tr>
 			</c:forEach>

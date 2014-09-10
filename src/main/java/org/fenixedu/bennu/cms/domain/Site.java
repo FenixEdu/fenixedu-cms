@@ -1,22 +1,13 @@
 package org.fenixedu.bennu.cms.domain;
 
-import static java.util.stream.Collectors.toSet;
-
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import org.fenixedu.bennu.cms.domain.component.Component;
-import org.fenixedu.bennu.cms.domain.component.ListCategoryPosts;
-import org.fenixedu.bennu.cms.domain.component.SideMenuComponent;
-import org.fenixedu.bennu.cms.domain.component.TopMenuComponent;
-import org.fenixedu.bennu.cms.domain.component.ViewPost;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import org.fenixedu.bennu.cms.domain.component.*;
 import org.fenixedu.bennu.cms.domain.wraps.UserWrap;
-import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
-import org.fenixedu.bennu.cms.routing.CMSBackend;
 import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
+import org.fenixedu.bennu.cms.routing.CMSBackend;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
@@ -32,14 +23,17 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
 
 public class Site extends Site_Base implements Wrappable {
     /**
@@ -390,6 +384,14 @@ public class Site extends Site_Base implements Wrappable {
         }
     }
 
+    public String getFullUrl() {
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/" + getBaseUrl();
+    }
+
+    public String getRssUrl() {
+        return getFullUrl() + "/rss";
+    }
+
     @Override
     public void setFolder(CMSFolder folder) {
         super.setFolder(folder);
@@ -423,6 +425,14 @@ public class Site extends Site_Base implements Wrappable {
 
         public DateTime getCreationDate(){
             return Site.this.getCreationDate();
+        }
+
+        public String getRssUrl(){
+            return Site.this.getRssUrl();
+        }
+
+        public String getAnalyticsCode(){
+            return Site.this.getAnalyticsCode();
         }
 
         // TODO: Most likely this should be Wrappable

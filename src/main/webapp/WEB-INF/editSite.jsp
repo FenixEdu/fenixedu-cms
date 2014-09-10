@@ -104,6 +104,14 @@
             </div>
 
             <div class="form-group">
+                <label for="analyticsCode" class="col-sm-2 control-label">Analytics Code</label>
+
+                <div class="col-sm-10">
+                    <input type="text" name="analyticsCode" id="analyticsCode" value="${ site.analyticsCode }" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.save"/></button>
                 </div>

@@ -1,7 +1,11 @@
 package org.fenixedu.bennu.cms.portal;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 import org.fenixedu.bennu.cms.domain.CMSTheme;
 import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
@@ -20,15 +24,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 
 @SpringApplication(group = "anyone", path = "cms", title = "application.title")
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")
@@ -45,7 +47,7 @@ public class AdminSites {
     @RequestMapping(value = "manage/{page}", method = RequestMethod.GET)
     public String list(@PathVariable("page") Integer page, Model model) {
         List<List<Site>> pages = Lists.partition(getSites(), ITEMS_PER_PAGE);
-        if(!pages.isEmpty()) {
+        if (!pages.isEmpty()) {
             int currentPage = Optional.of(page).orElse(0);
             model.addAttribute("numberOfPages", pages.size());
             model.addAttribute("currentPage", currentPage);
@@ -68,7 +70,6 @@ public class AdminSites {
         }
     }
 
-
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.GET)
     public String edit(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
@@ -85,7 +86,8 @@ public class AdminSites {
     public RedirectView edit(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
             @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug, @RequestParam(
                     required = false) Boolean published, RedirectAttributes redirectAttributes, @RequestParam String viewGroup,
-            @RequestParam String postGroup, @RequestParam String adminGroup, @RequestParam String folder) {
+            @RequestParam String postGroup, @RequestParam String adminGroup, @RequestParam String folder,
+            @RequestParam String analyticsCode) {
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
@@ -98,20 +100,20 @@ public class AdminSites {
 
             AdminSites.canEdit(s);
 
-            editSite(name, description, theme, newSlug, published, s, viewGroup, postGroup, adminGroup, folder);
+            editSite(name, description, theme, newSlug, published, s, viewGroup, postGroup, adminGroup, folder, analyticsCode);
             return new RedirectView("/cms/sites", true);
         }
     }
 
     @Atomic(mode = TxMode.WRITE)
     private void editSite(LocalizedString name, LocalizedString description, String theme, String slug, Boolean published,
-            Site s, String viewGroup, String postGroup, String adminGroup, String folder) {
+            Site s, String viewGroup, String postGroup, String adminGroup, String folder, String analyticsCode) {
         s.setName(name);
         s.setDescription(description);
         s.setTheme(CMSTheme.forType(theme));
         if (!Strings.isNullOrEmpty(folder)) {
             s.setFolder(FenixFramework.getDomainObject(folder));
-        } else {
+        } else if (s.getFolder() != null) {
             // Remove the folder and set the new slug, so the MenuFunctionality will be created
             s.setFolder(null);
             s.setSlug(slug);
@@ -122,6 +124,8 @@ public class AdminSites {
             s.setSlug(slug);
             s.updateMenuFunctionality();
         }
+
+        s.setAnalyticsCode(analyticsCode);
 
         s.setPublished(published);
         s.setCanViewGroup(Group.parse(viewGroup));

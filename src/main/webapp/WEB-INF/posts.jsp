@@ -20,6 +20,7 @@
               <th><spring:message code="page.manage.label.name" /></th>
               <th><spring:message code="page.manage.label.createdBy" /></th>
               <th><spring:message code="page.manage.label.creationDate" /></th>
+              <th>Categories</th>
               <th><spring:message code="page.manage.label.operations" /></th>
             </tr>
           </thead>
@@ -32,6 +33,10 @@
               </td>
               <td>${p.createdBy.username}</td>
               <td><joda:format value="${p.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
+              <td>
+                <c:forEach var="cat" items="${p.categoriesSet}">
+                  <a href="${pageContext.request.contextPath}/cms/categories/${site.slug}" class="badge">${cat.name.content}</a>
+                </c:forEach></td>
               <td>
                 <div class="btn-group">
                   <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${p.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>

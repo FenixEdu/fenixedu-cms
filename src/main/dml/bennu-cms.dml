@@ -22,11 +22,13 @@ class Site{
   String slug;
   Boolean published;
   boolean embedded;
+  public String analyticsCode;
 }
 
 public class PersistentSiteViewersGroup extends .org.fenixedu.bennu.core.domain.groups.PersistentGroup;
 
 public class CMSFolder {
+    public NashornStrategy<CMSFolder.FolderResolver> resolver;
 }
 
 class Page{
