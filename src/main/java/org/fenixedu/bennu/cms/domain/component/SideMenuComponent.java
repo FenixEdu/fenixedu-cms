@@ -16,7 +16,7 @@ public class SideMenuComponent extends SideMenuComponent_Base {
     @Override
     public void handle(Page currentPage, TemplateContext local, TemplateContext global) {
         if (!getMenu().getChildrenSorted().isEmpty()) {
-            local.put("sideMenu", menuWrapper(getMenu(), currentPage));
+            local.put("sideMenu", getMenu().makeWrap(currentPage));
             handleMenu(getMenu(), "sideMenus", currentPage, global);
         }
     }

@@ -12,8 +12,11 @@ import org.fenixedu.bennu.cms.domain.component.ListCategoryPosts;
 import org.fenixedu.bennu.cms.domain.component.SideMenuComponent;
 import org.fenixedu.bennu.cms.domain.component.TopMenuComponent;
 import org.fenixedu.bennu.cms.domain.component.ViewPost;
+import org.fenixedu.bennu.cms.domain.wraps.UserWrap;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.routing.CMSBackend;
+import org.fenixedu.bennu.cms.domain.wraps.Wrap;
+import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
@@ -38,7 +41,7 @@ import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
-public class Site extends Site_Base {
+public class Site extends Site_Base implements Wrappable {
     /**
      * maps the registered template types on the tempate classes
      */
@@ -398,5 +401,37 @@ public class Site extends Site_Base {
     @ConsistencyPredicate
     public boolean checkHasEitherFunctionalityOrFolder() {
         return getFunctionality() != null || getFolder() != null;
+    }
+
+    public class SiteWrap extends Wrap{
+
+        public boolean isAdmin(){
+            return Site.this.getCanAdminGroup().isMember(Authenticate.getUser());
+        }
+
+        public LocalizedString getName(){
+            return Site.this.getName();
+        }
+
+        public LocalizedString getDescription(){
+            return Site.this.getDescription();
+        }
+
+        public UserWrap getCreatedBy(){
+            return new UserWrap(Site.this.getCreatedBy());
+        }
+
+        public DateTime getCreationDate(){
+            return Site.this.getCreationDate();
+        }
+
+        // TODO: Most likely this should be Wrappable
+        public Object getSiteObject(){
+            return Site.this.getObject();
+        }
+    }
+
+    @Override public Wrap makeWrap() {
+        return new SiteWrap();
     }
 }

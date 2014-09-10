@@ -16,7 +16,7 @@ public class TopMenuComponent extends TopMenuComponent_Base {
     @Override
     public void handle(Page currentPage, TemplateContext local, TemplateContext global) {
         if (!getMenu().getChildrenSorted().isEmpty()) {
-            local.put("topMenu", menuWrapper(getMenu(), currentPage));
+            local.put("topMenu", getMenu().makeWrap(currentPage));
             handleMenu(getMenu(), "topMenus", currentPage, global);
         }
     }

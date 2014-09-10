@@ -1,17 +1,18 @@
 package org.fenixedu.bennu.cms.domain.component;
 
-import java.util.Collection;
-import java.util.HashMap;
-
 import org.fenixedu.bennu.cms.domain.Category;
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.domain.Post;
 import org.fenixedu.bennu.cms.domain.PostsPresentationBean;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
-
+import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 /**
  * Component that lists the {@link Post} of a given category.
  */
@@ -30,17 +31,17 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
     public void handle(Page page, TemplateContext local, TemplateContext global) {
         String slug = global.getRequestContext().length > 1 ? global.getRequestContext()[1] : null;
         Category category = getCategory() != null ? getCategory() : page.getSite().categoryForSlug(slug);
-        local.put("category", category);
-        global.put("category", category);
+        local.put("category", category.makeWrap());
+        global.put("category", category.makeWrap());
 
         PostsPresentationBean postsPresentation = new PostsPresentationBean(category.getPostsSet());
         int currentPage = postsPresentation.currentPage(global.getParameter("p"));
         HashMap<String, Object> pagination = postsPresentation.paginate(page, currentPage, POSTS_PER_PAGE);
-
-        local.put("posts", postsPresentation.getVisiblePosts());
+        List<Wrap> posts = postsPresentation.getVisiblePosts().stream().map(Wrap::make).collect(Collectors.toList());
+        local.put("posts", posts);
         local.put("pagination", pagination);
 
-        global.put("posts", postsPresentation.getVisiblePosts());
+        global.put("posts", posts);
         global.put("pagination", pagination);
     }
 

@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableList;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
+import org.fenixedu.bennu.cms.domain.wraps.Wrap;
+import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -20,7 +23,7 @@ import com.google.common.collect.Sets;
 /**
  * Model of a Menu for a given {@link Page}
  */
-public class Menu extends Menu_Base {
+public class Menu extends Menu_Base implements Wrappable{
 
     public Menu(Site site, LocalizedString name) {
         this();
@@ -122,5 +125,40 @@ public class Menu extends Menu_Base {
 
     public <T> Set<T> getComponentsOfClass(Class<T> clazz) {
         return Sets.newHashSet(Iterables.filter(getComponentSet(), clazz));
+    }
+
+    private class MenuWrap extends Wrap {
+        private Page page;
+        public MenuWrap(){}
+        List<Wrap> children;
+
+        public MenuWrap(Page page){
+            this.page = page;
+            children = ImmutableList.copyOf(Menu.this.getChildrenSorted().stream().map((x) -> x.makeWrap(page)).collect(Collectors.toList()));
+        }
+
+        public List<Wrap> getChildren(){
+            return children;
+        }
+
+        public LocalizedString getName(){
+            return Menu.this.getName();
+        }
+
+        public Wrap getSite(){
+            return Menu.this.getSite().makeWrap();
+        }
+
+        public Boolean getTopMenu(){
+            return Menu.this.getTopMenu();
+        }
+    }
+
+    @Override public Wrap makeWrap() {
+        return new MenuWrap();
+    }
+
+    public Wrap makeWrap(Page page) {
+        return new MenuWrap(page);
     }
 }

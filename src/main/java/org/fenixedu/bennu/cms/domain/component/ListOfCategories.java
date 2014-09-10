@@ -3,6 +3,9 @@ package org.fenixedu.bennu.cms.domain.component;
 import org.fenixedu.bennu.cms.domain.Category;
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
+import org.fenixedu.bennu.cms.domain.wraps.Wrap;
+
+import java.util.stream.Collectors;
 
 /**
  * Component that lists all the {@link Category} of a given site.
@@ -16,8 +19,8 @@ public class ListOfCategories implements CMSComponent {
 
     @Override
     public void handle(Page page, TemplateContext local, TemplateContext global) {
-        local.put("categories", page.getSite().getCategoriesSet());
-        global.put("categories", page.getSite().getCategoriesSet());
+        local.put("categories", page.getSite().getCategoriesSet().stream().map(Wrap::make).collect(Collectors.toList()));
+        global.put("categories", page.getSite().getCategoriesSet().stream().map(Wrap::make).collect(Collectors.toList()));
     }
 
 }

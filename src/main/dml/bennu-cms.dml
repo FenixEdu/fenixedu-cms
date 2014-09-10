@@ -211,7 +211,7 @@ relation PostFile{
     multiplicity 0..1;
   }
 
-  .org.fenixedu.bennu.io.domain.GroupBasedFile playsRole files{
+  protected .org.fenixedu.bennu.io.domain.GroupBasedFile playsRole files{
     multiplicity 0..*;
   }
 }

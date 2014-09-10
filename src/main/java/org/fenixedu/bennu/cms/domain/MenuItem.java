@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableList;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
+import org.fenixedu.bennu.cms.domain.wraps.Wrap;
+import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -20,7 +23,7 @@ import com.google.common.collect.Lists;
 /**
  * Models the items of a {@link Menu}
  */
-public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
+public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>,Wrappable {
 
     /**
      * The logged {@link User} creates a new MenuItem.
@@ -177,5 +180,47 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem> {
             }
         }
         return menuItem;
+    }
+
+    public class MenuItemWrap extends Wrap{
+        private boolean active;
+        private boolean open;
+        private List<Wrap> children;
+
+        public MenuItemWrap(){
+            children = MenuItem.this.getChildrenSorted().stream().map((x) -> x.makeWrap()).collect(Collectors.toList());
+            active = false;
+            open = false;
+        }
+
+        public MenuItemWrap(Page page){
+            open = MenuItem.this.getPage() != null && MenuItem.this.getPage().equals(page);
+            children = ImmutableList.copyOf(MenuItem.this.getChildrenSorted().stream().map((x) -> x.makeWrap(page)).collect(Collectors.toList()));
+            active = open || children.stream().map((x) -> ((MenuItemWrap) x).open).reduce(false, (x,y) -> x || y);
+        }
+
+        public List<Wrap> getChildren(){
+            return children;
+        }
+
+        public String getAddress(){
+            return MenuItem.this.getAddress();
+        }
+
+        public boolean isActive() {
+            return active;
+        }
+
+        public boolean isOpen() {
+            return open;
+        }
+    }
+
+    @Override public Wrap makeWrap() {
+        return new MenuItemWrap();
+    }
+
+    public Wrap makeWrap(Page page) {
+        return new MenuItemWrap(page);
     }
 }

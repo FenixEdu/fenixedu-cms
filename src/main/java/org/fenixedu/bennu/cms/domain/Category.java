@@ -2,6 +2,8 @@ package org.fenixedu.bennu.cms.domain;
 
 import org.fenixedu.bennu.cms.domain.component.Component;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
+import org.fenixedu.bennu.cms.domain.wraps.Wrap;
+import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.StringNormalizer;
@@ -15,7 +17,7 @@ import com.google.common.collect.Sets;
 /**
  * Categories give a semantic group for {@link Site} and {@link Post}.
  */
-public class Category extends Category_Base {
+public class Category extends Category_Base implements Wrappable {
     /**
      * The logged {@link User} creates a new instance of a {@link Category}
      */
@@ -55,5 +57,29 @@ public class Category extends Category_Base {
             }
         }
         this.deleteDomainObject();
+    }
+
+    public class CategoryWrap extends Wrap{
+
+        public LocalizedString getName(){
+            return Category.this.getName();
+        }
+
+        public String getAddress(){
+            return Category.this.getAddress();
+        }
+
+        public String getSlug(){
+            return Category.this.getSlug();
+        }
+
+        public DateTime getCreationDate(){
+            return Category.this.getCreationDate();
+        }
+
+    }
+
+    @Override public Wrap makeWrap() {
+        return new CategoryWrap();
     }
 }

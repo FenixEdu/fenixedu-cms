@@ -18,15 +18,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.fenixedu.bennu.cms.CMSConfigurationManager;
-import org.fenixedu.bennu.cms.domain.CMSTheme;
-import org.fenixedu.bennu.cms.domain.CMSThemeFile;
-import org.fenixedu.bennu.cms.domain.Page;
-import org.fenixedu.bennu.cms.domain.Site;
+import org.fenixedu.bennu.cms.domain.*;
 import org.fenixedu.bennu.cms.domain.component.Component;
+import org.fenixedu.bennu.cms.domain.wraps.UserWrap;
 import org.fenixedu.bennu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.bennu.cms.rendering.CMSExtensions;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
-import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
@@ -217,10 +214,6 @@ public final class CMSURLHandler implements SemanticURLHandler {
         return requestURL.toString();
     }
 
-    private Map<String, Object> makeForUser(User user) {
-        return ImmutableMap.of("username", user.getUsername());
-    }
-
     private void renderPage(final HttpServletRequest req, String reqPagePath, HttpServletResponse res, Site site, Page page,
             String[] requestContext) throws PebbleException, IOException {
 
@@ -232,7 +225,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
 
         global.put("request", makeRequestWrapper(req));
         global.put("app", makeAppWrapper());
-        global.put("site", makeSiteWrapper(site));
+        global.put("site", site.makeWrap());
         global.put("page", makePageWrapper(page));
         global.put("staticDir", site.getStaticDirectory());
 
@@ -262,24 +255,12 @@ public final class CMSURLHandler implements SemanticURLHandler {
         return result;
     }
 
-    private Map<String, Object> makeSiteWrapper(Site site) {
-        HashMap<String, Object> result = new HashMap<String, Object>();
-
-        result.put("name", site.getName());
-        result.put("description", site.getDescription());
-        result.put("createdBy", makeForUser(site.getCreatedBy()));
-        result.put("creationDate", site.getCreationDate());
-        result.put("siteObject", site.getObject());
-
-        return result;
-    }
-
     private Map<String, Object> makePageWrapper(Page page) {
         HashMap<String, Object> result = new HashMap<String, Object>();
 
         result.put("name", page.getName());
-        result.put("user", makeForUser(page.getCreatedBy()));
-        result.put("createdBy", makeForUser(page.getCreatedBy()));
+        result.put("user", new UserWrap(page.getCreatedBy()));
+        result.put("createdBy", new UserWrap(page.getCreatedBy()));
         result.put("creationDate", page.getCreationDate());
         return result;
     }
@@ -311,7 +292,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
                 PebbleTemplate compiledTemplate = engine.getTemplate(cmsTheme.getType() + "/" + errorCode + ".html");
                 TemplateContext global = new TemplateContext();
                 global.put("request", makeRequestWrapper(req));
-                global.put("site", makeSiteWrapper(site));
+                global.put("site", site.makeWrap());
                 global.put("staticDir", site.getStaticDirectory());
                 res.setStatus(errorCode);
                 res.setContentType("text/html");

@@ -138,7 +138,7 @@ public class AdminPosts {
 
         addAttachment(name, attachment, p);
 
-        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
+        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit#attachments", true);
     }
 
     @Atomic
@@ -160,7 +160,7 @@ public class AdminPosts {
 
         deleteAttachment(file, p);
 
-        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
+        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit#attachments", true);
     }
 
     @Atomic
@@ -180,7 +180,7 @@ public class AdminPosts {
 
         moveAttachment(origin, destiny, p);
 
-        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
+        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit#attachments", true);
     }
 
     @Atomic
@@ -201,7 +201,7 @@ public class AdminPosts {
 
         addFile(attachment, p);
 
-        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug(), true);
+        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit#files", true);
     }
 
     @Atomic
@@ -210,8 +210,7 @@ public class AdminPosts {
                 f = new GroupBasedFile(attachment.getOriginalFilename(), attachment.getOriginalFilename(), attachment.getBytes(),
                 AnyoneGroup
                         .get());
-
-        p.getFilesSet().add(f);
+        p.getPostFiles().putFile(f);
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/deleteFile", method = RequestMethod.POST)
@@ -226,15 +225,14 @@ public class AdminPosts {
 
         deleteFile(file, p);
 
-        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
+        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit#files", true);
     }
 
     @Atomic
     private void deleteFile(GroupBasedFile file, Post p) {
-        if (p.getFilesSet().contains(file)) {
-            file.setPost(null);
+        if (p.getPostFiles().contains(file)) {
+            p.getPostFiles().removeFile(file);
             file.delete();
         }
     }
-
 }

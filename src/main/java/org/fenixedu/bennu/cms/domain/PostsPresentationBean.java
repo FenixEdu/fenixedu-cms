@@ -4,14 +4,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
-import org.springframework.util.NumberUtils;
+import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 public class PostsPresentationBean {
     private static final int FIRST_PAGE_INDEX = 1;
@@ -22,9 +23,11 @@ public class PostsPresentationBean {
     }
 
     public HashMap<String, Object> paginate(Page page, int currentPage, int postsPerPage) {
-        List<List<Post>> pages = Lists.partition(getVisiblePosts(), postsPerPage);
+
+        List<List<Wrap>> pages = Lists.partition(getVisiblePosts(), postsPerPage);
         currentPage = ensureRange(currentPage, FIRST_PAGE_INDEX, pages.size());
-        List<Post> currentPagePosts = pages.isEmpty() ? Lists.newArrayList() : pages.get(currentPage - FIRST_PAGE_INDEX);
+        List<Wrap> currentPagePosts = pages.isEmpty() ? Lists.newArrayList() : pages.get(currentPage - FIRST_PAGE_INDEX);
+
 
         HashMap<String, Object> pagination = Maps.newHashMap();
         pagination.put("pages", createPagesList(pages.size()));
@@ -33,25 +36,29 @@ public class PostsPresentationBean {
         return pagination;
     }
 
+
     private List<Object> createPagesList(int numberOfPages) {
         return IntStream.rangeClosed(FIRST_PAGE_INDEX, numberOfPages)
                 .mapToObj(i -> ImmutableMap.of("url", "?p=" + i, "number", i)).collect(toList());
     }
 
+
     private int ensureRange(int number, int min, int max) {
         return Math.max(Math.min(number, max),  min);
     }
 
-    public List<Post> getVisiblePosts() {
-        return visiblePostsStream().collect(toList());
+    public List<Wrap> getVisiblePosts() {
+        return visiblePostsStream().map(Wrap::make).collect(toList());
     }
 
-    public List<Post> getVisiblePosts(long numPosts) {
+    public List<Wrap> getVisiblePosts(long numPosts) {
         return visiblePostsStream().limit(numPosts).collect(toList());
     }
 
-    private Stream<Post> visiblePostsStream() {
-        return allPosts.stream().filter(p -> p.getComponentSet().isEmpty() && p.isVisible()).sorted(Post.CREATION_DATE_COMPARATOR);
+
+    private Stream<Wrap> visiblePostsStream() {
+        return allPosts.stream().filter(p -> p.getComponentSet().isEmpty() && p.isVisible()).sorted(Post.CREATION_DATE_COMPARATOR).map(Wrap::make);
+
     }
 
     public int currentPage(String currentPageString) {

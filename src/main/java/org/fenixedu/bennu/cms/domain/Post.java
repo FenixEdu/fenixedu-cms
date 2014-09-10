@@ -1,30 +1,33 @@
 package org.fenixedu.bennu.cms.domain;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import org.fenixedu.bennu.cms.domain.component.Component;
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
+import org.fenixedu.bennu.cms.domain.wraps.Wrap;
+import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
+import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.groups.AnyoneGroup;
+import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.io.domain.GroupBasedFile;
+import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
+import org.fenixedu.commons.StringNormalizer;
+import org.fenixedu.commons.i18n.LocalizedString;
+import org.joda.time.DateTime;
+import pt.ist.fenixframework.Atomic;
+
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.fenixedu.bennu.cms.domain.component.Component;
-import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
-import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
-import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.bennu.io.domain.GroupBasedFile;
-import org.fenixedu.commons.StringNormalizer;
-import org.fenixedu.commons.i18n.LocalizedString;
-import org.joda.time.DateTime;
-
-import pt.ist.fenixframework.Atomic;
-
-import com.google.common.collect.Lists;
-
 /**
  * A post models a given content to be presented to the user.
  */
-public class Post extends Post_Base {
+public class Post extends Post_Base implements Wrappable {
 
     public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = (o1, o2) -> o2.getCreationDate().compareTo(
             o1.getCreationDate());
@@ -85,6 +88,7 @@ public class Post extends Post_Base {
         this.setSite(null);
         this.setViewGroup(null);
         this.deleteDomainObject();
+
     }
 
     public void removeCategories() {
@@ -128,7 +132,7 @@ public class Post extends Post_Base {
      * returns the group of people who can view this site.
      *
      * @return group
-     *         the access group for this site
+     * the access group for this site
      */
     public Group getCanViewGroup() {
         return getViewGroup().toGroup();
@@ -137,12 +141,15 @@ public class Post extends Post_Base {
     /**
      * sets the access group for this site
      *
-     * @param group
-     *            the group of people who can view this site
+     * @param group the group of people who can view this site
      */
     @Atomic
     public void setCanViewGroup(Group group) {
         setViewGroup(group.toPersistentGroup());
+
+        for (GroupBasedFile file : getFilesSet()) {
+            file.setAccessGroup(group);
+        }
     }
 
     public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category,
@@ -166,6 +173,32 @@ public class Post extends Post_Base {
     private void fixOrder(List<PostFile> sortedItems) {
         for (int i = 0; i < sortedItems.size(); ++i) {
             sortedItems.get(i).setIndex(i);
+        }
+    }
+
+    public class PostFiles {
+        private PostFiles() {
+        }
+
+        public List<GroupBasedFile> getFiles() {
+            return ImmutableList.copyOf(getFilesSet());
+        }
+
+        public void putFile(GroupBasedFile file) {
+            Post.this.getFilesSet().add(file);
+            file.setAccessGroup(Post.this.getCanViewGroup());
+        }
+
+        public void removeFile(GroupBasedFile file) {
+            Post.this.getFilesSet().remove(file);
+        }
+
+        public boolean contains(GroupBasedFile file) {
+            return Post.this.getFilesSet().contains(file);
+        }
+
+        public void delete() {
+            Post.this.getFilesSet().forEach((a) -> a.delete());
         }
     }
 
@@ -228,10 +261,18 @@ public class Post extends Post_Base {
 
             putFile(removeFile(orig), dest);
         }
+
+        public void delete() {
+            Post.this.getAttachementsSet().forEach((a) -> a.delete());
+        }
     }
 
     public Attachments getAttachments() {
         return new Attachments();
+    }
+
+    public PostFiles getPostFiles() {
+        return new PostFiles();
     }
 
     @Override
@@ -274,5 +315,61 @@ public class Post extends Post_Base {
     public void setPublicationBegin(DateTime publicationBegin) {
         super.setPublicationBegin(publicationBegin);
         setModificationDate(new DateTime());
+    }
+
+    public class PostWrap extends Wrap {
+
+        public LocalizedString getName() {
+            return Post.this.getName();
+        }
+
+        public String getSlug() {
+            return Post.this.getSlug();
+        }
+
+        public LocalizedString getBody() {
+            return Post.this.getBody();
+        }
+
+        public DateTime getCreationDate() {
+            return Post.this.getCreationDate();
+        }
+
+        public DateTime getPublicationBegin() {
+            return Post.this.getPublicationBegin();
+        }
+
+        public DateTime getPublicationEnd() {
+            return Post.this.getPublicationEnd();
+        }
+
+        public DateTime getModificationDate(){
+            return Post.this.getModificationDate();
+        }
+
+        public Wrap getSite() {
+            return Post.this.getSite().makeWrap();
+        }
+
+        public List<Wrap> getCategories(){
+            return Post.this.getCategoriesSet().stream().map(Wrap::make).collect(Collectors.toList());
+        }
+
+        public List<ImmutableMap<String, Object>> getAttachments() {
+            return Post.this.getAttachments().getFiles().stream().map(
+                    (f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType", (Object) f.getContentType(), "url",
+                            FileDownloadServlet.getDownloadUrl(f))).collect(Collectors.toList());
+        }
+
+        public List<ImmutableMap<String, Object>> getPostFiles() {
+            return Post.this.getPostFiles().getFiles().stream().map(
+                    (f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType", (Object) f.getContentType(), "url",
+                            FileDownloadServlet.getDownloadUrl(f))).collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    public Wrap makeWrap() {
+        return new PostWrap();
     }
 }

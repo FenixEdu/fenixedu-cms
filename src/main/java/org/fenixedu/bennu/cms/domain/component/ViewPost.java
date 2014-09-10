@@ -19,8 +19,8 @@ public class ViewPost implements CMSComponent {
         String[] ctx = global.getRequestContext();
         if (ctx.length > 1) {
             Post p = page.getSite().postForSlug(ctx[1]);
-            local.put("post", p);
-            global.put("post", p);
+            local.put("post", p.makeWrap());
+            global.put("post", p.makeWrap());
         } else {
             throw new ResourceNotFoundException();
         }

@@ -21,8 +21,8 @@ public class StaticPost extends StaticPost_Base {
     @Override
     public void handle(Page page, TemplateContext local, TemplateContext global) {
         Post post = this.getPost();
-        local.put("post", post);
-        global.put("post", post);
+        local.put("post", post.makeWrap());
+        global.put("post", post.makeWrap());
     }
 
     @Override
