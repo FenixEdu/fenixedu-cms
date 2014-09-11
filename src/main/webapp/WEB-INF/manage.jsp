@@ -1,5 +1,4 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="joda" uri="http://www.joda.org/joda/time/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <h1><spring:message code="site.manage.title" /></h1>
@@ -56,7 +55,7 @@
                   <p><span class="label label-info">Embedded</span></p>
               </c:if>
           </td>
-          <td><joda:format value="${i.creationDate}" pattern="MMM dd, yyyy"/></td>
+          <td>${i.creationDate.toString('MMM dd, yyyy')}</td>
           <td>
             <div class="btn-group">
               <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-sm btn-default"><spring:message code="action.manage"/></a>

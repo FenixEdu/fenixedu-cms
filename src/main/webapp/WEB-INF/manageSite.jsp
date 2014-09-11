@@ -1,10 +1,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="joda" uri="http://www.joda.org/joda/time/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <c:set var="locale" value="<%= org.fenixedu.commons.i18n.I18N.getLocale() %>"/>
 
-<div class="col-sm-12 main">
+<div class="main">
 	<h2 class="page-header">${site.name.content}
 		<c:if test="${not site.published}">
 			<span class="badge"><spring:message code="site.manage.label.unpublished"/></span>

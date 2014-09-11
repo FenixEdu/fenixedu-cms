@@ -62,7 +62,7 @@ public class AdminComponents {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/componentArguments/{page}", produces = "application/json")
+    @RequestMapping(value = "/componentArguments/{page}", produces = "application/json;charset=UTF-8")
     public String getComponentArguments(@PathVariable("page") Page page, @RequestParam("type") String type) {
         AdminSites.canEdit(page.getSite());
         ComponentDescriptor descriptor = Component.forType(type);

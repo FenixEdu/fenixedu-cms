@@ -1,6 +1,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="joda" uri="http://www.joda.org/joda/time/tags" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+
+<h2 class="page-header" style="margin-top: 0">
+  <spring:message code="menu.edit.title" />
+  <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
+</h2>
 
 <style>
 
@@ -11,7 +15,6 @@
 <form id="deleteForm" method="post" action="">
 </form>
 <div class="container">
-    <h1><spring:message code="menu.edit.title"/></h1>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
     <link href="${pageContext.request.contextPath}/static/css/skin-awesome/ui.fancytree.css" rel="stylesheet" type="text/css">
     <script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.min.js" type="text/javascript"></script>

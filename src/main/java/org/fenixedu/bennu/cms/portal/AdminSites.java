@@ -47,6 +47,7 @@ public class AdminSites {
     @RequestMapping("/{slug}")
     public String manage(Model model, @PathVariable String slug) {
         Site site = Site.fromSlug(slug);
+        canEdit(site);
         model.addAttribute("site", site);
         return "manageSite";
     }
@@ -72,6 +73,9 @@ public class AdminSites {
     }
 
     public static void canEdit(Site site) {
+        if (site == null) {
+            throw CmsDomainException.notFound();
+        }
         if (!(site.getCanAdminGroup().isMember(Authenticate.getUser()))) {
             throw CmsDomainException.forbiden();
         }

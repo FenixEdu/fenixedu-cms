@@ -1,10 +1,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="joda" uri="http://www.joda.org/joda/time/tags" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@taglib prefix="joda" uri="http://www.joda.org/joda/time/tags" %>
 
-<h1><spring:message code="site.edit.title"/></h1>
-
+<h2 class="page-header" style="margin-top: 0">
+  <spring:message code="site.edit.title" />
+  <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
+</h2>
 <div class="row">
     <form class="form-horizontal" action="" method="post" role="form">
         <div class="col-sm-9">
@@ -125,9 +125,8 @@
                     <b>Created by</b>: ${site.createdBy.username}
                 </div>
                 <div>
-                    <b>Created at</b>: <joda:format value="${site.creationDate}" pattern="dd MMM, yyyy HH:mm:ss"/>
+                    <b>Created at</b>: ${site.creationDate.toString('dd MMM, yyyy HH:mm:ss')}
                 </div>
-                ${site.canPostGroup}
             </div>
 
             <div class="well">
