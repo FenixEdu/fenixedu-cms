@@ -3,8 +3,10 @@ package org.fenixedu.bennu.cms.domain;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.fenixedu.bennu.cms.domain.component.Component;
@@ -385,6 +387,10 @@ public class Site extends Site_Base {
         } else {
             return getSlug();
         }
+    }
+
+    public List<Post> getLatestPosts() {
+        return getPostSet().stream().sorted(Post.CREATION_DATE_COMPARATOR.reversed()).limit(5).collect(Collectors.toList());
     }
 
     public String getFullUrl() {

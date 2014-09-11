@@ -114,6 +114,7 @@
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.save"/></button>
+                    <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}" class="btn btn-default"><spring:message code="action.cancel"/></a>
                 </div>
             </div>
 
@@ -127,6 +128,33 @@
                     <b>Created at</b>: <joda:format value="${site.creationDate}" pattern="dd MMM, yyyy HH:mm:ss"/>
                 </div>
                 ${site.canPostGroup}
+            </div>
+
+            <div class="well">
+                <h4><spring:message code="site.edit.danger.zone"/></h4>
+
+                <a href="#" data-toggle="modal" data-target="#confirmDeleteModal" class="btn btn-danger"><spring:message code="action.delete"/></a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <form method="post" action="${pageContext.request.contextPath}/cms/sites/${site.slug}/delete">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                            class="sr-only">Close</span></button>
+                    <h4><spring:message code="site.edit.delete.title"/></h4>
+                </div>
+                <div class="modal-body">
+                    <spring:message code="site.edit.delete.confirm"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
+                    <button type="button" data-dismiss="modal" class="btn btn-primary"><spring:message code="action.cancel"/></button>
+                </div>
             </div>
         </div>
     </form>

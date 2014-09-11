@@ -44,6 +44,13 @@ public class AdminSites {
         return list(0, model);
     }
 
+    @RequestMapping("/{slug}")
+    public String manage(Model model, @PathVariable String slug) {
+        Site site = Site.fromSlug(slug);
+        model.addAttribute("site", site);
+        return "manageSite";
+    }
+
     @RequestMapping(value = "manage/{page}", method = RequestMethod.GET)
     public String list(@PathVariable("page") Integer page, Model model) {
         List<List<Site>> pages = Lists.partition(getSites(), ITEMS_PER_PAGE);
@@ -101,7 +108,7 @@ public class AdminSites {
             AdminSites.canEdit(s);
 
             editSite(name, description, theme, newSlug, published, s, viewGroup, postGroup, adminGroup, folder, analyticsCode);
-            return new RedirectView("/cms/sites", true);
+            return new RedirectView("/cms/sites/" + newSlug, true);
         }
     }
 

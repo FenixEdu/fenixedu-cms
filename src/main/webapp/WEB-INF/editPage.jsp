@@ -5,7 +5,7 @@
 <div ng-app="componentsApp" ng-controller="ComponentController">
 <h1><spring:message code="page.edit.title" /></h1>
 <h2>${page.name.content}</h2>
-<p class="small"><spring:message code="page.edit.label.site" />: <strong>${site.name.content}</strong>  </p>
+<p class="small"><spring:message code="page.edit.label.site" />: <strong><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></strong>  </p>
 <form class="form-horizontal" action="" method="post" role="form">
   
   <div class="${emptyName ? "form-group has-error" : "form-group"}">

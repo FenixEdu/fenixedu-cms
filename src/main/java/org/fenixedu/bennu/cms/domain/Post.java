@@ -26,8 +26,7 @@ import com.google.common.collect.Lists;
  */
 public class Post extends Post_Base {
 
-    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = (o1, o2) -> o2.getCreationDate().compareTo(
-            o1.getCreationDate());
+    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate);
 
     /**
      * The logged {@link User} creates a new Post.

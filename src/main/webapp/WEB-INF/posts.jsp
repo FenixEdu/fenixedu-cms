@@ -3,7 +3,7 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <h1><spring:message code="post.manage.title" /></h1>
-<p class="small"><spring:message code="page.manage.label.site" />: <a href="../"><strong>${site.name.content}</strong></a> </p>
+<p class="small"><spring:message code="page.manage.label.site" />: <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}"><strong>${site.name.content}</strong></a> </p>
 <p>
 <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/create" class="btn btn-default btn-primary"><spring:message code="page.manage.label.createPost" /></a>
 </p>

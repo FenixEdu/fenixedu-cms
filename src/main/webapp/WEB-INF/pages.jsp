@@ -4,7 +4,7 @@
 
 <h1><spring:message code="page.manage.title"/></h1>
 
-<p class="small"><spring:message code="page.manage.label.site"/>: <a href="${pageContext.request.contextPath}/cms/sites"><strong>${site.name.content}</strong></a></p>
+<p class="small"><spring:message code="page.manage.label.site"/>: <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}"><strong>${site.name.content}</strong></a></p>
 
 <p>
     <a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" class="btn btn-default btn-primary"><spring:message
