@@ -48,7 +48,7 @@
 	</div>
 
 	<div class="row">
-		<div class="col-sm-8">
+		<div class="col-sm-7">
 			<h3 class="sub-header"><spring:message code="site.manage.label.latest.posts"/> <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/create" class="btn btn-primary pull-right"><spring:message code="action.create"/></a></h3>
 			<div class="table-responsive">
 				<table class="table table-striped">
@@ -78,7 +78,7 @@
 				</table>
 			</div>
 		</div>
-		<div class="col-sm-4">
+		<div class="col-sm-5">
 			<h3 class="sub-header">${site.name.content}</h3>
 			<p><strong><spring:message code="site.edit.label.theme"/>: </strong> ${site.theme.name}</p>
 			<p><strong><spring:message code="site.edit.label.description"/>	: </strong> ${site.description.content}</p>
