@@ -90,6 +90,7 @@ public class MenuComponent extends MenuComponent_Base {
         public String address;
         public Boolean isActive;
         public Boolean isOpen;
+        public Boolean isVisible;
         public List<MenuItemWrapper> children;
 
         public MenuItemWrapper(MenuItem menuItem, Page currentPage) {
@@ -99,19 +100,23 @@ public class MenuComponent extends MenuComponent_Base {
             this.isActive = isActive(menuItem, currentPage);
             this.children = menuItemWrappers(menuItem.getChildrenSorted(), currentPage);
             this.isOpen = isOpen(menuItem, currentPage);
+            this.isVisible =
+                    menuItem.getPage() != null && menuItem.getPage().getPublished() || menuItem.getPage() == null
+                            && !menuItem.getChildrenSet().isEmpty();
         }
 
-        private boolean isOpen(List<MenuItem> children, Page currentPage) {
+        private static boolean isOpen(List<MenuItem> children, Page currentPage) {
             return children.stream().filter(child -> isOpen(child, currentPage)).findAny().isPresent();
         }
 
-        private boolean isOpen(MenuItem menuItem, Page currentPage) {
+        private static boolean isOpen(MenuItem menuItem, Page currentPage) {
             return isActive(menuItem, currentPage) || isOpen(menuItem.getChildrenSorted(), currentPage);
         }
 
-        private boolean isActive(MenuItem menuItem, Page currentPage) {
+        private static boolean isActive(MenuItem menuItem, Page currentPage) {
             return menuItem.getPage() != null && menuItem.getPage().equals(currentPage);
         }
+
     }
 
     public static class MenuWrapper {
