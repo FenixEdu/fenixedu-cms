@@ -131,6 +131,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
                         return;
                     }
                     res.reset();
+                    res.resetBuffer();
                     errorPage(req, res, site, 500);
                 }
             } else {
