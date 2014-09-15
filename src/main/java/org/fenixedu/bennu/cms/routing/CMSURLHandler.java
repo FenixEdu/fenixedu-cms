@@ -37,6 +37,9 @@ import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
 import org.fenixedu.commons.i18n.I18N;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +56,8 @@ import com.mitchellbosecke.pebble.template.PebbleTemplate;
 public final class CMSURLHandler implements SemanticURLHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CMSURLHandler.class);
+
+    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm:ss z");
 
     private final PebbleEngine engine = new PebbleEngine(new ClasspathLoader() {
         @Override
@@ -181,6 +186,16 @@ public final class CMSURLHandler implements SemanticURLHandler {
         byte[] bytes = sites.getTheme().contentForPath(pageSlug);
         if (bytes != null) {
             CMSThemeFile templateFile = sites.getTheme().fileForPath(pageSlug);
+            String etag =
+                    "W/\"" + bytes.length + "-" + (templateFile == null ? "na" : templateFile.getLastModified().getMillis())
+                            + "\"";
+            res.setHeader("ETag", etag);
+            if (etag.equals(req.getHeader("If-None-Match"))) {
+                res.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                return;
+            }
+            res.setHeader("Expires", formatter.print(DateTime.now().plusHours(12)));
+            res.setHeader("Cache-Control", "max-age=43200");
             res.setContentLength(bytes.length);
             if (templateFile != null) {
                 res.setContentType(templateFile.getContentType());
