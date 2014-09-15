@@ -320,6 +320,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
         result.put("siteObject", site.getObject());
         result.put("rssUrl", site.getRssUrl());
         result.put("analyticsCode", site.getAnalyticsCode());
+        result.put("fullUrl", site.getFullUrl());
 
         return result;
     }
@@ -363,6 +364,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
                 global.put("request", makeRequestWrapper(req));
                 global.put("site", makeSiteWrapper(site));
                 global.put("staticDir", site.getStaticDirectory());
+                global.put("app", makeAppWrapper());
                 res.setStatus(errorCode);
                 res.setContentType("text/html");
                 compiledTemplate.evaluate(res.getWriter(), global);
