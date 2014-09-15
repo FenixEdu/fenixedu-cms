@@ -84,7 +84,7 @@ public class AdminPages {
         Page p = s.pageForSlug(slugPage);
         model.addAttribute("site", s);
         model.addAttribute("page", p);
-        model.addAttribute("availableComponents", Component.availableComponents());
+        model.addAttribute("availableComponents", Component.availableComponents(s));
 
         return "editPage";
     }

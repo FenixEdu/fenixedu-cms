@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.fenixedu.bennu.cms.domain.Menu;
 import org.fenixedu.bennu.cms.domain.MenuItem;
 import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -127,5 +128,9 @@ public class MenuComponent extends MenuComponent_Base {
             this.name = name;
             this.children = children;
         }
+    }
+
+    public static boolean supportsSite(Site site) {
+        return !site.getMenusSet().isEmpty();
     }
 }

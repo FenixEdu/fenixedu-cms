@@ -3,6 +3,7 @@ package org.fenixedu.bennu.cms.domain.component;
 import java.util.HashMap;
 
 import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.core.domain.User;
@@ -42,9 +43,10 @@ public abstract class Component extends Component_Base {
         return COMPONENTS.get(type);
     }
 
-    public static JsonArray availableComponents() {
+    public static JsonArray availableComponents(Site site) {
         JsonArray array = new JsonArray();
-        COMPONENTS.values().stream().map(ComponentDescriptor::toJson).forEach(obj -> array.add(obj));
+        COMPONENTS.values().stream().filter(descriptor -> descriptor.isForSite(site)).map(ComponentDescriptor::toJson)
+                .forEach(obj -> array.add(obj));
         return array;
     }
 
@@ -112,4 +114,5 @@ public abstract class Component extends Component_Base {
     public Class<?> componentType() {
         return this.getClass();
     }
+
 }
