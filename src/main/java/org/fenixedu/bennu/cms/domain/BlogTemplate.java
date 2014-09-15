@@ -1,11 +1,11 @@
 package org.fenixedu.bennu.cms.domain;
 
+import org.fenixedu.bennu.cms.domain.component.Component;
 import org.fenixedu.bennu.cms.domain.component.ListCategoryPosts;
 import org.fenixedu.bennu.cms.domain.component.ListOfCategories;
 import org.fenixedu.bennu.cms.domain.component.ListPosts;
 import org.fenixedu.bennu.cms.domain.component.MenuComponent;
 import org.fenixedu.bennu.cms.domain.component.StaticPost;
-import org.fenixedu.bennu.cms.domain.component.StrategyBasedComponent;
 import org.fenixedu.bennu.cms.domain.component.ViewPost;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -121,7 +121,7 @@ public class BlogTemplate implements SiteTemplate {
         Page page = new Page();
         page.setSite(site);
         page.setName(new LocalizedString(I18N.getLocale(), "Homepage"));
-        page.addComponents(StrategyBasedComponent.forType(ListPosts.class));
+        page.addComponents(Component.forType(ListPosts.class));
         page.setTemplate(site.getTheme().templateForType("posts"));
         page.setSlug("");
         return page;
@@ -141,7 +141,7 @@ public class BlogTemplate implements SiteTemplate {
         Page page = new Page();
         page.setSite(site);
         page.setName(new LocalizedString(I18N.getLocale(), "View"));
-        page.addComponents(StrategyBasedComponent.forType(ViewPost.class));
+        page.addComponents(Component.forType(ViewPost.class));
         page.setTemplate(site.getTheme().templateForType("view"));
         return page;
     }
@@ -150,7 +150,7 @@ public class BlogTemplate implements SiteTemplate {
         Page page = new Page();
         page.setSite(site);
         page.setName(new LocalizedString(I18N.getLocale(), "Categories"));
-        page.addComponents(StrategyBasedComponent.forType(ListOfCategories.class));
+        page.addComponents(Component.forType(ListOfCategories.class));
         page.setTemplate(site.getTheme().templateForType("categories"));
         return page;
     }

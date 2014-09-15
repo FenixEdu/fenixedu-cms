@@ -24,7 +24,7 @@ public final class StrategyBasedComponent extends StrategyBasedComponent_Base {
         return getComponent().getClass();
     }
 
-    public static Component forType(Class<? extends CMSComponent> type) {
+    static Component componentForType(Class<? extends CMSComponent> type) {
         return Bennu.getInstance().getCmsComponentsSet().stream()
                 .filter(component -> component.getComponent().getClass().equals(type)).findAny().orElseGet(() -> {
                     try {

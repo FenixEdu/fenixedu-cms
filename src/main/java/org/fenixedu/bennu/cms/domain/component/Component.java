@@ -115,4 +115,8 @@ public abstract class Component extends Component_Base {
         return this.getClass();
     }
 
+    public static Component forType(Class<? extends CMSComponent> type) {
+        return StrategyBasedComponent.componentForType(type);
+    }
+
 }
