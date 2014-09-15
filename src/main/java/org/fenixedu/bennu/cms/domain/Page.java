@@ -189,4 +189,8 @@ public class Page extends Page_Base {
         setModificationDate(new DateTime());
         super.setTemplate(template);
     }
+
+    public boolean isPublished() {
+        return getPublished() != null ? getPublished().booleanValue() : false;
+    }
 }

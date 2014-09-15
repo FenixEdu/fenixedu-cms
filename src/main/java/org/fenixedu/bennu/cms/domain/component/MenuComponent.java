@@ -102,7 +102,7 @@ public class MenuComponent extends MenuComponent_Base {
             this.children = menuItemWrappers(menuItem.getChildrenSorted(), currentPage);
             this.isOpen = isOpen(menuItem, currentPage);
             this.isVisible =
-                    menuItem.getPage() != null && menuItem.getPage().getPublished() || menuItem.getPage() == null
+                    menuItem.getPage() != null && menuItem.getPage().isPublished() || menuItem.getPage() == null
                             && !menuItem.getChildrenSet().isEmpty();
         }
 
