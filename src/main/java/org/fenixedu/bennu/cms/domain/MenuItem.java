@@ -6,10 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableList;
-import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -18,6 +17,7 @@ import org.joda.time.DateTime;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -179,9 +179,9 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     }
 
     public class MenuItemWrap extends Wrap {
-        private boolean active;
-        private boolean open;
-        private List<Wrap> children;
+        private final boolean active;
+        private final boolean open;
+        private final List<Wrap> children;
 
         public MenuItemWrap() {
             children = MenuItem.this.getChildrenSorted().stream().map((x) -> x.makeWrap()).collect(Collectors.toList());
@@ -214,6 +214,10 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
         public boolean isOpen() {
             return open;
+        }
+
+        public boolean isFolder() {
+            return MenuItem.this.getFolder();
         }
     }
 
