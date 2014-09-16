@@ -1,8 +1,11 @@
-<html>
-  <head>
-    
-  </head>
-  <body>
-    <h1>File Not Found</h1>
-  </body>
-</html>
+{% extends "cms-default-theme/base.html" %}
+
+{% block content %}
+	<div class="jumbotron">
+		<h1>Oops, not found!</h1>
+
+		<p>This is embarrassing, but the page you were looking for could not be found.</p>
+
+		<p><a href="{{site.fullUrl}}" class="btn btn-primary btn-lg" role="button"><span class="glyphicon glyphicon-home"></span> Home</a></p>
+	</div>
+{% endblock content %}

@@ -7,7 +7,6 @@ import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.domain.component.CMSComponent;
 import org.fenixedu.bennu.cms.domain.component.Component;
 import org.fenixedu.bennu.cms.domain.component.ComponentDescriptor;
-import org.fenixedu.bennu.cms.domain.component.StrategyBasedComponent;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +53,7 @@ public class AdminComponents {
         if (descriptor.isStateless()) {
             @SuppressWarnings("unchecked")
             Class<? extends CMSComponent> type = (Class<? extends CMSComponent>) descriptor.getType();
-            page.addComponents(StrategyBasedComponent.forType(type));
+            page.addComponents(Component.forType(type));
         } else {
             JsonObject params = json.get("parameters").getAsJsonObject();
             page.addComponents(descriptor.instantiate(params));
@@ -62,7 +61,7 @@ public class AdminComponents {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/componentArguments/{page}", produces = "application/json")
+    @RequestMapping(value = "/componentArguments/{page}", produces = "application/json;charset=UTF-8")
     public String getComponentArguments(@PathVariable("page") Page page, @RequestParam("type") String type) {
         AdminSites.canEdit(page.getSite());
         ComponentDescriptor descriptor = Component.forType(type);

@@ -1,12 +1,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="joda" uri="http://www.joda.org/joda/time/tags" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 
+<h2 class="page-header" style="margin-top: 0">
+  <spring:message code="page.edit.title" /> - ${page.name.content}
+  <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
+</h2>
+
 <div ng-app="componentsApp" ng-controller="ComponentController">
-<h1><spring:message code="page.edit.title" /></h1>
-<h2>${page.name.content}</h2>
-<p class="small"><spring:message code="page.edit.label.site" />: <strong>${site.name.content}</strong>  </p>
-<form class="form-horizontal" action="" method="post" role="form">
+<form id="mainForm" class="form-horizontal" action="" method="post" role="form">
   
   <div class="${emptyName ? "form-group has-error" : "form-group"}">
         <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.slug"/></label>
@@ -45,7 +46,7 @@
   </div>
   <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-      <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.save" /></button>
+      <button type="submit" onclick="$('#mainForm').submit()" class="btn btn-default btn-primary"><spring:message code="action.save" /></button>
     </div>
   </div>
 </form>
@@ -72,11 +73,10 @@
       </c:when>
 
       <c:otherwise>
-        <table class="table table-striped table-bordered">
+        <table class="table table-striped">
           <thead>
             <tr>
               <th><spring:message code="page.edit.label.name" /></th>
-              <th><spring:message code="page.edit.label.createdBy" /></th>
               <th><spring:message code="page.edit.label.creationDate" /></th>
               <th><spring:message code="page.edit.label.operations" /></th>
             </tr>
@@ -88,11 +88,10 @@
                 <h5>${m.name}</h5>
                 <div><small>${m.description}</code></small></div>
               </td>
-              <td>${m.createdBy.username}</td>
-              <td><joda:format value="${m.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
+              <td>${m.creationDate.toString('dd MMMM yyyy, HH:mm', locale)} <small>- ${m.createdBy.name}</small></td>
               <td>
-                <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteComponentForm').submit();"><spring:message code="action.delete" /></a>
-               	<form id="deleteComponentForm" action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/deleteComponent/${m.getExternalId()}" method="POST"></form>
+                <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteComponentForm${m.externalId}').submit();"><spring:message code="action.delete" /></a>
+               	<form id="deleteComponentForm${m.externalId}" action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/deleteComponent/${m.getExternalId()}" method="POST"></form>
               </td>
             </tr>
           </c:forEach>

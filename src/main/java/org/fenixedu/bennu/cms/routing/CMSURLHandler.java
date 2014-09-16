@@ -23,6 +23,9 @@ import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
 import org.fenixedu.commons.i18n.I18N;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +46,8 @@ import java.util.concurrent.TimeUnit;
 public final class CMSURLHandler implements SemanticURLHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CMSURLHandler.class);
+
+    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm:ss z");
 
     private final PebbleEngine engine = new PebbleEngine(new ClasspathLoader() {
         @Override
@@ -121,6 +126,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
                         return;
                     }
                     res.reset();
+                    res.resetBuffer();
                     errorPage(req, res, site, 500);
                 }
             } else {
@@ -170,6 +176,16 @@ public final class CMSURLHandler implements SemanticURLHandler {
         byte[] bytes = sites.getTheme().contentForPath(pageSlug);
         if (bytes != null) {
             CMSThemeFile templateFile = sites.getTheme().fileForPath(pageSlug);
+            String etag =
+                    "W/\"" + bytes.length + "-" + (templateFile == null ? "na" : templateFile.getLastModified().getMillis())
+                            + "\"";
+            res.setHeader("ETag", etag);
+            if (etag.equals(req.getHeader("If-None-Match"))) {
+                res.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                return;
+            }
+            res.setHeader("Expires", formatter.print(DateTime.now().plusHours(12)));
+            res.setHeader("Cache-Control", "max-age=43200");
             res.setContentLength(bytes.length);
             if (templateFile != null) {
                 res.setContentType(templateFile.getContentType());
@@ -282,6 +298,22 @@ public final class CMSURLHandler implements SemanticURLHandler {
         return result;
     }
 
+    private Map<String, Object> makeSiteWrapper(Site site) {
+        HashMap<String, Object> result = new HashMap<String, Object>();
+
+        result.put("name", site.getName());
+        result.put("description", site.getDescription());
+        result.put("createdBy", makeForUser(site.getCreatedBy()));
+        result.put("creationDate", site.getCreationDate());
+        result.put("siteObject", site.getObject());
+        result.put("rssUrl", site.getRssUrl());
+        result.put("analyticsCode", site.getAnalyticsCode());
+        result.put("fullUrl", site.getFullUrl());
+
+        return result;
+    }
+
+
     private Map<String, Object> makePageWrapper(Page page) {
         HashMap<String, Object> result = new HashMap<String, Object>();
 
@@ -317,6 +349,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
                 global.put("request", makeRequestWrapper(req));
                 global.put("site", site.makeWrap());
                 global.put("staticDir", site.getStaticDirectory());
+                global.put("app", makeAppWrapper());
                 res.setStatus(errorCode);
                 res.setContentType("text/html");
                 compiledTemplate.evaluate(res.getWriter(), global);

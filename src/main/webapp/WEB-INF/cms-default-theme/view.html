@@ -3,10 +3,12 @@
 {% block content %}
 
 <div class="blog-post">
+
     <h2 class="blog-post-title"><a href="{{post.address}}">{{ post.name.content }}</a></h2>
 
     <p class="small blog-post-meta">
         {{ post.creationDate|formatDate("MMMM d, Y, H:m") }} by <a href="#">{{post.createdBy.username}}</a>
+
     <span class="pull-right">
     {% for cat in post.categoriesSet %}
        <a href="{{cat.address}}" class="badge">{{cat.name.content}}</a>

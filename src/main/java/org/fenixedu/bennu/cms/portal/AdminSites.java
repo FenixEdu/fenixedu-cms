@@ -44,6 +44,14 @@ public class AdminSites {
         return list(0, model);
     }
 
+    @RequestMapping("/{slug}")
+    public String manage(Model model, @PathVariable String slug) {
+        Site site = Site.fromSlug(slug);
+        canEdit(site);
+        model.addAttribute("site", site);
+        return "manageSite";
+    }
+
     @RequestMapping(value = "manage/{page}", method = RequestMethod.GET)
     public String list(@PathVariable("page") Integer page, Model model) {
         List<List<Site>> pages = Lists.partition(getSites(), ITEMS_PER_PAGE);
@@ -65,6 +73,9 @@ public class AdminSites {
     }
 
     public static void canEdit(Site site) {
+        if (site == null) {
+            throw CmsDomainException.notFound();
+        }
         if (!(site.getCanAdminGroup().isMember(Authenticate.getUser()))) {
             throw CmsDomainException.forbiden();
         }
@@ -101,7 +112,7 @@ public class AdminSites {
             AdminSites.canEdit(s);
 
             editSite(name, description, theme, newSlug, published, s, viewGroup, postGroup, adminGroup, folder, analyticsCode);
-            return new RedirectView("/cms/sites", true);
+            return new RedirectView("/cms/sites/" + newSlug, true);
         }
     }
 

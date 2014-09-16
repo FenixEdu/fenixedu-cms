@@ -1,5 +1,7 @@
 package org.fenixedu.bennu.cms.portal;
 
+import java.util.Objects;
+
 import org.fenixedu.bennu.cms.domain.CMSTemplate;
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.domain.Site;
@@ -82,7 +84,7 @@ public class AdminPages {
         Page p = s.pageForSlug(slugPage);
         model.addAttribute("site", s);
         model.addAttribute("page", p);
-        model.addAttribute("availableComponents", Component.availableComponents());
+        model.addAttribute("availableComponents", Component.availableComponents(s));
 
         return "editPage";
     }
@@ -107,7 +109,9 @@ public class AdminPages {
     @Atomic(mode = TxMode.WRITE)
     private void editPage(LocalizedString name, String slug, String template, Site s, Page p) {
         p.setName(name);
-        p.setSlug(slug);
+        if (!Objects.equals(slug, p.getSlug())) {
+            p.setSlug(slug);
+        }
         if (s != null && s.getTheme() != null) {
             CMSTemplate t = s.getTheme().templateForType(template);
             p.setTemplate(t);

@@ -41,7 +41,8 @@ public class Category extends Category_Base implements Wrappable {
     }
 
     public String getAddress() {
-        return this.getSite().getViewCategoryPage().getAddress() + "/" + this.getSlug();
+        Page viewCategoryPage = this.getSite().getViewCategoryPage();
+        return viewCategoryPage == null ? null : viewCategoryPage.getAddress() + "/" + this.getSlug();
     }
 
     public String getRssUrl() {

@@ -1,13 +1,17 @@
 package org.fenixedu.bennu.cms.domain.component;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.domain.component.ComponentContextProvider.EmptyProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.ClassUtils;
 
 import pt.ist.fenixframework.DomainObject;
@@ -25,17 +29,21 @@ import com.google.gson.JsonObject;
  */
 public class ComponentDescriptor {
 
+    private static final Logger logger = LoggerFactory.getLogger(ComponentDescriptor.class);
+
     private final Class<?> type;
     private final String name;
     private final boolean stateless;
     private final Map<String, ComponentParameterDescriptor> parameters = new HashMap<>();
     private final Constructor<?> ctor;
+    private final Method filter;
 
     ComponentDescriptor(Class<?> type) {
         this.type = type;
         ComponentType ann = type.getAnnotation(ComponentType.class);
         this.name = ann.name();
         this.stateless = CMSComponent.class.isAssignableFrom(type);
+        this.filter = ClassUtils.getMethodIfAvailable(type, "supportsSite", Site.class);
         if (!this.stateless) {
             this.ctor = getCustomCtor(type);
             for (Parameter param : ctor.getParameters()) {
@@ -65,6 +73,15 @@ public class ComponentDescriptor {
 
     public boolean isStateless() {
         return stateless;
+    }
+
+    public boolean isForSite(Site site) {
+        try {
+            return filter == null ? true : (boolean) filter.invoke(null, site);
+        } catch (Exception e) {
+            logger.warn("Exception when running component site filter, returning true!", e);
+            return true;
+        }
     }
 
     private class ComponentParameterDescriptor {

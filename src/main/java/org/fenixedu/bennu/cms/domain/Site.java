@@ -8,6 +8,7 @@ import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.routing.CMSBackend;
+import org.fenixedu.bennu.cms.routing.CMSEmbeddedBackend;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
@@ -16,6 +17,7 @@ import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.groups.UserGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
+import org.fenixedu.bennu.portal.domain.MenuContainer;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.domain.MenuItem;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
@@ -29,8 +31,9 @@ import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
 import java.util.HashMap;
-import java.util.Optional;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
@@ -263,11 +266,15 @@ public class Site extends Site_Base implements Wrappable {
         Preconditions.checkArgument(isValidSlug(getSlug()));
 
         if (getFolder() == null) {
+            MenuContainer parent =
+                    getFunctionality() == null ? PortalConfiguration.getInstance().getMenu() : getFunctionality().getParent();
             if (getFunctionality() != null) {
                 deleteMenuFunctionality();
             }
-            this.setFunctionality(new MenuFunctionality(PortalConfiguration.getInstance().getMenu(), false, getSlug(),
-                    CMSBackend.BACKEND_KEY, "anyone", getDescription(), getName(), getSlug()));
+            this.setFunctionality(new MenuFunctionality(parent, getEmbedded(), getSlug(),
+                    getEmbedded() ? CMSEmbeddedBackend.BACKEND_KEY : CMSBackend.BACKEND_KEY, "anyone", this.getDescription(),
+                    this.getName(), getSlug()));
+            getFunctionality().setAccessGroup(SiteViewersGroup.get(this));
         }
 
     }
@@ -377,6 +384,10 @@ public class Site extends Site_Base implements Wrappable {
         } else {
             return getSlug();
         }
+    }
+
+    public List<Post> getLatestPosts() {
+        return getPostSet().stream().sorted(Post.CREATION_DATE_COMPARATOR.reversed()).limit(5).collect(Collectors.toList());
     }
 
     public String getFullUrl() {

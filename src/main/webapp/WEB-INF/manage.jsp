@@ -1,5 +1,4 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="joda" uri="http://www.joda.org/joda/time/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <h1><spring:message code="site.manage.title" /></h1>
@@ -22,7 +21,7 @@
           <th class="col-md-6"><spring:message code="site.manage.label.name" /></th>
           <th><spring:message code="site.manage.label.status" /></th>
           <th><spring:message code="site.manage.label.creationDate" /></th>
-          <th><spring:message code="site.manage.label.operations" /></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -32,11 +31,9 @@
             <c:choose>
               <c:when test="${i.getInitialPage()!=null}">
                 <h5><a href="${i.getInitialPage().getAddress()}" target="_blank">${i.getName().getContent()}</a>
-
                     <c:if test="${i.isDefault()}">
                         <span class="label label-success"><spring:message code="site.manage.label.default"/></span>
                     </c:if>
-
                 </h5>
               </c:when>
               <c:otherwise>
@@ -44,7 +41,6 @@
               </c:otherwise>
             </c:choose>
             <div><small>Url: <code>${i.baseUrl}</code></small></div>
-            <div><small>${i.getDescription().getContent()}</small></div>
           </td>
           <td class="text-center">
               <c:choose>
@@ -59,22 +55,10 @@
                   <p><span class="label label-info">Embedded</span></p>
               </c:if>
           </td>
-          <td><joda:format value="${i.creationDate}" pattern="MMM dd, yyyy"/></td>
+          <td>${i.creationDate.toString('MMM dd, yyyy')}</td>
           <td>
             <div class="btn-group">
-              <a href="${pageContext.request.contextPath}/cms/posts/${i.slug}" class="btn btn-sm btn-default"><spring:message code="site.manage.label.posts" /></a>
-
-              <a href="${pageContext.request.contextPath}/cms/pages/${i.slug}" class="btn btn-sm btn-default"><spring:message code="site.manage.label.pages" /></a>
-
-              <a href="${pageContext.request.contextPath}/cms/categories/${i.slug}" class="btn btn-sm btn-default"><spring:message code="site.manage.label.categories" /></a>
-
-              <a href="${pageContext.request.contextPath}/cms/menus/${i.slug}" class="btn btn-sm btn-default"><spring:message code="site.manage.label.menus" /></a>
-
-              <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
-
-       	      <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteSiteForm').submit();"><spring:message code="action.delete" /></a>
-
-              <form id="deleteSiteForm" action="${pageContext.request.contextPath}/cms/sites/${i.slug}/delete" method="POST"></form>
+              <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-sm btn-default"><spring:message code="action.manage"/></a>
             </div>
           </td>
         </tr>

@@ -1,10 +1,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="joda" uri="http://www.joda.org/joda/time/tags" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<h1><spring:message code="page.manage.title"/></h1>
-
-<p class="small"><spring:message code="page.manage.label.site"/>: <a href="${pageContext.request.contextPath}/cms/sites"><strong>${site.name.content}</strong></a></p>
+<h2 class="page-header" style="margin-top: 0">
+  <spring:message code="page.manage.title" />
+  <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
+</h2>
 
 <p>
     <a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" class="btn btn-default btn-primary"><spring:message
@@ -15,26 +15,25 @@
 
 <c:choose>
     <c:when test="${pages.size() == 0}">
-        <p><spring:message code="page.manage.label.emptyPages"/></p>
+        <i><spring:message code="page.manage.label.emptyPages"/></i>
     </c:when>
 
     <c:otherwise>
-        <table class="table table-striped table-bordered">
+        <table class="table table-striped">
             <thead>
             <tr>
                 <th><spring:message code="page.manage.label.name"/></th>
-                <th><spring:message code="page.manage.label.createdBy"/></th>
                 <th><spring:message code="page.manage.label.creationDate"/></th>
                 <th><spring:message code="page.manage.label.operations"/></th>
             </tr>
             </thead>
             <tbody>
-            <c:forEach var="p" items="${pages}">
+            <c:forEach var="page" items="${pages}">
                 <tr>
                     <td>
                         <h5><a target="_blank"
-                               href="${p.address}">${p.getName().getContent()}</a>
-                            <c:if test="${p.site.initialPage == p}">
+                               href="${page.address}">${page.name.content}</a>
+                            <c:if test="${page.site.initialPage == page}">
                                 <span class="label label-success"><spring:message code="site.manage.label.default"/></span>
                             </c:if>
                         </h5>
@@ -42,8 +41,8 @@
                         <div>
                             <small><spring:message code="page.manage.label.url"/>:
                                 <c:choose>
-                                    <c:when test="${p.slug != ''}">
-                                        <code>${p.getSlug()}</code>
+                                    <c:when test="${page.slug != ''}">
+                                        <code>${page.slug}</code>
                                     </c:when>
                                     <c:otherwise>
                                         <i>Empty</i>
@@ -52,28 +51,25 @@
                             </small>
                         </div>
                     </td>
-                    <td>${p.createdBy.username}</td>
-                    <td><joda:format value="${p.getCreationDate()}" pattern="MMM dd, yyyy"/></td>
+                    <td>${page.creationDate.toString('dd MMMM yyyy, HH:mm', locale)} <small>- ${page.createdBy.name}</small></td>
                     <td>
                         <div class="btn-group">
                             <c:choose>
-                                <c:when test="${p.slug != ''}">
-                                    <a href="${pageContext.request.contextPath}/cms/pages/${p.site.slug}/${p.slug}/edit"
+                                <c:when test="${page.slug != ''}">
+                                    <a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit"
                                        class="btn btn-sm btn-default"><spring:message code="action.edit"/></a>
                                 </c:when>
                                 <c:otherwise>
-                                    <a href="${pageContext.request.contextPath}/cms/pages/${p.site.slug}/--**--/edit"
+                                    <a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/--**--/edit"
                                        class="btn btn-sm btn-default"><spring:message code="action.edit"/></a>
                                 </c:otherwise>
                             </c:choose>
-                            <a href="${p.address}" class="btn btn-sm btn-default"
-                               target="_blank"><spring:message code="action.link"/></a>
                             <a href="#" class="btn btn-danger btn-sm"
-                               onclick="document.getElementById('deletePageForm').submit();"><spring:message
+                               onclick="document.getElementById('deletePageForm${page.externalId}').submit();"><spring:message
                                     code="action.delete"/></a>
 
-                            <form id="deletePageForm"
-                                  action="${pageContext.request.contextPath}/cms/pages/${p.site.slug}/${p.slug}/delete"
+                            <form id="deletePageForm${page.externalId}"
+                                  action="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/delete"
                                   method="POST"></form>
                         </div>
                     </td>
