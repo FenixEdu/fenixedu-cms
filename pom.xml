@@ -67,6 +67,7 @@
                             <webappTargetDir>${project.build.outputDirectory}/META-INF/resources/</webappTargetDir>
                             <jsTargetDir>static/js</jsTargetDir>
                             <jsFinalFile>toolkit.js</jsFinalFile>
+                            <jsEngine>CLOSURE</jsEngine>
                             <nosuffix>true</nosuffix>
                         </configuration>
                         <goals>

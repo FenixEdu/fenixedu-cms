@@ -1,9 +1,11 @@
-package org.fenixedu.bennu.cms.domain;
+package org.fenixedu.bennu.cms.domain.component;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Ints;
+import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Post;
 import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 
 import java.util.HashMap;
@@ -48,13 +50,12 @@ public class PostsPresentationBean {
     }
 
     public List<Wrap> getVisiblePosts() {
-        return visiblePostsStream().map(Wrap::make).collect(toList());
+        return visiblePostsStream().collect(toList());
     }
 
     public List<Wrap> getVisiblePosts(long numPosts) {
         return visiblePostsStream().limit(numPosts).collect(toList());
     }
-
 
     private Stream<Wrap> visiblePostsStream() {
         return allPosts.stream().filter(p -> p.getComponentSet().isEmpty() && p.isVisible()).sorted(Post.CREATION_DATE_COMPARATOR).map(Wrap::make);

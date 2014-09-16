@@ -2,19 +2,18 @@
     var ALLOW_VOICE = false;
     var ALLOW_FULLSCREEN = true;
 
-    
 
     Bennu.htmlEditor = Bennu.htmlEditor || {};
-    Bennu.htmlEditor.fullscreen = function(e){
+    Bennu.htmlEditor.fullscreen = function (e) {
         var target = $(e.target);
         a = target.closest(".bennu-html-editor-input");
         a.toggleFullScreen();
 
         a.addClass("fullscreen");
         $(".fullscreen-button", a).addClass("btn-primary");
-        $(document).bind("fullscreenchange", function() {
+        $(document).bind("fullscreenchange", function () {
             var state = ($(document).fullScreen() ? "on" : "off");
-            if (state == "off"){
+            if (state == "off") {
                 $(".fullscreen").removeClass("fullscreen");
                 $(".fullscreen-button", a).removeClass("btn-primary");
                 $(".bennu-html-editor-tools", a).off("mouseover mouseout");
@@ -22,45 +21,54 @@
             }
         });
         var i;
+
         function h(action) {
-            clearTimeout(i), 
-            a.hasClass("visible") && "show" !== action ? "autohide" !== action && 
-            a.removeClass("visible") : a.addClass("visible"), 
-            "autohide" === action && (i = setTimeout(function(){ a.removeClass('visible') }, 2e3))
+            clearTimeout(i),
+                    a.hasClass("visible") && "show" !== action ? "autohide" !== action &&
+                a.removeClass("visible") : a.addClass("visible"),
+                "autohide" === action && (i = setTimeout(function () {
+                a.removeClass('visible')
+            }, 2e3))
         }
 
-        $(".bennu-html-editor-tools", a).on("mouseover",function(){
+        $(".bennu-html-editor-tools", a).on("mouseover", function () {
             h("show");
-        }).on("mouseout",function(){
+        }).on("mouseout", function () {
             h("autohide");
         })
         h("show");
-        i = setTimeout(function(){ a.removeClass('visible') }, 2e3);
+        i = setTimeout(function () {
+            a.removeClass('visible')
+        }, 2e3);
 
         $(".bennu-html-editor-editor", a).focus();
     }
 
     var two_line = /\n\n/g;
     var one_line = /\n/g;
+
     function linebreak(s) {
-      return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+        return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
     }
 
     var first_char = /\S/;
+
     function capitalize(s) {
-      return s.replace(first_char, function(m) { return m.toUpperCase(); });
+        return s.replace(first_char, function (m) {
+            return m.toUpperCase();
+        });
     }
 
 
     $(function () {
         $("[bennu-html-editor]").map(function (i, e) {
             e = $(e)
-            var dom = $('<div class="bennu-html-editor-input">'+
+            var dom = $('<div class="bennu-html-editor-input">' +
                 '<div class="bennu-html-editor-tools">' +
-                '<div class="bennu-html-editor-toolbar btn-toolbar" data-role="editor-toolbar" data-target=".bennu-html-editor-editor"></div>'+
+                '<div class="bennu-html-editor-toolbar btn-toolbar" data-role="editor-toolbar" data-target=".bennu-html-editor-editor"></div>' +
                 '</div>' +
-                '<div class="bennu-html-editor-editor editor-input" contenteditable="true"></div>'+
-                '<span class="help-block"></span>'+
+                '<div class="bennu-html-editor-editor editor-input" contenteditable="true"></div>' +
+                '<span class="help-block"></span>' +
                 '</div>');
 
             var toolbarReqs = e.attr("toolbar");
@@ -73,13 +81,13 @@
             for (var i = 0; i < toolbarReqs.length; i++) {
                 var c = toolbarReqs[i];
                 if (c === "size") {
-                    $(".btn-toolbar", dom).append('<div class="btn-group">'+
-                        '<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" title="" data-original-title="Font Size">'+
-                            '<span class="glyphicon glyphicon-text-height"></span>&nbsp;<b class="caret"></b></a>'+
-                        '<ul class="dropdown-menu">'+
-                            '<li><a data-edit="fontSize 5"><font size="5">Huge</font></a></li>'+
-                            '<li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>'+
-                            '<li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>'+
+                    $(".btn-toolbar", dom).append('<div class="btn-group">' +
+                        '<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" title="" data-original-title="Font Size">' +
+                        '<span class="glyphicon glyphicon-text-height"></span>&nbsp;<b class="caret"></b></a>' +
+                        '<ul class="dropdown-menu">' +
+                        '<li><a data-edit="fontSize 5"><font size="5">Huge</font></a></li>' +
+                        '<li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>' +
+                        '<li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>' +
                         '</ul></div>');
                 } else if (c === "style") {
                     $(".btn-toolbar", dom).append('<div class="btn-group">' +
@@ -113,8 +121,8 @@
                         '</div>');
                 } else if (c === "image") {
                     $(".btn-toolbar", dom).append(
-                        '<a class="btn btn-sm btn-default" title="" id="pictureBtn" data-original-title="Insert picture (or just drag &amp; drop)"><span class="glyphicon glyphicon-picture"></span></a>' +
-                        '<input type="file" data-role="magic-overlay" data-target="#pictureBtn" data-edit="insertImage" style="opacity: 0; position: absolute; top: 0px; left: 0px; width: 41px; height: 30px;">');
+                            '<a class="pictureBtn btn btn-sm btn-default" title="" data-original-title="Insert picture (or just drag &amp; drop)"><span class="glyphicon glyphicon-picture"></span></a>' +
+                            '<input type="file" name="pictureTlb" style="position:absolute; top: -1000px;" multiple>');
                 } else if (c === "undo") {
                     $(".btn-toolbar", dom).append('<div class="btn-group">' +
                         '<a class="btn btn-sm btn-default" data-edit="undo" title="" data-original-title="Undo (Ctrl/Cmd+Z)"><span class="fa fa-undo"></span></a>' +
@@ -124,7 +132,7 @@
                     $(".btn-toolbar", dom).append('<button class="voiceBtn" ><img alt="Start" class="voiceBtnImage"src="' + Bennu.contextPath + '/static/img/mic.gif"></button>');
                 } else if (c === "fullscreen" && ALLOW_FULLSCREEN) {
                     $(".btn-toolbar", dom).append('<a href="#" data-original-title="Enter Zen Mode" class="btn btn-sm btn-default fullscreen-button"><span class="fa fa-arrows-alt"></span></a>');
-                    $(".fullscreen-button", dom).on("click",Bennu.htmlEditor.fullscreen);
+                    $(".fullscreen-button", dom).on("click", Bennu.htmlEditor.fullscreen);
                 }
             }
 
@@ -149,7 +157,7 @@
             e.data("input", dom)
 
             if ('webkitSpeechRecognition' in window && ALLOW_VOICE) {
-                var editorOffset = $('.bennu-html-editor-editor',dom).offset();
+                var editorOffset = $('.bennu-html-editor-editor', dom).offset();
 //                $('.voiceBtn', dom).css('position', 'absolute').offset({top: editorOffset.top + 2, left: editorOffset.left + $('.bennu-html-editor-editor', dom).innerWidth() - 50})
                 var start_img = $('.voiceBtn .voiceBtnImage', dom)[0];
                 var recognition = new webkitSpeechRecognition();
@@ -161,7 +169,7 @@
                 recognition.onstart = function () {
                     recognizing = true;
                     start_img.src = '' + Bennu.contextPath + '/static/img/mic-an.gif';
-                    $(".bennu-html-editor-editor",dom).append('<span class="final" id="final_span"></span> <span class="interim" id="interim_span"></span>')
+                    $(".bennu-html-editor-editor", dom).append('<span class="final" id="final_span"></span> <span class="interim" id="interim_span"></span>')
 
                     function replaceSelection(html, selectInserted) {
                         var sel, range, fragment;
@@ -186,7 +194,7 @@
                                     var div = document.createElement("div"), child;
                                     div.innerHTML = html;
                                     fragment = document.createDocumentFragment();
-                                    while ( (child = div.firstChild) ) {
+                                    while ((child = div.firstChild)) {
                                         fragment.appendChild(child);
                                     }
                                 }
@@ -209,9 +217,9 @@
                         }
                     }
 
-                    replaceSelection('<span class="final" id="final_span"></span> <span class="interim" id="interim_span"></span>',false)
-                    final_span = $("#final_span",dom)[0]
-                    interim_span = $("#interim_span",dom)[0]
+                    replaceSelection('<span class="final" id="final_span"></span> <span class="interim" id="interim_span"></span>', false)
+                    final_span = $("#final_span", dom)[0]
+                    interim_span = $("#interim_span", dom)[0]
 
                 };
 
@@ -278,7 +286,7 @@
                     }
                 };
 
-                $('.voiceBtn', dom).on("click",function(event){
+                $('.voiceBtn', dom).on("click", function (event) {
                     event.preventDefault();
                     if (recognizing) {
                         recognition.stop();
@@ -296,30 +304,32 @@
                 });
             }
 
-            function showErrorAlert (reason, detail) {
-                var msg='';
-                if (reason==='unsupported-file-type') { msg = "Unsupported format " +detail; }
+            function showErrorAlert(reason, detail) {
+                var msg = '';
+                if (reason === 'unsupported-file-type') {
+                    msg = "Unsupported format " + detail;
+                }
                 else {
                     console.log("error uploading file", reason, detail);
                 }
-                $('<div class="alert"> <button type="button" class="close" data-dismiss="alert">&times;</button>'+
-                        '<strong>File upload error</strong> '+msg+' </div>').prependTo('#alerts');
+                $('<div class="alert"> <button type="button" class="close" data-dismiss="alert">&times;</button>' +
+                    '<strong>File upload error</strong> ' + msg + ' </div>').prependTo('#alerts');
             }
 
             var s = new Sanitize(Sanitize.Config.RELAXED);
 
-            $('.bennu-html-editor-editor',dom).on("paste",function(){
-                setTimeout(function(){
-                    $('.bennu-html-editor-editor',dom).html(s.clean_node($('.bennu-html-editor-editor',dom)[0]));
+            $('.bennu-html-editor-editor', dom).on("paste", function () {
+                setTimeout(function () {
+                    $('.bennu-html-editor-editor', dom).html(s.clean_node($('.bennu-html-editor-editor', dom)[0]));
                 });
             });
 
-            $('.bennu-html-editor-editor',dom).on('focus', function() {
+            $('.bennu-html-editor-editor', dom).on('focus', function () {
                 var $this = $(this);
                 $this.data('before', $this.html());
 
                 return $this;
-            }).on('blur keyup paste input', function() {
+            }).on('blur keyup paste input', function () {
                 var $this = $(this);
 
                 if ($this.data('before') !== $this.html()) {
@@ -331,23 +341,23 @@
             });
 
             var widgetInput = {};
-            widgetInput.val = function (){
-                if (arguments.length === 0){
+            widgetInput.val = function () {
+                if (arguments.length === 0) {
                     return $(".bennu-html-editor-editor", dom).html();
-                }else{
+                } else {
                     return $(".bennu-html-editor-editor", dom).html(arguments[0]);
                 }
             }
 
             var attr = e.attr("bennu-localized-string");
-            if (attr != null && attr != undefined){
-                var menu = $('<div class="btn-group bennu-localized-string-group">'+
-                    '<button type="button" class="btn btn-default dropdown-toggle bennu-localized-string-button" data-toggle="dropdown">'+
-                        '<span class="bennu-localized-string-language"></span> <span class="caret"></span>'+
-                    '</button>'+
+            if (attr != null && attr != undefined) {
+                var menu = $('<div class="btn-group bennu-localized-string-group">' +
+                    '<button type="button" class="btn btn-default dropdown-toggle bennu-localized-string-button" data-toggle="dropdown">' +
+                    '<span class="bennu-localized-string-language"></span> <span class="caret"></span>' +
+                    '</button>' +
                     '<ul class="dropdown-menu bennu-localized-string-menu" role="menu"></ul></div>');
                 $("div.btn-toolbar", dom).before(menu);
-                dom.data("localized-string",true);
+                dom.data("localized-string", true);
 
                 Bennu.localizedString.makeLocaleList($(".bennu-localized-string-menu", dom), dom, function (e) {
                     Bennu.localizedString.changeData($(e.target).parent().data("locale"), $(".bennu-localized-string-language", dom), widgetInput, dom);
@@ -355,26 +365,89 @@
 
                 Bennu.localizedString.changeData(Bennu.locale, $(".bennu-localized-string-language", dom), widgetInput, dom);
 
-                if(e.val() === ""){
+                if (e.val() === "") {
                     e.val("{}");
                 }
             }
 
-            $(".bennu-html-editor-editor",dom).on('change',function(){
+            $(".bennu-html-editor-editor", dom).on('change', function () {
                 var attr = e.attr("bennu-localized-string");
-                if (attr !== null && attr !== undefined){
+                if (attr !== null && attr !== undefined) {
                     var data = JSON.parse($(dom.data("related")).val());
                     data[$(".bennu-localized-string-language", dom).data("locale").tag] = widgetInput.val();
                     $(dom.data("related")).val(JSON.stringify(data));
                     $(".help-block", dom).empty();
                     dom.removeClass("has-error");
-                }else{
-                    dom.data("related")[0].innerHTML = $(".bennu-html-editor-editor",dom).html();
+                } else {
+                    dom.data("related")[0].innerHTML = $(".bennu-html-editor-editor", dom).html();
                 }
             });
             Bennu.validation.attachToForm(dom);
             e.after(dom);
-            $('.bennu-html-editor-editor',dom).wysiwyg({ fileUploadError: showErrorAlert} );
+
+            function submitFiles(files) {
+                var formData = new FormData();
+                for (var i = 0; i < files.length; i++) {
+                    formData.append('attachment', files[i]);
+                }
+
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', 'addFile.json');
+
+                function transferCanceled(event){
+
+                }
+
+                function transferFailed(event){
+
+                }
+
+                function transferComplete(event){
+                    var objs = JSON.parse(event.currentTarget.response);
+                    $(".bennu-html-editor-editor",dom).focus()
+                    for(var i=0; i<objs.length; i++){
+                        var o = objs[i];
+                        document.execCommand('insertimage', 0,o.url);
+                    }
+                }
+
+                function updateProgress(event) {
+                    if (event.lengthComputable) {
+                        var complete = (event.loaded / event.total * 100 | 0);
+                        //progress.value = progress.innerHTML = complete;
+                        console.log(complete);
+                    }
+                }
+
+                xhr.addEventListener("progress", updateProgress, false);
+                xhr.addEventListener("load", transferComplete, false);
+                xhr.addEventListener("error", transferFailed, false);
+                xhr.addEventListener("abort", transferCanceled, false);
+
+                xhr.send(formData);
+            }
+
+            $(".btn-toolbar .pictureBtn", dom).on("click",function(){
+                $(".btn-toolbar input[name='pictureTlb']", dom).click();
+            });
+
+            $(".btn-toolbar input[name='pictureTlb']", dom).on("change",function(evt){
+                submitFiles($(".btn-toolbar input[name='pictureTlb']", dom)[0].files);
+            });
+
+            dom.on('dragenter dragover', false)
+                .on('drop', function (e) {
+                    var dataTransfer = e.originalEvent.dataTransfer;
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (dataTransfer && dataTransfer.files && dataTransfer.files.length > 0) {
+                        submitFiles(dataTransfer.files);
+                    }
+                });
+            $('.bennu-html-editor-editor', dom).wysiwyg({ dragAndDropImages: false, fileUploadError: showErrorAlert});
+
+
         });
     });
 })();

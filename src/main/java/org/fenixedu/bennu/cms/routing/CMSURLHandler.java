@@ -220,7 +220,8 @@ public final class CMSURLHandler implements SemanticURLHandler {
                 PebbleEngine engine = new PebbleEngine(new StringLoader());
                 engine.addExtension(new CMSExtensions());
                 PebbleTemplate compiledTemplate =
-                        engine.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
+                        engine.getTemplate(
+                                "<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
                 res.setStatus(500);
                 res.setContentType("text/html");
                 compiledTemplate.evaluate(res.getWriter());
@@ -253,6 +254,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
         global.put("site", site.makeWrap());
         global.put("page", makePageWrapper(page));
         global.put("staticDir", site.getStaticDirectory());
+        global.put("devMode", CoreConfiguration.getConfiguration().developmentMode());
 
         List<TemplateContext> components = new ArrayList<TemplateContext>();
 
@@ -293,11 +295,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
     private Map<String, Object> makeRequestWrapper(HttpServletRequest req) {
         HashMap<String, Object> result = new HashMap<String, Object>();
 
-        if (Authenticate.isLogged()) {
-            result.put("user", ImmutableMap.of("username", Authenticate.getUser().getUsername(), "isAuthenticated", true));
-        } else {
-            result.put("user", ImmutableMap.of("username", "", "isAuthenticated", false));
-        }
+        result.put("user", new UserWrap(Authenticate.getUser()));
 
         result.put("method", req.getMethod());
         result.put("protocol", req.getProtocol());

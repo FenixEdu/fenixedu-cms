@@ -1,22 +1,22 @@
 {% macro menuChildren(menuItems) %}
-  {% if menuItems.size != 0 %}
-    {% for item in menuItems %}
-      {{menuItem(item)}}
-    {% endfor %}
-  {% endif %}
+{% if menuItems.size != 0 %}
+{% for item in menuItems %}
+{{menuItem(item)}}
+{% endfor %}
+{% endif %}
 {% endmacro %}
 
 {% macro menuItem(item) %}
-  <li><a href="{{item.address}}">{{ item.name.content }}</a></li>
-  {% if item.childrenSet.size != 0 %}
-    <ol class="list-unstyled">
-      {{menuChildren(item.children)}}
-    </ol>
-  {% endif %}
+<li><a href="{{item.address}}">{{ item.name.content }}</a></li>
+{% if item.children.size != 0 %}
+<ol class="list-unstyled">
+    {{menuChildren(item.children)}}
+</ol>
+{% endif %}
 {% endmacro %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,84 +24,101 @@
     <meta name="author" content="">
 
     <title>{{site.name.content}}</title>
-    
+
     <!-- Bootstrap core CSS -->
     <link href="{{staticDir}}/css/bootstrap.min.css" rel="stylesheet">
 
-    <link rel="alternate" type="application/rss+xml"  href="{{site.rssUrl}}" title="{{site.name.content}} RSS">
+
+    <link rel="alternate" type="application/rss+xml" href="{{site.rssUrl}}" title="{{site.name.content}} RSS">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
     {% if site.analyticsCode is not empty %}
-      <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                    m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
         ga('create', '{{site.analyticsCode}}', 'auto');
         ga('send', 'pageview');
 
-      </script>
+    </script>
     {% endif %}
-  </head>
+</head>
 
-  <body>
+<body>
 
-    <div class="container">
+<div class="container">
 
-      <div class="blog-header">
+    <div class="blog-header">
         <h1 class="blog-title">{{site.name.content}}</h1>
+
         <p class="lead blog-description">{{page.name.content}}</p>
-      </div>
-
-      <div class="row">
-
-        <div class="col-sm-8 blog-main">
-          {% block content %}
-
-          {% endblock content %}
-
-        </div><!-- /.blog-main -->
-        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
-          <div class="sidebar-module sidebar-module-inset">
-            <h4>About</h4>
-            <p>{{ site.description.content }}</p>
-          </div>
-          {% for menu in menus %}
-            <div class="sidebar-module">
-              <h4>{{menu.name.content}}</h4>
-              <ol class="list-unstyled">
-              {{menuChildren(menu.children)}}
-              </ol>
-            </div>
-          {% endfor %}
-          <div class="sidebar-module">
-            <h4>Subscribe</h4>
-            <p><a href="{{site.rssUrl}}"><img src="{{staticDir}}/image/rss.svg" height="16" /> RSS for {{site.name.content}}</a></p>
-            {% if category != null %}
-              <a href="{{category.rssUrl}}"><img src="{{staticDir}}/image/rss.svg" height="16" /> RSS for {{category.name.content}}</a>
-            {% endif %}
-          </div>
-        </div><!-- /.blog-sidebar -->
-
-      </div><!-- /.row -->
-
-    </div><!-- /.container -->
-
-    <div style="margin-top:30px; margin-bottom: 10px;"class="blog-footer container">
-        <hr />
-        {{app.title.content}}
-        <span class="small pull-right">{{app.copyright.content}}</span>
     </div>
 
+    <div class="row">
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-  </body>
+        <div class="col-sm-8 blog-main">
+            {% block content %}
+
+            {% endblock content %}
+
+        </div>
+        <!-- /.blog-main -->
+        <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+            <div class="sidebar-module sidebar-module-inset">
+                <h4>About</h4>
+
+                <p>{{ site.description.content }}</p>
+            </div>
+            {% for menu in menus %}
+            <div class="sidebar-module">
+                <h4>{{menu.name.content}}</h4>
+                <ol class="list-unstyled">
+                    {{menuChildren(menu.children)}}
+                </ol>
+            </div>
+            {% endfor %}
+            <div class="sidebar-module">
+                <h4>Subscribe</h4>
+
+                <p><a href="{{site.rssUrl}}"><img src="{{staticDir}}/image/rss.svg" height="16"/> RSS for
+                    {{site.name.content}}</a></p>
+                {% if category != null %}
+                <a href="{{category.rssUrl}}"><img src="{{staticDir}}/image/rss.svg" height="16"/> RSS for
+                    {{category.name.content}}</a>
+                {% endif %}
+            </div>
+        </div>
+        <!-- /.blog-sidebar -->
+
+    </div>
+    <!-- /.row -->
+
+</div>
+<!-- /.container -->
+
+<div style="margin-top:30px; margin-bottom: 10px;" class="blog-footer container">
+    <hr/>
+    {{app.title.content}}
+    <span class="small pull-right">{{app.copyright.content}}</span>
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+</body>
 </html>

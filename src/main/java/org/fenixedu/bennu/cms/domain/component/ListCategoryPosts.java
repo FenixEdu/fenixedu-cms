@@ -3,7 +3,6 @@ package org.fenixedu.bennu.cms.domain.component;
 import org.fenixedu.bennu.cms.domain.Category;
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.domain.Post;
-import org.fenixedu.bennu.cms.domain.PostsPresentationBean;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 import pt.ist.fenixframework.Atomic;
@@ -37,7 +36,7 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
         PostsPresentationBean postsPresentation = new PostsPresentationBean(category.getPostsSet());
         int currentPage = postsPresentation.currentPage(global.getParameter("p"));
         HashMap<String, Object> pagination = postsPresentation.paginate(page, currentPage, POSTS_PER_PAGE);
-        List<Wrap> posts = postsPresentation.getVisiblePosts().stream().map(Wrap::make).collect(Collectors.toList());
+        List<Wrap> posts = postsPresentation.getVisiblePosts().stream().collect(Collectors.toList());
         local.put("posts", posts);
         local.put("pagination", pagination);
 

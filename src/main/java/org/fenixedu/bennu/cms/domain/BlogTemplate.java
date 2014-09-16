@@ -21,9 +21,8 @@ public class BlogTemplate implements SiteTemplate {
     /**
      * Populates a site with the structure of a blog.
      * Including some pages, menus, posts and categories.
-     * 
-     * @param site
-     *            the site to be populated.
+     *
+     * @param site the site to be populated.
      */
     @Override
     public void makeIt(Site site) {
@@ -64,6 +63,7 @@ public class BlogTemplate implements SiteTemplate {
         postPage.addComponents(menu);
         categories.addComponents(menu);
         category.addComponents(menu);
+        site.setInitialPage(homepage);
 
     }
 
@@ -85,32 +85,31 @@ public class BlogTemplate implements SiteTemplate {
         post.setBody(new LocalizedString(I18N.getLocale(), "This is a simple blog that was generated for you, so "
                 + "you can start understanding how the CMS works. Access to admin space to alter "
                 + "stuff around or to create new posts."));
-        for (int i = 0; i < 15; i++) {
-            post = new Post();
-            post.setSite(site);
-            post.addCategories(site.categoryForSlug("random-text"));
-            post.setName(new LocalizedString(I18N.getLocale(), "This is a post"));
-            post.setBody(new LocalizedString(I18N.getLocale(), "Lorem ipsum dolor sit amet, consectetur adipiscing "
-                    + "elit. Nullam tempor, felis eget pulvinar fringilla, dui orci dignissim mi, sit amet "
-                    + "tincidunt dui purus in nulla. Etiam sit amet dolor at augue ullamcorper volutpat. Integer "
-                    + "in tellus quam. Ut rutrum eget enim vel suscipit. Curabitur ornare, mauris at volutpat "
-                    + "congue, elit dolor imperdiet ligula, eget malesuada lacus lacus eu tortor. Maecenas ac "
-                    + "lacus nisl. Aliquam erat volutpat."));
 
-            post = new Post();
-            post.setSite(site);
-            post.addCategories(site.categoryForSlug("random-text"));
-            post.setName(new LocalizedString(I18N.getLocale(), "This is a another post"));
-            post.setBody(new LocalizedString(I18N.getLocale(), "Curabitur quis erat gravida, rhoncus leo a, vehicula mi."
-                    + " Etiam a ante sit amet libero feugiat pellentesque sit amet porttitor augue. Cras tempor quis metus"
-                    + " non tincidunt. Duis non nulla aliquet, hendrerit metus nec, ullamcorper lectus. Donec posuere et "
-                    + "dui a ultricies. Fusce tempor hendrerit velit, sed facilisis diam venenatis ut. Suspendisse feugiat"
-                    + " ullamcorper mattis. Ut feugiat sed augue feugiat elementum. In quis augue viverra, ultricies elit et, "
-                    + "mollis tellus. Phasellus consequat rhoncus sem, sit amet consectetur risus pharetra laoreet. Integer at "
-                    + "tristique elit. Suspendisse arcu nunc, vestibulum non nulla ut, feugiat varius ipsum. Nulla sagittis dui "
-                    + "accumsan auctor pulvinar."));
+        post = new Post();
+        post.setSite(site);
+        post.addCategories(site.categoryForSlug("random-text"));
+        post.setName(new LocalizedString(I18N.getLocale(), "This is a post"));
+        post.setBody(new LocalizedString(I18N.getLocale(), "Lorem ipsum dolor sit amet, consectetur adipiscing "
+                + "elit. Nullam tempor, felis eget pulvinar fringilla, dui orci dignissim mi, sit amet "
+                + "tincidunt dui purus in nulla. Etiam sit amet dolor at augue ullamcorper volutpat. Integer "
+                + "in tellus quam. Ut rutrum eget enim vel suscipit. Curabitur ornare, mauris at volutpat "
+                + "congue, elit dolor imperdiet ligula, eget malesuada lacus lacus eu tortor. Maecenas ac "
+                + "lacus nisl. Aliquam erat volutpat."));
 
-        }
+        post = new Post();
+        post.setSite(site);
+        post.addCategories(site.categoryForSlug("random-text"));
+        post.setName(new LocalizedString(I18N.getLocale(), "This is a another post"));
+        post.setBody(new LocalizedString(I18N.getLocale(), "Curabitur quis erat gravida, rhoncus leo a, vehicula mi."
+                + " Etiam a ante sit amet libero feugiat pellentesque sit amet porttitor augue. Cras tempor quis metus"
+                + " non tincidunt. Duis non nulla aliquet, hendrerit metus nec, ullamcorper lectus. Donec posuere et "
+                + "dui a ultricies. Fusce tempor hendrerit velit, sed facilisis diam venenatis ut. Suspendisse feugiat"
+                + " ullamcorper mattis. Ut feugiat sed augue feugiat elementum. In quis augue viverra, ultricies elit et, "
+                + "mollis tellus. Phasellus consequat rhoncus sem, sit amet consectetur risus pharetra laoreet. Integer at "
+                + "tristique elit. Suspendisse arcu nunc, vestibulum non nulla ut, feugiat varius ipsum. Nulla sagittis dui "
+                + "accumsan auctor pulvinar."));
+
         about = new Post();
         about.setSite(site);
         about.setName(new LocalizedString(I18N.getLocale(), "About " + site.getCreatedBy().getUsername()));

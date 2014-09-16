@@ -363,11 +363,6 @@ public class Site extends Site_Base implements Wrappable {
         return !Strings.isNullOrEmpty(slug) && menuItems.map(MenuItem::getPath).noneMatch(path -> path.equals(slug));
     }
 
-    @Override
-    public Page getInitialPage() {
-        return Optional.ofNullable(super.getInitialPage()).orElseGet(() -> getPagesSet().stream().findFirst().orElse(null));
-    }
-
     public Set<Menu> getSideMenus() {
         return getMenusSet().stream().filter(m -> !m.getComponentsOfClass(SideMenuComponent.class).isEmpty()).collect(toSet());
     }
@@ -392,6 +387,8 @@ public class Site extends Site_Base implements Wrappable {
         return getFullUrl() + "/rss";
     }
 
+    public String getEditUrl() { return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/sites/" + getSlug(); }
+
     @Override
     public void setFolder(CMSFolder folder) {
         super.setFolder(folder);
@@ -409,6 +406,10 @@ public class Site extends Site_Base implements Wrappable {
 
         public boolean isAdmin(){
             return Site.this.getCanAdminGroup().isMember(Authenticate.getUser());
+        }
+
+        public boolean canPost(){
+            return Site.this.getCanAdminGroup().isMember(Authenticate.getUser()) || isAdmin();
         }
 
         public LocalizedString getName(){
@@ -438,6 +439,14 @@ public class Site extends Site_Base implements Wrappable {
         // TODO: Most likely this should be Wrappable
         public Object getSiteObject(){
             return Site.this.getObject();
+        }
+
+        public String getAddress(){
+            return Site.this.getFullUrl();
+        }
+
+        public String getEditAddress(){
+            return Site.this.getEditUrl();
         }
     }
 

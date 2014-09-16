@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import org.fenixedu.bennu.cms.domain.Page;
 import org.fenixedu.bennu.cms.domain.Post;
-import org.fenixedu.bennu.cms.domain.PostsPresentationBean;
 import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
 /**

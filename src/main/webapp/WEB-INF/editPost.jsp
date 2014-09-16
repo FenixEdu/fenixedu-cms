@@ -2,8 +2,14 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <h1><spring:message code="post.edit.title" /></h1>
-<p class="small"><spring:message code="post.edit.label.site" />: <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}"></a><strong>${site.name.content}</strong></a>  </p>
-
+<div class="row">
+    <div class="col-sm-8"><h4>${site.name.content}</h4></div>
+    <div class="col-sm-4">
+        <div class="pull-right">
+        <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}" class="btn btn-default">Dashboard</a> <a href="${site.fullUrl}" target="_blank" class="btn btn-default">View Site</a> <a href="${post.address}" target="_blank" class="btn btn-default">View Post</a>
+        </div>
+    </div>
+</div>
 <form class="form-horizontal" action="" method="post" role="form">
 
 <!-- Nav tabs -->
@@ -36,7 +42,7 @@
             <div class="${emptyName ? "form-group has-error" : "form-group"}">
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.name" /></label>
                 <div class="col-sm-10">
-                    <input  bennu-localized-string required name="name" id="inputEmail3" placeholder="<spring:message code="post.edit.label.name" />" value='${post.name.json()}'>
+                    <input  bennu-localized-string required-any name="name" id="inputEmail3" placeholder="<spring:message code="post.edit.label.name" />" value='${post.name.json()}'>
                     <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="post.edit.error.emptyName"/></p></c:if>
                 </div>
             </div>
@@ -44,10 +50,9 @@
             <div class="form-group">
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.body" /></label>
                 <div class="col-sm-10">
-                    <textarea bennu-html-editor bennu-localized-string required name="body" rows="3">${post.body.json()}</textarea>
+                    <textarea bennu-html-editor bennu-localized-string name="body" rows="3">${post.body.json()}</textarea>
                 </div>
             </div>
-
 
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
@@ -89,8 +94,8 @@
 
                                 <td><code>${file.contentType}</code></td>
                                 <td>
-                                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#fileDeleteModal"
-                                            data-file="${file.displayName}" data-file-oid="${file.oid}" ><span class="glyphicon glyphicon-trash"></span></button>
+                                    <a href="#" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#fileDeleteModal"
+                                            data-file="${file.displayName}" data-file-oid="${file.oid}" ><span class="glyphicon glyphicon-trash"></span></a>
                                     <a href="${cms.downloadUrl(file)}" target="_blank" class="btn btn-default btn-sm">Link</a>
                                 </td>
                             </tr>
@@ -207,7 +212,7 @@
                                 code="theme.view.fileName"/>:</label>
 
                         <div class="col-sm-10">
-                            <input type="text" name="name" class="form-control">
+                            <input required type="text" name="name" class="form-control">
                         </div>
                     </div>
                     <div class="form-group">
@@ -302,7 +307,7 @@
 </div>
 
 <script>
-    $("button[data-target='#attachmentDeleteModal']").on('click', function (event) {
+    $("[data-target='#attachmentDeleteModal']").on('click', function (event) {
         var index = $(event.target).closest("[data-file-index]").attr('data-file-index');
         var filename = $(event.target).closest("[data-file]").attr('data-file');
         $('#fileName').html(filename);
@@ -311,7 +316,7 @@
 </script>
 
 <script>
-    $("button[data-target='#fileDeleteModal']").on('click', function (event) {
+    $("[data-target='#fileDeleteModal']").on('click', function (event) {
         var index = $(event.target).closest("[data-file-oid]").attr('data-file-oid');
         var filename = $(event.target).closest("[data-file]").attr('data-file');
         $('#fileName', $("#fileDeleteModal")).html(filename);
@@ -320,7 +325,7 @@
 </script>
 
 <script>
-    $("button[data-origin]").on("click",function(e){
+    $("[data-origin]").on("click",function(e){
         e = $(e.target).closest("[data-origin]")
         var form = $("#moveAttachment")[0];
         form.origin.value = e.data("origin");
@@ -349,4 +354,6 @@
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
 <script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
+
+
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>

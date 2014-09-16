@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.fenixedu.bennu.cms.domain.component.Component;
+import org.fenixedu.bennu.cms.domain.wraps.UserWrap;
 import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
@@ -11,6 +12,7 @@ import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
 import org.fenixedu.commons.StringNormalizer;
@@ -87,6 +89,8 @@ public class Post extends Post_Base implements Wrappable {
         this.setCreatedBy(null);
         this.setSite(null);
         this.setViewGroup(null);
+        this.getAttachments().delete();
+        this.getPostFiles().delete();
         this.deleteDomainObject();
 
     }
@@ -170,6 +174,10 @@ public class Post extends Post_Base implements Wrappable {
 
     }
 
+    public String getEditUrl() {
+        return this.getSite().getEditUrl() + "/" + this.getSlug() + "/edit";
+    }
+
     private void fixOrder(List<PostFile> sortedItems) {
         for (int i = 0; i < sortedItems.size(); ++i) {
             sortedItems.get(i).setIndex(i);
@@ -198,7 +206,10 @@ public class Post extends Post_Base implements Wrappable {
         }
 
         public void delete() {
-            Post.this.getFilesSet().forEach((a) -> a.delete());
+            Post.this.getFilesSet().forEach((a) -> {
+                a.setPost(null);
+                a.delete();
+            });
         }
     }
 
@@ -263,7 +274,10 @@ public class Post extends Post_Base implements Wrappable {
         }
 
         public void delete() {
-            Post.this.getAttachementsSet().forEach((a) -> a.delete());
+            Post.this.getAttachementsSet().forEach((a) -> {
+                a.setPost(null);
+                a.delete();
+            });
         }
     }
 
@@ -331,6 +345,10 @@ public class Post extends Post_Base implements Wrappable {
             return Post.this.getBody();
         }
 
+        public Wrap getCreatedBy() {
+            return new UserWrap(Post.this.getCreatedBy());
+        }
+
         public DateTime getCreationDate() {
             return Post.this.getCreationDate();
         }
@@ -343,7 +361,7 @@ public class Post extends Post_Base implements Wrappable {
             return Post.this.getPublicationEnd();
         }
 
-        public DateTime getModificationDate(){
+        public DateTime getModificationDate() {
             return Post.this.getModificationDate();
         }
 
@@ -351,7 +369,16 @@ public class Post extends Post_Base implements Wrappable {
             return Post.this.getSite().makeWrap();
         }
 
-        public List<Wrap> getCategories(){
+        public String getAddress() {
+            return Post.this.getAddress();
+        }
+
+        public String getEditAddress() {
+            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/posts/" + Post.this.getSite().getSlug() + "/"
+                    + Post.this.getSlug() + "/edit";
+        }
+
+        public List<Wrap> getCategories() {
             return Post.this.getCategoriesSet().stream().map(Wrap::make).collect(Collectors.toList());
         }
 

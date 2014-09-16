@@ -133,8 +133,8 @@
 </div>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
-<%--<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>--%>
-<script src="http://worf.bounceme.net:8000"></script>
+<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
+<%--<script src="http://worf.bounceme.net:8000"></script>--%>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.4/typeahead.bundle.min.js"></script>

@@ -8,7 +8,7 @@ public abstract class Wrap {
         if (o instanceof Wrappable){
             return ((Wrappable)o).makeWrap();
         }else{
-            throw new RuntimeException("object is not wrappable");
+            throw new RuntimeException("Object of type " + o.getClass().getCanonicalName() +  " is not wrappable");
         }
     }
 }

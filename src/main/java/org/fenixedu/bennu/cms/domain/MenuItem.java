@@ -23,7 +23,7 @@ import com.google.common.collect.Lists;
 /**
  * Models the items of a {@link Menu}
  */
-public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>,Wrappable {
+public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wrappable {
 
     /**
      * The logged {@link User} creates a new MenuItem.
@@ -41,10 +41,8 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>,Wrap
     /**
      * Adds a children at a given position and shifts the existing items.
      *
-     * @param item
-     *            the {@link MenuItem} to be added.
-     * @param position
-     *            the position where the item should be added.
+     * @param item     the {@link MenuItem} to be added.
+     * @param position the position where the item should be added.
      */
     public void putAt(MenuItem item, int position) {
 
@@ -70,8 +68,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>,Wrap
     /**
      * Removes a given {@link MenuItem}
      *
-     * @param mi
-     *            the children to be removed
+     * @param mi the children to be removed
      */
     public void remove(MenuItem mi) {
         ArrayList<MenuItem> items = Lists.newArrayList(getChildrenSorted());
@@ -83,8 +80,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>,Wrap
     /**
      * Adds a new {@link MenuItem} has the last item.
      *
-     * @param mi
-     *            the {@link MenuItem} to be added.
+     * @param mi the {@link MenuItem} to be added.
      */
     public void add(MenuItem mi) {
         this.putAt(mi, getChildrenSet().size());
@@ -182,28 +178,33 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>,Wrap
         return menuItem;
     }
 
-    public class MenuItemWrap extends Wrap{
+    public class MenuItemWrap extends Wrap {
         private boolean active;
         private boolean open;
         private List<Wrap> children;
 
-        public MenuItemWrap(){
+        public MenuItemWrap() {
             children = MenuItem.this.getChildrenSorted().stream().map((x) -> x.makeWrap()).collect(Collectors.toList());
             active = false;
             open = false;
         }
 
-        public MenuItemWrap(Page page){
+        public MenuItemWrap(Page page) {
             open = MenuItem.this.getPage() != null && MenuItem.this.getPage().equals(page);
-            children = ImmutableList.copyOf(MenuItem.this.getChildrenSorted().stream().map((x) -> x.makeWrap(page)).collect(Collectors.toList()));
-            active = open || children.stream().map((x) -> ((MenuItemWrap) x).open).reduce(false, (x,y) -> x || y);
+            children = ImmutableList
+                    .copyOf(MenuItem.this.getChildrenSorted().stream().map((x) -> x.makeWrap(page)).collect(Collectors.toList()));
+            active = open || children.stream().map((x) -> ((MenuItemWrap) x).open).reduce(false, (x, y) -> x || y);
         }
 
-        public List<Wrap> getChildren(){
+        public List<Wrap> getChildren() {
             return children;
         }
 
-        public String getAddress(){
+        public LocalizedString getName() {
+            return MenuItem.this.getName();
+        }
+
+        public String getAddress() {
             return MenuItem.this.getAddress();
         }
 
