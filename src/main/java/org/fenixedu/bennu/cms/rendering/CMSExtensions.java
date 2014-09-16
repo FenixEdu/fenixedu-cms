@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.fenixedu.bennu.core.i18n.BundleUtil;
+import org.fenixedu.bennu.portal.servlet.LazyForTokenParser;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -25,6 +26,7 @@ import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
 import com.mitchellbosecke.pebble.extension.Test;
+import com.mitchellbosecke.pebble.tokenParser.TokenParser;
 
 public class CMSExtensions extends AbstractExtension {
     public class LengthFilter implements Filter {
@@ -264,6 +266,11 @@ public class CMSExtensions extends AbstractExtension {
         functions.put("entries", new MapEntriesFunction());
         functions.put("getValue", new MapValueFunction());
         return functions;
+    }
+
+    @Override
+    public List<TokenParser> getTokenParsers() {
+        return Collections.singletonList(new LazyForTokenParser());
     }
 
 }
