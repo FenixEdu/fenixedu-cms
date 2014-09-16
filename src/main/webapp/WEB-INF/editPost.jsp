@@ -7,7 +7,7 @@
     <div class="col-sm-8"><h4>${site.name.content}</h4></div>
     <div class="col-sm-4">
         <div class="pull-right">
-        <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}" class="btn btn-default">Dashboard</a> <a href="${site.fullUrl}" target="_blank" class="btn btn-default">View Site</a> <a href="${post.address}" target="_blank" class="btn btn-default">View Post</a>
+        <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}" class="btn btn-default">Dashboard</a> <a href="${site.fullUrl}" target="_blank" class="btn btn-default">View Site</a> <a href="${post.address}" target="_blank" class="btn btn-default">View Post</a>
         </div>
     </div>
 </div>
