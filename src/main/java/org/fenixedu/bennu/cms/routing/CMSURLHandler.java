@@ -1,16 +1,30 @@
 package org.fenixedu.bennu.cms.routing;
 
-import com.google.common.base.Strings;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableMap;
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.error.LoaderException;
-import com.mitchellbosecke.pebble.error.PebbleException;
-import com.mitchellbosecke.pebble.loader.ClasspathLoader;
-import com.mitchellbosecke.pebble.loader.StringLoader;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLStreamException;
+
 import org.fenixedu.bennu.cms.CMSConfigurationManager;
-import org.fenixedu.bennu.cms.domain.*;
+import org.fenixedu.bennu.cms.domain.CMSTheme;
+import org.fenixedu.bennu.cms.domain.CMSThemeFile;
+import org.fenixedu.bennu.cms.domain.Category;
+import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Site;
 import org.fenixedu.bennu.cms.domain.component.Component;
 import org.fenixedu.bennu.cms.domain.wraps.UserWrap;
 import org.fenixedu.bennu.cms.exceptions.ResourceNotFoundException;
@@ -29,19 +43,14 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.stream.XMLStreamException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.mitchellbosecke.pebble.PebbleEngine;
+import com.mitchellbosecke.pebble.error.LoaderException;
+import com.mitchellbosecke.pebble.error.PebbleException;
+import com.mitchellbosecke.pebble.loader.ClasspathLoader;
+import com.mitchellbosecke.pebble.loader.StringLoader;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 public final class CMSURLHandler implements SemanticURLHandler {
 
@@ -236,8 +245,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
                 PebbleEngine engine = new PebbleEngine(new StringLoader());
                 engine.addExtension(new CMSExtensions());
                 PebbleTemplate compiledTemplate =
-                        engine.getTemplate(
-                                "<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
+                        engine.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
                 res.setStatus(500);
                 res.setContentType("text/html");
                 compiledTemplate.evaluate(res.getWriter());
@@ -265,12 +273,8 @@ public final class CMSURLHandler implements SemanticURLHandler {
             global.put(key, req.getParameter(key));
         }
 
-        global.put("request", makeRequestWrapper(req));
-        global.put("app", makeAppWrapper());
-        global.put("site", site.makeWrap());
         global.put("page", makePageWrapper(page));
-        global.put("staticDir", site.getStaticDirectory());
-        global.put("devMode", CoreConfiguration.getConfiguration().developmentMode());
+        populateSiteInfo(req, site, global);
 
         List<TemplateContext> components = new ArrayList<TemplateContext>();
 
@@ -289,30 +293,23 @@ public final class CMSURLHandler implements SemanticURLHandler {
         compiledTemplate.evaluate(res.getWriter(), global);
     }
 
+    private void populateSiteInfo(final HttpServletRequest req, Site site, TemplateContext context) {
+        context.put("request", makeRequestWrapper(req));
+        context.put("app", makeAppWrapper());
+        context.put("site", site.makeWrap());
+        context.put("staticDir", site.getStaticDirectory());
+        context.put("devMode", CoreConfiguration.getConfiguration().developmentMode());
+    }
+
     private Map<String, Object> makeAppWrapper() {
         HashMap<String, Object> result = new HashMap<String, Object>();
         PortalConfiguration configuration = PortalConfiguration.getInstance();
         result.put("title", configuration.getApplicationTitle());
         result.put("subtitle", configuration.getApplicationSubTitle());
         result.put("copyright", configuration.getApplicationCopyright());
+        result.put("support", configuration.getSupportEmailAddress());
         return result;
     }
-
-    private Map<String, Object> makeSiteWrapper(Site site) {
-        HashMap<String, Object> result = new HashMap<String, Object>();
-
-        result.put("name", site.getName());
-        result.put("description", site.getDescription());
-        result.put("createdBy", new UserWrap(site.getCreatedBy()));
-        result.put("creationDate", site.getCreationDate());
-        result.put("siteObject", site.getObject());
-        result.put("rssUrl", site.getRssUrl());
-        result.put("analyticsCode", site.getAnalyticsCode());
-        result.put("fullUrl", site.getFullUrl());
-
-        return result;
-    }
-
 
     private Map<String, Object> makePageWrapper(Page page) {
         HashMap<String, Object> result = new HashMap<String, Object>();
@@ -346,10 +343,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
             try {
                 PebbleTemplate compiledTemplate = engine.getTemplate(cmsTheme.getType() + "/" + errorCode + ".html");
                 TemplateContext global = new TemplateContext();
-                global.put("request", makeRequestWrapper(req));
-                global.put("site", site.makeWrap());
-                global.put("staticDir", site.getStaticDirectory());
-                global.put("app", makeAppWrapper());
+                populateSiteInfo(req, site, global);
                 res.setStatus(errorCode);
                 res.setContentType("text/html");
                 compiledTemplate.evaluate(res.getWriter(), global);
