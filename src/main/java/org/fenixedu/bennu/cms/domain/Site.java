@@ -1,8 +1,13 @@
 package org.fenixedu.bennu.cms.domain;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import org.fenixedu.bennu.cms.domain.component.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.fenixedu.bennu.cms.domain.component.Component;
+import org.fenixedu.bennu.cms.domain.component.ListCategoryPosts;
+import org.fenixedu.bennu.cms.domain.component.ViewPost;
 import org.fenixedu.bennu.cms.domain.wraps.UserWrap;
 import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
@@ -25,18 +30,14 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toSet;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 public class Site extends Site_Base implements Wrappable {
     /**
@@ -370,14 +371,6 @@ public class Site extends Site_Base implements Wrappable {
         return !Strings.isNullOrEmpty(slug) && menuItems.map(MenuItem::getPath).noneMatch(path -> path.equals(slug));
     }
 
-    public Set<Menu> getSideMenus() {
-        return getMenusSet().stream().filter(m -> !m.getComponentsOfClass(SideMenuComponent.class).isEmpty()).collect(toSet());
-    }
-
-    public Set<Menu> getTopMenus() {
-        return getMenusSet().stream().filter(m -> !m.getComponentsOfClass(TopMenuComponent.class).isEmpty()).collect(toSet());
-    }
-
     public String getBaseUrl() {
         if (getFolder() != null) {
             return getFolder().getBaseUrl(this);
@@ -398,7 +391,9 @@ public class Site extends Site_Base implements Wrappable {
         return getFullUrl() + "/rss";
     }
 
-    public String getEditUrl() { return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/sites/" + getSlug(); }
+    public String getEditUrl() {
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/sites/" + getSlug();
+    }
 
     @Override
     public void setFolder(CMSFolder folder) {
@@ -413,55 +408,56 @@ public class Site extends Site_Base implements Wrappable {
         return getFunctionality() != null || getFolder() != null;
     }
 
-    public class SiteWrap extends Wrap{
+    public class SiteWrap extends Wrap {
 
-        public boolean isAdmin(){
+        public boolean isAdmin() {
             return Site.this.getCanAdminGroup().isMember(Authenticate.getUser());
         }
 
-        public boolean canPost(){
+        public boolean canPost() {
             return Site.this.getCanAdminGroup().isMember(Authenticate.getUser()) || isAdmin();
         }
 
-        public LocalizedString getName(){
+        public LocalizedString getName() {
             return Site.this.getName();
         }
 
-        public LocalizedString getDescription(){
+        public LocalizedString getDescription() {
             return Site.this.getDescription();
         }
 
-        public UserWrap getCreatedBy(){
+        public UserWrap getCreatedBy() {
             return new UserWrap(Site.this.getCreatedBy());
         }
 
-        public DateTime getCreationDate(){
+        public DateTime getCreationDate() {
             return Site.this.getCreationDate();
         }
 
-        public String getRssUrl(){
+        public String getRssUrl() {
             return Site.this.getRssUrl();
         }
 
-        public String getAnalyticsCode(){
+        public String getAnalyticsCode() {
             return Site.this.getAnalyticsCode();
         }
 
         // TODO: Most likely this should be Wrappable
-        public Object getSiteObject(){
+        public Object getSiteObject() {
             return Site.this.getObject();
         }
 
-        public String getAddress(){
+        public String getAddress() {
             return Site.this.getFullUrl();
         }
 
-        public String getEditAddress(){
+        public String getEditAddress() {
             return Site.this.getEditUrl();
         }
     }
 
-    @Override public Wrap makeWrap() {
+    @Override
+    public Wrap makeWrap() {
         return new SiteWrap();
     }
 }

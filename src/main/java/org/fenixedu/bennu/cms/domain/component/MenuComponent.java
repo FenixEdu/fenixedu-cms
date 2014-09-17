@@ -1,20 +1,18 @@
 package org.fenixedu.bennu.cms.domain.component;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.fenixedu.bennu.cms.domain.Menu;
 import org.fenixedu.bennu.cms.domain.Page;
-import org.fenixedu.bennu.cms.domain.Site;
-import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.cms.domain.wraps.Wrap;
+import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
-
-import com.google.common.collect.Lists;
 
 /**
  * Component that provides a {@link Menu} for a given {@link Page}
@@ -35,9 +33,10 @@ public class MenuComponent extends MenuComponent_Base {
 
     @Override
     public void handle(Page currentPage, TemplateContext local, TemplateContext global) {
-        if (!getMenu().getChildrenSorted().isEmpty()) {
-            handleMenu(getMenu(), "menus", currentPage, global);
-            local.put("menu", getMenu().makeWrap(currentPage));
+        if (!getMenu().getToplevelItemsSet().isEmpty()) {
+            Wrap wrap = getMenu().makeWrap(currentPage);
+            handleMenu(wrap, "menus", global);
+            local.put("menu", wrap);
         }
     }
 
@@ -54,10 +53,10 @@ public class MenuComponent extends MenuComponent_Base {
     }
 
     @SuppressWarnings("unchecked")
-    public void handleMenu(Menu menu, String menuType, Page currentPage, TemplateContext global) {
-        List<Wrap> menus = (List<Wrap>) global.getOrDefault(menuType, Lists.newArrayList());
+    public void handleMenu(Wrap menu, String menuType, TemplateContext global) {
+        List<Wrap> menus = (List<Wrap>) global.computeIfAbsent(menuType, key -> new ArrayList<>());
 
-        menus.add(menu.makeWrap(currentPage));
+        menus.add(menu);
         global.put(menuType, menus);
     }
 

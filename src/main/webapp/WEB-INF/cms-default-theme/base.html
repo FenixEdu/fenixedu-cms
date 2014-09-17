@@ -1,8 +1,8 @@
 {% macro menuChildren(menuItems) %}
 {% if menuItems.size != 0 %}
-{% for item in menuItems %}
+{% lazyFor item in menuItems %}
 {{menuItem(item)}}
-{% endfor %}
+{% endLazyFor %}
 {% endif %}
 {% endmacro %}
 

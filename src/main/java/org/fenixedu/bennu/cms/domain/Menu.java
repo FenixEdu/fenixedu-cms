@@ -1,14 +1,12 @@
 package org.fenixedu.bennu.cms.domain;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
-import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -16,14 +14,12 @@ import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.Atomic;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
  * Model of a Menu for a given {@link Page}
  */
-public class Menu extends Menu_Base implements Wrappable{
+public class Menu extends Menu_Base implements Wrappable {
 
     public Menu(Site site, LocalizedString name) {
         this();
@@ -68,14 +64,14 @@ public class Menu extends Menu_Base implements Wrappable{
 
         if (position >= this.getToplevelItemsSet().size()) {
             item.removeFromParent();
-            position = getToplevelItemsSorted().size();
+            position = getToplevelItemsSet().size();
         }
 
         if (item.getPosition() != null) {
             item.removeFromParent();
         }
 
-        List<MenuItem> list = Lists.newArrayList(getToplevelItemsSorted());
+        List<MenuItem> list = getToplevelItemsSorted().collect(Collectors.toList());
         list.add(position, item);
 
         MenuItem.fixOrder(list);
@@ -92,10 +88,10 @@ public class Menu extends Menu_Base implements Wrappable{
      */
     public void remove(MenuItem mi) {
         getToplevelItemsSet().remove(mi);
-        MenuItem.fixOrder(getToplevelItemsSorted());
+        MenuItem.fixOrder(getToplevelItemsSorted().collect(Collectors.toList()));
 
         getItemsSet().remove(mi);
-        MenuItem.fixOrder(getItemsSorted());
+        MenuItem.fixOrder(getItemsSorted().collect(Collectors.toList()));
     }
 
     /**
@@ -108,53 +104,48 @@ public class Menu extends Menu_Base implements Wrappable{
         this.putAt(mi, getToplevelItemsSet().size());
     }
 
-    /**
-     * @return the menu items sorted by position.
-     */
-    public List<MenuItem> getChildrenSorted() {
-        return getToplevelItemsSorted();
+    public Stream<MenuItem> getToplevelItemsSorted() {
+        return getToplevelItemsSet().stream().sorted();
     }
 
-    public List<MenuItem> getToplevelItemsSorted() {
-        return getToplevelItemsSet().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
+    public Stream<MenuItem> getItemsSorted() {
+        return getItemsSet().stream().sorted();
     }
 
-    public List<MenuItem> getItemsSorted() {
-        return getItemsSet().stream().sorted(Comparator.naturalOrder()).collect(Collectors.toList());
-    }
-
-    public <T> Set<T> getComponentsOfClass(Class<T> clazz) {
-        return Sets.newHashSet(Iterables.filter(getComponentSet(), clazz));
-    }
-
+    @SuppressWarnings("unused")
     private class MenuWrap extends Wrap {
-        private Page page;
-        public MenuWrap(){}
-        List<Wrap> children;
+        private final Page page;
+        private final Stream<Wrap> children;
 
-        public MenuWrap(Page page){
-            this.page = page;
-            children = ImmutableList.copyOf(Menu.this.getChildrenSorted().stream().map((x) -> x.makeWrap(page)).collect(Collectors.toList()));
+        public MenuWrap() {
+            this.page = null;
+            this.children = Stream.empty();
         }
 
-        public List<Wrap> getChildren(){
+        public MenuWrap(Page page) {
+            this.page = page;
+            this.children = getToplevelItemsSorted().map(item -> item.makeWrap(page));
+        }
+
+        public Stream<Wrap> getChildren() {
             return children;
         }
 
-        public LocalizedString getName(){
+        public LocalizedString getName() {
             return Menu.this.getName();
         }
 
-        public Wrap getSite(){
+        public Wrap getSite() {
             return Menu.this.getSite().makeWrap();
         }
 
-        public Boolean getTopMenu(){
+        public Boolean getTopMenu() {
             return Menu.this.getTopMenu();
         }
     }
 
-    @Override public Wrap makeWrap() {
+    @Override
+    public Wrap makeWrap() {
         return new MenuWrap();
     }
 

@@ -80,9 +80,7 @@ public class AdminMenuItem {
 
         JsonArray child = new JsonArray();
 
-        for (MenuItem subitem : m.getToplevelItemsSorted()) {
-            child.add(serialize(subitem));
-        }
+        m.getToplevelItemsSorted().map(this::serialize).forEach(json -> child.add(json));
 
         root.add("children", child);
 
