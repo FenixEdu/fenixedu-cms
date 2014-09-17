@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.stream.XMLEventFactory;
@@ -122,12 +123,17 @@ public class RSSService {
         return strWriter.toString();
     }
 
+    // Pattern to remove invalid XML characters
+    private static final Pattern sanitizeInputForXml = Pattern
+            .compile("[^\\u0009\\u000A\\u000D\\u0020-\\uD7FF\\uE000-\\uFFFD\uD800\uDC00-\uDBFF\uDFFF]");
+
     private static void writePost(Locale locale, XMLEventWriter writer, Post post, XMLEventFactory eventFactory)
             throws XMLStreamException {
         writer.add(eventFactory.createStartElement("", "", "item"));
         writer.add(eventFactory.createDTD("\n"));
         createNode(writer, eventFactory, "title", post.getName().getContent(locale));
-        createNode(writer, eventFactory, "description", post.getBody().getContent(locale));
+        createNode(writer, eventFactory, "description", sanitizeInputForXml.matcher(post.getBody().getContent(locale))
+                .replaceAll(""));
         createNode(writer, eventFactory, "link", post.getAddress());
         createNode(writer, eventFactory, "author", post.getCreatedBy().getProfile().getEmail() + " ("
                 + post.getCreatedBy().getName() + ")");
