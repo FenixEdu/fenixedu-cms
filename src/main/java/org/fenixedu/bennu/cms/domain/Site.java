@@ -50,10 +50,8 @@ public class Site extends Site_Base implements Wrappable {
     /**
      * registers a new site template
      *
-     * @param type
-     *            the type of the template. This must be unique on the application.
-     * @param c
-     *            the class to be registered as a template.
+     * @param type the type of the template. This must be unique on the application.
+     * @param c    the class to be registered as a template.
      */
     public static void register(String type, Class<?> c) {
         TEMPLATES.put(type, c);
@@ -62,10 +60,8 @@ public class Site extends Site_Base implements Wrappable {
     /**
      * searches for a {@link SiteTemplate} by type.
      *
-     * @param type
-     *            the type of the {@link SiteTemplate} wanted.
-     * @return
-     *         the {@link SiteTemplate} with the given type if it exists or null otherwise.
+     * @param type the type of the {@link SiteTemplate} wanted.
+     * @return the {@link SiteTemplate} with the given type if it exists or null otherwise.
      */
     public static SiteTemplate templateFor(String type) {
         try {
@@ -77,7 +73,6 @@ public class Site extends Site_Base implements Wrappable {
     }
 
     /**
-     *
      * @return mapping between the type and description for all the registered {@link SiteTemplate}.
      */
     public static HashMap<String, String> getTemplates() {
@@ -113,7 +108,7 @@ public class Site extends Site_Base implements Wrappable {
      * returns the group of people who can view this site.
      *
      * @return group
-     *         the access group for this site
+     * the access group for this site
      */
     public Group getCanViewGroup() {
         return getViewGroup().toGroup();
@@ -122,8 +117,7 @@ public class Site extends Site_Base implements Wrappable {
     /**
      * sets the access group for this site
      *
-     * @param group
-     *            the group of people who can view this site
+     * @param group the group of people who can view this site
      */
     @Atomic
     public void setCanViewGroup(Group group) {
@@ -142,8 +136,7 @@ public class Site extends Site_Base implements Wrappable {
     /**
      * sets the access group of people who can post in this site
      *
-     * @param group
-     *            the group of people who can view this site
+     * @param group the group of people who can view this site
      */
     @Atomic
     public void setCanPostGroup(Group group) {
@@ -162,8 +155,7 @@ public class Site extends Site_Base implements Wrappable {
     /**
      * sets the access group of people who can post in this site
      *
-     * @param group
-     *            the group of people who can view this site
+     * @param group the group of people who can view this site
      */
     @Atomic
     public void setCanAdminGroup(Group group) {
@@ -173,10 +165,8 @@ public class Site extends Site_Base implements Wrappable {
     /**
      * searches for a {@link Site} by slug.
      *
-     * @param slug
-     *            the slug of the {@link Site} wanted.
-     * @return
-     *         the {@link Site} with the given slug if it exists, or null otherwise.
+     * @param slug the slug of the {@link Site} wanted.
+     * @return the {@link Site} with the given slug if it exists, or null otherwise.
      */
     public static Site fromSlug(String slug) {
         return Bennu.getInstance().getSitesSet().stream().filter(site -> site.getSlug() != null && site.getSlug().equals(slug))
@@ -186,10 +176,8 @@ public class Site extends Site_Base implements Wrappable {
     /**
      * searches for a {@link Page} by slug on this {@link Site}.
      *
-     * @param slug
-     *            the slug of the {@link Page} wanted.
-     * @return
-     *         the {@link Page} with the given slug if it exists on this site, or null otherwise.
+     * @param slug the slug of the {@link Page} wanted.
+     * @return the {@link Page} with the given slug if it exists on this site, or null otherwise.
      */
     public Page pageForSlug(String slug) {
         return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElse(null);
@@ -198,10 +186,8 @@ public class Site extends Site_Base implements Wrappable {
     /**
      * searches for a {@link Post} by slug on this {@link Site}.
      *
-     * @param slug
-     *            the slug of the {@link Post} wanted.
-     * @return
-     *         the {@link Post} with the given slug if it exists on this site, or null otherwise.
+     * @param slug the slug of the {@link Post} wanted.
+     * @return the {@link Post} with the given slug if it exists on this site, or null otherwise.
      */
     public Post postForSlug(String slug) {
         return getPostSet().stream().filter(post -> post.getSlug().equals(slug)).findAny().orElse(null);
@@ -210,10 +196,8 @@ public class Site extends Site_Base implements Wrappable {
     /**
      * searches for a {@link Category} by slug on this {@link Site}.
      *
-     * @param slug
-     *            the slug of the {@link Category} wanted.
-     * @return
-     *         the {@link Category} with the given slug if it exists on this site, or null otherwise.
+     * @param slug the slug of the {@link Category} wanted.
+     * @return the {@link Category} with the given slug if it exists on this site, or null otherwise.
      */
     public Category categoryForSlug(String slug) {
         return getCategoriesSet().stream().filter(category -> category.getSlug().equals(slug)).findAny().orElse(null);
@@ -233,10 +217,8 @@ public class Site extends Site_Base implements Wrappable {
     /**
      * searches for a {@link Menu} by oid on this {@link Site}.
      *
-     * @param oid
-     *            the slug of the {@link Menu} wanted.
-     * @return
-     *         the {@link Menu} with the given oid if it exists on this site, or null otherwise.
+     * @param oid the slug of the {@link Menu} wanted.
+     * @return the {@link Menu} with the given oid if it exists on this site, or null otherwise.
      */
     public Menu menuForOid(String oid) {
         Menu menu = FenixFramework.getDomainObject(oid);
@@ -257,7 +239,6 @@ public class Site extends Site_Base implements Wrappable {
     /**
      * Updates the site's slug and it's respective MenuFunctionality.
      * It should be used after setting the site's description, name and slug.
-     *
      */
 
     public void updateMenuFunctionality() {

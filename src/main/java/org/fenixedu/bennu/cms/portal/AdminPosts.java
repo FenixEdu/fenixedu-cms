@@ -25,6 +25,7 @@ import pt.ist.fenixframework.Atomic;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -96,7 +97,7 @@ public class AdminPosts {
     @RequestMapping(value = "{slug}/{postSlug}/edit", method = RequestMethod.POST)
     public RedirectView editPost(Model model, @PathVariable(value = "slug") String slug,
             @PathVariable(value = "postSlug") String postSlug, @RequestParam String newSlug, @RequestParam LocalizedString name,
-            @RequestParam LocalizedString body, RedirectAttributes redirectAttributes) {
+            @RequestParam LocalizedString body, @RequestParam String[] categories, RedirectAttributes redirectAttributes) {
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
@@ -104,18 +105,21 @@ public class AdminPosts {
         } else {
             Site s = Site.fromSlug(slug);
             Post p = s.postForSlug(postSlug);
-            editPost(p, name, body, newSlug);
+            editPost(p, name, body, newSlug, categories);
             return new RedirectView("/cms/posts/" + s.getSlug() + "", true);
         }
     }
 
     @Atomic
-    private void editPost(Post post, LocalizedString name, LocalizedString body, String newSlug) {
+    private void editPost(Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories) {
         post.setName(name);
         post.setBody(body);
-        post.setSlug(newSlug
-        );
-
+        post.setSlug(newSlug);
+        post.getCategoriesSet().clear();
+        HashSet<String> h = new HashSet<>();
+        h.addAll(Arrays.asList(categories));
+        post.getCategoriesSet().addAll(post.getSite().getCategoriesSet().stream().filter(x -> h.contains(x.getSlug())).collect(
+                Collectors.toList()));
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/delete", method = RequestMethod.POST)
@@ -145,7 +149,8 @@ public class AdminPosts {
         return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit#attachments", true);
     }
 
-    @RequestMapping(value = "{slugSite}/{slugPost}/addAttachment.json", method = RequestMethod.POST, produces = "application/json")
+    @RequestMapping(value = "{slugSite}/{slugPost}/addAttachment.json", method = RequestMethod.POST,
+            produces = "application/json")
     public @ResponseBody String addAttachmentJson(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "slugPost") String slugPost, @RequestParam(required = true) String name,
             @RequestParam("attachment") MultipartFile attachment)

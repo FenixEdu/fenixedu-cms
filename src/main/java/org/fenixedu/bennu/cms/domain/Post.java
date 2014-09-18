@@ -330,6 +330,10 @@ public class Post extends Post_Base implements Wrappable {
         setModificationDate(new DateTime());
     }
 
+    public String getCategories() {
+        return this.getCategoriesSet().stream().map(x -> x.getName().getContent()).reduce((x, y) -> x + "," + y).orElse("");
+    }
+
     public class PostWrap extends Wrap {
 
         public LocalizedString getName() {
