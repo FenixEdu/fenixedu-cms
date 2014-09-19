@@ -9,13 +9,40 @@
     </parent>
 
     <artifactId>fenixedu-cms</artifactId>
-    <name>Bennu CMS</name>
+    <name>FenixEdu CMS</name>
+    <url>http://fenixedu.org</url>
     <version>1.0.0-SNAPSHOT</version>
+    <inceptionYear>2014</inceptionYear>
 
     <properties>
         <version.org.fenixedu.bennu>3.3.3</version.org.fenixedu.bennu>
         <version.org.fenixedu.bennu.spring>1.1.0</version.org.fenixedu.bennu.spring>
     </properties>
+
+    <issueManagement>
+        <system>JIRA</system>
+        <url>https://jira.fenixedu.org/browse/CMS</url>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License v3.0</name>
+            <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <ciManagement>
+        <system>Bamboo</system>
+        <url>https://ci.fenixedu.org/browse/CMS</url>
+    </ciManagement>
+
+    <scm>
+        <connection>scm:git:git@github.com:fenixedu/fenixedu-cms.git</connection>
+        <developerConnection>scm:git:git@github.com:fenixedu/fenixedu-cms.git</developerConnection>
+        <url>http://fenixedu.org</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <build>
         <plugins>
@@ -75,6 +102,17 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*.js</exclude>
+                        <exclude>**/*.css</exclude>
+                        <exclude>**/*.html</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
