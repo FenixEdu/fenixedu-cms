@@ -41,7 +41,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     /**
      * Adds a children at a given position and shifts the existing items.
      *
-     * @param item     the {@link MenuItem} to be added.
+     * @param item the {@link MenuItem} to be added.
      * @param position the position where the item should be added.
      */
     public void putAt(MenuItem item, int position) {
@@ -191,8 +191,9 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
         public MenuItemWrap(Page page) {
             open = MenuItem.this.getPage() != null && MenuItem.this.getPage().equals(page);
-            children = ImmutableList
-                    .copyOf(MenuItem.this.getChildrenSorted().stream().map((x) -> x.makeWrap(page)).collect(Collectors.toList()));
+            children =
+                    ImmutableList.copyOf(MenuItem.this.getChildrenSorted().stream().map((x) -> x.makeWrap(page))
+                            .collect(Collectors.toList()));
             active = open || children.stream().map((x) -> ((MenuItemWrap) x).open).reduce(false, (x, y) -> x || y);
         }
 
@@ -221,7 +222,8 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         }
     }
 
-    @Override public Wrap makeWrap() {
+    @Override
+    public Wrap makeWrap() {
         return new MenuItemWrap();
     }
 

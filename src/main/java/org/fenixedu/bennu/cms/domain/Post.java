@@ -1,13 +1,16 @@
 package org.fenixedu.bennu.cms.domain;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.fenixedu.bennu.cms.domain.component.Component;
 import org.fenixedu.bennu.cms.domain.wraps.UserWrap;
-import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
@@ -18,13 +21,12 @@ import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
+
 import pt.ist.fenixframework.Atomic;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 /**
  * A post models a given content to be presented to the user.
@@ -135,7 +137,7 @@ public class Post extends Post_Base implements Wrappable {
      * returns the group of people who can view this site.
      *
      * @return group
-     * the access group for this site
+     *         the access group for this site
      */
     public Group getCanViewGroup() {
         return getViewGroup().toGroup();
@@ -386,15 +388,21 @@ public class Post extends Post_Base implements Wrappable {
         }
 
         public List<ImmutableMap<String, Object>> getAttachments() {
-            return Post.this.getAttachments().getFiles().stream().map(
-                    (f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType", (Object) f.getContentType(), "url",
-                            FileDownloadServlet.getDownloadUrl(f))).collect(Collectors.toList());
+            return Post.this
+                    .getAttachments()
+                    .getFiles()
+                    .stream()
+                    .map((f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType", (Object) f.getContentType(),
+                            "url", FileDownloadServlet.getDownloadUrl(f))).collect(Collectors.toList());
         }
 
         public List<ImmutableMap<String, Object>> getPostFiles() {
-            return Post.this.getPostFiles().getFiles().stream().map(
-                    (f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType", (Object) f.getContentType(), "url",
-                            FileDownloadServlet.getDownloadUrl(f))).collect(Collectors.toList());
+            return Post.this
+                    .getPostFiles()
+                    .getFiles()
+                    .stream()
+                    .map((f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType", (Object) f.getContentType(),
+                            "url", FileDownloadServlet.getDownloadUrl(f))).collect(Collectors.toList());
         }
     }
 

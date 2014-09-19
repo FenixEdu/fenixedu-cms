@@ -1,11 +1,11 @@
 package org.fenixedu.bennu.cms.domain.component;
 
+import java.util.stream.Collectors;
+
 import org.fenixedu.bennu.cms.domain.Category;
 import org.fenixedu.bennu.cms.domain.Page;
-import org.fenixedu.bennu.cms.rendering.TemplateContext;
 import org.fenixedu.bennu.cms.domain.wraps.Wrap;
-
-import java.util.stream.Collectors;
+import org.fenixedu.bennu.cms.rendering.TemplateContext;
 
 /**
  * Component that lists all the {@link Category} of a given site.

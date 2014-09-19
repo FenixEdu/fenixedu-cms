@@ -1,12 +1,6 @@
 package org.fenixedu.bennu.cms.domain.component;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.primitives.Ints;
-import org.fenixedu.bennu.cms.domain.Page;
-import org.fenixedu.bennu.cms.domain.Post;
-import org.fenixedu.bennu.cms.domain.wraps.Wrap;
+import static java.util.stream.Collectors.toList;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +8,14 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
+import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Post;
+import org.fenixedu.bennu.cms.domain.wraps.Wrap;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.primitives.Ints;
 
 public class PostsPresentationBean {
     private static final int FIRST_PAGE_INDEX = 1;
@@ -30,7 +31,6 @@ public class PostsPresentationBean {
         currentPage = ensureRange(currentPage, FIRST_PAGE_INDEX, pages.size());
         List<Wrap> currentPagePosts = pages.isEmpty() ? Lists.newArrayList() : pages.get(currentPage - FIRST_PAGE_INDEX);
 
-
         HashMap<String, Object> pagination = Maps.newHashMap();
         pagination.put("pages", createPagesList(pages.size()));
         pagination.put("current", currentPage);
@@ -38,15 +38,13 @@ public class PostsPresentationBean {
         return pagination;
     }
 
-
     private List<Object> createPagesList(int numberOfPages) {
         return IntStream.rangeClosed(FIRST_PAGE_INDEX, numberOfPages)
                 .mapToObj(i -> ImmutableMap.of("url", "?p=" + i, "number", i)).collect(toList());
     }
 
-
     private int ensureRange(int number, int min, int max) {
-        return Math.max(Math.min(number, max),  min);
+        return Math.max(Math.min(number, max), min);
     }
 
     public List<Wrap> getVisiblePosts() {
@@ -58,12 +56,13 @@ public class PostsPresentationBean {
     }
 
     private Stream<Wrap> visiblePostsStream() {
-        return allPosts.stream().filter(p -> p.getComponentSet().isEmpty() && p.isVisible()).sorted(Post.CREATION_DATE_COMPARATOR).map(Wrap::make);
+        return allPosts.stream().filter(p -> p.getComponentSet().isEmpty() && p.isVisible())
+                .sorted(Post.CREATION_DATE_COMPARATOR).map(Wrap::make);
 
     }
 
     public int currentPage(String currentPageString) {
-        boolean isValid = currentPageString != null && Ints.tryParse(currentPageString) !=null;
+        boolean isValid = currentPageString != null && Ints.tryParse(currentPageString) != null;
         return isValid ? Ints.tryParse(currentPageString) : 1;
     }
 }

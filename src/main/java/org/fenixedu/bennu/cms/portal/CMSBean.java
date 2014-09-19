@@ -1,9 +1,9 @@
 package org.fenixedu.bennu.cms.portal;
 
+import java.text.DecimalFormat;
+
 import org.fenixedu.bennu.io.domain.GenericFile;
 import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
-
-import java.text.DecimalFormat;
 
 public class CMSBean {
 
@@ -16,7 +16,7 @@ public class CMSBean {
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
-    public String downloadUrl(GenericFile file){
+    public String downloadUrl(GenericFile file) {
         return FileDownloadServlet.getDownloadUrl(file);
     }
 

@@ -5,13 +5,16 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.zip.ZipFile;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.fenixedu.bennu.cms.domain.*;
+import org.fenixedu.bennu.cms.domain.CMSTemplate;
+import org.fenixedu.bennu.cms.domain.CMSTheme;
+import org.fenixedu.bennu.cms.domain.CMSThemeFile;
+import org.fenixedu.bennu.cms.domain.CMSThemeFiles;
+import org.fenixedu.bennu.cms.domain.CMSThemeLoader;
 import org.fenixedu.bennu.cms.routing.CMSURLHandler;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
@@ -28,11 +31,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.view.RedirectView;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Files;
 import pt.ist.fenixframework.Atomic;
 
-@SpringFunctionality(app = AdminSites.class, title = "application.admin-themes.title")
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Files;
+
+@SpringFunctionality(app = AdminSites.class, title = "application.admin-themes.title", accessGroup = "#managers")
 @RequestMapping("/cms/themes")
 public class AdminThemes {
 
@@ -152,14 +156,14 @@ public class AdminThemes {
 
     @RequestMapping(value = "new", method = RequestMethod.POST)
     public RedirectView newTheme(Model model, @RequestParam String type, @RequestParam String name,
-            @RequestParam String description, @RequestParam(value="extends") String ext) {
+            @RequestParam String description, @RequestParam(value = "extends") String ext) {
         CMSTheme theme = CMSTheme.forType(ext);
         newTheme(type, name, description, theme);
         return new RedirectView("/cms/themes/" + type + "/see", true);
     }
 
     @Atomic
-    public void newTheme(String type, String name, String description, CMSTheme ext){
+    public void newTheme(String type, String name, String description, CMSTheme ext) {
         CMSTheme theme = new CMSTheme();
         theme.setType(type);
         theme.setName(name);
@@ -170,40 +174,40 @@ public class AdminThemes {
     }
 
     @RequestMapping(value = "{type}/newFile", method = RequestMethod.POST)
-    public RedirectView newFile(@PathVariable(value = "type") String type, @RequestParam String filename){
+    public RedirectView newFile(@PathVariable(value = "type") String type, @RequestParam String filename) {
         CMSTheme theme = CMSTheme.forType(type);
         String[] r = filename.split("/");
-        if (theme.fileForPath(filename) == null){
+        if (theme.fileForPath(filename) == null) {
             CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename, new byte[0]);
             theme.changeFiles(theme.getFiles().with(newFile));
             return new RedirectView("/cms/themes/" + type + "/editFile/" + filename, true);
-        }else{
+        } else {
             throw new RuntimeException("File already exists");
         }
     }
 
     @RequestMapping(value = "{type}/importFile", method = RequestMethod.POST)
-    public RedirectView importTheme(@PathVariable(value = "type") String type, @RequestParam String filename, @RequestParam("uploadedFile") MultipartFile uploadedFile)
-            throws IOException {
+    public RedirectView importTheme(@PathVariable(value = "type") String type, @RequestParam String filename,
+            @RequestParam("uploadedFile") MultipartFile uploadedFile) throws IOException {
         CMSTheme theme = CMSTheme.forType(type);
         String[] r = filename.split("/");
-        if (theme.fileForPath(filename) == null){
+        if (theme.fileForPath(filename) == null) {
             CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename, uploadedFile.getBytes());
             theme.changeFiles(theme.getFiles().with(newFile));
             return new RedirectView("/cms/themes/" + type + "/see", true);
-        }else{
+        } else {
             throw new RuntimeException("File already exists");
         }
     }
 
     @RequestMapping(value = "{type}/newTemplate", method = RequestMethod.POST)
-    public RedirectView newTemplate(@PathVariable(value = "type") String type, @RequestParam(value="type") String templateType, @RequestParam String name,
-            @RequestParam String description, @RequestParam String filename){
+    public RedirectView newTemplate(@PathVariable(value = "type") String type, @RequestParam(value = "type") String templateType,
+            @RequestParam String name, @RequestParam String description, @RequestParam String filename) {
         CMSTheme theme = CMSTheme.forType(type);
-        if (theme.templateForType(templateType) == null){
+        if (theme.templateForType(templateType) == null) {
             newTemplate(templateType, name, description, filename, theme);
             return new RedirectView("/cms/themes/" + type + "/see#templates", true);
-        }else{
+        } else {
             throw new RuntimeException("Template already exists");
         }
     }
@@ -219,26 +223,28 @@ public class AdminThemes {
     }
 
     @RequestMapping(value = "{type}/deleteTemplate", method = RequestMethod.POST)
-    public RedirectView deleteTemplate(@PathVariable(value = "type") String type, @RequestParam(value="type") String templateType) {
+    public RedirectView deleteTemplate(@PathVariable(value = "type") String type,
+            @RequestParam(value = "type") String templateType) {
         CMSTheme theme = CMSTheme.forType(type);
         deleteTemplate(templateType, theme);
         return new RedirectView("/cms/themes/" + type + "/see#templates", true);
     }
+
     @Atomic
     private void deleteTemplate(String templateType, CMSTheme theme) {
         theme.templateForType(templateType).delete();
     }
 
     @RequestMapping(value = "{type}/duplicate", method = RequestMethod.POST)
-    public RedirectView duplicateTheme(Model model, @PathVariable String type, @RequestParam(value="newThemeType") String newThemeType, @RequestParam String name,
-            @RequestParam String description) {
+    public RedirectView duplicateTheme(Model model, @PathVariable String type,
+            @RequestParam(value = "newThemeType") String newThemeType, @RequestParam String name, @RequestParam String description) {
         CMSTheme orig = CMSTheme.forType(type);
         duplicateTheme(orig, newThemeType, name, description);
         return new RedirectView("/cms/themes/" + newThemeType + "/see", true);
     }
 
     @Atomic
-    public void duplicateTheme(CMSTheme orig, String type, String name, String description){
+    public void duplicateTheme(CMSTheme orig, String type, String name, String description) {
         CMSTheme theme = new CMSTheme();
         theme.setType(type);
         theme.setName(name);
@@ -246,7 +252,7 @@ public class AdminThemes {
         theme.setBennu(orig.getBennu());
         theme.setExtended(orig.getExtended());
         theme.changeFiles(orig.getFiles());
-        for(CMSTemplate originalTemplate : orig.getTemplatesSet()){
+        for (CMSTemplate originalTemplate : orig.getTemplatesSet()) {
             CMSTemplate tp = new CMSTemplate();
             tp.setTheme(theme);
             tp.setFilePath(originalTemplate.getFilePath());

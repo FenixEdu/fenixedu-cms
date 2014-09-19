@@ -9,6 +9,8 @@ import org.fenixedu.bennu.core.domain.exceptions.DomainException;
  */
 public class CmsDomainException extends DomainException {
 
+    private static final long serialVersionUID = -7452149666134820945L;
+
     protected static final String BUNDLE = "CmsExceptionResources";
 
     protected CmsDomainException(Response.Status status, String bundle, String key, String... args) {

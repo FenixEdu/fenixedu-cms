@@ -17,7 +17,7 @@ import pt.ist.fenixframework.FenixFramework;
 
 import com.google.common.base.Strings;
 
-@SpringFunctionality(app = AdminSites.class, title = "application.create-site.title")
+@SpringFunctionality(app = AdminSites.class, title = "application.create-site.title", accessGroup = "#managers")
 @RequestMapping("/cms/sites/new")
 public class CreateSite {
 

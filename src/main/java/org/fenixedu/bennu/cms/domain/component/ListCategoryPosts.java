@@ -1,17 +1,19 @@
 package org.fenixedu.bennu.cms.domain.component;
 
-import org.fenixedu.bennu.cms.domain.Category;
-import org.fenixedu.bennu.cms.domain.Page;
-import org.fenixedu.bennu.cms.domain.Post;
-import org.fenixedu.bennu.cms.rendering.TemplateContext;
-import org.fenixedu.bennu.cms.domain.wraps.Wrap;
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.fenixedu.bennu.cms.domain.Category;
+import org.fenixedu.bennu.cms.domain.Page;
+import org.fenixedu.bennu.cms.domain.Post;
+import org.fenixedu.bennu.cms.domain.wraps.Wrap;
+import org.fenixedu.bennu.cms.rendering.TemplateContext;
+
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.Atomic.TxMode;
+
 /**
  * Component that lists the {@link Post} of a given category.
  */

@@ -127,6 +127,7 @@ public class RSSService {
     private static final Pattern sanitizeInputForXml = Pattern
             .compile("[^\\u0009\\u000A\\u000D\\u0020-\\uD7FF\\uE000-\\uFFFD\uD800\uDC00-\uDBFF\uDFFF]");
 
+    @SuppressWarnings("deprecation")
     private static void writePost(Locale locale, XMLEventWriter writer, Post post, XMLEventFactory eventFactory)
             throws XMLStreamException {
         writer.add(eventFactory.createStartElement("", "", "item"));

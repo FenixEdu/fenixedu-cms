@@ -1,9 +1,9 @@
 package org.fenixedu.bennu.cms.domain;
 
 import org.fenixedu.bennu.cms.domain.component.Component;
-import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.cms.domain.wraps.Wrap;
 import org.fenixedu.bennu.cms.domain.wraps.Wrappable;
+import org.fenixedu.bennu.cms.exceptions.CmsDomainException;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.StringNormalizer;
@@ -64,27 +64,28 @@ public class Category extends Category_Base implements Wrappable {
         this.deleteDomainObject();
     }
 
-    public class CategoryWrap extends Wrap{
+    public class CategoryWrap extends Wrap {
 
-        public LocalizedString getName(){
+        public LocalizedString getName() {
             return Category.this.getName();
         }
 
-        public String getAddress(){
+        public String getAddress() {
             return Category.this.getAddress();
         }
 
-        public String getSlug(){
+        public String getSlug() {
             return Category.this.getSlug();
         }
 
-        public DateTime getCreationDate(){
+        public DateTime getCreationDate() {
             return Category.this.getCreationDate();
         }
 
     }
 
-    @Override public Wrap makeWrap() {
+    @Override
+    public Wrap makeWrap() {
         return new CategoryWrap();
     }
 }

@@ -12,8 +12,6 @@ import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import pt.ist.fenixframework.Atomic;
 
@@ -23,7 +21,6 @@ import com.google.common.base.Joiner;
  * Model for a page on a given Site.
  */
 public class Page extends Page_Base {
-    private static final Logger log = LoggerFactory.getLogger(Page.class);
 
     /**
      * the logged {@link User} creates a new Page.

@@ -51,7 +51,7 @@ public class Site extends Site_Base implements Wrappable {
      * registers a new site template
      *
      * @param type the type of the template. This must be unique on the application.
-     * @param c    the class to be registered as a template.
+     * @param c the class to be registered as a template.
      */
     public static void register(String type, Class<?> c) {
         TEMPLATES.put(type, c);
@@ -108,7 +108,7 @@ public class Site extends Site_Base implements Wrappable {
      * returns the group of people who can view this site.
      *
      * @return group
-     * the access group for this site
+     *         the access group for this site
      */
     public Group getCanViewGroup() {
         return getViewGroup().toGroup();

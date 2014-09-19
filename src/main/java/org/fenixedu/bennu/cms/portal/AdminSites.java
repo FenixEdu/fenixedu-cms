@@ -32,7 +32,7 @@ import pt.ist.fenixframework.FenixFramework;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
-@SpringApplication(group = "anyone", path = "cms", title = "application.title")
+@SpringApplication(group = "logged", path = "cms", title = "application.title.cms")
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")
 @RequestMapping("/cms/sites")
 public class AdminSites {

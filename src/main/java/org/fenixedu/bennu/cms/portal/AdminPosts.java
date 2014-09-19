@@ -1,35 +1,31 @@
 package org.fenixedu.bennu.cms.portal;
 
-import com.google.common.io.Files;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import org.fenixedu.bennu.cms.domain.CMSTheme;
-import org.fenixedu.bennu.cms.domain.CMSThemeLoader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
 import org.fenixedu.bennu.cms.domain.Post;
 import org.fenixedu.bennu.cms.domain.Site;
-import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import pt.ist.fenixframework.Atomic;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.UUID;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.zip.ZipFile;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/posts")
@@ -118,8 +114,8 @@ public class AdminPosts {
         post.getCategoriesSet().clear();
         HashSet<String> h = new HashSet<>();
         h.addAll(Arrays.asList(categories));
-        post.getCategoriesSet().addAll(post.getSite().getCategoriesSet().stream().filter(x -> h.contains(x.getSlug())).collect(
-                Collectors.toList()));
+        post.getCategoriesSet().addAll(
+                post.getSite().getCategoriesSet().stream().filter(x -> h.contains(x.getSlug())).collect(Collectors.toList()));
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/delete", method = RequestMethod.POST)
@@ -134,10 +130,9 @@ public class AdminPosts {
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/addAttachment", method = RequestMethod.POST)
-    public RedirectView addAttachment(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPost") String slugPost, @RequestParam(required = true) String name,
-            @RequestParam("attachment") MultipartFile attachment)
-            throws IOException {
+    public RedirectView addAttachment(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+            value = "slugPost") String slugPost, @RequestParam(required = true) String name,
+            @RequestParam("attachment") MultipartFile attachment) throws IOException {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -151,10 +146,9 @@ public class AdminPosts {
 
     @RequestMapping(value = "{slugSite}/{slugPost}/addAttachment.json", method = RequestMethod.POST,
             produces = "application/json")
-    public @ResponseBody String addAttachmentJson(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPost") String slugPost, @RequestParam(required = true) String name,
-            @RequestParam("attachment") MultipartFile attachment)
-            throws IOException {
+    public @ResponseBody String addAttachmentJson(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+            value = "slugPost") String slugPost, @RequestParam(required = true) String name,
+            @RequestParam("attachment") MultipartFile attachment) throws IOException {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -179,9 +173,8 @@ public class AdminPosts {
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/deleteAttachment", method = RequestMethod.POST)
-    public RedirectView deleteAttachment(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPost") String slugPost, @RequestParam Integer file)
-            throws IOException {
+    public RedirectView deleteAttachment(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+            value = "slugPost") String slugPost, @RequestParam Integer file) throws IOException {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -199,9 +192,8 @@ public class AdminPosts {
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/moveAttachment", method = RequestMethod.POST)
-    public RedirectView moveAttachment(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPost") String slugPost, @RequestParam Integer origin, @RequestParam Integer destiny)
-            throws IOException {
+    public RedirectView moveAttachment(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+            value = "slugPost") String slugPost, @RequestParam Integer origin, @RequestParam Integer destiny) throws IOException {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -219,10 +211,8 @@ public class AdminPosts {
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/addFile.json", method = RequestMethod.POST, produces = "application/json")
-    public @ResponseBody String addFileJson(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPost") String slugPost,
-            @RequestParam("attachment") MultipartFile[] attachments)
-            throws IOException {
+    public @ResponseBody String addFileJson(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+            value = "slugPost") String slugPost, @RequestParam("attachment") MultipartFile[] attachments) throws IOException {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -249,18 +239,16 @@ public class AdminPosts {
 
     @Atomic
     private GroupBasedFile addFile(MultipartFile attachment, Post p) throws IOException {
-        GroupBasedFile
-                f = new GroupBasedFile(attachment.getOriginalFilename(), attachment.getOriginalFilename(), attachment.getBytes(),
-                AnyoneGroup
-                        .get());
+        GroupBasedFile f =
+                new GroupBasedFile(attachment.getOriginalFilename(), attachment.getOriginalFilename(), attachment.getBytes(),
+                        AnyoneGroup.get());
         p.getPostFiles().putFile(f);
         return f;
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/deleteFile", method = RequestMethod.POST)
-    public RedirectView deleteFile(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPost") String slugPost, @RequestParam GroupBasedFile file)
-            throws IOException {
+    public RedirectView deleteFile(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+            value = "slugPost") String slugPost, @RequestParam GroupBasedFile file) throws IOException {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
