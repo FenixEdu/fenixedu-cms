@@ -100,8 +100,6 @@ public class component.StrategyBasedComponent extends component.Component {
 class component.ListCategoryPosts extends component.Component{}
 class component.StaticPost extends component.Component{}
 class component.MenuComponent extends component.Component{}
-class component.TopMenuComponent extends component.MenuComponent{}
-class component.SideMenuComponent extends component.MenuComponent{}
 
 class PostFile{
     Integer index;
