@@ -78,3 +78,35 @@
     </c:if>
     </c:otherwise>
 </c:choose>
+
+<div class="modal fade" id="defaultSite" tabindex="-1" role="dialog" aria-hidden="true">
+    <form action="${pageContext.request.contextPath}/cms/sites/default" class="form-horizontal" method="post">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                            class="sr-only">Close</span></button>
+                    <h4><spring:message code="action.set.default.site"/></h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.site"/>:</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" name="slug">
+                                <option value="">-</option>
+                                <c:forEach var="i"  items="${sites}">
+                                    <option value="${i.slug}">${i.name.content}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary"><spring:message code="label.save"/></button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
