@@ -1,0 +1,34 @@
+package org.fenixedu.cms.domain.component;
+
+import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.exceptions.ResourceNotFoundException;
+import org.fenixedu.cms.rendering.TemplateContext;
+
+/**
+ * Component that obtains the necessary info about a {@link Post}
+ */
+@ComponentType(name = "View Post", description = "View a Single Post")
+public class ViewPost implements CMSComponent {
+
+    /**
+     * fetches a post based on the 'q' parameter of the request and saves that post on the local and global context as 'post'
+     */
+    @Override
+    public void handle(Page page, TemplateContext local, TemplateContext global) {
+        String[] ctx = global.getRequestContext();
+        if (ctx.length > 1) {
+            Post p = page.getSite().postForSlug(ctx[1]);
+
+            if (p == null) {
+                throw new ResourceNotFoundException();
+            }
+
+            local.put("post", p.makeWrap());
+            global.put("post", p.makeWrap());
+
+        } else {
+            throw new ResourceNotFoundException();
+        }
+    }
+}

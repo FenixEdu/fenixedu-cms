@@ -1,12 +1,12 @@
-package org.fenixedu.bennu.cms.domain;
+package org.fenixedu.cms.domain;
 
-valueType org.fenixedu.bennu.cms.domain.CMSThemeFiles as CMSThemeFiles {
+valueType org.fenixedu.cms.domain.CMSThemeFiles as CMSThemeFiles {
     externalizeWith {
         bytearray externalize();
     }
 }
 
-valueType org.fenixedu.bennu.cms.domain.component.CMSComponent as CMSComponent {
+valueType org.fenixedu.cms.domain.component.CMSComponent as CMSComponent {
     externalizeWith {
         String externalize();
     }
