@@ -154,7 +154,7 @@ public class RSSService {
 
     private static String getCMSVersion() {
         try {
-            Project project = Project.fromName("bennu-cms");
+            Project project = Project.fromName("fenixedu-cms");
             return project == null ? "" : "v" + project.getVersion();
         } catch (IOException | ProjectException e) {
             return "";
