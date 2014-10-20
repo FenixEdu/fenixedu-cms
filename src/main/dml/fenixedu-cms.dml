@@ -1,5 +1,12 @@
 package org.fenixedu.cms.domain;
 
+valueType org.fenixedu.cms.domain.PostMetadata as PostMetadata {
+    externalizeWith {
+        String externalize();
+    }
+    internalizeWith internalize();
+}
+
 valueType org.fenixedu.cms.domain.CMSThemeFiles as CMSThemeFiles {
     externalizeWith {
         bytearray externalize();
@@ -72,6 +79,7 @@ class Post{
   DateTime referedSubjectBegin;
   DateTime referedSubjectEnd;
   LocalizedString location;
+  PostMetadata metadata;
 }
 
 public class component.Component{
