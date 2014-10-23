@@ -18,10 +18,7 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.domain.User;
@@ -51,7 +48,8 @@ import com.google.common.collect.Lists;
  */
 public class Post extends Post_Base implements Wrappable {
 
-    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate);
+    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate)
+            .reversed();
 
     /**
      * The logged {@link User} creates a new Post.
@@ -78,8 +76,19 @@ public class Post extends Post_Base implements Wrappable {
         super.setName(name);
         this.setModificationDate(new DateTime());
         if (prevName == null) {
-            setSlug(StringNormalizer.slugify(name.getContent()));
+            String slug = StringNormalizer.slugify(name.getContent());
+            while (existsSlug(slug)) {
+                slug = StringNormalizer.slugify(name.getContent() + UUID.randomUUID().toString().substring(0, 4));
+            }
+            setSlug(slug);
         }
+    }
+
+    /**
+     * @return true if the site allready has a post registered with the slug received as argument and false otherwise.
+     */
+    private boolean existsSlug(String slug) {
+        return getSite().getPostSet().stream().map(Post::getSlug).filter(postSlug -> slug.equals(postSlug)).findAny().isPresent();
     }
 
     /**
@@ -422,6 +431,7 @@ public class Post extends Post_Base implements Wrappable {
                     .map((f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType", (Object) f.getContentType(),
                             "url", FileDownloadServlet.getDownloadUrl(f))).collect(Collectors.toList());
         }
+
     }
 
     @Override
