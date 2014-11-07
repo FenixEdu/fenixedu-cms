@@ -237,6 +237,8 @@ public final class CMSURLHandler implements SemanticURLHandler {
 
         if (page == null || page.getTemplate() == null) {
             errorPage(req, res, sites, 404);
+        } else if(!page.getCanViewGroup().isMember(Authenticate.getUser())){
+            errorPage(req, res, sites, 404);
         } else {
             try {
                 renderPage(req, pageSlug, res, sites, page, parts);
@@ -278,7 +280,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
     }
 
     private void renderPage(final HttpServletRequest req, String reqPagePath, HttpServletResponse res, Site site, Page page,
-            String[] requestContext) throws PebbleException, IOException {
+                            String[] requestContext) throws PebbleException, IOException {
 
         TemplateContext global = new TemplateContext();
         global.setRequestContext(requestContext);
