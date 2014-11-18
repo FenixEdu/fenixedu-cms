@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -55,8 +55,8 @@
                         <configuration>
                             <target>
                                 <zip
-                                    destfile="${project.build.directory}/classes/META-INF/resources/WEB-INF/cms-default-theme.zip"
-                                    basedir="${project.basedir}/src/main/webapp/WEB-INF/cms-default-theme"></zip>
+                                        destfile="${project.build.directory}/classes/META-INF/resources/WEB-INF/cms-default-theme.zip"
+                                        basedir="${project.basedir}/src/main/webapp/WEB-INF/cms-default-theme"></zip>
                             </target>
                         </configuration>
                         <goals>
@@ -84,7 +84,7 @@
                                 <jsSourceFile>MutationObserverPolyfill.js</jsSourceFile>
                                 <jsSourceFile>sanitize.js</jsSourceFile>
                                 <jsSourceFile>bootstrap-wysiwyg.js</jsSourceFile>
-                                <jsSourceFile>bennu.js</jsSourceFile>
+                                <jsSourceFile>org.fenixedu.bennu.js</jsSourceFile>
                                 <jsSourceFile>validation.js</jsSourceFile>
                                 <jsSourceFile>localizedString.js</jsSourceFile>
                                 <jsSourceFile>htmlEditor.js</jsSourceFile>

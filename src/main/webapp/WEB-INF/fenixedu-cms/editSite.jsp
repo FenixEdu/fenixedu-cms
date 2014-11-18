@@ -22,8 +22,8 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <h2 class="page-header" style="margin-top: 0">
-  <spring:message code="site.edit.title" />
-  <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
+    <spring:message code="site.edit.title"/>
+    <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small>
 </h2>
 <div class="row">
     <form class="form-horizontal" action="" method="post" role="form">
@@ -103,7 +103,8 @@
                 <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
 
                 <div class="col-sm-10">
-                    <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text" value="${ site.canViewGroup.expression }"/>
+                    <input bennu-group allow="public,users,managers,space-manager,custom" name="viewGroup" type="text"
+                           value="${ site.canViewGroup.expression }"/>
                 </div>
             </div>
 
@@ -111,7 +112,8 @@
                 <label for="inputEmail3" class="col-sm-2 control-label">Can Post</label>
 
                 <div class="col-sm-10">
-                    <input bennu-group allow="managers,custom" name="postGroup" type="text" value="${ site.canPostGroup.expression }"/>
+                    <input bennu-group allow="managers,custom" name="postGroup" type="text"
+                           value="${ site.canPostGroup.expression }"/>
                 </div>
             </div>
 
@@ -119,7 +121,8 @@
                 <label for="inputEmail3" class="col-sm-2 control-label">Can Admin</label>
 
                 <div class="col-sm-10">
-                    <input bennu-group allow="managers,custom" name="adminGroup" type="text" value="${ site.canAdminGroup.expression }"/>
+                    <input bennu-group allow="managers,custom" name="adminGroup" type="text"
+                           value="${ site.canAdminGroup.expression }"/>
                 </div>
             </div>
 
@@ -127,14 +130,16 @@
                 <label for="analyticsCode" class="col-sm-2 control-label">Analytics Code</label>
 
                 <div class="col-sm-10">
-                    <input type="text" name="analyticsCode" id="analyticsCode" value="${ site.analyticsCode }" class="form-control" />
+                    <input type="text" name="analyticsCode" id="analyticsCode" value="${ site.analyticsCode }"
+                           class="form-control"/>
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.save"/></button>
-                    <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}" class="btn btn-default"><spring:message code="action.cancel"/></a>
+                    <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}" class="btn btn-default"><spring:message
+                            code="action.cancel"/></a>
                 </div>
             </div>
 
@@ -152,7 +157,8 @@
             <div class="well">
                 <h4><spring:message code="site.edit.danger.zone"/></h4>
 
-                <a href="#" data-toggle="modal" data-target="#confirmDeleteModal" class="btn btn-danger"><spring:message code="action.delete"/></a>
+                <a href="#" data-toggle="modal" data-target="#confirmDeleteModal" class="btn btn-danger"><spring:message
+                        code="action.delete"/></a>
             </div>
         </div>
     </form>
@@ -172,7 +178,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
-                    <button type="button" data-dismiss="modal" class="btn btn-primary"><spring:message code="action.cancel"/></button>
+                    <button type="button" data-dismiss="modal" class="btn btn-primary"><spring:message
+                            code="action.cancel"/></button>
                 </div>
             </div>
         </div>
@@ -180,9 +187,7 @@
 </div>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
-<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
-<%--<script src="http://worf.bounceme.net:8000"></script>--%>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>
+${portal.toolkit()}
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.4/typeahead.bundle.min.js"></script>
+
 

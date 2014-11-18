@@ -23,11 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -43,11 +39,7 @@ import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
 import org.fenixedu.cms.CMSConfigurationManager;
-import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.CMSThemeFile;
-import org.fenixedu.cms.domain.Category;
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.wraps.UserWrap;
 import org.fenixedu.cms.exceptions.ResourceNotFoundException;
@@ -194,7 +186,9 @@ public final class CMSURLHandler implements SemanticURLHandler {
         if (menu.getSites() != null) {
             return menu.getSites();
         }
-        return menu.getCmsFolder().resolveSite(url);
+        return Optional.ofNullable(menu.getCmsFolder()).map((x) -> {
+            return x.resolveSite(url);
+        }).orElse(null);
     }
 
     private void handleStaticResource(final HttpServletRequest req, HttpServletResponse res, Site sites, String pageSlug)
@@ -263,7 +257,8 @@ public final class CMSURLHandler implements SemanticURLHandler {
                 PebbleEngine engine = new PebbleEngine(new StringLoader());
                 engine.addExtension(new CMSExtensions());
                 PebbleTemplate compiledTemplate =
-                        engine.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
+                        engine.getTemplate(
+                                "<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
                 res.setStatus(500);
                 res.setContentType("text/html");
                 compiledTemplate.evaluate(res.getWriter());

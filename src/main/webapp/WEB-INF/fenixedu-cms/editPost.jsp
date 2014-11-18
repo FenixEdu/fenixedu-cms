@@ -38,234 +38,234 @@
 </div>
 <form class="form-horizontal" action="" method="post" role="form">
 
-<!-- Nav tabs -->
-<ul class="nav nav-tabs" role="tablist">
-    <li class="active"><a href="#postContent" role="tab" data-toggle="tab">Post</a></li>
-    <li><a href="#files" role="tab" data-toggle="tab">Post Files</a></li>
-    <li><a href="#attachments" role="tab" data-toggle="tab">Attachments</a></li>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="active"><a href="#postContent" role="tab" data-toggle="tab">Post</a></li>
+        <li><a href="#files" role="tab" data-toggle="tab">Post Files</a></li>
+        <li><a href="#attachments" role="tab" data-toggle="tab">Attachments</a></li>
 
-</ul>
+    </ul>
 
-<!-- Tab panes -->
-<div class="tab-content">
-<div class="tab-pane active" id="postContent">
-    <p>
-    </p>
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="postContent">
+            <p>
+            </p>
 
-    <div class="${emptyName ? "form-group has-error" : "form-group"}">
-        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.edit.label.slug"/></label>
+            <div class="${emptyName ? "form-group has-error" : "form-group"}">
+                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.edit.label.slug"/></label>
 
-        <div class="col-sm-5">
-            <div class="input-group">
+                <div class="col-sm-5">
+                    <div class="input-group">
 
-                <span class="input-group-addon"><code>/${site.baseUrl}/${site.viewPostPage.slug}/</code></span>
-                <input required type="text" name="newSlug" class="form-control" id="inputEmail3"
-                       placeholder="<spring:message code="site.edit.label.slug" />" value='${post.slug}' \>
+                        <span class="input-group-addon"><code>/${site.baseUrl}/${site.viewPostPage.slug}/</code></span>
+                        <input required type="text" name="newSlug" class="form-control" id="inputEmail3"
+                               placeholder="<spring:message code="site.edit.label.slug" />" value='${post.slug}' \>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
 
-    <div class="${emptyName ? "form-group has-error" : "form-group"}">
-        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.name"/></label>
+            <div class="${emptyName ? "form-group has-error" : "form-group"}">
+                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.name"/></label>
 
-        <div class="col-sm-10">
-            <input bennu-localized-string required-any name="name" id="inputEmail3"
-                   placeholder="<spring:message code="post.edit.label.name" />" value='${post.name.json()}'>
-            <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
-                    code="post.edit.error.emptyName"/></p></c:if>
-        </div>
-    </div>
-
-
-    <div class="form-group">
-        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.body"/></label>
-
-        <div class="col-sm-10">
-            <textarea bennu-html-editor bennu-localized-string name="body" rows="3">${post.body.json()}</textarea>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for="inputEmail3" class="col-sm-2 control-label">Categories</label>
-
-        <div class="col-sm-10">
-            <c:choose>
-                <c:when test="${site.categoriesSet.size() > 0}">
-                    <c:forEach var="c" items="${site.categoriesSet}" varStatus="loop">
-
-                        <div class="checkbox">
-                            <label>
-                                <c:choose>
-                                    <c:when test="${post.categoriesSet.contains(c)}">
-                                        <input type="checkbox" name="categories" value="${c.slug}"
-                                               checked="checked"/> ${c.name.content}
-                                    </c:when>
-                                    <c:otherwise>
-                                        <input type="checkbox" name="categories" value="${c.slug}"/> ${c.name.content}
-                                    </c:otherwise>
-                                </c:choose>
-                            </label>
-                        </div>
-                    </c:forEach>
-                </c:when>
-                <c:otherwise>
-                    <div><i>This site has no categories</i></div>
-                </c:otherwise>
-            </c:choose>
-            <div class="checkbox">
-                <a href="${pageContext.request.contextPath}/cms/categories/${site.slug}">Edit Categories</a>
+                <div class="col-sm-10">
+                    <input bennu-localized-string required-any name="name" id="inputEmail3"
+                           placeholder="<spring:message code="post.edit.label.name" />" value='${post.name.json()}'>
+                    <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
+                            code="post.edit.error.emptyName"/></p></c:if>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-            <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.edit"/></button>
-        </div>
-    </div>
 
-</div>
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.body"/></label>
 
-<div class="tab-pane" id="files">
-    <div class="col-sm-12">
-        <p>
-        </p>
+                <div class="col-sm-10">
+                    <textarea bennu-html-editor bennu-localized-string name="body" rows="3">${post.body.json()}</textarea>
+                </div>
+            </div>
 
-        <p>
-            <button class="btn btn-default" data-toggle="modal" data-target="#addFile">Add File</button>
-        </p>
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">Categories</label>
 
-        <c:choose>
-            <c:when test="${post.postFiles.files.size() > 0}">
-                <table class="table table-striped table-bordered">
-                    <thead>
-                    <tr>
-                        <th class="center">#</th>
-                        <th class="col-md-6"><spring:message code="theme.view.label.name"/></th>
-                        <th><spring:message code="theme.view.label.type"/></th>
-                        <th>&nbsp;</th>
+                <div class="col-sm-10">
+                    <c:choose>
+                        <c:when test="${site.categoriesSet.size() > 0}">
+                            <c:forEach var="c" items="${site.categoriesSet}" varStatus="loop">
 
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <c:forEach var="file" items="${post.postFiles.files}" varStatus="loop">
-                        <tr>
-                            <td class="center">
-                                <h5>${loop.index + 1}</h5>
-                            </td>
-
-                            <td>
-                                <a href="${cms.downloadUrl(file)}" target="_blank"><h5>${file.displayName}</h5></a>
-                            </td>
-
-                            <td><code>${file.contentType}</code></td>
-                            <td>
-                                <a href="#" class="btn btn-danger btn-sm" data-toggle="modal"
-                                   data-target="#fileDeleteModal"
-                                   data-file="${file.displayName}" data-file-oid="${file.oid}"><span
-                                        class="glyphicon glyphicon-trash"></span></a>
-                                <a href="${cms.downloadUrl(file)}" target="_blank" class="btn btn-default btn-sm">Link</a>
-                            </td>
-                        </tr>
-                    </c:forEach>
-                    </tbody>
-                </table>
-            </c:when>
-            <c:otherwise>
-                <i>Post has no files</i>
-            </c:otherwise>
-        </c:choose>
-    </div>
-</div>
-
-<div class="tab-pane" id="attachments">
-    <div class="col-sm-12">
-        <p>
-        </p>
-
-        <p>
-            <button class="btn btn-default" data-toggle="modal" data-target="#addAttachment">Add Attachment</button>
-        </p>
-
-        <c:choose>
-            <c:when test="${post.attachments.files.size() > 0}">
-                <table class="table table-striped table-bordered">
-                    <thead>
-                    <tr>
-                        <th class="center">#</th>
-                        <th class="col-md-6"><spring:message code="theme.view.label.name"/></th>
-                        <th><spring:message code="theme.view.label.type"/></th>
-                        <th>&nbsp;</th>
-
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <c:forEach var="file" items="${post.attachments.files}" varStatus="loop">
-                        <tr>
-                            <td class="center">
-                                <h5>${loop.index + 1}</h5>
-                            </td>
-                            <td>
-                                <a href="${cms.downloadUrl(file)}" target="_blank"><h5>${file.displayName}</h5></a>
-
-                            </td>
-                            <td><code>${file.contentType}</code></td>
-                            <td>
-                                <button class="btn btn-danger btn-sm" data-toggle="modal"
-                                        data-target="#attachmentDeleteModal"
-                                        data-file="${file.displayName}" data-file-index="${loop.index}"><span
-                                        class="glyphicon glyphicon-trash"></span></button>
-                                <a href="${cms.downloadUrl(file)}" target="_blank" class="btn btn-default btn-sm">Link</a>
-
-                                <button class="btn btn-default btn-sm" data-toggle="modal"
-                                        data-target="#attachmentDeleteModal"
-                                        data-file="${file.displayName}" data-file-index="${loop.index}">
-                                    <spring:message code="label.access.control"/>
-                                </button>
-
-                                <div class="btn-group">
-
-                                    <c:choose>
-                                        <c:when test="${loop.index != 0}">
-                                            <button class="btn btn-default btn-sm" data-origin="${loop.index}"
-                                                    data-destiny="${loop.index - 1}"><span
-                                                    class="glyphicon glyphicon-chevron-up"></span></button>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <button class="btn btn-default disabled btn-sm"><span
-                                                    class="glyphicon glyphicon-chevron-up"></span></button>
-                                        </c:otherwise>
-                                    </c:choose>
-
-                                    <c:choose>
-                                        <c:when test="${loop.index != post.attachments.files.size() -1}">
-                                            <button class="btn btn-default btn-sm" data-origin="${loop.index}"
-                                                    data-destiny="${loop.index + 1}"><span
-                                                    class="glyphicon glyphicon-chevron-down"></span></button>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <button class="btn btn-default disabled btn-sm" data-toggle="modal"><span
-                                                    class="glyphicon glyphicon-chevron-down"></span></button>
-                                        </c:otherwise>
-                                    </c:choose>
-
+                                <div class="checkbox">
+                                    <label>
+                                        <c:choose>
+                                            <c:when test="${post.categoriesSet.contains(c)}">
+                                                <input type="checkbox" name="categories" value="${c.slug}"
+                                                       checked="checked"/> ${c.name.content}
+                                            </c:when>
+                                            <c:otherwise>
+                                                <input type="checkbox" name="categories" value="${c.slug}"/> ${c.name.content}
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </label>
                                 </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <div><i>This site has no categories</i></div>
+                        </c:otherwise>
+                    </c:choose>
+                    <div class="checkbox">
+                        <a href="${pageContext.request.contextPath}/cms/categories/${site.slug}">Edit Categories</a>
+                    </div>
+                </div>
+            </div>
 
-                            </td>
-                        </tr>
-                    </c:forEach>
-                    </tbody>
-                </table>
-            </c:when>
-            <c:otherwise>
-                <i>Post has no attachments</i>
-            </c:otherwise>
-        </c:choose>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.edit"/></button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="tab-pane" id="files">
+            <div class="col-sm-12">
+                <p>
+                </p>
+
+                <p>
+                    <button class="btn btn-default" data-toggle="modal" data-target="#addFile">Add File</button>
+                </p>
+
+                <c:choose>
+                    <c:when test="${post.postFiles.files.size() > 0}">
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                            <tr>
+                                <th class="center">#</th>
+                                <th class="col-md-6"><spring:message code="theme.view.label.name"/></th>
+                                <th><spring:message code="theme.view.label.type"/></th>
+                                <th>&nbsp;</th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <c:forEach var="file" items="${post.postFiles.files}" varStatus="loop">
+                                <tr>
+                                    <td class="center">
+                                        <h5>${loop.index + 1}</h5>
+                                    </td>
+
+                                    <td>
+                                        <a href="${cms.downloadUrl(file)}" target="_blank"><h5>${file.displayName}</h5></a>
+                                    </td>
+
+                                    <td><code>${file.contentType}</code></td>
+                                    <td>
+                                        <a href="#" class="btn btn-danger btn-sm" data-toggle="modal"
+                                           data-target="#fileDeleteModal"
+                                           data-file="${file.displayName}" data-file-oid="${file.oid}"><span
+                                                class="glyphicon glyphicon-trash"></span></a>
+                                        <a href="${cms.downloadUrl(file)}" target="_blank" class="btn btn-default btn-sm">Link</a>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:when>
+                    <c:otherwise>
+                        <i>Post has no files</i>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </div>
+
+        <div class="tab-pane" id="attachments">
+            <div class="col-sm-12">
+                <p>
+                </p>
+
+                <p>
+                    <button class="btn btn-default" data-toggle="modal" data-target="#addAttachment">Add Attachment</button>
+                </p>
+
+                <c:choose>
+                    <c:when test="${post.attachments.files.size() > 0}">
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                            <tr>
+                                <th class="center">#</th>
+                                <th class="col-md-6"><spring:message code="theme.view.label.name"/></th>
+                                <th><spring:message code="theme.view.label.type"/></th>
+                                <th>&nbsp;</th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <c:forEach var="file" items="${post.attachments.files}" varStatus="loop">
+                                <tr>
+                                    <td class="center">
+                                        <h5>${loop.index + 1}</h5>
+                                    </td>
+                                    <td>
+                                        <a href="${cms.downloadUrl(file)}" target="_blank"><h5>${file.displayName}</h5></a>
+
+                                    </td>
+                                    <td><code>${file.contentType}</code></td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sm" data-toggle="modal"
+                                                data-target="#attachmentDeleteModal"
+                                                data-file="${file.displayName}" data-file-index="${loop.index}"><span
+                                                class="glyphicon glyphicon-trash"></span></button>
+                                        <a href="${cms.downloadUrl(file)}" target="_blank" class="btn btn-default btn-sm">Link</a>
+
+                                        <button class="btn btn-default btn-sm" data-toggle="modal"
+                                                data-target="#attachmentDeleteModal"
+                                                data-file="${file.displayName}" data-file-index="${loop.index}">
+                                            <spring:message code="label.access.control"/>
+                                        </button>
+
+                                        <div class="btn-group">
+
+                                            <c:choose>
+                                                <c:when test="${loop.index != 0}">
+                                                    <button class="btn btn-default btn-sm" data-origin="${loop.index}"
+                                                            data-destiny="${loop.index - 1}"><span
+                                                            class="glyphicon glyphicon-chevron-up"></span></button>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <button class="btn btn-default disabled btn-sm"><span
+                                                            class="glyphicon glyphicon-chevron-up"></span></button>
+                                                </c:otherwise>
+                                            </c:choose>
+
+                                            <c:choose>
+                                                <c:when test="${loop.index != post.attachments.files.size() -1}">
+                                                    <button class="btn btn-default btn-sm" data-origin="${loop.index}"
+                                                            data-destiny="${loop.index + 1}"><span
+                                                            class="glyphicon glyphicon-chevron-down"></span></button>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <button class="btn btn-default disabled btn-sm" data-toggle="modal"><span
+                                                            class="glyphicon glyphicon-chevron-down"></span></button>
+                                                </c:otherwise>
+                                            </c:choose>
+
+                                        </div>
+
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                            </tbody>
+                        </table>
+                    </c:when>
+                    <c:otherwise>
+                        <i>Post has no attachments</i>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+
+        </div>
     </div>
-
-</div>
-</div>
 
 </form>
 
@@ -432,9 +432,4 @@
 </script>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
-
-<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>
-
-<script src="${pageContext.request.contextPath}/static/js/jquery.tagsinput.js"></script>
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/static/css/jquery.tagsinput.css" />
+${portal.toolkit()}

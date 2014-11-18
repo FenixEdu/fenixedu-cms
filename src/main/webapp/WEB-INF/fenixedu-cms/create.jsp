@@ -75,8 +75,9 @@
 
     <div class="form-group">
         <label for="embedded" class="col-sm-2 control-label"><spring:message code="label.embedded"/></label>
+
         <div class="col-sm-2">
-            <input type="checkbox" name="embedded" value="true" />
+            <input type="checkbox" name="embedded" value="true"/>
         </div>
     </div>
 
@@ -89,6 +90,5 @@
 </form>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
-<script src="${pageContext.request.contextPath}/static/js/toolkit.js"></script>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/toolkit/toolkit.css"/>
+${portal.toolkit()}
 
