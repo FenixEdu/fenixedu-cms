@@ -23,7 +23,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import com.google.common.collect.Sets;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -37,6 +42,8 @@ import pt.ist.fenixframework.Atomic.TxMode;
 import com.google.common.io.ByteStreams;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import static java.util.stream.Collectors.toSet;
 
 public class CMSTheme extends CMSTheme_Base {
 
@@ -73,13 +80,13 @@ public class CMSTheme extends CMSTheme_Base {
      * @return
      *         the {@link CMSTemplate} with the given type if it exists, or null otherwise.
      */
-    public CMSTemplate templateForType(String t) {
-        for (CMSTemplate template : this.getTemplatesSet()) {
-            if (template.getType().equals(t)) {
-                return template;
-            }
+    public CMSTemplate templateForType(String type) {
+        CMSTemplate found = getTemplatesSet().stream().filter(template -> template.getType().equals(type)).findFirst().orElse(null);
+        if(found == null && getExtended() != null) {
+            return getExtended().templateForType(type);
+        } else {
+            return found;
         }
-        return null;
     }
 
     /**
@@ -91,7 +98,12 @@ public class CMSTheme extends CMSTheme_Base {
      *         the {@link CMSThemeFile} with the given displayName if it exists, or null otherwise.
      */
     public CMSThemeFile fileForPath(String path) {
-        return getFiles().getFileForPath(path);
+        CMSThemeFile file = getFiles().getFileForPath(path);
+        if(file == null && getExtended() != null) {
+            return getExtended().fileForPath(path);
+        } else {
+            return file;
+        }
     }
 
     private static String getTypeForThemeFolder(String path) {
@@ -166,6 +178,20 @@ public class CMSTheme extends CMSTheme_Base {
     public void changeFiles(CMSThemeFiles files) {
         if (getFiles() == null || !getFiles().checksumMatches(files)) {
             setFiles(files);
+        }
+    }
+
+    public Set<CMSTemplate> getAllTemplates() {
+        return Sets.union(getTemplatesSet(), getExtendedTemplates());
+    }
+
+    public Set<CMSTemplate> getExtendedTemplates() {
+        if(getExtended() != null) {
+            Set<String> myTemplateTypes = getTemplatesSet().stream().map(CMSTemplate::getType).collect(toSet());
+            Predicate<CMSTemplate> isInherited = parentTemplate -> myTemplateTypes.contains(parentTemplate.getType());
+            return getExtended().getAllTemplates().stream().filter(isInherited.negate()).collect(toSet());
+        } else {
+            return Sets.newHashSet();
         }
     }
 
