@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -36,8 +37,12 @@ import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
 
+import org.fenixedu.commons.i18n.LocalizedString;
 import pt.ist.fenixframework.core.Project;
 import pt.ist.fenixframework.core.exception.ProjectException;
+
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
 
 /**
  * Service that generates an RSS Feed from either a {@link Site} (in which case the feed info is that of the site, and all the
@@ -150,17 +155,16 @@ public class RSSService {
             throws XMLStreamException {
         writer.add(eventFactory.createStartElement("", "", "item"));
         writer.add(eventFactory.createDTD("\n"));
-        createNode(writer, eventFactory, "title", post.getName().getContent(locale));
-        createNode(writer, eventFactory, "description", sanitizeInputForXml.matcher(post.getBody().getContent(locale))
-                .replaceAll(""));
+        createNode(writer, eventFactory, "title", contentOf(post.getName(), locale));
+        createNode(writer, eventFactory, "description", sanitizeInputForXml.matcher(contentOf(post.getBody(), locale)).replaceAll(""));
         createNode(writer, eventFactory, "link", post.getAddress());
-        createNode(writer, eventFactory, "author", post.getCreatedBy().getProfile().getEmail() + " ("
-                + post.getCreatedBy().getName() + ")");
+        boolean hasEmail = post.getCreatedBy().getProfile() != null && post.getCreatedBy().getProfile().getEmail() != null;
+        String authorEmail = hasEmail ? post.getCreatedBy().getProfile().getEmail() : "";
+        createNode(writer, eventFactory, "author", authorEmail + " (" + post.getCreatedBy().getName() + ")");
         createNode(writer, eventFactory, "guid", post.getAddress() + "#" + post.getExternalId());
         if (!post.getCategoriesSet().isEmpty()) {
             createNode(writer, eventFactory, "category",
-                    post.getCategoriesSet().stream().map(cat -> cat.getName().getContent(locale))
-                            .collect(Collectors.joining("/")));
+                    post.getCategoriesSet().stream().map(cat -> contentOf(cat.getName(), locale)).collect(joining("/")));
         }
         createNode(writer, eventFactory, "pubDate", post.getCreationDate()
                 .toString("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH));
@@ -186,6 +190,10 @@ public class RSSService {
         eventWriter.add(eventFactory.createCharacters(value));
         eventWriter.add(eventFactory.createEndElement("", "", name));
         eventWriter.add(eventFactory.createDTD("\n"));
+    }
+
+    private static String contentOf(LocalizedString localizedString, Locale locale) {
+        return ofNullable(ofNullable(localizedString.getContent(locale)).orElse(localizedString.getContent())).orElse("");
     }
 
 }
