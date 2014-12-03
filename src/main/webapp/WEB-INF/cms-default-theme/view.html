@@ -1,0 +1,40 @@
+{% extends "cms-default-theme/base.html" %}
+
+{% block content %}
+
+<div class="blog-post">
+
+    <h2 class="blog-post-title"><a href="{{post.address}}">{{ post.name.content }}</a></h2>
+
+    <p class="small blog-post-meta">
+        {{ post.creationDate|formatDate("MMMM d, Y, H:m") }} by <a href="#">{{post.createdBy.username}}</a>
+
+    <span class="pull-right">
+    {% for cat in post.categoriesSet %}
+       <a href="{{cat.address}}" class="badge">{{cat.name.content}}</a>
+    {% endfor %}
+    </span>
+    </p>
+
+    <p>
+        {{post.body.content | raw}}
+    </p>
+    {% if site.canPost %}
+    <p class="small"><a href="{{post.editUrl}}">Edit</a> this post. {% if site.isAdmin %}<a href="{{site.editUrl}}">Admin</a> this
+        site.{% endif %}</p>
+    {% endif %}
+
+    {% if post.attachments.size != 0%}
+    <p>
+    <h4>Attachments</h4>
+    <ul>
+        {% for file in post.attachments %}
+        <li><a href="{{file.url}}">{{file.name}}</a></li>
+        {% endfor %}
+    </ul>
+    </p>
+    {% endif %}
+
+</div><!-- /.blog-post -->
+
+{% endblock content %}

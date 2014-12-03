@@ -1,0 +1,18 @@
+{% extends "cms-default-theme/base.html" %}
+
+{% block content %}
+
+
+  {% for post in pagination.posts %}
+  <div class="blog-post">
+    <h2 class="blog-post-title"><a href="{{ post.address }}">{{ post.name.content }}</a></h2>
+    <p class="small blog-post-meta">{{ post.creationDate|formatDate("MMMM d, Y, H:m") }} by <a href="#">{{post.createdBy.name}}</a></p>
+    <p>
+      {{post.body.content | raw}}
+    </p>
+  </div><!-- /.blog-post -->
+  {% endfor %}
+
+  {% include "cms-default-theme/pagination.html" %}
+
+{% endblock content %}

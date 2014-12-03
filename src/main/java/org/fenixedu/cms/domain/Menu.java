@@ -1,22 +1,58 @@
+/**
+ * Copyright © 2014 Instituto Superior Técnico
+ *
+ * This file is part of FenixEdu CMS.
+ *
+ * FenixEdu CMS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FenixEdu CMS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.fenixedu.cms.domain;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.cms.domain.wraps.Wrap;
+import org.fenixedu.cms.domain.wraps.Wrappable;
+import org.fenixedu.cms.exceptions.CmsDomainException;
+import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-
-import com.google.common.collect.FluentIterable;
 
 import pt.ist.fenixframework.Atomic;
 
-public class Menu extends Menu_Base {
+import com.google.common.collect.Sets;
 
+/**
+ * Model of a Menu for a given {@link Page}
+ */
+public class Menu extends Menu_Base implements Wrappable {
+
+    public Menu(Site site, LocalizedString name) {
+        this();
+        setSite(site);
+        setName(name);
+        setTopMenu(false);
+    }
+
+    /**
+     * Logged {@link User} creates a new Menu.
+     */
     public Menu() {
         super();
         if (Authenticate.getUser() == null) {
-            throw new RuntimeException("Needs Login");
+            throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
@@ -24,79 +60,114 @@ public class Menu extends Menu_Base {
 
     @Atomic
     public void delete() {
-        for(Component c : this.getComponentSet()){
-            c.delete();
-        }
-        
-        for (MenuItem menuItem : getItemsSet()) {
-            menuItem.delete();
-        }
-        
+        Sets.newHashSet(getComponentSet()).forEach(c -> c.delete());
+        Sets.newHashSet(getItemsSet()).forEach(i -> i.delete());
         this.setCreatedBy(null);
         this.setSite(null);
         this.deleteDomainObject();
     }
 
-    
+    /**
+     * Puts a {@link MenuItem} at a given position, shifting the existing ones to the right.
+     * 
+     * @param item
+     *            The {@link MenuItem} to be added.
+     * @param position
+     *            the position to save the item.
+     */
     public void putAt(MenuItem item, int position) {
-        if (position < 0){
+        if (position < 0) {
             position = 0;
         }
-        
-        if (position >= this.getToplevelItemsSet().size()){
+
+        if (position >= this.getToplevelItemsSet().size()) {
             item.removeFromParent();
-            item.setPosition(this.getToplevelItemsSorted().size());
-            this.addToplevelItems(item);
-            this.addItems(item);
-            return;
+            position = getToplevelItemsSet().size();
         }
-        
-        if (item.getPosition() != null){
+
+        if (item.getPosition() != null) {
             item.removeFromParent();
         }
-        
-        List<MenuItem> list = getToplevelItemsSorted();
-        
-        for (int i = position; i < list.size(); i++) {
-            MenuItem menuItem = list.get(i);
-            menuItem.setPosition(menuItem.getPosition() + 1);
-        }
-        
-        item.setPosition(position);
+
+        List<MenuItem> list = getToplevelItemsSorted().collect(Collectors.toList());
+        list.add(position, item);
+
+        MenuItem.fixOrder(list);
+
         getToplevelItemsSet().add(item);
         getItemsSet().add(item);
     }
-    
-    public void remove(MenuItem mi){
-        int found = 0;
-        for(MenuItem item : new ArrayList<>(getToplevelItemsSorted())){
-            if (item == mi){
-                found++;
-                getToplevelItemsSet().remove(mi);
-                getItemsSet().remove(mi);
-            }else{
-                item.setPosition(item.getPosition() - found);
-            }
-        }
+
+    /**
+     * Removes a given {@link MenuItem} from the Menu.
+     * 
+     * @param mi
+     *            the {@link MenuItem} to be removed.
+     */
+    public void remove(MenuItem mi) {
+        getToplevelItemsSet().remove(mi);
+        MenuItem.fixOrder(getToplevelItemsSorted().collect(Collectors.toList()));
+
+        getItemsSet().remove(mi);
+        MenuItem.fixOrder(getItemsSorted().collect(Collectors.toList()));
     }
-    
-    public void add(MenuItem mi){
+
+    /**
+     * Adds a given {@link MenuItem} as the last item.
+     * 
+     * @param mi
+     *            the {@link MenuItem} to be added.
+     */
+    public void add(MenuItem mi) {
         this.putAt(mi, getToplevelItemsSet().size());
     }
-    
-    public List<MenuItem> getChildrenSorted(){
-        return getToplevelItemsSorted();
+
+    public Stream<MenuItem> getToplevelItemsSorted() {
+        return getToplevelItemsSet().stream().sorted();
     }
-    
-    public List<MenuItem> getToplevelItemsSorted(){
-        
-        return FluentIterable.from(getToplevelItemsSet()).toSortedList(new Comparator<MenuItem>() {
 
-            @Override
-            public int compare(MenuItem o1, MenuItem o2) {
-                return o1.getPosition().compareTo(o2.getPosition());
-            }
+    public Stream<MenuItem> getItemsSorted() {
+        return getItemsSet().stream().sorted();
+    }
 
-        });
+    @SuppressWarnings("unused")
+    private class MenuWrap extends Wrap {
+        private final Page page;
+        private final Stream<Wrap> children;
+
+        public MenuWrap() {
+            this.page = null;
+            this.children = Stream.empty();
+        }
+
+        public MenuWrap(Page page) {
+            this.page = page;
+            this.children = getToplevelItemsSorted().map(item -> item.makeWrap(page));
+        }
+
+        public Stream<Wrap> getChildren() {
+            return children;
+        }
+
+        public LocalizedString getName() {
+            return Menu.this.getName();
+        }
+
+        public Wrap getSite() {
+            return Menu.this.getSite().makeWrap();
+        }
+
+        public Boolean getTopMenu() {
+            return Menu.this.getTopMenu();
+        }
+    }
+
+    @Override
+    public Wrap makeWrap() {
+        return new MenuWrap();
+    }
+
+    public Wrap makeWrap(Page page) {
+        return new MenuWrap(page);
     }
 }

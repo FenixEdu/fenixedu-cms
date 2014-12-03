@@ -1,0 +1,27 @@
+{
+	"type":"cms-default-theme",
+	"name":"Bennu CMS Default Theme",
+	"description":"This is the Bennu CMS Default Theme",
+	"templates":{
+		"posts":{
+			"name": "Posts Page",
+			"description": "A page listing a list of posts",
+			"file":"posts.html"
+		},
+		"view":{
+			"name": "View Post",
+			"description": "A page where you can read a post in particular",
+			"file":"view.html"
+		},
+		"categories":{
+			"name": "Categories",
+			"description": "List of Categories",
+			"file":"categories.html"
+		},
+		"category":{
+			"name": "Category Posts",
+			"description": "Posts for a give category",
+			"file":"category.html"
+		}
+	}
+}

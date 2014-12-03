@@ -1,4 +1,24 @@
+/**
+ * Copyright © 2014 Instituto Superior Técnico
+ *
+ * This file is part of FenixEdu CMS.
+ *
+ * FenixEdu CMS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FenixEdu CMS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.fenixedu.cms.portal;
+
+import java.util.Optional;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
@@ -7,7 +27,6 @@ import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,17 +42,20 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-@BennuSpringController(AdminPortal.class)
-@RequestMapping("/cms/manage")
+@BennuSpringController(AdminSites.class)
+@RequestMapping("/cms/menus")
 public class AdminMenuItem {
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/change", method = RequestMethod.GET)
+    @RequestMapping(value = "{slugSite}/{oidMenu}/change", method = RequestMethod.GET)
     public String change(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         model.addAttribute("site", s);
         model.addAttribute("menu", s.menuForOid(oidMenu));
-        return "changeMenu";
+        return "fenixedu-cms/changeMenu";
     }
 
     private JsonObject serialize(MenuItem item) {
@@ -44,11 +66,12 @@ public class AdminMenuItem {
         root.add("url", item.getUrl() == null ? null : new JsonPrimitive(item.getUrl()));
         root.add("page", item.getPage() == null ? null : new JsonPrimitive(item.getPage().getSlug()));
         root.add("position", new JsonPrimitive(item.getPosition()));
-        
+        root.add("isFolder", new JsonPrimitive(Optional.ofNullable(item.getFolder()).orElse(false)));
+
         if (item.getChildrenSet().size() > 0) {
             root.add("folder", new JsonPrimitive(true));
             JsonArray child = new JsonArray();
-            
+
             for (MenuItem subitem : item.getChildrenSorted()) {
                 child.add(serialize(subitem));
             }
@@ -57,10 +80,13 @@ public class AdminMenuItem {
         return root;
     }
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/data", method = RequestMethod.GET, produces = "application/json")
-    public @ResponseBody
-    String data(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(value = "oidMenu") String oidMenu) {
+    @RequestMapping(value = "{slugSite}/{oidMenu}/data", method = RequestMethod.GET, produces = "application/json")
+    public @ResponseBody String data(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+            value = "oidMenu") String oidMenu) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Menu m = s.menuForOid(oidMenu);
 
         JsonObject root = new JsonObject();
@@ -72,9 +98,7 @@ public class AdminMenuItem {
 
         JsonArray child = new JsonArray();
 
-        for (MenuItem subitem : m.getToplevelItemsSorted()) {
-            child.add(serialize(subitem));
-        }
+        m.getToplevelItemsSorted().map(this::serialize).forEach(json -> child.add(json));
 
         root.add("children", child);
 
@@ -84,15 +108,18 @@ public class AdminMenuItem {
         return top.toString();
     }
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/createItem", method = RequestMethod.POST)
+    @RequestMapping(value = "{slugSite}/{oidMenu}/createItem", method = RequestMethod.POST)
     public RedirectView create(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid, @RequestParam String name,
             @RequestParam String use, @RequestParam String url, @RequestParam String slugPage) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Menu m = s.menuForOid(oidMenu);
 
         createMenuItem(menuItemOid, name, use, url, slugPage, s, m);
-        return new RedirectView("/cms/manage/" + slugSite + "/menus/" + oidMenu + "/change", true);
+        return new RedirectView("/cms/menus/" + slugSite + "/" + oidMenu + "/change", true);
     }
 
     @Atomic
@@ -113,6 +140,8 @@ public class AdminMenuItem {
 
         if (use.equals("url")) {
             mi.setUrl(url);
+        } else if (use.equals("folder")) {
+            mi.setFolder(true);
         } else {
             Page p = s.pageForSlug(slugPage);
             if (p == null) {
@@ -122,13 +151,16 @@ public class AdminMenuItem {
         }
     }
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/changeItem", method = RequestMethod.POST)
+    @RequestMapping(value = "{slugSite}/{oidMenu}/changeItem", method = RequestMethod.POST)
     public RedirectView change(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid,
             @RequestParam String menuItemOidParent, @RequestParam String name, @RequestParam String use,
             @RequestParam String url, @RequestParam String slugPage, @RequestParam Integer position) {
 
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Menu m = s.menuForOid(oidMenu);
 
         if (menuItemOid.equals("null") && menuItemOidParent.equals("null")) {
@@ -143,7 +175,7 @@ public class AdminMenuItem {
 
             changeMenuItem(mi, menuItemOidParent, name, use, url, slugPage, s, m, position);
         }
-        return new RedirectView("/cms/manage/" + slugSite + "/menus/" + oidMenu + "/change", true);
+        return new RedirectView("/cms/menus/" + slugSite + "/" + oidMenu + "/change", true);
     }
 
     @Atomic
@@ -173,10 +205,16 @@ public class AdminMenuItem {
             mi.setParent(null);
         }
 
-        if (use.equals("url")) {
+        if (use.equals("folder")) {
+            mi.setFolder(true);
+            mi.setUrl(null);
+            mi.setPage(null);
+        } else if (use.equals("url")) {
+            mi.setFolder(false);
             mi.setUrl(url);
             mi.setPage(null);
         } else if (use.equals("page")) {
+            mi.setFolder(false);
             mi.setUrl(null);
             Page p = s.pageForSlug(slugPage);
 
@@ -188,16 +226,19 @@ public class AdminMenuItem {
         }
     }
 
-    @RequestMapping(value = "{slugSite}/menus/{oidMenu}/delete/{oidMenuItem}", method = RequestMethod.GET)
+    @RequestMapping(value = "{slugSite}/{oidMenu}/delete/{oidMenuItem}", method = RequestMethod.POST)
     public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu, @PathVariable(value = "oidMenuItem") String oidMenuItem) {
         Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
         Menu m = s.menuForOid(oidMenu);
         MenuItem item = FenixFramework.getDomainObject(oidMenuItem);
         if (item.getMenu() != m) {
             throw new RuntimeException("Wrong Parents");
         }
         item.delete();
-        return new RedirectView("/cms/manage/" + slugSite + "/menus/" + oidMenu + "/change", true);
+        return new RedirectView("/cms/menus/" + slugSite + "/" + oidMenu + "/change", true);
     }
 }
