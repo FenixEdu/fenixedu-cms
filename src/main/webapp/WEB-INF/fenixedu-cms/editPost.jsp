@@ -82,7 +82,7 @@
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.body"/></label>
 
                 <div class="col-sm-10">
-                    <textarea bennu-html-editor bennu-localized-string name="body" rows="3">${post.body.json()}</textarea>
+                    <textarea id="htmlEditor" bennu-html-editor bennu-localized-string name="body" rows="3">${post.body.json()}</textarea>
                 </div>
             </div>
 
@@ -429,6 +429,48 @@
             z.tab('show')
         }
     }, 150)
+</script>
+
+<script>
+    function submitFiles(files, cb) {
+        var formData = new FormData();
+        for (var i = 0; i < files.length; i++) {
+            formData.append('attachment', files[i]);
+        }
+
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'addFile.json');
+
+        function transferCanceled(event) {
+
+        }
+
+        function transferFailed(event) {
+
+        }
+
+        function transferComplete(event) {
+            var objs = JSON.parse(event.currentTarget.response);
+            cb(objs.map(function(x){ return x.url }));
+        }
+
+        function updateProgress(event) {
+            if (event.lengthComputable) {
+                var complete = (event.loaded / event.total * 100 | 0);
+                //progress.value = progress.innerHTML = complete;
+                console.log(complete);
+            }
+        }
+
+        xhr.addEventListener("progress", updateProgress, false);
+        xhr.addEventListener("load", transferComplete, false);
+        xhr.addEventListener("error", transferFailed, false);
+        xhr.addEventListener("abort", transferCanceled, false);
+
+        xhr.send(formData);
+    }
+    $("htmlEditor").data("fileHandler", submitFiles);
 </script>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
