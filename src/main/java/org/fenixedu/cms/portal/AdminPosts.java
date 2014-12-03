@@ -111,7 +111,8 @@ public class AdminPosts {
     @RequestMapping(value = "{slug}/{postSlug}/edit", method = RequestMethod.POST)
     public RedirectView editPost(Model model, @PathVariable(value = "slug") String slug,
             @PathVariable(value = "postSlug") String postSlug, @RequestParam String newSlug, @RequestParam LocalizedString name,
-            @RequestParam LocalizedString body, @RequestParam String[] categories, RedirectAttributes redirectAttributes) {
+            @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories,
+            RedirectAttributes redirectAttributes) {
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
@@ -131,6 +132,9 @@ public class AdminPosts {
         post.setSlug(newSlug);
         post.getCategoriesSet().clear();
         HashSet<String> h = new HashSet<>();
+        if (categories == null) {
+            categories = new String[0];
+        }
         h.addAll(Arrays.asList(categories));
         post.getCategoriesSet().addAll(
                 post.getSite().getCategoriesSet().stream().filter(x -> h.contains(x.getSlug())).collect(Collectors.toList()));
