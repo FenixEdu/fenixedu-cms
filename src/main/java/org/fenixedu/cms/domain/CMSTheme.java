@@ -107,7 +107,7 @@ public class CMSTheme extends CMSTheme_Base {
 
     public byte[] contentForPath(String t) {
         String themeDevelopmentDirectory = CMSConfigurationManager.getConfiguration().themeDevelopmentDirectory();
-        if (CoreConfiguration.getConfiguration().developmentMode() && themeDevelopmentDirectory != null
+        if (CoreConfiguration.getConfiguration().developmentMode() && CMSConfigurationManager.isInThemeDevelopmentMode()
                 && this.getType().equals(getTypeForThemeFolder(themeDevelopmentDirectory))) {
             try {
                 return ByteStreams.toByteArray(new FileInputStream(themeDevelopmentDirectory + t));

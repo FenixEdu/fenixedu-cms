@@ -21,6 +21,8 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
+${portal.toolkit()}
 
 <h1><spring:message code="post.edit.title"/></h1>
 
@@ -473,5 +475,3 @@
     $("htmlEditor").data("fileHandler", submitFiles);
 </script>
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
-${portal.toolkit()}
