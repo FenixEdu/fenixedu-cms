@@ -140,19 +140,9 @@ public class Post extends Post_Base implements Wrappable {
         return getPublicationBegin() != null && getPublicationEnd() != null;
     }
 
-    public boolean hasReferedSubjectPeriod() {
-        return getReferedSubjectBegin() != null && getReferedSubjectEnd() != null;
-    }
-
     public boolean isInPublicationPeriod() {
         boolean inBegin = getPublicationBegin() == null || getPublicationBegin().isAfterNow();
         boolean inEnd = getPublicationEnd() == null || getPublicationEnd().isBeforeNow();
-        return inBegin && inEnd;
-    }
-
-    public boolean isInReferedSubjectPeriod() {
-        boolean inBegin = getReferedSubjectBegin() == null || getReferedSubjectBegin().isAfterNow();
-        boolean inEnd = getReferedSubjectEnd() == null || getReferedSubjectEnd().isBeforeNow();
         return inBegin && inEnd;
     }
 
@@ -175,7 +165,7 @@ public class Post extends Post_Base implements Wrappable {
      *
      * @param group the group of people who can view this site
      */
-    @Atomic
+    @Atomic 
     public void setCanViewGroup(Group group) {
         setViewGroup(group.toPersistentGroup());
 

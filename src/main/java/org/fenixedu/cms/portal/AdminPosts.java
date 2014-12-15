@@ -30,6 +30,9 @@ import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
+import org.joda.time.DateTime;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -111,7 +114,9 @@ public class AdminPosts {
     @RequestMapping(value = "{slug}/{postSlug}/edit", method = RequestMethod.POST)
     public RedirectView editPost(Model model, @PathVariable(value = "slug") String slug,
             @PathVariable(value = "postSlug") String postSlug, @RequestParam String newSlug, @RequestParam LocalizedString name,
-            @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories,
+            @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories, @RequestParam(
+                    required = false) @DateTimeFormat(iso=ISO.DATE_TIME) DateTime publicationStarts, @RequestParam(
+                    required = false) @DateTimeFormat(iso=ISO.DATE_TIME) DateTime publicationEnds,
             RedirectAttributes redirectAttributes) {
 
         if (name.isEmpty()) {
@@ -120,13 +125,14 @@ public class AdminPosts {
         } else {
             Site s = Site.fromSlug(slug);
             Post p = s.postForSlug(postSlug);
-            editPost(p, name, body, newSlug, categories);
+            editPost(p, name, body, newSlug, categories, publicationStarts, publicationEnds);
             return new RedirectView("/cms/posts/" + s.getSlug() + "", true);
         }
     }
 
     @Atomic
-    private void editPost(Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories) {
+    private void editPost(Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories,
+            DateTime publicationStarts, DateTime publicationEnds) {
         post.setName(name);
         post.setBody(body);
         post.setSlug(newSlug);
@@ -138,6 +144,9 @@ public class AdminPosts {
         h.addAll(Arrays.asList(categories));
         post.getCategoriesSet().addAll(
                 post.getSite().getCategoriesSet().stream().filter(x -> h.contains(x.getSlug())).collect(Collectors.toList()));
+
+        post.setPublicationBegin(publicationStarts);
+        post.setPublicationEnd(publicationEnds);
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/delete", method = RequestMethod.POST)

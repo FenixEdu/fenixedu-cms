@@ -89,6 +89,24 @@ ${portal.toolkit()}
             </div>
 
             <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">Publication date</label>
+
+                <div class="col-sm-5">
+                    <label>
+                        Start
+                    </label>
+                    <input bennu-datetime name="publicationStarts" id="inputEmail3" value='${post.publicationBegin}'>
+                </div>
+
+                <div class="col-sm-5">
+                    <label>
+                        End
+                    </label>
+                    <input bennu-datetime name="publicationEnds" id="inputEmail3" value='${post.publicationEnd}'>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label for="inputEmail3" class="col-sm-2 control-label">Categories</label>
 
                 <div class="col-sm-10">
