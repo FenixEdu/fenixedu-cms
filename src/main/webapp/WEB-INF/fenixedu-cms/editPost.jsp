@@ -22,6 +22,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
+
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/jquery.jsonview.css"/>
+<script src="${pageContext.request.contextPath}/static/js/jquery.jsonview.js"></script>
+
 ${portal.toolkit()}
 
 <h1><spring:message code="post.edit.title"/></h1>
@@ -141,7 +145,8 @@ ${portal.toolkit()}
 
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                    <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.edit"/></button>
+                    <button type="submit" class="btn btn-primary"><spring:message code="action.edit"/></button>
+                    <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">View Metadata</a>
                 </div>
             </div>
 
@@ -382,6 +387,47 @@ ${portal.toolkit()}
         </div>
     </form>
 </div>
+
+<div class="modal fade" id="viewMetadata" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4>Metadata</h4>
+            </div>
+            <div class="modal-body">
+
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <label>Current post metadata:</label>
+                        <div class="json-data"></div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+<c:if test="${post.metadata != null}">$(".json-data").JSONView(${post.metadata}, {collapsed: true});</c:if>
+<c:if test="${post.metadata == null}">$(".json-data").JSONView({}, {collapsed: true});</c:if>
+</script>
+
+<style>
+    .json-data{
+        height:400px;
+        overflow: scroll;
+        border: 1px solid #ddd;
+        padding:20px;
+        margin-bottom:20px;
+        border-radius: 3px;
+    }
+</style>
 
 <div class="modal fade" id="fileDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
