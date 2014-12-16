@@ -19,6 +19,7 @@
 package org.fenixedu.cms.domain;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -142,7 +143,7 @@ public class Menu extends Menu_Base implements Wrappable {
 
         public MenuWrap(Page page) {
             this.page = page;
-            this.children = getToplevelItemsSorted().map(item -> item.makeWrap(page));
+            this.children = getToplevelItemsSorted().filter(MenuItem::isVisible).map(item -> item.makeWrap(page));
         }
 
         public Stream<Wrap> getChildren() {

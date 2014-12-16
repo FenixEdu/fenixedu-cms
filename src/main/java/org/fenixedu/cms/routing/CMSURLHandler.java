@@ -237,7 +237,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
 
         if (page == null || page.getTemplate() == null) {
             errorPage(req, res, sites, 404);
-        } else if(!page.getCanViewGroup().isMember(Authenticate.getUser())){
+        } else if(!page.isPublished() || !page.getCanViewGroup().isMember(Authenticate.getUser())){
             errorPage(req, res, sites, 404);
         } else {
             try {
