@@ -379,7 +379,7 @@ public class Site extends Site_Base implements Wrappable {
     }
 
     public List<Post> getLatestPosts() {
-        return getPostSet().stream().sorted(Post.CREATION_DATE_COMPARATOR.reversed()).limit(5).collect(Collectors.toList());
+        return getPostSet().stream().sorted(Post.CREATION_DATE_COMPARATOR).limit(5).collect(Collectors.toList());
     }
 
     public String getFullUrl() {

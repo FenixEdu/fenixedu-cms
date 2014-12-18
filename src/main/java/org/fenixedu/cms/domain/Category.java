@@ -100,6 +100,10 @@ public class Category extends Category_Base implements Wrappable {
             return Category.this.getCreationDate();
         }
 
+        public String getRssUrl() {
+            return Category.this.getRssUrl();
+        }
+
     }
 
     @Override

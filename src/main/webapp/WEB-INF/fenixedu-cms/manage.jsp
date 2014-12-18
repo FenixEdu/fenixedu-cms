@@ -85,7 +85,7 @@
       </c:forEach>
       </tbody>
     </table>
-    <c:if test="${numberOfPages == 1}">
+    <c:if test="${numberOfPages != 1}">
     <div class="row">
         <div class="col-md-2 col-md-offset-5">
             <ul class="pagination">
