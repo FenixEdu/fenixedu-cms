@@ -18,7 +18,11 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.domain.User;
@@ -165,7 +169,7 @@ public class Post extends Post_Base implements Wrappable {
      *
      * @param group the group of people who can view this site
      */
-    @Atomic 
+    @Atomic
     public void setCanViewGroup(Group group) {
         setViewGroup(group.toPersistentGroup());
 
@@ -353,6 +357,10 @@ public class Post extends Post_Base implements Wrappable {
         return this.getCategoriesSet().stream().map(x -> x.getName().getContent()).reduce((x, y) -> x + "," + y).orElse("");
     }
 
+    public String getCategoriesString() {
+        return this.getCategoriesSet().stream().map(x -> x.getName().getContent()).reduce((x, y) -> x + "," + y).orElse("");
+    }
+
     public class PostWrap extends Wrap {
 
         public LocalizedString getName() {
@@ -428,4 +436,13 @@ public class Post extends Post_Base implements Wrappable {
     public Wrap makeWrap() {
         return new PostWrap();
     }
+
+    public boolean isAccessible() {
+        return getCanViewGroup().isMember(Authenticate.getUser());
+    }
+
+    public boolean isModified() {
+        return !getCreationDate().toLocalDate().equals(getModificationDate().toLocalDate());
+    }
+
 }
