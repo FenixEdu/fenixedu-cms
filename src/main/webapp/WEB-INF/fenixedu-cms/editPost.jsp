@@ -77,7 +77,7 @@ ${portal.toolkit()}
 
                 <div class="col-sm-10">
                     <input bennu-localized-string required-any name="name" id="inputEmail3"
-                           placeholder="<spring:message code="post.edit.label.name" />" value='${post.name.json()}'>
+                           placeholder="<spring:message code="post.edit.label.name" />" value='<c:out value="${post.name.json()}"/>'>
                     <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
                             code="post.edit.error.emptyName"/></p></c:if>
                 </div>
@@ -88,7 +88,7 @@ ${portal.toolkit()}
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.body"/></label>
 
                 <div class="col-sm-10">
-                    <textarea id="htmlEditor" bennu-html-editor bennu-localized-string name="body" rows="3">${post.body.json()}</textarea>
+                    <textarea id="htmlEditor" bennu-html-editor bennu-localized-string name="body" rows="3"><c:out value="${post.body.json()}"/></textarea>
                 </div>
             </div>
 
