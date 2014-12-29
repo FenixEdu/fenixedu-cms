@@ -80,7 +80,7 @@ public class AdminMenuItem {
         return root;
     }
 
-    @RequestMapping(value = "{slugSite}/{oidMenu}/data", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "{slugSite}/{oidMenu}/data", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
     public @ResponseBody String data(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "oidMenu") String oidMenu) {
         Site s = Site.fromSlug(slugSite);
