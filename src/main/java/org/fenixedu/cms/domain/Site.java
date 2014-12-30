@@ -20,6 +20,8 @@ package org.fenixedu.cms.domain;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -187,6 +189,23 @@ public class Site extends Site_Base implements Wrappable {
      * @return the {@link Site} with the given slug if it exists, or null otherwise.
      */
     public static Site fromSlug(String slug) {
+        if (slug == null) {
+            return null;
+        }
+        Site match = siteCache.computeIfAbsent(slug, Site::manualFind);
+        if (match == null) {
+            return null;
+        }
+        if (!FenixFramework.isDomainObjectValid(match) || !match.getSlug().equals(slug)) {
+            siteCache.remove(slug, match);
+            return fromSlug(slug);
+        }
+        return match;
+    }
+
+    private static final Map<String, Site> siteCache = new ConcurrentHashMap<>();
+
+    private static Site manualFind(String slug) {
         return Bennu.getInstance().getSitesSet().stream().filter(site -> site.getSlug() != null && site.getSlug().equals(slug))
                 .findAny().orElse(null);
     }
