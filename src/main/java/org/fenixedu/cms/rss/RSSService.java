@@ -18,13 +18,14 @@
  */
 package org.fenixedu.cms.rss;
 
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
+
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -36,13 +37,10 @@ import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
-
 import org.fenixedu.commons.i18n.LocalizedString;
+
 import pt.ist.fenixframework.core.Project;
 import pt.ist.fenixframework.core.exception.ProjectException;
-
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.joining;
 
 /**
  * Service that generates an RSS Feed from either a {@link Site} (in which case the feed info is that of the site, and all the
@@ -71,8 +69,8 @@ public class RSSService {
      *             If an exception occurs while generating the feed
      */
     public static String generateRSSForSite(Site site, Locale locale) throws XMLStreamException {
-        return generateRSS(site.getRssUrl(), site.getFullUrl(), site.getName().getContent(locale), site.getDescription()
-                .getContent(locale), locale, site.getPostSet());
+        return generateRSS(site.getRssUrl(), site.getFullUrl(), contentOf(site.getName(), locale),
+                contentOf(site.getDescription(), locale), locale, site.getPostSet());
     }
 
     /**
@@ -88,7 +86,7 @@ public class RSSService {
      *             If an exception occurs while generating the feed
      */
     public static String generateRSSForCategory(Category category, Locale locale) throws XMLStreamException {
-        String title = category.getName().getContent(locale) + " · " + category.getSite().getName().getContent(locale);
+        String title = contentOf(category.getName(), locale) + " · " + contentOf(category.getSite().getName(), locale);
         return generateRSS(category.getRssUrl(), category.getAddress(), title, title, locale, category.getPostsSet());
     }
 
@@ -98,7 +96,7 @@ public class RSSService {
         StringWriter strWriter = new StringWriter();
         XMLEventWriter writer = XMLOutputFactory.newInstance().createXMLEventWriter(strWriter);
         XMLEventFactory eventFactory = XMLEventFactory.newInstance();
-        XMLEvent nl = eventFactory.createDTD("\n");
+        XMLEvent nl = eventFactory.createCharacters("\n");
 
         writer.add(eventFactory.createStartDocument());
         writer.add(nl);
@@ -111,7 +109,7 @@ public class RSSService {
         writer.add(eventFactory.createStartElement("", "", "channel"));
         writer.add(nl);
 
-        writer.add(eventFactory.createDTD("\t"));
+        writer.add(eventFactory.createCharacters("\t"));
         writer.add(eventFactory.createStartElement("", "", "atom:link"));
         writer.add(eventFactory.createAttribute("rel", "self"));
         writer.add(eventFactory.createAttribute("type", "application/rss+xml"));
@@ -124,9 +122,9 @@ public class RSSService {
         createNode(writer, eventFactory, "description", description);
         createNode(writer, eventFactory, "language", locale.toLanguageTag());
         createNode(writer, eventFactory, "copyright",
-                PortalConfiguration.getInstance().getApplicationCopyright().getContent(locale));
+                contentOf(PortalConfiguration.getInstance().getApplicationCopyright(), locale));
         createNode(writer, eventFactory, "webMaster", PortalConfiguration.getInstance().getSupportEmailAddress() + " ("
-                + PortalConfiguration.getInstance().getApplicationTitle().getContent(locale) + ")");
+                + contentOf(PortalConfiguration.getInstance().getApplicationTitle(), locale) + ")");
         createNode(writer, eventFactory, "generator", "FenixEdu CMS " + CMS_VERSION);
         createNode(writer, eventFactory, "docs", "http://blogs.law.harvard.edu/tech/rss");
         createNode(writer, eventFactory, "ttl", "60");
@@ -154,9 +152,10 @@ public class RSSService {
     private static void writePost(Locale locale, XMLEventWriter writer, Post post, XMLEventFactory eventFactory)
             throws XMLStreamException {
         writer.add(eventFactory.createStartElement("", "", "item"));
-        writer.add(eventFactory.createDTD("\n"));
+        writer.add(eventFactory.createCharacters("\n"));
         createNode(writer, eventFactory, "title", contentOf(post.getName(), locale));
-        createNode(writer, eventFactory, "description", sanitizeInputForXml.matcher(contentOf(post.getBody(), locale)).replaceAll(""));
+        createNode(writer, eventFactory, "description", sanitizeInputForXml.matcher(contentOf(post.getBody(), locale))
+                .replaceAll(""));
         createNode(writer, eventFactory, "link", post.getAddress());
         boolean hasEmail = post.getCreatedBy().getProfile() != null && post.getCreatedBy().getProfile().getEmail() != null;
         String authorEmail = hasEmail ? post.getCreatedBy().getProfile().getEmail() : "";
@@ -169,9 +168,9 @@ public class RSSService {
         createNode(writer, eventFactory, "pubDate", post.getCreationDate()
                 .toString("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH));
 
-        writer.add(eventFactory.createDTD("\n"));
+        writer.add(eventFactory.createCharacters("\n"));
         writer.add(eventFactory.createEndElement("", "", "item"));
-        writer.add(eventFactory.createDTD("\n"));
+        writer.add(eventFactory.createCharacters("\n"));
     }
 
     private static String getCMSVersion() {
@@ -185,11 +184,11 @@ public class RSSService {
 
     private static void createNode(XMLEventWriter eventWriter, XMLEventFactory eventFactory, String name, String value)
             throws XMLStreamException {
-        eventWriter.add(eventFactory.createDTD("\t"));
+        eventWriter.add(eventFactory.createCharacters("\t"));
         eventWriter.add(eventFactory.createStartElement("", "", name));
-        eventWriter.add(eventFactory.createCharacters(value));
+        eventWriter.add(eventFactory.createCharacters(value == null ? "" : value));
         eventWriter.add(eventFactory.createEndElement("", "", name));
-        eventWriter.add(eventFactory.createDTD("\n"));
+        eventWriter.add(eventFactory.createCharacters("\n"));
     }
 
     private static String contentOf(LocalizedString localizedString, Locale locale) {
