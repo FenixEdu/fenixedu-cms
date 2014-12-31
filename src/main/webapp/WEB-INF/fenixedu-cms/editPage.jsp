@@ -61,7 +61,7 @@
             <div class="col-sm-10">
                 <select name="template" class="form-control" id="tempate">
                     <option value="null">-</option>
-                    <c:forEach var="i" items="${site.theme.templatesSet}">
+                    <c:forEach var="i" items="${site.theme.allTemplates}">
                         <option value="${i.type}" ${i == page.template ? 'selected' : ''}>${i.name}</option>
                     </c:forEach>
                 </select>
