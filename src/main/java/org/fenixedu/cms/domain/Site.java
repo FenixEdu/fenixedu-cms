@@ -46,6 +46,7 @@ import org.fenixedu.cms.domain.wraps.Wrappable;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.cms.routing.CMSBackend;
 import org.fenixedu.cms.routing.CMSEmbeddedBackend;
+import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
-public class Site extends Site_Base implements Wrappable {
+public class Site extends Site_Base implements Wrappable, Sluggable{
     /**
      * maps the registered template types on the tempate classes
      */
@@ -240,17 +241,24 @@ public class Site extends Site_Base implements Wrappable {
         return getCategoriesSet().stream().filter(category -> category.getSlug().equals(slug)).findAny().orElse(null);
     }
 
-    public Category categoryForSlug(String slug, LocalizedString name) {
-        Category c = categoryForSlug(slug);
-        if (c == null) {
-            c = new Category();
-            c.setName(name);
-            c.setSlug(slug);
-            c.setSite(this);
-        }
-        return c;
+    @Override
+    public void setSlug(String slug) {
+        super.setSlug(SlugUtils.makeSlug(this, slug));
     }
-
+    
+    /**
+     * saves the name of the site and creates a new slug for the site.
+     */
+    @Override
+    public void setName(LocalizedString name) {
+        LocalizedString prevName = getName();
+        super.setName(name);
+        if (prevName == null) {
+            String slug = StringNormalizer.slugify(name.getContent());
+            setSlug(slug);
+        }
+    }
+    
     /**
      * searches for a {@link Menu} by oid on this {@link Site}.
      *
@@ -264,6 +272,17 @@ public class Site extends Site_Base implements Wrappable {
         } else {
             return menu;
         }
+    }
+    
+    /**
+     * searches for a {@link Menu} by its slug on this {@link Site}.
+     *
+     * @param slug the slug of the {@link Menu} wanted.
+     * @return the {@link Menu} with the given oid if it exists on this site, or null otherwise.
+     */
+    public Menu menuForSlug(String slug) {
+        // TODO Auto-generated method stub
+        return getMenusSet().stream().filter(x -> x.getSlug().equals(slug)).findAny().orElse(null);
     }
 
     @Atomic
@@ -384,7 +403,7 @@ public class Site extends Site_Base implements Wrappable {
         return null;
     }
 
-    public static boolean isValidSlug(String slug) {
+    public boolean isValidSlug(String slug) {
         Stream<MenuItem> menuItems = Bennu.getInstance().getConfiguration().getMenu().getOrderedChild().stream();
         return !Strings.isNullOrEmpty(slug) && menuItems.map(MenuItem::getPath).noneMatch(path -> path.equals(slug));
     }

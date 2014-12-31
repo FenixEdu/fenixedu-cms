@@ -38,7 +38,7 @@ import com.google.common.base.Joiner;
 /**
  * Model for a page on a given Site.
  */
-public class Page extends Page_Base {
+public class Page extends Page_Base implements Sluggable {
 
     /**
      * the logged {@link User} creates a new Page.
@@ -68,22 +68,7 @@ public class Page extends Page_Base {
 
     @Override
     public void setSlug(String slug) {
-        if (slug == null) {
-            slug = "";
-        }
-
-        slug = StringNormalizer.slugify(slug);
-
-        while (!isValidSlug(slug)) {
-            String randomSlug = UUID.randomUUID().toString().substring(0, 3);
-            slug = Joiner.on("-").join(slug, randomSlug);
-        }
-
-        super.setSlug(slug);
-
-        if (slug == "" && getSite().getInitialPage() == null) {
-            getSite().setInitialPage(this);
-        }
+        super.setSlug(SlugUtils.makeSlug(this, slug));
     }
 
     /**
@@ -92,7 +77,7 @@ public class Page extends Page_Base {
      * @param slug
      * @return true if it is a valid slug.
      */
-    private boolean isValidSlug(String slug) {
+    public boolean isValidSlug(String slug) {
         return getSite().pageForSlug(slug) == null;
     }
 

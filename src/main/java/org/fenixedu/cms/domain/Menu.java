@@ -19,6 +19,7 @@
 package org.fenixedu.cms.domain;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,6 +28,7 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
 import org.fenixedu.cms.exceptions.CmsDomainException;
+import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
@@ -37,7 +39,7 @@ import com.google.common.collect.Sets;
 /**
  * Model of a Menu for a given {@link Page}
  */
-public class Menu extends Menu_Base implements Wrappable {
+public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     public Menu(Site site, LocalizedString name) {
         this();
@@ -65,6 +67,34 @@ public class Menu extends Menu_Base implements Wrappable {
         this.setCreatedBy(null);
         this.setSite(null);
         this.deleteDomainObject();
+    }
+
+    @Override
+    public void setSlug(String slug) {
+        super.setSlug(SlugUtils.makeSlug(this, slug));
+    }
+
+    /**
+     * A slug is valid if there are no other page on that site that have the same slug.
+     *
+     * @param slug
+     * @return true if it is a valid slug.
+     */
+    public boolean isValidSlug(String slug) {
+        return getSite().menuForSlug(slug) == null;
+    }
+    
+    /**
+     * saves the name of the post and creates a new slug for the post.
+     */
+    @Override
+    public void setName(LocalizedString name) {
+        LocalizedString prevName = getName();
+        super.setName(name);
+        if (prevName == null) {
+            String slug = StringNormalizer.slugify(name.getContent());
+            setSlug(slug);
+        }
     }
 
     /**

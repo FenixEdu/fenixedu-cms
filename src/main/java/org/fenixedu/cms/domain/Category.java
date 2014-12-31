@@ -35,7 +35,7 @@ import com.google.common.collect.Sets;
 /**
  * Categories give a semantic group for {@link Site} and {@link Post}.
  */
-public class Category extends Category_Base implements Wrappable {
+public class Category extends Category_Base implements Wrappable, Sluggable {
     /**
      * The logged {@link User} creates a new instance of a {@link Category}
      */
@@ -56,6 +56,21 @@ public class Category extends Category_Base implements Wrappable {
         if (prevName == null) {
             setSlug(StringNormalizer.slugify(name.getContent()));
         }
+    }
+    
+    @Override
+    public void setSlug(String slug) {
+        super.setSlug(SlugUtils.makeSlug(this, slug));
+    }
+
+    /**
+     * A slug is valid if there are no other category on that site that have the same slug.
+     *
+     * @param slug
+     * @return true if it is a valid slug.
+     */
+    public boolean isValidSlug(String slug) {
+        return getSite().categoryForSlug(slug) == null;
     }
 
     public String getAddress() {

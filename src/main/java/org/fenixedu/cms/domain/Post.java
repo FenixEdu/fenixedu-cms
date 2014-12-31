@@ -50,7 +50,7 @@ import com.google.common.collect.Lists;
 /**
  * A post models a given content to be presented to the user.
  */
-public class Post extends Post_Base implements Wrappable {
+public class Post extends Post_Base implements Wrappable, Sluggable {
 
     public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate)
             .reversed();
@@ -81,18 +81,23 @@ public class Post extends Post_Base implements Wrappable {
         this.setModificationDate(new DateTime());
         if (prevName == null) {
             String slug = StringNormalizer.slugify(name.getContent());
-            while (existsSlug(slug)) {
-                slug = StringNormalizer.slugify(name.getContent() + UUID.randomUUID().toString().substring(0, 4));
-            }
             setSlug(slug);
         }
     }
 
+    @Override
+    public void setSlug(String slug) {
+        super.setSlug(SlugUtils.makeSlug(this, slug));
+    }
+
     /**
-     * @return true if the site allready has a post registered with the slug received as argument and false otherwise.
+     * A slug is valid if there are no other page on that site that have the same slug.
+     *
+     * @param slug
+     * @return true if it is a valid slug.
      */
-    private boolean existsSlug(String slug) {
-        return getSite().getPostSet().stream().map(Post::getSlug).filter(postSlug -> slug.equals(postSlug)).findAny().isPresent();
+    public boolean isValidSlug(String slug) {
+        return getSite().postForSlug(slug) == null;
     }
 
     /**
