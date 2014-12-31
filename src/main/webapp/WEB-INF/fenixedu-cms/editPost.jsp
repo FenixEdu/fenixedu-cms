@@ -397,14 +397,14 @@ ${portal.toolkit()}
                 <h4>Metadata</h4>
             </div>
             <div class="modal-body">
-
-                <div class="form-group">
-                    <div class="col-sm-12">
-                        <label>Current post metadata:</label>
-                        <div class="json-data"></div>
+                <div class="clearfix">
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <label>Current post metadata:</label>
+                            <div class="json-data"></div>
+                        </div>
                     </div>
                 </div>
-
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
