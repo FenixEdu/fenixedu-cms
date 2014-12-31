@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.fenixedu.cms.portal;
+package org.fenixedu.cms.ui;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.Menu;
+import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -36,54 +36,59 @@ import pt.ist.fenixframework.Atomic;
 import com.google.common.base.Strings;
 
 @BennuSpringController(AdminSites.class)
-@RequestMapping("/cms/menus")
-public class AdminMenu {
+@RequestMapping("/cms/categories")
+public class AdminCategory {
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
-    public String posts(Model model, @PathVariable(value = "slug") String slug) {
+    public String categories(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
 
         AdminSites.canEdit(site);
 
         model.addAttribute("site", site);
-        model.addAttribute("menus", site.getMenusSet());
-        return "fenixedu-cms/menus";
+        model.addAttribute("categories", site.getCategoriesSet());
+        return "fenixedu-cms/categories";
     }
 
     @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
-    public String createMenu(Model model, @PathVariable(value = "slug") String slug) {
+    public String createCategory(Model model, @PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
 
         AdminSites.canEdit(s);
 
         model.addAttribute("site", s);
-        return "fenixedu-cms/createMenu";
+        return "fenixedu-cms/createCategory";
     }
 
     @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
-    public RedirectView createMenu(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
+    public RedirectView createCategory(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
             RedirectAttributes redirectAttributes) {
         if (Strings.isNullOrEmpty(name)) {
             redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/menus/" + slug + "/create", true);
-        } else {
-            Site s = Site.fromSlug(slug);
-            createMenu(s, name);
-            return new RedirectView("/cms/menus/" + s.getSlug() + "", true);
+            return new RedirectView("/cms/categories/" + slug + "/create", true);
         }
+        Site s = Site.fromSlug(slug);
+
+        AdminSites.canEdit(s);
+
+        createCategory(s, name);
+        return new RedirectView("/cms/categories/" + s.getSlug() + "", true);
     }
 
     @Atomic
-    private void createMenu(Site site, String name) {
-        Menu p = new Menu();
+    private void createCategory(Site site, String name) {
+        Category p = new Category();
         p.setSite(site);
         p.setName(new LocalizedString(I18N.getLocale(), name));
     }
 
-    @RequestMapping(value = "{slugSite}/{oidMenu}/delete", method = RequestMethod.POST)
-    public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "oidMenu") String oidMenu) {
+    @RequestMapping(value = "{slugSite}/{slugCategories}/delete", method = RequestMethod.POST)
+    public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+            value = "slugCategories") String slugCategories) {
         Site s = Site.fromSlug(slugSite);
-        s.menuForOid(oidMenu).delete();
-        return new RedirectView("/cms/menus/" + s.getSlug() + "", true);
+
+        AdminSites.canEdit(s);
+
+        s.categoryForSlug(slugCategories).delete();
+        return new RedirectView("/cms/categories/" + s.getSlug() + "", true);
     }
 }

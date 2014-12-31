@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.fenixedu.cms.portal;
+package org.fenixedu.cms.ui;
 
 import java.io.IOException;
 import java.util.Arrays;

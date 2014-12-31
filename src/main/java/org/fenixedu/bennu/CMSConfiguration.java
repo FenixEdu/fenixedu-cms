@@ -22,10 +22,10 @@ import javax.annotation.PostConstruct;
 
 import org.fenixedu.bennu.portal.servlet.PortalBackendRegistry;
 import org.fenixedu.bennu.spring.BennuSpringModule;
-import org.fenixedu.cms.portal.CMSBean;
 import org.fenixedu.cms.routing.CMSBackend;
 import org.fenixedu.cms.routing.CMSEmbeddedBackend;
 import org.fenixedu.cms.routing.CMSURLHandler;
+import org.fenixedu.cms.ui.CMSBean;
 import org.springframework.context.annotation.Bean;
 
 @BennuSpringModule(basePackages = "org.fenixedu.cms", bundles = "CmsResources")
