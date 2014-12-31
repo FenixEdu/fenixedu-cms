@@ -331,6 +331,8 @@ public final class CMSURLHandler implements SemanticURLHandler {
         result.put("subtitle", configuration.getApplicationSubTitle());
         result.put("copyright", configuration.getApplicationCopyright());
         result.put("support", configuration.getSupportEmailAddress());
+        result.put("locale", I18N.getLocale());
+        result.put("supportedLocales", CoreConfiguration.supportedLocales());
         return result;
     }
 
