@@ -16,6 +16,8 @@ import com.google.gson.JsonObject;
 
 public class PostMetadata implements Serializable, Wrappable {
 
+    private static final long serialVersionUID = 4890885803531605616L;
+
     private final JsonObject metadata;
 
     public PostMetadata() {

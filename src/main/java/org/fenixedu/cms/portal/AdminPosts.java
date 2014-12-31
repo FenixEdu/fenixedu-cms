@@ -115,8 +115,8 @@ public class AdminPosts {
     public RedirectView editPost(Model model, @PathVariable(value = "slug") String slug,
             @PathVariable(value = "postSlug") String postSlug, @RequestParam String newSlug, @RequestParam LocalizedString name,
             @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories, @RequestParam(
-                    required = false) @DateTimeFormat(iso=ISO.DATE_TIME) DateTime publicationStarts, @RequestParam(
-                    required = false) @DateTimeFormat(iso=ISO.DATE_TIME) DateTime publicationEnds,
+                    required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationStarts, @RequestParam(
+                    required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationEnds,
             RedirectAttributes redirectAttributes) {
 
         if (name.isEmpty()) {

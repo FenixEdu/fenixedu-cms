@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.domain.User;
@@ -204,16 +203,18 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         private final List<Wrap> children;
 
         public MenuItemWrap() {
-            children = MenuItem.this.getChildrenSorted().stream().filter(MenuItem::isVisible)
-                    .map((menuItem) -> menuItem.makeWrap()).collect(Collectors.toList());
+            children =
+                    MenuItem.this.getChildrenSorted().stream().filter(MenuItem::isVisible).map((menuItem) -> menuItem.makeWrap())
+                            .collect(Collectors.toList());
             active = false;
             open = false;
         }
 
         public MenuItemWrap(Page page) {
             open = MenuItem.this.getPage() != null && MenuItem.this.getPage().equals(page);
-            children = ImmutableList.copyOf(MenuItem.this.getChildrenSorted().stream().filter(MenuItem::isVisible)
-                    .map(menuItem -> menuItem.makeWrap(page)).collect(Collectors.toList()));
+            children =
+                    ImmutableList.copyOf(MenuItem.this.getChildrenSorted().stream().filter(MenuItem::isVisible)
+                            .map(menuItem -> menuItem.makeWrap(page)).collect(Collectors.toList()));
             active = open || children.stream().map(menuItem -> ((MenuItemWrap) menuItem).open).reduce(false, (x, y) -> x || y);
         }
 
