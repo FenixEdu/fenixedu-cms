@@ -298,7 +298,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
         }
 
         global.put("page", makePageWrapper(page));
-        populateSiteInfo(req, page,site, global);
+        populateSiteInfo(req, page, site, global);
 
         List<TemplateContext> components = new ArrayList<TemplateContext>();
 
@@ -325,8 +325,8 @@ public final class CMSURLHandler implements SemanticURLHandler {
         context.put("staticDir", site.getStaticDirectory());
         context.put("devMode", CoreConfiguration.getConfiguration().developmentMode());
     }
-    
-    private Map<String, Object> makeMenuWrapper(Page page){
+
+    private Map<String, Object> makeMenuWrapper(Page page) {
         HashMap<String, Object> result = new HashMap<String, Object>();
         for (Menu menu : page.getSite().getMenusSet()) {
             result.put(menu.getSlug(), menu.makeWrap(page));
@@ -378,7 +378,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
             try {
                 PebbleTemplate compiledTemplate = engine.getTemplate(cmsTheme.getType() + "/" + errorCode + ".html");
                 TemplateContext global = new TemplateContext();
-                populateSiteInfo(req, site, global);
+                populateSiteInfo(req, null, site, global);
                 res.setStatus(errorCode);
                 res.setContentType("text/html");
                 compiledTemplate.evaluate(res.getWriter(), global);
