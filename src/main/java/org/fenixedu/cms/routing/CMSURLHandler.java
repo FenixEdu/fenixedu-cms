@@ -321,15 +321,15 @@ public final class CMSURLHandler implements SemanticURLHandler {
         context.put("request", makeRequestWrapper(req));
         context.put("app", makeAppWrapper());
         context.put("site", site.makeWrap());
-        context.put("menus", makeMenuWrapper(page));
+        context.put("menus", makeMenuWrapper(site, page));
         context.put("staticDir", site.getStaticDirectory());
         context.put("devMode", CoreConfiguration.getConfiguration().developmentMode());
     }
 
-    private Map<String, Object> makeMenuWrapper(Page page) {
+    private Map<String, Object> makeMenuWrapper(Site site, Page page) {
         HashMap<String, Object> result = new HashMap<String, Object>();
-        for (Menu menu : page.getSite().getMenusSet()) {
-            result.put(menu.getSlug(), menu.makeWrap(page));
+        for (Menu menu : site.getMenusSet()) {
+            result.put(menu.getSlug(), page == null ? menu.makeWrap() : menu.makeWrap(page));
         }
         return result;
     }
