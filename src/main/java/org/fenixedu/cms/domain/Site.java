@@ -60,7 +60,7 @@ import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
-public class Site extends Site_Base implements Wrappable, Sluggable{
+public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * maps the registered template types on the tempate classes
      */
@@ -228,7 +228,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable{
      * @return the {@link Post} with the given slug if it exists on this site, or null otherwise.
      */
     public Post postForSlug(String slug) {
-        return getPostSet().stream().filter(post -> post.getSlug().equals(slug)).findAny().orElse(null);
+        return getPostSet().stream().filter(post -> slug.equals(post.getSlug())).findAny().orElse(null);
     }
 
     /**
@@ -238,9 +238,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable{
      * @return the {@link Category} with the given slug if it exists on this site, or null otherwise.
      */
     public Category categoryForSlug(String slug) {
-        return getCategoriesSet().stream().filter(category -> category.getSlug().equals(slug)).findAny().orElse(null);
+        return getCategoriesSet().stream().filter(category -> slug.equals(category.getSlug())).findAny().orElse(null);
     }
-    
+
     @Atomic
     /**
      * searches for a {@link Category} by slug on this {@link Site} or if one does not exist, creates one.
@@ -263,7 +263,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable{
     public void setSlug(String slug) {
         super.setSlug(SlugUtils.makeSlug(this, slug));
     }
-    
+
     /**
      * saves the name of the site and creates a new slug for the site.
      */
@@ -276,7 +276,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable{
             setSlug(slug);
         }
     }
-    
+
     /**
      * searches for a {@link Menu} by oid on this {@link Site}.
      *
@@ -291,7 +291,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable{
             return menu;
         }
     }
-    
+
     /**
      * searches for a {@link Menu} by its slug on this {@link Site}.
      *
@@ -299,8 +299,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable{
      * @return the {@link Menu} with the given oid if it exists on this site, or null otherwise.
      */
     public Menu menuForSlug(String slug) {
-        // TODO Auto-generated method stub
-        return getMenusSet().stream().filter(x -> x.getSlug().equals(slug)).findAny().orElse(null);
+        return getMenusSet().stream().filter(x -> slug.equals(x.getSlug())).findAny().orElse(null);
     }
 
     @Atomic
@@ -421,6 +420,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable{
         return null;
     }
 
+    @Override
     public boolean isValidSlug(String slug) {
         Stream<MenuItem> menuItems = Bennu.getInstance().getConfiguration().getMenu().getOrderedChild().stream();
         return !Strings.isNullOrEmpty(slug) && menuItems.map(MenuItem::getPath).noneMatch(path -> path.equals(slug));
