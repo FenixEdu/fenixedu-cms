@@ -298,7 +298,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
         }
 
         global.put("page", makePageWrapper(page));
-        populateSiteInfo(req, site, global);
+        populateSiteInfo(req, page,site, global);
 
         List<TemplateContext> components = new ArrayList<TemplateContext>();
 
@@ -317,19 +317,19 @@ public final class CMSURLHandler implements SemanticURLHandler {
         compiledTemplate.evaluate(res.getWriter(), global);
     }
 
-    private void populateSiteInfo(final HttpServletRequest req, Site site, TemplateContext context) {
+    private void populateSiteInfo(final HttpServletRequest req, Page page, Site site, TemplateContext context) {
         context.put("request", makeRequestWrapper(req));
         context.put("app", makeAppWrapper());
         context.put("site", site.makeWrap());
-        context.put("menus", makeMenuWrapper(site));
+        context.put("menus", makeMenuWrapper(page));
         context.put("staticDir", site.getStaticDirectory());
         context.put("devMode", CoreConfiguration.getConfiguration().developmentMode());
     }
     
-    private Map<String, Object> makeMenuWrapper(Site site){
+    private Map<String, Object> makeMenuWrapper(Page page){
         HashMap<String, Object> result = new HashMap<String, Object>();
-        for (Menu menu : site.getMenusSet()) {
-            result.put(menu.getSlug(), menu);
+        for (Menu menu : page.getSite().getMenusSet()) {
+            result.put(menu.getSlug(), menu.makeWrap(page));
         }
         return result;
     }
