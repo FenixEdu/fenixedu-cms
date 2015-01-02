@@ -18,8 +18,6 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.UUID;
-
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
@@ -32,8 +30,6 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
 import pt.ist.fenixframework.Atomic;
-
-import com.google.common.base.Joiner;
 
 /**
  * Model for a page on a given Site.
@@ -54,9 +50,11 @@ public class Page extends Page_Base implements Sluggable {
         this.setCreatedBy(Authenticate.getUser());
         this.setCanViewGroup(AnyoneGroup.get());
         this.setSite(site);
+        this.setPublished(true);
     }
-    
-    public Site getSite(){
+
+    @Override
+    public Site getSite() {
         return super.getSite();
     }
 
@@ -82,6 +80,7 @@ public class Page extends Page_Base implements Sluggable {
      * @param slug
      * @return true if it is a valid slug.
      */
+    @Override
     public boolean isValidSlug(String slug) {
         return getSite().pageForSlug(slug) == null;
     }
