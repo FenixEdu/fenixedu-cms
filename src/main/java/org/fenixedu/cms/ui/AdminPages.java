@@ -83,8 +83,7 @@ public class AdminPages {
 
     @Atomic
     private void createPage(String name, Site s) {
-        Page p = new Page();
-        p.setSite(s);
+        Page p = new Page(s);
         p.setName(new LocalizedString(I18N.getLocale(), name));
     }
 

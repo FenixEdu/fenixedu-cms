@@ -106,7 +106,6 @@ public class component.StrategyBasedComponent extends component.Component {
 }
 class component.ListCategoryPosts extends component.Component{}
 class component.StaticPost extends component.Component{}
-class component.MenuComponent extends component.Component{}
 
 class PostFile{
     Integer index;
@@ -273,30 +272,22 @@ relation StaticPostPost{
   }
 }
 
-relation MenuComponentMenu{
-  component.MenuComponent playsRole component{
-    multiplicity *;
-  }
-  Menu playsRole menu{
-    multiplicity 1..1;
-  }
-}
 relation CategorySite{
-    Site playsRole site;
+    protected Site playsRole site;
     Category playsRole categories {
         multiplicity *;
     }
 }
 
 relation MenuSite{
-    Site playsRole site;
+    protected Site playsRole site;
     Menu playsRole menus {
         multiplicity *;
     }
 }
 
 relation MenuMenuItem{
-    Menu playsRole menu;
+    protected Menu playsRole menu;
     MenuItem playsRole items {
         multiplicity *;
     }
@@ -324,14 +315,14 @@ relation PageMenuItem{
 }
 
 relation SitePost{
-    Site playsRole site;
+    protected Site playsRole site;
     Post playsRole post {
         multiplicity *;
     }
 }
 
 relation SitePage {
-    Site playsRole site;
+    protected Site playsRole site;
     Page playsRole pages {
         multiplicity *;
     }

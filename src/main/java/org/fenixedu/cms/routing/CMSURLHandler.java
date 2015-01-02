@@ -47,6 +47,7 @@ import org.fenixedu.cms.CMSConfigurationManager;
 import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.CMSThemeFile;
 import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;
@@ -320,8 +321,17 @@ public final class CMSURLHandler implements SemanticURLHandler {
         context.put("request", makeRequestWrapper(req));
         context.put("app", makeAppWrapper());
         context.put("site", site.makeWrap());
+        context.put("menus", makeMenuWrapper(site));
         context.put("staticDir", site.getStaticDirectory());
         context.put("devMode", CoreConfiguration.getConfiguration().developmentMode());
+    }
+    
+    private Map<String, Object> makeMenuWrapper(Site site){
+        HashMap<String, Object> result = new HashMap<String, Object>();
+        for (Menu menu : site.getMenusSet()) {
+            result.put(menu.getSlug(), menu);
+        }
+        return result;
     }
 
     private Map<String, Object> makeAppWrapper() {

@@ -74,8 +74,7 @@ public class AdminMenu {
 
     @Atomic
     private void createMenu(Site site, String name) {
-        Menu p = new Menu();
-        p.setSite(site);
+        Menu p = new Menu(site);
         p.setName(new LocalizedString(I18N.getLocale(), name));
     }
 

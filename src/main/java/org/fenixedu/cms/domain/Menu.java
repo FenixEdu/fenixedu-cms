@@ -19,7 +19,7 @@
 package org.fenixedu.cms.domain;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,28 +41,24 @@ import com.google.common.collect.Sets;
  */
 public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
-    public Menu(Site site, LocalizedString name) {
-        this();
-        setSite(site);
-        setName(name);
-        setTopMenu(false);
-    }
-
-    /**
-     * Logged {@link User} creates a new Menu.
-     */
-    public Menu() {
+    public Menu(Site site) {
         super();
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
+        
+        setSite(site);
+        setTopMenu(false);
+    }
+    
+    public Site getSite(){
+        return super.getSite(); 
     }
 
     @Atomic
     public void delete() {
-        Sets.newHashSet(getComponentSet()).forEach(c -> c.delete());
         Sets.newHashSet(getItemsSet()).forEach(i -> i.delete());
         this.setCreatedBy(null);
         this.setSite(null);

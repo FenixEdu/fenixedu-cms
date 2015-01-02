@@ -46,7 +46,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     /**
      * The logged {@link User} creates a new MenuItem.
      */
-    public MenuItem() {
+    public MenuItem(Menu menu) {
         super();
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
@@ -54,6 +54,11 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
         this.setFolder(false);
+        this.setMenu(menu);
+    }
+    
+    public Menu getMenu(){
+        return super.getMenu();
     }
 
     /**
@@ -182,11 +187,10 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     }
 
     public static MenuItem create(Menu menu, Page page, LocalizedString name, MenuItem parent) {
-        MenuItem menuItem = new MenuItem();
+        MenuItem menuItem = new MenuItem(menu);
         menuItem.setName(name);
         menuItem.setPage(page);
         menuItem.setFolder(page == null);
-        menuItem.setMenu(menu);
         if (menu != null) {
             if (parent != null) {
                 parent.add(menuItem);

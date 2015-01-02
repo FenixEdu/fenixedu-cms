@@ -39,13 +39,18 @@ public class Category extends Category_Base implements Wrappable, Sluggable {
     /**
      * The logged {@link User} creates a new instance of a {@link Category}
      */
-    public Category() {
+    public Category(Site site) {
         super();
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
+        this.setSite(site);
+    }
+    
+    public Site getSite(){
+        return super.getSite();
     }
 
     @Override

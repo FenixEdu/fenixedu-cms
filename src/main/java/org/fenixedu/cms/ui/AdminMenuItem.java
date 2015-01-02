@@ -124,9 +124,8 @@ public class AdminMenuItem {
 
     @Atomic
     private void createMenuItem(String menuItemOid, String name, String use, String url, String slugPage, Site s, Menu m) {
-        MenuItem mi = new MenuItem();
+        MenuItem mi = new MenuItem(m);
         mi.setName(new LocalizedString(I18N.getLocale(), name));
-        mi.setMenu(m);
 
         if (!menuItemOid.equals("null")) {
             MenuItem parent = FenixFramework.getDomainObject(menuItemOid);

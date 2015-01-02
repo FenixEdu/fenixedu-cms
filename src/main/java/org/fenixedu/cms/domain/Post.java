@@ -58,7 +58,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     /**
      * The logged {@link User} creates a new Post.
      */
-    public Post() {
+    public Post(Site site) {
         super();
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
@@ -69,6 +69,11 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         this.setModificationDate(now);
         this.setActive(true);
         this.setCanViewGroup(AnyoneGroup.get());
+        this.setSite(site);
+    }
+    
+    public Site getSite(){
+        return super.getSite();
     }
 
     /**
@@ -185,7 +190,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
 
     public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category,
             boolean active, User creator) {
-        Post post = new Post();
+        Post post = new Post(site);
         post.setSite(site);
         post.setName(name);
         post.setBody(body);

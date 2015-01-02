@@ -43,7 +43,7 @@ public class Page extends Page_Base implements Sluggable {
     /**
      * the logged {@link User} creates a new Page.
      */
-    public Page() {
+    public Page(Site site) {
         super();
         DateTime now = new DateTime();
         this.setCreationDate(now);
@@ -53,6 +53,11 @@ public class Page extends Page_Base implements Sluggable {
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCanViewGroup(AnyoneGroup.get());
+        this.setSite(site);
+    }
+    
+    public Site getSite(){
+        return super.getSite();
     }
 
     @Override
@@ -146,7 +151,7 @@ public class Page extends Page_Base implements Sluggable {
 
     public static Page create(Site site, Menu menu, MenuItem parent, LocalizedString name, boolean published, String template,
             User creator, Component... components) {
-        Page page = new Page();
+        Page page = new Page(site);
         page.setSite(site);
         page.setName(name);
         if (components != null && components.length > 0) {
@@ -163,17 +168,6 @@ public class Page extends Page_Base implements Sluggable {
         page.setPublished(published);
         if (menu != null) {
             MenuItem.create(menu, page, name, parent);
-        }
-        return page;
-    }
-
-    public static Page createBasePage(CMSTemplate template, Component... components) {
-        Page page = new Page();
-        page.setTemplate(template);
-        if (components != null && components.length > 0) {
-            for (Component component : components) {
-                page.addComponents(component);
-            }
         }
         return page;
     }

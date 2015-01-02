@@ -90,9 +90,7 @@ public class AdminPosts {
 
     @Atomic
     private void createPost(Site site, LocalizedString name, LocalizedString body) {
-        Post p = new Post();
-
-        p.setSite(site);
+        Post p = new Post(site);
         p.setName(name);
         p.setBody(body);
 

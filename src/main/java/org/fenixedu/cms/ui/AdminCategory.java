@@ -76,8 +76,7 @@ public class AdminCategory {
 
     @Atomic
     private void createCategory(Site site, String name) {
-        Category p = new Category();
-        p.setSite(site);
+        Category p = new Category(site);
         p.setName(new LocalizedString(I18N.getLocale(), name));
     }
 

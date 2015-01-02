@@ -240,6 +240,24 @@ public class Site extends Site_Base implements Wrappable, Sluggable{
     public Category categoryForSlug(String slug) {
         return getCategoriesSet().stream().filter(category -> category.getSlug().equals(slug)).findAny().orElse(null);
     }
+    
+    @Atomic
+    /**
+     * searches for a {@link Category} by slug on this {@link Site} or if one does not exist, creates one.
+     *
+     * @param slug the slug of the {@link Category} wanted.
+     * @param name {@link Category} name.
+     * @return the {@link Category} with the given slug if it exists on this site, or null otherwise.
+     */
+    public Category getOrCreateCategoryForSlug(String slug, LocalizedString name) {
+        Category c = categoryForSlug(slug);
+        if (c == null) {
+            c = new Category(this);
+            c.setName(name);
+            c.setSlug(slug);
+        }
+        return c;
+    }
 
     @Override
     public void setSlug(String slug) {
