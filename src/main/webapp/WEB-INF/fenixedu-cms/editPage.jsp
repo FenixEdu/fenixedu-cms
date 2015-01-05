@@ -36,7 +36,7 @@
                 <div class="input-group">
 
                     <span class="input-group-addon"><code>/${site.baseUrl}/</code></span>
-                    <input required type="text" name="slug" class="form-control" id="inputEmail3"
+                    <input type="text" name="slug" class="form-control" id="inputEmail3"
                            placeholder="<spring:message code="page.edit.label.slug" />" value='${page.slug}' \>
                 </div>
             </div>

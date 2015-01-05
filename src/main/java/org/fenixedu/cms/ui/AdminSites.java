@@ -18,8 +18,8 @@
  */
 package org.fenixedu.cms.ui;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -71,15 +71,24 @@ public class AdminSites {
     }
 
     @RequestMapping(value = "manage/{page}", method = RequestMethod.GET)
-    public String list(@PathVariable("page") Integer page, Model model) {
+    public String list(@PathVariable(value = "page") int page, Model model) {
         List<List<Site>> pages = Lists.partition(getSites(), ITEMS_PER_PAGE);
-        if (!pages.isEmpty()) {
-            int currentPage = Optional.of(page).orElse(0);
-            model.addAttribute("numberOfPages", pages.size());
-            model.addAttribute("currentPage", currentPage);
-            model.addAttribute("sites", pages.get(currentPage));
-        }
+        int currentPage = normalize(page, pages);
+        model.addAttribute("numberOfPages", pages.size());
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("sites", pages.isEmpty() ? Collections.emptyList() : pages.get(currentPage));
+        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(Authenticate.getUser()));
         return "fenixedu-cms/manage";
+    }
+
+    private int normalize(int page, List<List<Site>> pages) {
+        if (page < 0) {
+            return 0;
+        }
+        if (page >= pages.size()) {
+            return pages.size() - 1;
+        }
+        return page;
     }
 
     private List<Site> getSites() {

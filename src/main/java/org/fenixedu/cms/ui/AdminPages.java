@@ -75,16 +75,17 @@ public class AdminPages {
             Site s = Site.fromSlug(slug);
 
             AdminSites.canEdit(s);
-            
-            createPage(name, s);
-            return new RedirectView("/cms/pages/" + s.getSlug(), true);
+
+            Page page = createPage(name, s);
+            return new RedirectView("/cms/pages/" + s.getSlug() + "/" + page.getSlug() + "/edit", true);
         }
     }
 
     @Atomic
-    private void createPage(String name, Site s) {
+    private Page createPage(String name, Site s) {
         Page p = new Page(s);
         p.setName(new LocalizedString(I18N.getLocale(), name));
+        return p;
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.GET)
@@ -118,9 +119,9 @@ public class AdminPages {
 
         AdminSites.canEdit(s);
 
-        Page p = s.pageForSlug(slugPage);
+        Page p = s.pageForSlug(slugPage.equals("--**--") ? "" : slugPage);
         editPage(name, slug, template, s, p);
-        return new RedirectView("/cms/pages/" + s.getSlug() + "", true);
+        return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage + "/edit", true);
     }
 
     @Atomic(mode = TxMode.WRITE)

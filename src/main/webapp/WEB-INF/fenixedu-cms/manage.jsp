@@ -23,15 +23,15 @@
 
 <h1><spring:message code="site.manage.title" /></h1>
 
-<c:if test="${sites.size() != 0}">
+<c:if test="${isManager}">
     <p>
-        <a href="#" data-toggle="modal" data-target="#defaultSite" class="btn btn-default">Set default site</a>
+        <a href="#" data-toggle="modal" data-target="#defaultSite" class="btn btn-default">Default site</a>
     </p>
 </c:if>
 
 <c:choose>
-  <c:when test="${sites==null || sites.size() == 0}">
-    <spring:message code="site.manage.label.emptySites" />
+  <c:when test="${sites.size() == 0}">
+    <em><spring:message code="site.manage.label.emptySites" /></em>
   </c:when>
 
   <c:otherwise>

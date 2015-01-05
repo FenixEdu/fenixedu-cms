@@ -62,7 +62,7 @@
               <td>${category.postsSet.size()}</td>
               <td>
 	               <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteCategoryForm${category.externalId}').submit();" ${category.postsSet.size() > 0 ? 'disabled' : ''}><spring:message code="action.delete"/></button>
-					       <form id="deleteCategoryForm${category.externalId}" action="${pageContext.request.contextPath}/cms/categories/${c.site.slug}/${c.slug}/delete" method="POST"></form>
+					       <form id="deleteCategoryForm${category.externalId}" action="${pageContext.request.contextPath}/cms/categories/${category.site.slug}/${category.slug}/delete" method="POST"></form>
               </td>
             </tr>
           </c:forEach>

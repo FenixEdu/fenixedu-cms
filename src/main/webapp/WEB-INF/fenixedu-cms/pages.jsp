@@ -65,7 +65,7 @@
                                         <code>${page.slug}</code>
                                     </c:when>
                                     <c:otherwise>
-                                        <i>Empty</i>
+                                        <code>-</code>
                                     </c:otherwise>
                                 </c:choose>
                             </small>
@@ -84,13 +84,8 @@
                                        class="btn btn-sm btn-default"><spring:message code="action.edit"/></a>
                                 </c:otherwise>
                             </c:choose>
-                            <a href="#" class="btn btn-danger btn-sm"
-                               onclick="document.getElementById('deletePageForm${page.externalId}').submit();"><spring:message
+                            <a href="#" class="btn btn-danger btn-sm" data-page="${page.slug}"><spring:message
                                     code="action.delete"/></a>
-
-                            <form id="deletePageForm${page.externalId}"
-                                  action="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/delete"
-                                  method="POST"></form>
                         </div>
                     </td>
                 </tr>
@@ -99,6 +94,27 @@
         </table>
     </c:otherwise>
 </c:choose>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4><spring:message code="page.manage.label.delete.page"/></h4>
+            </div>
+            <div class="modal-body">
+                <p><spring:message code="page.manage.label.delete.page.message"/></p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
+                    <a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="modal fade" id="defaultModal" tabindex="-1" role="dialog" aria-hidden="true">
     <form action="${site.slug}/defaultPage" class="form-horizontal" method="post">
@@ -132,3 +148,13 @@
         </div>
     </form>
 </div>
+
+<script>
+(function () {
+    $("a[data-page]").on('click', function(el) {
+        var pageSlug = el.target.getAttribute('data-page');
+        $('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/pages/${site.slug}/' + pageSlug + '/delete');
+        $('#deleteModal').modal('show');
+    });
+})();
+</script>
