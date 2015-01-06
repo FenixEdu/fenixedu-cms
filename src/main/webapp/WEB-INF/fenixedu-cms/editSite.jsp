@@ -103,7 +103,7 @@
                 <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
 
                 <div class="col-sm-10">
-                    <input bennu-group allow="public,users,managers,space-manager,custom" name="viewGroup" type="text"
+                    <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
                            value="${ site.canViewGroup.expression }"/>
                 </div>
             </div>

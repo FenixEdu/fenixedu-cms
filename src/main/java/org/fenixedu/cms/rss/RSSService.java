@@ -131,7 +131,10 @@ public class RSSService {
         writer.add(nl);
 
         for (Post post : posts) {
-            writePost(locale, writer, post, eventFactory);
+            // Is this post public? 
+            if (post.getCanViewGroup().isMember(null)) {
+                writePost(locale, writer, post, eventFactory);
+            }
         }
 
         writer.add(eventFactory.createEndElement("", "", "channel"));

@@ -6,10 +6,22 @@
 {% for post in pagination.posts %}
 <div class="blog-post">
   <h2 class="blog-post-title"><a href="{{ post.address }}">{{ post.name.content }}</a></h2>
+
+  {% if post.isVisible %}
+
   <p class="small blog-post-meta">{{ post.creationDate|formatDate("MMMM d, Y, H:m") }} by <a href="#">{{post.createdBy.username}}</a></p>
   <p>
     {{post.body.content | raw}}
   </p>
+
+  {% else %}
+  
+      <p>
+          {{ i18n('CmsExceptionResources', 'label.private.post') }}
+      </p>
+
+  {% endif %}
+  
 </div><!-- /.blog-post -->
 {% endfor %}
 

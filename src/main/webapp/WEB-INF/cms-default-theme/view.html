@@ -5,6 +5,8 @@
 <div class="blog-post">
 
     <h2 class="blog-post-title"><a href="{{post.address}}">{{ post.name.content }}</a></h2>
+    
+    {% if post.isVisible %}
 
     <p class="small blog-post-meta">
         {{ post.creationDate|formatDate("MMMM d, Y, H:m") }} by <a href="#">{{post.createdBy.username}}</a>
@@ -19,10 +21,6 @@
     <p>
         {{post.body.content | raw}}
     </p>
-    {% if site.canPost %}
-    <p class="small"><a href="{{post.editUrl}}">Edit</a> this post. {% if site.isAdmin %}<a href="{{site.editUrl}}">Admin</a> this
-        site.{% endif %}</p>
-    {% endif %}
 
     {% if post.attachments.size != 0%}
     <p>
@@ -35,6 +33,32 @@
     </p>
     {% endif %}
 
+    {% else %}
+
+        {% if request.user.isAuthenticated %}
+            
+        <p>
+            {{ i18n('CmsExceptionResources', 'label.autenticated.private.post') }}
+        </p>
+
+        {% else %}
+
+        <p>
+            {{ i18n('CmsExceptionResources', 'label.unautenticated.private.post') }} : {{ post.visibilityGroup }}
+        </p>
+
+        <p>
+            <a href="/login?callback={{ request.url }}">Login</a>
+        </p>    
+
+        {% endif %}    
+
+    {% endif %}
+
+    {% if site.canPost %}
+    <p class="small"><a href="{{post.editUrl}}">Edit</a> this post. {% if site.isAdmin %}<a href="{{site.editUrl}}">Admin</a> this
+        site.{% endif %}</p>
+    {% endif %}
 </div><!-- /.blog-post -->
 
 {% endblock content %}

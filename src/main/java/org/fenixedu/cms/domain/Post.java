@@ -22,7 +22,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.domain.User;
@@ -71,8 +70,9 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         this.setCanViewGroup(AnyoneGroup.get());
         this.setSite(site);
     }
-    
-    public Site getSite(){
+
+    @Override
+    public Site getSite() {
         return super.getSite();
     }
 
@@ -101,6 +101,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
      * @param slug
      * @return true if it is a valid slug.
      */
+    @Override
     public boolean isValidSlug(String slug) {
         return getSite().postForSlug(slug) == null;
     }
@@ -379,6 +380,14 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
 
         public String getSlug() {
             return Post.this.getSlug();
+        }
+
+        public boolean isVisible() {
+            return Post.this.getCanViewGroup().isMember(Authenticate.getUser());
+        }
+
+        public String getVisibilityGroup() {
+            return Post.this.getCanViewGroup().toPersistentGroup().getPresentationName();
         }
 
         public LocalizedString getBody() {
