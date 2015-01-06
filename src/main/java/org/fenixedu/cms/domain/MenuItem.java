@@ -56,8 +56,9 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         this.setFolder(false);
         this.setMenu(menu);
     }
-    
-    public Menu getMenu(){
+
+    @Override
+    public Menu getMenu() {
         return super.getMenu();
     }
 
@@ -85,6 +86,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
         fixOrder(list);
 
+        item.setMenu(getMenu());
         getChildrenSet().add(item);
     }
 
