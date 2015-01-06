@@ -19,11 +19,9 @@
 package org.fenixedu.cms.domain;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
@@ -48,13 +46,14 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
         }
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
-        
+
         setSite(site);
         setTopMenu(false);
     }
-    
-    public Site getSite(){
-        return super.getSite(); 
+
+    @Override
+    public Site getSite() {
+        return super.getSite();
     }
 
     @Atomic
@@ -76,10 +75,11 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
      * @param slug
      * @return true if it is a valid slug.
      */
+    @Override
     public boolean isValidSlug(String slug) {
         return getSite().menuForSlug(slug) == null;
     }
-    
+
     /**
      * saves the name of the post and creates a new slug for the post.
      */
@@ -163,7 +163,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
         public MenuWrap() {
             this.page = null;
-            this.children = Stream.empty();
+            this.children = getToplevelItemsSorted().filter(MenuItem::isVisible).map(MenuItem::makeWrap);
         }
 
         public MenuWrap(Page page) {
