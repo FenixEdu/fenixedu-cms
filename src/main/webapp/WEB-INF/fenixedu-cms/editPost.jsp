@@ -499,6 +499,7 @@ ${portal.toolkit()}
 
 <script>
     function submitFiles(files, cb) {
+
         var formData = new FormData();
         for (var i = 0; i < files.length; i++) {
             formData.append('attachment', files[i]);
@@ -536,6 +537,6 @@ ${portal.toolkit()}
 
         xhr.send(formData);
     }
-    $("htmlEditor").data("fileHandler", submitFiles);
+    $("#htmlEditor").data("fileHandler", submitFiles);
 </script>
 

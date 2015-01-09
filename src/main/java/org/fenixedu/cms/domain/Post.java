@@ -21,6 +21,7 @@ package org.fenixedu.cms.domain;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,8 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 
 import pt.ist.fenixframework.Atomic;
 
@@ -462,6 +465,17 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
 
     public boolean isModified() {
         return !getCreationDate().toLocalDate().equals(getModificationDate().toLocalDate());
+    }
+
+    private static PolicyFactory CMS_SANITIZER = Sanitizers.BLOCKS.and(Sanitizers.FORMATTING).and(Sanitizers.IMAGES)
+            .and(Sanitizers.LINKS).and(Sanitizers.STYLES);
+
+    public static LocalizedString sanitize(LocalizedString origin) {
+        LocalizedString result = new LocalizedString();
+        for (Locale l : origin.getLocales()) {
+            result = result.with(l, CMS_SANITIZER.sanitize(origin.getContent(l)));
+        }
+        return result;
     }
 
 }

@@ -331,7 +331,6 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
                     this.getName(), getSlug()));
             getFunctionality().setAccessGroup(SiteViewersGroup.get(this));
         }
-
     }
 
     @Atomic

@@ -91,8 +91,8 @@ public class AdminPosts {
     @Atomic
     private void createPost(Site site, LocalizedString name, LocalizedString body) {
         Post p = new Post(site);
-        p.setName(name);
-        p.setBody(body);
+        p.setName(Post.sanitize(name));
+        p.setBody(Post.sanitize(body));
 
     }
 
@@ -131,8 +131,8 @@ public class AdminPosts {
     @Atomic
     private void editPost(Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories,
             DateTime publicationStarts, DateTime publicationEnds) {
-        post.setName(name);
-        post.setBody(body);
+        post.setName(Post.sanitize(name));
+        post.setBody(Post.sanitize(body));
         post.setSlug(newSlug);
         post.getCategoriesSet().clear();
         HashSet<String> h = new HashSet<>();
