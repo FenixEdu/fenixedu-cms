@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -11,7 +10,7 @@
     <artifactId>fenixedu-cms</artifactId>
     <name>FenixEdu CMS</name>
     <url>http://fenixedu.org</url>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0.RC2</version>
     <inceptionYear>2014</inceptionYear>
 
     <properties>
@@ -41,7 +40,7 @@
         <connection>scm:git:git@github.com:fenixedu/fenixedu-cms.git</connection>
         <developerConnection>scm:git:git@github.com:fenixedu/fenixedu-cms.git</developerConnection>
         <url>http://fenixedu.org</url>
-        <tag>HEAD</tag>
+        <tag>v1.0.0.RC2</tag>
     </scm>
 
     <build>
@@ -54,9 +53,7 @@
                         <phase>prepare-package</phase>
                         <configuration>
                             <target>
-                                <zip
-                                        destfile="${project.build.directory}/classes/META-INF/resources/WEB-INF/cms-default-theme.zip"
-                                        basedir="${project.basedir}/src/main/webapp/WEB-INF/cms-default-theme"></zip>
+                                <zip destfile="${project.build.directory}/classes/META-INF/resources/WEB-INF/cms-default-theme.zip" basedir="${project.basedir}/src/main/webapp/WEB-INF/cms-default-theme" />
                             </target>
                         </configuration>
                         <goals>
