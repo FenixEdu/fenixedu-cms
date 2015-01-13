@@ -59,8 +59,8 @@
               <td>
                 <div class="btn-group">
                   <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
-               	  <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteForm${post.externalId}').submit();"><spring:message code="action.delete" /></a>
-               	  <form id="deleteForm${post.externalId}" action="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/delete" method="POST"></form>
+                  <a href="#" class="btn btn-danger btn-sm" data-post="${post.slug}"><spring:message
+                                    code="action.delete"/></a>
                 </div>
 
               </td>
@@ -83,3 +83,35 @@
         </c:if>
       </c:otherwise>
 </c:choose>
+
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4><spring:message code="post.manage.label.delete.post"/></h4>
+            </div>
+            <div class="modal-body">
+                <p><spring:message code="post.manage.label.delete.post.message"/></p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
+                    <a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    $("a[data-post]").on('click', function(el) {
+        var postSlug = el.target.getAttribute('data-post');
+        $('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/posts/${site.slug}/' + postSlug + '/delete');
+        $('#deleteModal').modal('show');
+    });
+})();
+</script>
