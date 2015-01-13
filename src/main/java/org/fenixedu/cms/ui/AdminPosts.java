@@ -19,8 +19,10 @@
 package org.fenixedu.cms.ui;
 
 import java.io.IOException;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
@@ -45,20 +47,35 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import pt.ist.fenixframework.Atomic;
 
+import com.google.common.math.IntMath;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/posts")
 public class AdminPosts {
+
+    private static final int PER_PAGE = 20;
+
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
-    public String posts(Model model, @PathVariable(value = "slug") String slug) {
+    public String posts(Model model, @PathVariable(value = "slug") String slug, @RequestParam(required = false,
+            defaultValue = "1") int page) {
         Site site = Site.fromSlug(slug);
 
         AdminSites.canEdit(site);
 
         model.addAttribute("site", site);
-        model.addAttribute("posts", site.getPostSet());
+        Set<Post> posts = site.getPostSet();
+        int pages = IntMath.divide(posts.size(), PER_PAGE, RoundingMode.CEILING);
+        if (page < 1) {
+            page = 1;
+        }
+        if (page > pages) {
+            page = pages;
+        }
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pages", pages);
+        model.addAttribute("posts", posts.stream().skip((page - 1) * PER_PAGE).limit(PER_PAGE).collect(Collectors.toList()));
         return "fenixedu-cms/posts";
     }
 

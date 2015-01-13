@@ -68,5 +68,18 @@
           </c:forEach>
           </tbody>
         </table>
+        <c:if test="${pages > 1}">
+            <nav class="text-center">
+                <ul class="pagination">
+                    <li ${currentPage == 1 ? 'class="disabled"' : ''}>
+                        <a href="?page=${currentPage - 1}">&laquo;</a>
+                    </li>
+                    <li class="disabled"><a>${currentPage} / ${pages}</a></li>
+                    <li ${currentPage == pages ? 'class="disabled"' : ''}>
+                        <a href="?page=${currentPage + 1}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </c:if>
       </c:otherwise>
 </c:choose>
