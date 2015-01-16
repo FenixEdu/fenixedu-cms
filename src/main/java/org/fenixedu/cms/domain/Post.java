@@ -159,8 +159,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     }
 
     public boolean isInPublicationPeriod() {
-        boolean inBegin = getPublicationBegin() == null || getPublicationBegin().isAfterNow();
-        boolean inEnd = getPublicationEnd() == null || getPublicationEnd().isBeforeNow();
+        boolean inBegin = getPublicationBegin() == null || getPublicationBegin().isBeforeNow();
+        boolean inEnd = getPublicationEnd() == null || getPublicationEnd().isAfterNow();
         return inBegin && inEnd;
     }
 

@@ -159,7 +159,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
                     errorPage(req, res, site, 500);
                 }
             } else {
-                errorPage(req, res, site, 404);
+                res.sendError(404);
             }
         } else {
             res.sendError(404);
@@ -225,7 +225,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
             }
             res.getOutputStream().write(bytes);
         } else {
-            errorPage(req, res, sites, 404);
+            res.sendError(404);
         }
     }
 
