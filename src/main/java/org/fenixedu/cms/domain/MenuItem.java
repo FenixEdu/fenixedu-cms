@@ -247,6 +247,11 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         public boolean isFolder() {
             return MenuItem.this.getFolder();
         }
+
+        public String getRssUrl() {
+            Page page = MenuItem.this.getPage();
+            return page == null ? null : page.getRssUrl();
+        }
     }
 
     @Override

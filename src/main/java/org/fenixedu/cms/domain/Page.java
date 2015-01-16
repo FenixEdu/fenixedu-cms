@@ -24,6 +24,7 @@ import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.cms.domain.component.Component;
+import org.fenixedu.cms.domain.component.ListCategoryPosts;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -185,5 +186,17 @@ public class Page extends Page_Base implements Sluggable {
 
     public boolean isPublished() {
         return getPublished() != null ? getPublished().booleanValue() : false;
+    }
+
+    public String getRssUrl() {
+        for (Component component : getComponentsSet()) {
+            if (component instanceof ListCategoryPosts) {
+                ListCategoryPosts listPosts = (ListCategoryPosts) component;
+                if (listPosts.getCategory() != null) {
+                    return listPosts.getCategory().getRssUrl();
+                }
+            }
+        }
+        return null;
     }
 }
