@@ -122,6 +122,12 @@ public class CMSTheme extends CMSTheme_Base {
                 && this.getType().equals(getTypeForThemeFolder(themeDevelopmentDirectory))) {
             try {
                 return ByteStreams.toByteArray(new FileInputStream(themeDevelopmentDirectory + t));
+            } catch (FileNotFoundException e) {
+                if (this.getExtended() != null) {
+                    return this.getExtended().contentForPath(t);
+                } else {
+                    return null;
+                }
             } catch (IOException e) {
                 return null;
             }
