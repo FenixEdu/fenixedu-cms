@@ -77,7 +77,8 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
      */
     @Override
     public boolean isValidSlug(String slug) {
-        return getSite().menuForSlug(slug) == null;
+        Menu m = getSite().menuForSlug(slug);
+        return m == null || m == this;
     }
 
     /**

@@ -83,7 +83,8 @@ public class Page extends Page_Base implements Sluggable {
      */
     @Override
     public boolean isValidSlug(String slug) {
-        return getSite().pageForSlug(slug) == null;
+        Page p = getSite().pageForSlug(slug);
+        return p == null || p == this;
     }
 
     /**

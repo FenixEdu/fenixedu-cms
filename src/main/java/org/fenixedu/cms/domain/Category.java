@@ -48,8 +48,9 @@ public class Category extends Category_Base implements Wrappable, Sluggable {
         this.setCreationDate(new DateTime());
         this.setSite(site);
     }
-    
-    public Site getSite(){
+
+    @Override
+    public Site getSite() {
         return super.getSite();
     }
 
@@ -62,7 +63,7 @@ public class Category extends Category_Base implements Wrappable, Sluggable {
             setSlug(StringNormalizer.slugify(name.getContent()));
         }
     }
-    
+
     @Override
     public void setSlug(String slug) {
         super.setSlug(SlugUtils.makeSlug(this, slug));
@@ -74,8 +75,10 @@ public class Category extends Category_Base implements Wrappable, Sluggable {
      * @param slug
      * @return true if it is a valid slug.
      */
+    @Override
     public boolean isValidSlug(String slug) {
-        return getSite().categoryForSlug(slug) == null;
+        Category c = getSite().categoryForSlug(slug);
+        return c == null || c == this;
     }
 
     public String getAddress() {

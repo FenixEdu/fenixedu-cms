@@ -422,7 +422,8 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     @Override
     public boolean isValidSlug(String slug) {
         Stream<MenuItem> menuItems = Bennu.getInstance().getConfiguration().getMenu().getOrderedChild().stream();
-        return !Strings.isNullOrEmpty(slug) && menuItems.map(MenuItem::getPath).noneMatch(path -> path.equals(slug));
+        return !Strings.isNullOrEmpty(slug)
+                && (slug.equals(getSlug()) || menuItems.map(MenuItem::getPath).noneMatch(path -> path.equals(slug)));
     }
 
     public String getBaseUrl() {

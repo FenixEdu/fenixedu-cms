@@ -40,8 +40,7 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-import org.owasp.html.PolicyFactory;
-import org.owasp.html.Sanitizers;
+import org.omg.PortableInterceptor.PolicyFactory;
 
 import pt.ist.fenixframework.Atomic;
 
@@ -106,7 +105,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
      */
     @Override
     public boolean isValidSlug(String slug) {
-        return getSite().postForSlug(slug) == null;
+        Post p = getSite().postForSlug(slug);
+        return p == null || p == this;
     }
 
     /**
