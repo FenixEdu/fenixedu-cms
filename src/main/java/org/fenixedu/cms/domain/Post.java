@@ -40,7 +40,8 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-import org.omg.PortableInterceptor.PolicyFactory;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 
 import pt.ist.fenixframework.Atomic;
 
