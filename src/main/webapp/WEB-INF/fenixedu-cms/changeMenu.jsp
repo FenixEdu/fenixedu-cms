@@ -35,7 +35,7 @@
 <form id="deleteForm" method="post" action="">
 </form>
 <div class="container">
-    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script src="${pageContext.request.contextPath}/bennu-admin/fancytree/jquery-ui.min.js"></script>
     <link href="${pageContext.request.contextPath}/static/css/skin-awesome/ui.fancytree.css" rel="stylesheet" type="text/css">
     <script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.min.js" type="text/javascript"></script>
     <script src="${pageContext.request.contextPath}/static/jquery.js" type="text/javascript"></script>
