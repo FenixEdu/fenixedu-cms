@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.domain.User;
@@ -40,11 +41,12 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
+import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
-import org.owasp.html.Sanitizers;
 
 import pt.ist.fenixframework.Atomic;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -468,8 +470,35 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         return !getCreationDate().toLocalDate().equals(getModificationDate().toLocalDate());
     }
 
-    private static PolicyFactory CMS_SANITIZER = Sanitizers.BLOCKS.and(Sanitizers.FORMATTING).and(Sanitizers.IMAGES)
-            .and(Sanitizers.LINKS).and(Sanitizers.STYLES);
+    private static final Pattern ONSITE_URL = Pattern.compile("(?:[\\p{L}\\p{N}\\\\\\.\\#@\\$%\\+&;\\-_~,\\?=/!]+|\\#(\\w)+)");
+    private static final Pattern OFFSITE_URL = Pattern.compile("\\s*(?:(?:ht|f)tps?://)[\\p{L}\\p{N}]"
+            + "[\\p{L}\\p{N}\\p{Zs}\\.\\#@\\$%\\+&;:\\-_~,\\?=/!\\(\\)]*\\s*");
+
+    private static final Predicate<String> ONSITE_OR_OFFSITE_URL = new Predicate<String>() {
+        @Override
+        public boolean apply(String s) {
+            return ONSITE_URL.matcher(s).matches() || OFFSITE_URL.matcher(s).matches();
+        }
+    };
+
+    private static PolicyFactory CMS_SANITIZER = new HtmlPolicyBuilder()
+            .allowStyling()
+            .allowElements("a", "b", "blockquote", "br", "caption", "cite", "code", "col", "colgroup", "dd", "dl", "dt", "em",
+                    "h1", "h2", "h3", "h4", "h5", "h6", "i", "img", "li", "ol", "p", "pre", "q", "small", "strike", "strong",
+                    "sub", "sup", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "u", "ul").allowAttributes("href")
+            .matching(ONSITE_OR_OFFSITE_URL).onElements("a").allowAttributes("title").onElements("a").allowAttributes("cite")
+            .matching(ONSITE_OR_OFFSITE_URL).onElements("blockquote").allowAttributes("span").onElements("col")
+            .allowAttributes("width").onElements("col").allowAttributes("span").onElements("colgroup").allowAttributes("width")
+            .onElements("colgroup").allowAttributes("align").onElements("img").allowAttributes("alt").onElements("img")
+            .allowAttributes("height").onElements("img").allowAttributes("src").matching(ONSITE_OR_OFFSITE_URL).onElements("img")
+            .allowAttributes("title").onElements("img").allowAttributes("width").onElements("img").allowAttributes("start")
+            .onElements("ol").allowAttributes("type").onElements("ol").allowAttributes("cite").matching(ONSITE_OR_OFFSITE_URL)
+            .onElements("q").allowAttributes("summary").onElements("table").allowAttributes("width").onElements("table")
+            .allowAttributes("abbr").onElements("td").allowAttributes("axis").onElements("td").allowAttributes("colspan")
+            .onElements("td").allowAttributes("rowspan").onElements("td").allowAttributes("width").onElements("td")
+            .allowAttributes("abbr").onElements("th").allowAttributes("axis").onElements("th").allowAttributes("colspan")
+            .onElements("th").allowAttributes("rowspan").onElements("th").allowAttributes("scope").onElements("th")
+            .allowAttributes("width").onElements("th").allowAttributes("type").onElements("ul").toFactory();
 
     public static LocalizedString sanitize(LocalizedString origin) {
         LocalizedString result = new LocalizedString();
