@@ -470,9 +470,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         return !getCreationDate().toLocalDate().equals(getModificationDate().toLocalDate());
     }
 
-    private static final Pattern ONSITE_URL = Pattern.compile("(?:[\\p{L}\\p{N}\\\\\\.\\#@\\$%\\+&;\\-_~,\\?=/!]+|\\#(\\w)+)");
-    private static final Pattern OFFSITE_URL = Pattern.compile("\\s*(?:(?:ht|f)tps?://)[\\p{L}\\p{N}]"
-            + "[\\p{L}\\p{N}\\p{Zs}\\.\\#@\\$%\\+&;:\\-_~,\\?=/!\\(\\)]*\\s*");
+    private static final Pattern ONSITE_URL = Pattern.compile("");
+    private static final Pattern OFFSITE_URL = Pattern.compile("^\\s*((ht|f)tps?:|mailto:)(.*)");
 
     private static final Predicate<String> ONSITE_OR_OFFSITE_URL = new Predicate<String>() {
         @Override
@@ -483,16 +482,16 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
 
     private static PolicyFactory CMS_SANITIZER = new HtmlPolicyBuilder()
             .allowStyling()
+            .allowStandardUrlProtocols()
             .allowElements("a", "b", "blockquote", "br", "caption", "cite", "code", "col", "colgroup", "dd", "dl", "dt", "em",
                     "h1", "h2", "h3", "h4", "h5", "h6", "i", "img", "li", "ol", "p", "pre", "q", "small", "strike", "strong",
                     "sub", "sup", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "u", "ul").allowAttributes("href")
-            .matching(ONSITE_OR_OFFSITE_URL).onElements("a").allowAttributes("title").onElements("a").allowAttributes("cite")
-            .matching(ONSITE_OR_OFFSITE_URL).onElements("blockquote").allowAttributes("span").onElements("col")
-            .allowAttributes("width").onElements("col").allowAttributes("span").onElements("colgroup").allowAttributes("width")
-            .onElements("colgroup").allowAttributes("align").onElements("img").allowAttributes("alt").onElements("img")
-            .allowAttributes("height").onElements("img").allowAttributes("src").matching(ONSITE_OR_OFFSITE_URL).onElements("img")
-            .allowAttributes("title").onElements("img").allowAttributes("width").onElements("img").allowAttributes("start")
-            .onElements("ol").allowAttributes("type").onElements("ol").allowAttributes("cite").matching(ONSITE_OR_OFFSITE_URL)
+            .onElements("a").allowAttributes("title").onElements("a").allowAttributes("cite").onElements("blockquote")
+            .allowAttributes("span").onElements("col").allowAttributes("width").onElements("col").allowAttributes("span")
+            .onElements("colgroup").allowAttributes("width").onElements("colgroup").allowAttributes("align").onElements("img")
+            .allowAttributes("alt").onElements("img").allowAttributes("height").onElements("img").allowAttributes("src")
+            .onElements("img").allowAttributes("title").onElements("img").allowAttributes("width").onElements("img")
+            .allowAttributes("start").onElements("ol").allowAttributes("type").onElements("ol").allowAttributes("cite")
             .onElements("q").allowAttributes("summary").onElements("table").allowAttributes("width").onElements("table")
             .allowAttributes("abbr").onElements("td").allowAttributes("axis").onElements("td").allowAttributes("colspan")
             .onElements("td").allowAttributes("rowspan").onElements("td").allowAttributes("width").onElements("td")
