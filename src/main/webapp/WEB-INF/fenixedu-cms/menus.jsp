@@ -54,8 +54,7 @@
               <td>
               	<div class="btn-group">
 	                <a href="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.oid}/change" class="btn btn-sm btn-default"><spring:message code="action.manage" /></a>
-	                <a href="#" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteMenuForm${menu.externalId}').submit();"><spring:message code="action.delete" /></a>
-					<form id="deleteMenuForm${menu.externalId}" action="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.oid}/delete" method="POST"></form>
+	                <a href="#" class="btn btn-danger btn-sm" data-menu="${menu.oid}"><spring:message code="action.delete" /></a>
 				</div>
               </td>
             </tr>
@@ -64,3 +63,34 @@
         </table>
       </c:otherwise>
 </c:choose>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <h4><spring:message code="menu.manage.label.delete.menu"/></h4>
+            </div>
+            <div class="modal-body">
+                <p><spring:message code="menu.manage.label.delete.menu.message"/></p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
+                    <a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    $("a[data-menu]").on('click', function(el) {
+        var menu = el.target.getAttribute('data-menu');
+        $('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/menus/${site.slug}/' + menu + '/delete');
+        $('#deleteModal').modal('show');
+    });
+})();
+</script>
