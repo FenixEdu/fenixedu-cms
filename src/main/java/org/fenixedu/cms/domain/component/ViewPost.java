@@ -38,7 +38,7 @@ public class ViewPost implements CMSComponent {
         if (ctx.length > 1) {
             Post p = page.getSite().postForSlug(ctx[1]);
 
-            if (p == null) {
+            if (p == null || !p.getActive()) {
                 throw new ResourceNotFoundException();
             }
 

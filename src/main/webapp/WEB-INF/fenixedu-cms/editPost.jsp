@@ -28,25 +28,20 @@
 
 ${portal.toolkit()}
 
-<h1><spring:message code="post.edit.title"/></h1>
-
-<div class="row">
-    <div class="col-sm-8"><h4>${site.name.content}</h4></div>
-    <div class="col-sm-4">
-        <div class="pull-right">
-            <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}" class="btn btn-default">Dashboard</a> <a
-                href="${site.fullUrl}" target="_blank" class="btn btn-default">View Site</a> <a href="${post.address}"
-                                                                                                target="_blank"
-                                                                                                class="btn btn-default">View
-            Post</a>
-        </div>
+<h2 class="page-header" style="margin-top: 0">
+    <spring:message code="post.edit.title"/>
+    <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small>
+    <div class="pull-right">
+        <c:if test="${not empty post.address}">
+            <a href="${post.address}" target="_blank" class="btn btn-default">Link</a>
+        </c:if>
     </div>
-</div>
+</h2>
 <form class="form-horizontal" action="" method="post" role="form">
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
-        <li class="active"><a href="#postContent" role="tab" data-toggle="tab">Post</a></li>
+        <li class="active"><a href="#postContent" role="tab" data-toggle="tab"><spring:message code="page.edit.label.post"/></a></li>
         <li><a href="#files" role="tab" data-toggle="tab">Post Files</a></li>
         <li><a href="#attachments" role="tab" data-toggle="tab">Attachments</a></li>
 
@@ -93,6 +88,18 @@ ${portal.toolkit()}
             </div>
 
             <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.visible"/></label>
+
+                <div class="col-sm-10">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" value="true" ${post.active ? 'checked="checked"' : ''} name="active" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label for="inputEmail3" class="col-sm-2 control-label">Publication date</label>
 
                 <div class="col-sm-5">
@@ -110,43 +117,36 @@ ${portal.toolkit()}
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="inputEmail3" class="col-sm-2 control-label">Categories</label>
 
-                <div class="col-sm-10">
-                    <c:choose>
-                        <c:when test="${site.categoriesSet.size() > 0}">
-                            <c:forEach var="c" items="${site.categoriesSet}" varStatus="loop">
+            <c:if test="${site.categoriesSet.size() > 0}">
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.manage.label.categories"/></label>
 
-                                <div class="checkbox">
-                                    <label>
-                                        <c:choose>
-                                            <c:when test="${post.categoriesSet.contains(c)}">
-                                                <input type="checkbox" name="categories" value="${c.slug}"
-                                                       checked="checked"/> ${c.name.content}
-                                            </c:when>
-                                            <c:otherwise>
-                                                <input type="checkbox" name="categories" value="${c.slug}"/> ${c.name.content}
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </label>
-                                </div>
-                            </c:forEach>
-                        </c:when>
-                        <c:otherwise>
-                            <div><i>This site has no categories</i></div>
-                        </c:otherwise>
-                    </c:choose>
-                    <div class="checkbox">
-                        <a href="${pageContext.request.contextPath}/cms/categories/${site.slug}">Edit Categories</a>
+                    <div class="col-sm-10">
+                        <c:forEach var="c" items="${site.categoriesSet}" varStatus="loop">
+
+                            <div class="checkbox">
+                                <label>
+                                    <c:choose>
+                                        <c:when test="${post.categoriesSet.contains(c)}">
+                                            <input type="checkbox" name="categories" value="${c.slug}"
+                                                   checked="checked"/> ${c.name.content}
+                                        </c:when>
+                                        <c:otherwise>
+                                            <input type="checkbox" name="categories" value="${c.slug}"/> ${c.name.content}
+                                        </c:otherwise>
+                                    </c:choose>
+                                </label>
+                            </div>
+                        </c:forEach>
                     </div>
-                </div>
+            </c:if>
             </div>
 
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" class="btn btn-primary"><spring:message code="action.edit"/></button>
-                    <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">View Metadata</a>
+                    <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">Metadata</a>
                 </div>
             </div>
 
@@ -158,7 +158,7 @@ ${portal.toolkit()}
                 </p>
 
                 <p>
-                    <button class="btn btn-default" data-toggle="modal" data-target="#addFile">Add File</button>
+                    <a class="btn btn-default" data-toggle="modal" data-target="#addFile">Add File</a>
                 </p>
 
                 <c:choose>
@@ -210,7 +210,7 @@ ${portal.toolkit()}
                 </p>
 
                 <p>
-                    <button class="btn btn-default" data-toggle="modal" data-target="#addAttachment">Add Attachment</button>
+                    <a class="btn btn-default" data-toggle="modal" data-target="#addAttachment">Add Attachment</a>
                 </p>
 
                 <c:choose>
@@ -243,11 +243,11 @@ ${portal.toolkit()}
                                                 class="glyphicon glyphicon-trash"></span></button>
                                         <a href="${cms.downloadUrl(file)}" target="_blank" class="btn btn-default btn-sm">Link</a>
 
-                                        <button class="btn btn-default btn-sm" data-toggle="modal"
+                                        <%--<a class="btn btn-default btn-sm" data-toggle="modal"
                                                 data-target="#attachmentDeleteModal"
                                                 data-file="${file.displayName}" data-file-index="${loop.index}">
                                             <spring:message code="label.access.control"/>
-                                        </button>
+                                        </a>--%>
 
                                         <div class="btn-group">
 
@@ -400,7 +400,6 @@ ${portal.toolkit()}
                 <div class="clearfix">
                     <div class="form-group">
                         <div class="col-sm-12">
-                            <label>Current post metadata:</label>
                             <div class="json-data"></div>
                         </div>
                     </div>

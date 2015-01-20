@@ -91,7 +91,7 @@ public class AdminPosts {
 
     @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
     public RedirectView createPost(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
-            @RequestParam LocalizedString body, RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes) {
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/posts/" + slug + "/create", true);
@@ -100,17 +100,18 @@ public class AdminPosts {
 
             AdminSites.canEdit(s);
 
-            createPost(s, name, body);
-            return new RedirectView("/cms/posts/" + s.getSlug() + "", true);
+            Post post = createPost(s, name);
+            return new RedirectView("/cms/posts/" + s.getSlug() + "/" + post.getSlug() + "/edit", true);
         }
     }
 
     @Atomic
-    private void createPost(Site site, LocalizedString name, LocalizedString body) {
+    private Post createPost(Site site, LocalizedString name) {
         Post p = new Post(site);
         p.setName(Post.sanitize(name));
-        p.setBody(Post.sanitize(body));
-
+        p.setBody(new LocalizedString());
+        p.setActive(false);
+        return p;
     }
 
     @RequestMapping(value = "{slug}/{postSlug}/edit", method = RequestMethod.GET)
@@ -131,8 +132,8 @@ public class AdminPosts {
             @PathVariable(value = "postSlug") String postSlug, @RequestParam String newSlug, @RequestParam LocalizedString name,
             @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories, @RequestParam(
                     required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationStarts, @RequestParam(
-                    required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationEnds,
-            RedirectAttributes redirectAttributes) {
+                    required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationEnds, @RequestParam(
+                    required = false, defaultValue = "false") boolean active, RedirectAttributes redirectAttributes) {
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
@@ -140,14 +141,14 @@ public class AdminPosts {
         } else {
             Site s = Site.fromSlug(slug);
             Post p = s.postForSlug(postSlug);
-            editPost(p, name, body, newSlug, categories, publicationStarts, publicationEnds);
-            return new RedirectView("/cms/posts/" + s.getSlug() + "", true);
+            editPost(p, name, body, newSlug, categories, publicationStarts, publicationEnds, active);
+            return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
         }
     }
 
     @Atomic
     private void editPost(Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories,
-            DateTime publicationStarts, DateTime publicationEnds) {
+            DateTime publicationStarts, DateTime publicationEnds, boolean active) {
         post.setName(Post.sanitize(name));
         post.setBody(Post.sanitize(body));
         post.setSlug(newSlug);
@@ -162,6 +163,7 @@ public class AdminPosts {
 
         post.setPublicationBegin(publicationStarts);
         post.setPublicationEnd(publicationEnds);
+        post.setActive(active);
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/delete", method = RequestMethod.POST)

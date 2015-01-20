@@ -39,13 +39,6 @@
     </div>
 
     <div class="form-group">
-        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.create.label.body"/></label>
-
-        <div class="col-sm-10">
-            <textarea bennu-html-editor bennu-localized-string required-any name="body" rows="3"></textarea>
-        </div>
-    </div>
-    <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
             <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.create"/></button>
         </div>
