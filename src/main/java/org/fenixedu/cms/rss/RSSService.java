@@ -131,8 +131,8 @@ public class RSSService {
         writer.add(nl);
 
         for (Post post : posts) {
-            // Is this post public? 
-            if (post.getCanViewGroup().isMember(null)) {
+            // Is this post public?
+            if (post.isVisible() && post.getCanViewGroup().isMember(null)) {
                 writePost(locale, writer, post, eventFactory);
             }
         }
