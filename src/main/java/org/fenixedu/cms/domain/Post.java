@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.domain.User;
@@ -46,7 +45,6 @@ import org.owasp.html.PolicyFactory;
 
 import pt.ist.fenixframework.Atomic;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -469,16 +467,6 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     public boolean isModified() {
         return !getCreationDate().toLocalDate().equals(getModificationDate().toLocalDate());
     }
-
-    private static final Pattern ONSITE_URL = Pattern.compile("");
-    private static final Pattern OFFSITE_URL = Pattern.compile("^\\s*((ht|f)tps?:|mailto:)(.*)");
-
-    private static final Predicate<String> ONSITE_OR_OFFSITE_URL = new Predicate<String>() {
-        @Override
-        public boolean apply(String s) {
-            return ONSITE_URL.matcher(s).matches() || OFFSITE_URL.matcher(s).matches();
-        }
-    };
 
     private static PolicyFactory CMS_SANITIZER = new HtmlPolicyBuilder()
             .allowStyling()
