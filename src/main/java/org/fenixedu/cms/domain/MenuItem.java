@@ -221,7 +221,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
             children =
                     ImmutableList.copyOf(MenuItem.this.getChildrenSorted().stream().filter(MenuItem::isVisible)
                             .map(menuItem -> menuItem.makeWrap(page)).collect(Collectors.toList()));
-            active = open || children.stream().map(menuItem -> ((MenuItemWrap) menuItem).open).reduce(false, (x, y) -> x || y);
+            active = open || children.stream().anyMatch(item -> ((MenuItemWrap) item).open || ((MenuItemWrap) item).active);
         }
 
         public List<Wrap> getChildren() {
