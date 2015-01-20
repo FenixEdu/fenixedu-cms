@@ -21,7 +21,6 @@ package org.fenixedu.cms.domain;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,8 +39,6 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-import org.owasp.html.HtmlPolicyBuilder;
-import org.owasp.html.PolicyFactory;
 
 import pt.ist.fenixframework.Atomic;
 
@@ -468,31 +465,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         return !getCreationDate().toLocalDate().equals(getModificationDate().toLocalDate());
     }
 
-    private static PolicyFactory CMS_SANITIZER = new HtmlPolicyBuilder()
-            .allowStyling()
-            .allowStandardUrlProtocols()
-            .allowElements("a", "b", "blockquote", "br", "caption", "cite", "code", "col", "colgroup", "dd", "dl", "dt", "em",
-                    "h1", "h2", "h3", "h4", "h5", "h6", "i", "img", "li", "ol", "p", "pre", "q", "small", "strike", "strong",
-                    "sub", "sup", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "u", "ul").allowAttributes("href")
-            .onElements("a").allowAttributes("title").onElements("a").allowAttributes("cite").onElements("blockquote")
-            .allowAttributes("span").onElements("col").allowAttributes("width").onElements("col").allowAttributes("span")
-            .onElements("colgroup").allowAttributes("width").onElements("colgroup").allowAttributes("align").onElements("img")
-            .allowAttributes("alt").onElements("img").allowAttributes("height").onElements("img").allowAttributes("src")
-            .onElements("img").allowAttributes("title").onElements("img").allowAttributes("width").onElements("img")
-            .allowAttributes("start").onElements("ol").allowAttributes("type").onElements("ol").allowAttributes("cite")
-            .onElements("q").allowAttributes("summary").onElements("table").allowAttributes("width").onElements("table")
-            .allowAttributes("abbr").onElements("td").allowAttributes("axis").onElements("td").allowAttributes("colspan")
-            .onElements("td").allowAttributes("rowspan").onElements("td").allowAttributes("width").onElements("td")
-            .allowAttributes("abbr").onElements("th").allowAttributes("axis").onElements("th").allowAttributes("colspan")
-            .onElements("th").allowAttributes("rowspan").onElements("th").allowAttributes("scope").onElements("th")
-            .allowAttributes("width").onElements("th").allowAttributes("type").onElements("ul").toFactory();
-
-    public static LocalizedString sanitize(LocalizedString origin) {
-        LocalizedString result = new LocalizedString();
-        for (Locale l : origin.getLocales()) {
-            result = result.with(l, CMS_SANITIZER.sanitize(origin.getContent(l)));
-        }
-        return result;
+    public static LocalizedString sanitize(LocalizedString original) {
+        return Sanitization.sanitize(original);
     }
 
 }
