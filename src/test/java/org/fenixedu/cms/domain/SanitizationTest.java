@@ -26,6 +26,11 @@ public class SanitizationTest {
         checkNoChange("<table class=\"jumbotron\"></table>");
     }
 
+    @Test
+    public void testEmail() {
+        checkNoChange("<a href=\"mailto:hello@fenixedu.org\">hello@fenixedu.org</a>");
+    }
+
     private void checkNoChange(String str) {
         assertEquals(str, sanitize(str));
     }
