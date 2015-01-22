@@ -44,8 +44,6 @@
             <div style="outline:none;" id="tree"></div>
         </div>
         <div id="options" class="col-md-6">
-            <h3>ZZZZZ</h3>
-
             <form action="changeItem" id="modal" method="post">
                 <input type="hidden" name="menuItemOid" value="null"/>
                 <input type="hidden" name="menuItemOidParent" value="null"/>
@@ -59,7 +57,7 @@
                 <div class="form-group">
                     <label class="control-label" for="inputSuccess1"><spring:message code="menu.edit.label.menuLabel"/></label>
                     <input type="text" name="name" class="form-control"
-                           placeholder="<spring:message code="menu.edit.label.name"/>">
+                           placeholder="<spring:message code="menu.edit.label.name"/>" required="true">
                 </div>
 
                 <div id="menuitem-options">
@@ -86,7 +84,7 @@
                         <div class="form-group">
                             <select name="slugPage" class="page-select form-control">
                                 <option value="null">-</option>
-                                <c:forEach var="p" items="${site.pages}">
+                                <c:forEach var="p" items="${site.sortedPages}">
                                     <option value="${ p.slug }">${ p.name.content }</option>
                                 </c:forEach>
                             </select>
@@ -118,7 +116,8 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title">Create subitem</h4>
+                        <h4 class="modal-title"><spring:message
+                            code="menu.edit.label.createSubitem"/></h4>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
@@ -152,7 +151,7 @@
                                 <div class="form-group">
                                     <select name="slugPage" class="page-select form-control">
                                         <option value="null">-</option>
-                                        <c:forEach var="p" items="${site.pages}">
+                                        <c:forEach var="p" items="${site.sortedPages}">
                                             <option value="${ p.slug }">${ p.name.content }</option>
                                         </c:forEach>
                                     </select>
@@ -333,6 +332,10 @@
         });
     });
 
-
+    $("select[name=slugPage]").change(function(event) {
+        $(event.target).closest('form').find('input[name=use].usepage').prop('checked', true);
+        var name = $(event.target).closest('form').find('input[name=name]');
+        name.val($(event.target).find(':selected').text());
+    });
 </script>
   

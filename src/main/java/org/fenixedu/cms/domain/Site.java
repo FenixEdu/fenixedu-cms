@@ -18,6 +18,7 @@
  */
 package org.fenixedu.cms.domain;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -514,5 +515,10 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     @Override
     public Wrap makeWrap() {
         return new SiteWrap();
+    }
+
+    public List<Page> getSortedPages() {
+        return getPagesSet().stream().sorted(Comparator.comparing(page -> page.getName().getContent()))
+                .collect(Collectors.toList());
     }
 }

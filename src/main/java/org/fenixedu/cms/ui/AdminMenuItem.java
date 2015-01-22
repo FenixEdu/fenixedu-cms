@@ -61,7 +61,7 @@ public class AdminMenuItem {
     private JsonObject serialize(MenuItem item) {
         JsonObject root = new JsonObject();
 
-        root.add("title", new JsonPrimitive(item.getName().getContent()));
+        root.add("title", new JsonPrimitive(item.getName().isEmpty() ? "---" : item.getName().getContent()));
         root.add("key", new JsonPrimitive(item.getExternalId()));
         root.add("url", item.getUrl() == null ? null : new JsonPrimitive(item.getUrl()));
         root.add("page", item.getPage() == null ? null : new JsonPrimitive(item.getPage().getSlug()));

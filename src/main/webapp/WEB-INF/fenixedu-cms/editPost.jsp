@@ -124,7 +124,7 @@ ${portal.toolkit()}
 
                     <div class="col-sm-10">
                         <c:forEach var="c" items="${site.categoriesSet}" varStatus="loop">
-
+                            <div class="col-sm-4">
                             <div class="checkbox">
                                 <label>
                                     <c:choose>
@@ -138,6 +138,7 @@ ${portal.toolkit()}
                                     </c:choose>
                                 </label>
                             </div>
+                            </div>
                         </c:forEach>
                     </div>
             </c:if>
@@ -145,7 +146,7 @@ ${portal.toolkit()}
 
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                    <button type="submit" class="btn btn-primary"><spring:message code="action.edit"/></button>
+                    <button type="submit" class="btn btn-primary"><spring:message code="action.save"/></button>
                     <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">Metadata</a>
                 </div>
             </div>
