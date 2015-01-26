@@ -19,7 +19,9 @@
 package org.fenixedu.cms.ui;
 
 import java.util.Objects;
+import java.util.Optional;
 
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
 import org.fenixedu.cms.domain.Page;
@@ -39,6 +41,8 @@ import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
 import com.google.common.base.Strings;
+
+import static java.util.Optional.ofNullable;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/pages")
@@ -110,22 +114,21 @@ public class AdminPages {
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST)
     public RedirectView edit(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "slugPage") String slugPage, @RequestParam LocalizedString name, @RequestParam String slug,
-            @RequestParam String template, RedirectAttributes redirectAttributes) {
+            @RequestParam String template, @RequestParam(required = false) Boolean published, @RequestParam String viewGroup,
+            RedirectAttributes redirectAttributes) {
         if (name != null && name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage + "/edit", true);
         }
         Site s = Site.fromSlug(slugSite);
-
         AdminSites.canEdit(s);
-
         Page p = s.pageForSlug(slugPage.equals("--**--") ? "" : slugPage);
-        editPage(name, slug, template, s, p);
+        editPage(name, slug, template, s, p, ofNullable(published).orElse(false), Group.parse(viewGroup));
         return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage + "/edit", true);
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private void editPage(LocalizedString name, String slug, String template, Site s, Page p) {
+    private void editPage(LocalizedString name, String slug, String template, Site s, Page p, boolean published, Group canView) {
         p.setName(name);
         if (!Objects.equals(slug, p.getSlug())) {
             p.setSlug(slug);
@@ -133,6 +136,12 @@ public class AdminPages {
         if (s != null && s.getTheme() != null) {
             CMSTemplate t = s.getTheme().templateForType(template);
             p.setTemplate(t);
+        }
+        if(p.getPublished() != published) {
+            p.setPublished(published);
+        }
+        if(!p.getCanViewGroup().equals(canView)) {
+            p.setCanViewGroup(canView);
         }
     }
 
