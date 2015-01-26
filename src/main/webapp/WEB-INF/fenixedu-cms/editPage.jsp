@@ -67,6 +67,25 @@
                 </select>
             </div>
         </div>
+
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
+            ${ page.canViewGroup.expression }
+            <div class="col-sm-10">
+                <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
+                       value="${ page.canViewGroup.expression }"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                    code="site.create.label.published"/></label>
+
+            <div class="col-sm-2">
+                <input name="published" type="checkbox" value="true" ${page.published ? "checked='checked'" : ""}>
+            </div>
+        </div>
+
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <button type="submit" onclick="$('#mainForm').submit()" class="btn btn-default btn-primary"><spring:message
