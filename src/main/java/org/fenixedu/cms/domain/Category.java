@@ -98,9 +98,7 @@ public class Category extends Category_Base implements Wrappable, Sluggable {
         this.setCreatedBy(null);
         this.setSite(null);
         for (Post post : this.getPostsSet()) {
-            for (Category c : Sets.newHashSet(post.getCategoriesSet())) {
-                post.removeCategories(c);
-            }
+            post.removeCategories(this);
         }
         this.deleteDomainObject();
     }
