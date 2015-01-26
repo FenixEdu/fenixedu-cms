@@ -100,6 +100,14 @@ ${portal.toolkit()}
             </div>
 
             <div class="form-group">
+                <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
+                <div class="col-sm-10">
+                    <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
+                           value="${ post.canViewGroup.expression }"/>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label for="inputEmail3" class="col-sm-2 control-label">Publication date</label>
 
                 <div class="col-sm-5">
