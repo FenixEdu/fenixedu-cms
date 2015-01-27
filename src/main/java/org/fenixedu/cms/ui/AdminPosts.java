@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
@@ -133,7 +134,8 @@ public class AdminPosts {
             @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories, @RequestParam(
                     required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationStarts, @RequestParam(
                     required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationEnds, @RequestParam(
-                    required = false, defaultValue = "false") boolean active, RedirectAttributes redirectAttributes) {
+                    required = false, defaultValue = "false") boolean active, @RequestParam String viewGroup,
+            RedirectAttributes redirectAttributes) {
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
@@ -141,14 +143,14 @@ public class AdminPosts {
         } else {
             Site s = Site.fromSlug(slug);
             Post p = s.postForSlug(postSlug);
-            editPost(p, name, body, newSlug, categories, publicationStarts, publicationEnds, active);
+            editPost(p, name, body, newSlug, categories, publicationStarts, publicationEnds, active, Group.parse(viewGroup));
             return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
         }
     }
 
     @Atomic
     private void editPost(Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories,
-            DateTime publicationStarts, DateTime publicationEnds, boolean active) {
+            DateTime publicationStarts, DateTime publicationEnds, boolean active, Group viewGroup) {
         post.setName(Post.sanitize(name));
         post.setBody(Post.sanitize(body));
         post.setSlug(newSlug);
@@ -164,6 +166,7 @@ public class AdminPosts {
         post.setPublicationBegin(publicationStarts);
         post.setPublicationEnd(publicationEnds);
         post.setActive(active);
+        post.setCanViewGroup(viewGroup);
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/delete", method = RequestMethod.POST)

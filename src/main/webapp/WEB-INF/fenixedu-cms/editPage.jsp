@@ -24,6 +24,11 @@
 <h2 class="page-header" style="margin-top: 0">
     <spring:message code="page.edit.title"/> - ${page.name.content}
     <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small>
+    <c:if test="${page.published}">
+        <div class="button-group pull-right">
+                <a href="${page.address}" target="_blank" class="btn btn-default"><spring:message code="action.link"/></a>
+        </div>
+    </c:if>
 </h2>
 
 <div ng-app="componentsApp" ng-controller="ComponentController">
@@ -67,6 +72,24 @@
                 </select>
             </div>
         </div>
+
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
+            <div class="col-sm-10">
+                <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
+                       value="${ page.canViewGroup.expression }"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                    code="site.create.label.published"/></label>
+
+            <div class="col-sm-2">
+                <input name="published" type="checkbox" value="true" ${page.published ? "checked='checked'" : ""}>
+            </div>
+        </div>
+
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <button type="submit" onclick="$('#mainForm').submit()" class="btn btn-default btn-primary"><spring:message
