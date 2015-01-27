@@ -57,7 +57,7 @@ public class CMSThemeFiles {
         this.files.values().forEach(file -> {
             builder.append(Hashing.sha256().hashBytes(file.getContent()).toString());
         });
-        return Hashing.sha256().hashString(builder, StandardCharsets.UTF_8).toString();
+        return Hashing.murmur3_128().hashString(builder, StandardCharsets.UTF_8).toString().substring(0, 16);
     }
 
     public CMSThemeFile getFileForPath(String path) {
@@ -123,5 +123,9 @@ public class CMSThemeFiles {
 
     public boolean checksumMatches(CMSThemeFiles files) {
         return this.checksum.equals(files.checksum);
+    }
+
+    public String getChecksum() {
+        return this.checksum;
     }
 }

@@ -38,8 +38,10 @@ public class CMSConfigurationManager {
         return ConfigurationInvocationHandler.getConfiguration(ConfigurationProperties.class);
     }
 
+    private static final boolean devMode = CoreConfiguration.getConfiguration().developmentMode()
+            && !Strings.isNullOrEmpty(getConfiguration().themeDevelopmentDirectory());
+
     public static boolean isInThemeDevelopmentMode() {
-        return CoreConfiguration.getConfiguration().developmentMode()
-                && !Strings.isNullOrEmpty(getConfiguration().themeDevelopmentDirectory());
+        return devMode;
     }
 }

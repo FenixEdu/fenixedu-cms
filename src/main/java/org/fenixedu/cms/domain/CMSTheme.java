@@ -179,6 +179,11 @@ public class CMSTheme extends CMSTheme_Base {
 
     }
 
+    public String getAssetsPath() {
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/assets/" + getType() + "/"
+                + getFiles().getChecksum();
+    }
+
     @Atomic
     public void changeFiles(CMSThemeFiles files) {
         if (getFiles() == null || !getFiles().checksumMatches(files)) {

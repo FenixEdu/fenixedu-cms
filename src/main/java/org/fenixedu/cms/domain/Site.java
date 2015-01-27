@@ -38,6 +38,7 @@ import org.fenixedu.bennu.portal.domain.MenuContainer;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.domain.MenuItem;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
+import org.fenixedu.cms.CMSConfigurationManager;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ListCategoryPosts;
 import org.fenixedu.cms.domain.component.ViewPost;
@@ -410,7 +411,11 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
      * @return the static directory of this {@link Site}.
      */
     public String getStaticDirectory() {
-        return CoreConfiguration.getConfiguration().applicationUrl() + "/" + getBaseUrl() + "/static";
+        if (CMSConfigurationManager.isInThemeDevelopmentMode()) {
+            return CoreConfiguration.getConfiguration().applicationUrl() + "/" + getBaseUrl() + "/static";
+        } else {
+            return getTheme().getAssetsPath();
+        }
     }
 
     /**
