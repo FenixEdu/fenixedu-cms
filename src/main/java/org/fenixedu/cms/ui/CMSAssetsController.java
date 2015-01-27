@@ -33,6 +33,7 @@ public class CMSAssetsController {
         CMSThemeFile file = theme.fileForPath("static/" + path);
         if (file == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, path);
+            return;
         }
         byte[] bytes = file.getContent();
         String etag = "W/\"" + bytes.length + "-" + file.getLastModified().getMillis() + "\"";
