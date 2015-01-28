@@ -21,7 +21,6 @@ package org.fenixedu.cms.ui;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Site;
-import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,8 +31,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import pt.ist.fenixframework.Atomic;
-
-import com.google.common.base.Strings;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/menus")
@@ -60,9 +57,9 @@ public class AdminMenu {
     }
 
     @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
-    public RedirectView createMenu(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
+    public RedirectView createMenu(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
             RedirectAttributes redirectAttributes) {
-        if (Strings.isNullOrEmpty(name)) {
+        if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/menus/" + slug + "/create", true);
         } else {
@@ -73,9 +70,9 @@ public class AdminMenu {
     }
 
     @Atomic
-    private void createMenu(Site site, String name) {
+    private void createMenu(Site site, LocalizedString name) {
         Menu p = new Menu(site);
-        p.setName(new LocalizedString(I18N.getLocale(), name));
+        p.setName(name);
     }
 
     @RequestMapping(value = "{slugSite}/{oidMenu}/delete", method = RequestMethod.POST)

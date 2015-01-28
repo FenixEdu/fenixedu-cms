@@ -25,7 +25,6 @@ import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
-import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -62,6 +61,8 @@ public class AdminMenuItem {
         JsonObject root = new JsonObject();
 
         root.add("title", new JsonPrimitive(item.getName().isEmpty() ? "---" : item.getName().getContent()));
+        root.add("name", item.getName().json());
+
         root.add("key", new JsonPrimitive(item.getExternalId()));
         root.add("url", item.getUrl() == null ? null : new JsonPrimitive(item.getUrl()));
         root.add("page", item.getPage() == null ? null : new JsonPrimitive(item.getPage().getSlug()));
@@ -91,7 +92,8 @@ public class AdminMenuItem {
 
         JsonObject root = new JsonObject();
 
-        root.add("title", new JsonPrimitive(m.getName().getContent()));
+        root.add("title", new JsonPrimitive(m.getName().isEmpty() ? "---" : m.getName().getContent()));
+        root.add("name", m.getName().json());
         root.add("key", new JsonPrimitive("null"));
         root.add("root", new JsonPrimitive(true));
         root.add("folder", new JsonPrimitive(true));
@@ -110,8 +112,8 @@ public class AdminMenuItem {
 
     @RequestMapping(value = "{slugSite}/{oidMenu}/createItem", method = RequestMethod.POST)
     public RedirectView create(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid, @RequestParam String name,
-            @RequestParam String use, @RequestParam String url, @RequestParam String slugPage) {
+            @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid,
+            @RequestParam LocalizedString name, @RequestParam String use, @RequestParam String url, @RequestParam String slugPage) {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -123,9 +125,9 @@ public class AdminMenuItem {
     }
 
     @Atomic
-    private void createMenuItem(String menuItemOid, String name, String use, String url, String slugPage, Site s, Menu m) {
+    private void createMenuItem(String menuItemOid, LocalizedString name, String use, String url, String slugPage, Site s, Menu m) {
         MenuItem mi = new MenuItem(m);
-        mi.setName(new LocalizedString(I18N.getLocale(), name));
+        mi.setName(name);
 
         if (!menuItemOid.equals("null")) {
             MenuItem parent = FenixFramework.getDomainObject(menuItemOid);
@@ -153,7 +155,7 @@ public class AdminMenuItem {
     @RequestMapping(value = "{slugSite}/{oidMenu}/changeItem", method = RequestMethod.POST)
     public RedirectView change(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid,
-            @RequestParam String menuItemOidParent, @RequestParam String name, @RequestParam String use,
+            @RequestParam String menuItemOidParent, @RequestParam LocalizedString name, @RequestParam String use,
             @RequestParam String url, @RequestParam String slugPage, @RequestParam Integer position) {
 
         Site s = Site.fromSlug(slugSite);
@@ -178,15 +180,15 @@ public class AdminMenuItem {
     }
 
     @Atomic
-    private void changeMenu(Menu m, String name) {
-        m.setName(new LocalizedString(I18N.getLocale(), name));
+    private void changeMenu(Menu m, LocalizedString name) {
+        m.setName(name);
     }
 
     @Atomic
-    private void changeMenuItem(MenuItem mi, String menuItemOid, String name, String use, String url, String slugPage, Site s,
-            Menu m, Integer position) {
+    private void changeMenuItem(MenuItem mi, String menuItemOid, LocalizedString name, String use, String url, String slugPage,
+            Site s, Menu m, Integer position) {
 
-        mi.setName(new LocalizedString(I18N.getLocale(), name));
+        mi.setName(name);
 
         if (!menuItemOid.equals("null")) {
             if ((mi.getParent() == null && !menuItemOid.equals("null"))

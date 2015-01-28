@@ -26,11 +26,13 @@
   <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
 </h2>
 
+${portal.toolkit()}
+
 <form class="form-horizontal" action="" method="post" role="form">
   <div class="${emptyName ? "form-group has-error" : "form-group"}">
     <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="menu.create.label.name" /></label>
     <div class="col-sm-10">
-      <input type="text" name="name" class="form-control" id="inputEmail3" placeholder="<spring:message code="menu.create.label.name" />">
+      <input type="text" name="name" bennu-localized-string class="form-control" id="inputEmail3" placeholder="<spring:message code="menu.create.label.name" />">
       <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="site.create.error.emptyName"/></p></c:if>
     </div>
   </div>

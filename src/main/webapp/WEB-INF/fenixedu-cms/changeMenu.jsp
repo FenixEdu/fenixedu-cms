@@ -26,6 +26,8 @@
   <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
 </h2>
 
+${portal.toolkit()}
+
 <style>
 
     .fancytree-container {
@@ -56,8 +58,8 @@
 
                 <div class="form-group">
                     <label class="control-label" for="inputSuccess1"><spring:message code="menu.edit.label.menuLabel"/></label>
-                    <input type="text" name="name" class="form-control"
-                           placeholder="<spring:message code="menu.edit.label.name"/>" required="true">
+                    <input type="text" bennu-localized-string name="name" class="form-control"
+                           placeholder="<spring:message code="menu.edit.label.name"/>">
                 </div>
 
                 <div id="menuitem-options">
@@ -102,7 +104,7 @@
 
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary"><spring:message code="action.save"/></button>
-                    <button onclick='$("#deleteForm").submit(); return false' class="btn btn-danger delete"><spring:message code="action.delete"/></button>
+                    <button onclick='$("#deleteForm").submit(); return false' class="btn btn-danger delete-item delete"><spring:message code="action.delete"/></button>
                 </div>
             </form>
         </div>
@@ -123,7 +125,7 @@
                         <div class="form-group">
                             <label class="control-label" for="inputSuccess1"><spring:message
                                     code="menu.edit.label.menuLabel"/></label>
-                            <input type="text" name="name" class="form-control"
+                            <input type="text" bennu-localized-string name="name" value="{}" class="form-control"
                                    placeholder="<spring:message code="menu.edit.label.name"/>">
                         </div>
 
@@ -182,14 +184,17 @@
     </div>
     <!-- /.modal -->
 </div>
+
 <script>
 
     function optionsForComponent(event, data) {
         $("#options").show();
         $("#menuitem-options").show();
         if (data.node.data.root) {
-            $("#menuitem-options").hide();
+            $("#menuitem-options").hide()
+            $(".delete-item").hide();
         } else {
+            $(".delete-item").show();
             if(data.node.data.isFolder){
                 $("#options input.useurl").prop("checked", false);
                 $("#options input.usepage").prop("checked", false);
@@ -231,23 +236,28 @@
         $("#options [name='menuItemOid']").val(data.node.key);
         $("#options [name='position']").val(data.node.data.position);
         $("#options [name='menuItemOidParent']").val(data.node.key == "null" ? "null" : data.node.parent.key);
-        $("#options h3").html(data.node.title);
-        $("#options input[name='name']").val(data.node.title).on("keyup", function () {
+        $("#options h3").html(Bennu.localizedString.getContent(data.node.data.name, Bennu.locale));
+        var x = Bennu.localizedString.getContent(data.node.data.name, Bennu.locale);
+        if (x) {
+            $("#options h3").html(x);
+        } else {
+            $("#options h3").html("&nbsp;");
+        }
+        $("#options input[name='name']").val(JSON.stringify(data.node.data.name, Bennu.locale)).on("keyup", function () {
             var x = $("#options input[name='name']").val();
             if (x) {
                 $("#options h3").html(x);
             } else {
                 $("#options h3").html("&nbsp;");
             }
-        });
-
-        $("#options input[name='name']").val(data.node.title);
-
+        }).trigger("change");
     }
 
     function showModal() {
         $(".modal").modal({});
         $(".modal input[type='text']").val("");
+        $(".modal input[name='name']").val("{}");
+        $(".modal input[name='name']").trigger("change");
         $(".modal input.useurl").prop("checked", true);
 
     }
