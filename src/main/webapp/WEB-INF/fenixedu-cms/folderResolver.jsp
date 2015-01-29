@@ -34,7 +34,7 @@
 </p>
 
 <p>
-	<pre id="editor">${folder.resolver.code}</pre>
+    <pre id="editor"><c:out value="${folder.resolver.code}"></c:out></pre>
 </p>
 
 <script src="${pageContext.request.contextPath}/static/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
@@ -52,13 +52,13 @@
       $("#error").hide();
       $("#saveBtn").attr('disabled', true);
       $("#saveBtn").html('<spring:message code="action.saving"/>');
-      $.ajax('${pageContext.request.contextPath}/cms/folders/resolver/${folder.externalId}', 
+        $.ajax('${pageContext.request.contextPath}/cms/folders/resolver/${folder.externalId}',
              { data: editor.getValue(), type: 'PUT' }).always(function () {
                 $("#saveBtn").attr('disabled', false); $("#saveBtn").html('<spring:message code="action.save" />');
              }).error(function (data) {
 				$("#error").show(); $("#error").html(data.responseText);
              });
-    }
+    };
 
     editor.setFontSize(13);
     editor.setTheme("ace/theme/clouds");
