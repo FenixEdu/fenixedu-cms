@@ -17,6 +17,8 @@
     <properties>
         <version.org.fenixedu.bennu>3.4.0</version.org.fenixedu.bennu>
         <version.org.fenixedu.bennu.spring>1.1.0</version.org.fenixedu.bennu.spring>
+        <version.org.fenixedu.bennu.signals>1.0.1</version.org.fenixedu.bennu.signals>
+        
     </properties>
 
     <issueManagement>
@@ -99,6 +101,11 @@
             <groupId>org.fenixedu</groupId>
             <artifactId>bennu-spring</artifactId>
             <version>${version.org.fenixedu.bennu.spring}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.fenixedu</groupId>
+            <artifactId>bennu-signals</artifactId>
+            <version>${version.org.fenixedu.bennu.signals}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
