@@ -37,7 +37,6 @@ ${portal.toolkit()}
         </c:if>
     </div>
 </h2>
-<form class="form-horizontal" action="" method="post" role="form">
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
@@ -49,116 +48,120 @@ ${portal.toolkit()}
 
     <!-- Tab panes -->
     <div class="tab-content">
+
         <div class="tab-pane active" id="postContent">
-            <p>
-            </p>
+            <form class="form-horizontal" action="" method="post" role="form">
 
-            <div class="${emptyName ? "form-group has-error" : "form-group"}">
-                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.edit.label.slug"/></label>
+                <br/>
 
-                <div class="col-sm-5">
-                    <div class="input-group">
+                <div class="${emptyName ? "form-group has-error" : "form-group"}">
+                    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.edit.label.slug"/></label>
 
-                        <span class="input-group-addon"><code>/${site.baseUrl}/${site.viewPostPage.slug}/</code></span>
-                        <input required type="text" name="newSlug" class="form-control" id="inputEmail3"
-                               placeholder="<spring:message code="site.edit.label.slug" />" value='${post.slug}' \>
+                    <div class="col-sm-5">
+                        <div class="input-group">
+
+                            <span class="input-group-addon"><code>/${site.baseUrl}/${site.viewPostPage.slug}/</code></span>
+                            <input required type="text" name="newSlug" class="form-control" id="inputEmail3"
+                                   placeholder="<spring:message code="site.edit.label.slug" />" value='${post.slug}' \>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+                <div class="${emptyName ? "form-group has-error" : "form-group"}">
+                    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.name"/></label>
 
-            <div class="${emptyName ? "form-group has-error" : "form-group"}">
-                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.name"/></label>
-
-                <div class="col-sm-10">
-                    <input bennu-localized-string required-any name="name" id="inputEmail3"
-                           placeholder="<spring:message code="post.edit.label.name" />" value='<c:out value="${post.name.json()}"/>'>
-                    <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
-                            code="post.edit.error.emptyName"/></p></c:if>
-                </div>
-            </div>
-
-
-            <div class="form-group">
-                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.body"/></label>
-
-                <div class="col-sm-10">
-                    <textarea id="htmlEditor" bennu-html-editor bennu-localized-string name="body" rows="3"><c:out value="${post.body.json()}"/></textarea>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.visible"/></label>
-
-                <div class="col-sm-10">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" value="true" ${post.active ? 'checked="checked"' : ''} name="active" />
-                        </label>
+                    <div class="col-sm-10">
+                        <input bennu-localized-string required-any name="name" id="inputEmail3"
+                               placeholder="<spring:message code="post.edit.label.name" />"
+                               value='<c:out value="${post.name.json()}"/>'>
+                        <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
+                                code="post.edit.error.emptyName"/></p></c:if>
                     </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
-                <div class="col-sm-10">
-                    <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
-                           value="${ post.canViewGroup.expression }"/>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="inputEmail3" class="col-sm-2 control-label">Publication date</label>
-
-                <div class="col-sm-5">
-                    <label>
-                        Start
-                    </label>
-                    <input bennu-datetime name="publicationStarts" id="inputEmail3" value='${post.publicationBegin}'>
-                </div>
-
-                <div class="col-sm-5">
-                    <label>
-                        End
-                    </label>
-                    <input bennu-datetime name="publicationEnds" id="inputEmail3" value='${post.publicationEnd}'>
-                </div>
-            </div>
-
-
-            <c:if test="${site.categoriesSet.size() > 0}">
                 <div class="form-group">
-                    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.manage.label.categories"/></label>
+                    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.edit.label.body"/></label>
+
+                    <div class="col-sm-10">
+                        <textarea id="htmlEditor" bennu-html-editor bennu-localized-string name="body" rows="3"><c:out
+                                value="${post.body.json()}"/></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                            code="post.edit.label.visible"/></label>
+
+                    <div class="col-sm-10">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value="true" ${post.active ? 'checked="checked"' : ''} name="active"/>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
+
+                    <div class="col-sm-10">
+                        <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
+                               value="${ post.canViewGroup.expression }"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">Publication date</label>
+
+                    <div class="col-sm-5">
+                        <label>
+                            Start
+                        </label>
+                        <input bennu-datetime name="publicationStarts" id="inputEmail3" value='${post.publicationBegin}'>
+                    </div>
+
+                    <div class="col-sm-5">
+                        <label>
+                            End
+                        </label>
+                        <input bennu-datetime name="publicationEnds" id="inputEmail3" value='${post.publicationEnd}'>
+                    </div>
+                </div>
+
+                <c:if test="${site.categoriesSet.size() > 0}">
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                            code="site.manage.label.categories"/></label>
 
                     <div class="col-sm-10">
                         <c:forEach var="c" items="${site.categoriesSet}" varStatus="loop">
                             <div class="col-sm-4">
-                            <div class="checkbox">
-                                <label>
-                                    <c:choose>
-                                        <c:when test="${post.categoriesSet.contains(c)}">
-                                            <input type="checkbox" name="categories" value="${c.slug}"
-                                                   checked="checked"/> ${c.name.content}
-                                        </c:when>
-                                        <c:otherwise>
-                                            <input type="checkbox" name="categories" value="${c.slug}"/> ${c.name.content}
-                                        </c:otherwise>
-                                    </c:choose>
-                                </label>
-                            </div>
+                                <div class="checkbox">
+                                    <label>
+                                        <c:choose>
+                                            <c:when test="${post.categoriesSet.contains(c)}">
+                                                <input type="checkbox" name="categories" value="${c.slug}"
+                                                       checked="checked"/> ${c.name.content}
+                                            </c:when>
+                                            <c:otherwise>
+                                                <input type="checkbox" name="categories" value="${c.slug}"/> ${c.name.content}
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </label>
+                                </div>
                             </div>
                         </c:forEach>
                     </div>
-            </c:if>
-            </div>
-
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <button type="submit" class="btn btn-primary"><spring:message code="action.save"/></button>
-                    <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">Metadata</a>
                 </div>
-            </div>
+                </c:if>
 
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-primary"><spring:message code="action.save"/></button>
+                        <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">Metadata</a>
+                    </div>
+                </div>
+            </form>
         </div>
 
         <div class="tab-pane" id="files">
@@ -195,10 +198,10 @@ ${portal.toolkit()}
 
                                     <td><code>${file.contentType}</code></td>
                                     <td>
-                                        <a href="#" class="btn btn-danger btn-sm" data-toggle="modal"
-                                           data-target="#fileDeleteModal"
-                                           data-file="${file.displayName}" data-file-oid="${file.oid}"><span
-                                                class="glyphicon glyphicon-trash"></span></a>
+                                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                                                data-target="#fileDeleteModal" data-file="${file.displayName}"
+                                                data-file-oid="${file.oid}"><span class="glyphicon glyphicon-trash"></span>
+                                        </button>
                                         <a href="${cms.downloadUrl(file)}" target="_blank" class="btn btn-default btn-sm">Link</a>
                                     </td>
                                 </tr>
@@ -248,15 +251,10 @@ ${portal.toolkit()}
                                     <td>
                                         <button class="btn btn-danger btn-sm" data-toggle="modal"
                                                 data-target="#attachmentDeleteModal"
-                                                data-file="${file.displayName}" data-file-index="${loop.index}"><span
+                                                type="button" data-file="${file.displayName}"
+                                                data-file-index="${loop.index}"><span
                                                 class="glyphicon glyphicon-trash"></span></button>
                                         <a href="${cms.downloadUrl(file)}" target="_blank" class="btn btn-default btn-sm">Link</a>
-
-                                        <%--<a class="btn btn-default btn-sm" data-toggle="modal"
-                                                data-target="#attachmentDeleteModal"
-                                                data-file="${file.displayName}" data-file-index="${loop.index}">
-                                            <spring:message code="label.access.control"/>
-                                        </a>--%>
 
                                         <div class="btn-group">
 
@@ -301,7 +299,6 @@ ${portal.toolkit()}
         </div>
     </div>
 
-</form>
 
 <form action="moveAttachment" id="moveAttachment" class="hidden" method="post">
     <input type="hidden" name="origin" value="${loop.index}"/>
@@ -492,6 +489,7 @@ ${portal.toolkit()}
         if (window.location.hash === "#attachments") {
             var z = $("[href='#attachments']")
             z.tab('show')
+            window.location.hash = '';
         }
     }, 150)
 </script>
@@ -501,6 +499,7 @@ ${portal.toolkit()}
         if (window.location.hash === "#files") {
             var z = $("[href='#files']")
             z.tab('show')
+            window.location.hash = '';
         }
     }, 150)
 </script>
