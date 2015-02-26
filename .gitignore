@@ -1,9 +1,21 @@
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.next
-release.properties
-.classpath
-.project
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Eclipse #
 .settings/
-bennu-cms.iml
+.project
+.classpath
+output/
+
+# IntelliJ #
+
+.idea/
+*.iml
+
+# Maven #
+target/
+bin/
