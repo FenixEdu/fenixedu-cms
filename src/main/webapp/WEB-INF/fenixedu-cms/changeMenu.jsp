@@ -344,8 +344,6 @@ ${portal.toolkit()}
 
     $("select[name=slugPage]").change(function(event) {
         $(event.target).closest('form').find('input[name=use].usepage').prop('checked', true);
-        var name = $(event.target).closest('form').find('input[name=name]');
-        name.val($(event.target).find(':selected').text());
     });
 </script>
   
