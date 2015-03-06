@@ -18,12 +18,10 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Preconditions;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
@@ -268,9 +266,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
             postFile.setIndex(position);
             postFile.setFiles(item);
 
-            List<PostFile> list = Lists.newArrayList(Post.this.getAttachementsSet());
+            List<PostFile> list = Post.this.getAttachementsSet().stream().sorted().collect(Collectors.toList());
             list.add(position, postFile);
-
             fixOrder(list);
 
             Post.this.getAttachementsSet().add(postFile);
@@ -286,8 +283,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
             pf.setPost(null);
             pf.delete();
 
-            List<PostFile> list = Lists.newArrayList(Post.this.getAttachementsSet());
-
+            List<PostFile> list = Post.this.getAttachementsSet().stream().sorted().collect(Collectors.toList());
             fixOrder(list);
 
             return f;
@@ -295,14 +291,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
 
         public void move(int orig, int dest) {
             Set<PostFile> files = Post.this.getAttachementsSet();
-
-            if (orig < 0 || orig >= files.size()) {
-                throw new RuntimeException("Origin outside index bounds");
-            }
-
-            if (dest < 0 || dest >= files.size()) {
-                throw new RuntimeException("Destiny outside index bounds");
-            }
+            Preconditions.checkPositionIndex(orig, files.size(), "Origin outside index bounds");
+            Preconditions.checkPositionIndex(dest, files.size(), "Destiny outside index bounds");
 
             putFile(removeFile(orig), dest);
         }
