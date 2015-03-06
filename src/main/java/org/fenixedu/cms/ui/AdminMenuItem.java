@@ -113,7 +113,9 @@ public class AdminMenuItem {
     @RequestMapping(value = "{slugSite}/{oidMenu}/createItem", method = RequestMethod.POST)
     public RedirectView create(Model model, @PathVariable(value = "slugSite") String slugSite,
             @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid,
-            @RequestParam LocalizedString name, @RequestParam String use, @RequestParam String url, @RequestParam String slugPage) {
+            @RequestParam LocalizedString name, @RequestParam String use,
+            @RequestParam(required = false) String url,
+            @RequestParam(required = false) String slugPage) {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
