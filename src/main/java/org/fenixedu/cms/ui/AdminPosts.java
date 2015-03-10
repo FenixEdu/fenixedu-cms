@@ -180,6 +180,7 @@ public class AdminPosts {
     public RedirectView addAttachment(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "slugPost") String slugPost, @RequestParam(required = true) String name,
             @RequestParam("attachment") MultipartFile attachment) throws IOException {
+
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -255,6 +256,21 @@ public class AdminPosts {
     @Atomic
     private void moveAttachment(Integer origin, Integer destiny, Post p) {
         p.getAttachments().move(origin, destiny);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPost}/addFile", method = RequestMethod.POST, produces = "application/json")
+    public @ResponseBody RedirectView addFile(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+            value = "slugPost") String slugPost, @RequestParam("attachment") MultipartFile attachment) throws IOException {
+
+        Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
+        Post p = s.postForSlug(slugPost);
+
+        addFile(attachment, p);
+
+        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit#files", true);
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/addFile.json", method = RequestMethod.POST, produces = "application/json")
