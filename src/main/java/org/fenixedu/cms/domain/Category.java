@@ -27,10 +27,7 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-
 import pt.ist.fenixframework.Atomic;
-
-import com.google.common.collect.Sets;
 
 /**
  * Categories give a semantic group for {@link Site} and {@link Post}.
@@ -131,4 +128,5 @@ public class Category extends Category_Base implements Wrappable, Sluggable {
     public Wrap makeWrap() {
         return new CategoryWrap();
     }
+
 }

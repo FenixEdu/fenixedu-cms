@@ -26,7 +26,7 @@
     <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small>
     <c:if test="${page.published}">
         <div class="button-group pull-right">
-                <a href="${page.address}" target="_blank" class="btn btn-default"><spring:message code="action.link"/></a>
+            <a href="${page.address}" target="_blank" class="btn btn-default"><spring:message code="action.link"/></a>
         </div>
     </c:if>
 </h2>
@@ -35,7 +35,8 @@
     <form id="mainForm" class="form-horizontal" action="" method="post" role="form">
 
         <div class="${emptyName ? "form-group has-error" : "form-group"}">
-            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.slug"/></label>
+            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                    code="page.edit.label.slug"/></label>
 
             <div class="col-sm-5">
                 <div class="input-group">
@@ -49,19 +50,22 @@
         </div>
 
         <div class="${emptyName ? "form-group has-error" : "form-group"}">
-            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.name"/></label>
+            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                    code="page.edit.label.name"/></label>
 
             <div class="col-sm-10">
                 <input bennu-localized-string type="text" name="name" id="inputEmail3"
                        placeholder="<spring:message code="page.edit.label.name" />" value='${page.name.json()}' \>
-                <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="page.edit.error.emptyName"/></p>
+                <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
+                        code="page.edit.error.emptyName"/></p>
                 </c:if>
             </div>
         </div>
 
 
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.template"/></label>
+            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                    code="page.edit.label.template"/></label>
 
             <div class="col-sm-10">
                 <select name="template" class="form-control" id="tempate">
@@ -75,6 +79,7 @@
 
         <div class="form-group">
             <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
+
             <div class="col-sm-10">
                 <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
                        value="${ page.canViewGroup.expression }"/>
@@ -92,8 +97,9 @@
 
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" onclick="$('#mainForm').submit()" class="btn btn-default btn-primary"><spring:message
-                        code="action.save"/></button>
+                <button type="submit" onclick="$('#mainForm').submit()" class="btn btn-default btn-primary">
+                    <spring:message
+                            code="action.save"/></button>
             </div>
         </div>
     </form>
@@ -144,6 +150,19 @@
                             <small>- ${m.createdBy.name}</small>
                         </td>
                         <td>
+
+                            <c:if test="${m.getClass().simpleName.equals('StaticPost')}">
+                                <a href="${m.post.editUrl}" class="btn btn-danger btn-sm"/>
+                                    <spring:message code="action.edit"></spring:message>
+                                </a>
+                            </c:if>
+
+                            <c:if test="${m.getClass().simpleName.equals('CategoryPost')}">
+                                <a href="#${m.category.slug}" class="btn btn-danger btn-sm"/>
+                                    <spring:message code="action.edit"></spring:message>
+                                </a>
+                            </c:if>
+
                             <a href="#" class="btn btn-danger btn-sm"
                                onclick="document.getElementById('deleteComponentForm${m.externalId}').submit();"><spring:message
                                     code="action.delete"/></a>
@@ -159,7 +178,8 @@
         </c:otherwise>
     </c:choose>
 
-    <div class="modal fade" id="componentModal" tabindex="-1" role="dialog" aria-labelledby="componentModal" aria-hidden="true">
+    <div class="modal fade" id="componentModal" tabindex="-1" role="dialog" aria-labelledby="componentModal"
+         aria-hidden="true">
         <form class="modal-dialog form-horizontal" ng-submit="createComponent()">
             <div class="modal-content">
                 <div class="modal-header">

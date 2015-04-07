@@ -20,8 +20,10 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@ taglib uri="http://fenixedu.org/taglib/intersection" prefix="r" %>
 
 <h1><spring:message code="site.manage.title" /></h1>
+
 
 <c:if test="${isManager}">
     <p>
@@ -78,6 +80,9 @@
           <td>${i.creationDate.toString('MMM dd, yyyy')}</td>
           <td>
             <div class="btn-group">
+                <r:intersect location="cms.listSites" position="actionButtons">
+                    <r:arg key="site" value="${i}"/>
+                </r:intersect>
               <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-sm btn-default"><spring:message code="action.manage"/></a>
             </div>
           </td>
