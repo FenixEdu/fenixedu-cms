@@ -34,28 +34,30 @@
 <div class="row">
     <div class="col-lg-8">
         <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search for...">
-      <span class="input-group-btn">
+            <input id="search-query" type="text" class="form-control" placeholder="Search for...">
 
-          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-              <c:if test="${category!=null}">
-                  ${category.name.content}
-              </c:if>
-              <c:if test="${category==null}">
-                  Category
-              </c:if>
-              <span class="caret"></span>
-          </button>
+          <span class="input-group-btn">
 
-          <ul class="dropdown-menu dropdown-menu-right" role="menu">
-              <c:forEach var="cat" items="${site.categories}">
-                  <li><a href="searchByCategory('${cat.slug}')">${cat.name.content}</a></li>
-              </c:forEach>
-          </ul>
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                      aria-expanded="false">
+                  <c:if test="${category!=null}">
+                      ${category.name.content}
+                  </c:if>
+                  <c:if test="${category==null}">
+                      Category
+                  </c:if>
+                  <span class="caret"></span>
+              </button>
 
-        <button class="btn btn-default" type="submit" onclick="searchByQuery()">search!</button>
+              <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                  <c:forEach var="cat" items="${site.categories}">
+                      <li><a href="#" onclick="search('${cat.slug}', $('#search-query'))">${cat.name.content}</a></li>
+                  </c:forEach>
+              </ul>
 
-      </span>
+            <button class="btn btn-default" type="submit" onclick="search(null, $('#search-query'))">search!</button>
+
+          </span>
         </div>
         <!-- /input-group -->
     </div>
@@ -63,6 +65,17 @@
 </div>
 <!-- /.row -->
 
+
+<script type="application/javascript">
+
+    function search(categorySlug, query) {
+        var searchQuery = "";
+        searchQuery += categorySlug ? "category=" + categorySlug : "";
+        searchQuery += query ? "query=" + query : "";
+        window.location.search = searchQuery;
+    }
+
+</script>
 
 <c:choose>
     <c:when test="${posts.size() == 0}">
