@@ -22,51 +22,93 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <h2 class="page-header" style="margin-top: 0">
-  <spring:message code="post.manage.title" />
-  <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
+    <spring:message code="post.manage.title"/>
+    <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small>
+    <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/create"
+       class="btn btn-default btn-primary pull-right">
+        <spring:message code="page.manage.label.createPost"/>
+    </a>
 </h2>
-<p>
-<a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/create" class="btn btn-default btn-primary"><spring:message code="page.manage.label.createPost" /></a>
-</p>
+
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search for...">
+      <span class="input-group-btn">
+
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              <c:if test="${category!=null}">
+                  ${category.name.content}
+              </c:if>
+              <c:if test="${category==null}">
+                  Category
+              </c:if>
+              <span class="caret"></span>
+          </button>
+
+          <ul class="dropdown-menu dropdown-menu-right" role="menu">
+              <c:forEach var="cat" items="${site.categories}">
+                  <li><a href="searchByCategory('${cat.slug}')">${cat.name.content}</a></li>
+              </c:forEach>
+          </ul>
+
+        <button class="btn btn-default" type="submit" onclick="searchByQuery()">search!</button>
+
+      </span>
+        </div>
+        <!-- /input-group -->
+    </div>
+    <!-- /.col-lg-6 -->
+</div>
+<!-- /.row -->
+
 
 <c:choose>
-      <c:when test="${posts.size() == 0}">
-      <p><spring:message code="page.manage.label.emptyPosts" /></p>
-      </c:when>
+    <c:when test="${posts.size() == 0}">
+        <p><spring:message code="page.manage.label.emptyPosts"/></p>
+    </c:when>
 
-      <c:otherwise>
+    <c:otherwise>
         <table class="table table-striped">
-          <thead>
+            <thead>
             <tr>
-              <th><spring:message code="page.manage.label.name" /></th>
-              <th><spring:message code="page.manage.label.creationDate" /></th>
-              <th><spring:message code="site.manage.label.categories"/></th>
-              <th><spring:message code="page.manage.label.operations" /></th>
+                <th><spring:message code="page.manage.label.name"/></th>
+                <th><spring:message code="page.manage.label.creationDate"/></th>
+                <th><spring:message code="site.manage.label.categories"/></th>
+                <th><spring:message code="page.manage.label.operations"/></th>
             </tr>
-          </thead>
-          <tbody>
-          <c:forEach var="post" items="${posts}">
-            <tr>
-              <td>
-                <h5><a href="${post.address}" target="_blank">${post.name.content}</a></h5>
-                <div><small><spring:message code="page.manage.label.url" />:<code>${post.slug}</code></small></div>
-              </td>
-              <td>${post.creationDate.toString('dd MMMM yyyy, HH:mm', locale)} <small>- ${post.createdBy.name}</small></td>
-              <td>
-                <c:forEach var="cat" items="${post.categoriesSet}">
-                  <a href="${pageContext.request.contextPath}/cms/categories/${site.slug}" class="badge">${cat.name.content}</a>
-                </c:forEach></td>
-              <td>
-                <div class="btn-group">
-                  <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
-                  <a href="#" class="btn btn-danger btn-sm" data-post="${post.slug}"><spring:message
-                                    code="action.delete"/></a>
-                </div>
+            </thead>
+            <tbody>
+            <c:forEach var="post" items="${posts}">
+                <tr>
+                    <td>
+                        <h5><a href="${post.address}" target="_blank">${post.name.content}</a></h5>
 
-              </td>
-            </tr>
-          </c:forEach>
-          </tbody>
+                        <div>
+                            <small><spring:message code="page.manage.label.url"/>:<code>${post.slug}</code></small>
+                        </div>
+                    </td>
+                    <td>${post.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
+                        <small>- ${post.createdBy.name}</small>
+                    </td>
+                    <td>
+                        <c:forEach var="cat" items="${post.categoriesSet}">
+                            <a href="${pageContext.request.contextPath}/cms/categories/${site.slug}"
+                               class="badge">${cat.name.content}</a>
+                        </c:forEach></td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit"
+                               class="btn btn-sm btn-default"><spring:message code="action.edit"/></a>
+                            <a href="#" class="btn btn-danger btn-sm" data-post="${post.slug}"><spring:message
+                                    code="action.delete"/></a>
+                        </div>
+
+                    </td>
+                </tr>
+            </c:forEach>
+            </tbody>
         </table>
         <c:if test="${pages > 1}">
             <nav class="text-center">
@@ -81,7 +123,7 @@
                 </ul>
             </nav>
         </c:if>
-      </c:otherwise>
+    </c:otherwise>
 </c:choose>
 
 
@@ -107,11 +149,11 @@
 </div>
 
 <script>
-(function () {
-    $("a[data-post]").on('click', function(el) {
-        var postSlug = el.target.getAttribute('data-post');
-        $('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/posts/${site.slug}/' + postSlug + '/delete');
-        $('#deleteModal').modal('show');
-    });
-})();
+    (function () {
+        $("a[data-post]").on('click', function (el) {
+            var postSlug = el.target.getAttribute('data-post');
+            $('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/posts/${site.slug}/' + postSlug + '/delete');
+            $('#deleteModal').modal('show');
+        });
+    })();
 </script>
