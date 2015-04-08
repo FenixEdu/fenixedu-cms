@@ -20,6 +20,7 @@ package org.fenixedu.cms.domain;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
@@ -129,4 +130,8 @@ public class Category extends Category_Base implements Wrappable, Sluggable {
         return new CategoryWrap();
     }
 
+    public String getEditUrl() {
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/categories/"
+                + getSite().getSlug() + "/" + getSlug();
+    }
 }

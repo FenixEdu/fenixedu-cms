@@ -150,26 +150,42 @@
                             <small>- ${m.createdBy.name}</small>
                         </td>
                         <td>
+                            <div class="btn-group" role="group">
+                                <a href="#" class="btn btn-danger btn-sm"
+                                   onclick="document.getElementById('deleteComponentForm${m.externalId}').submit();"><spring:message
+                                        code="action.delete"/></a>
 
-                            <c:if test="${m.getClass().simpleName.equals('StaticPost')}">
-                                <a href="${m.post.editUrl}" class="btn btn-danger btn-sm"/>
+
+                                <c:if test="${m.getClass().simpleName.equals('StaticPost')}">
+                                    <a href="${m.post.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
                                     <spring:message code="action.edit"></spring:message>
-                                </a>
-                            </c:if>
-
-                            <c:if test="${m.getClass().simpleName.equals('CategoryPost')}">
-                                <a href="#${m.category.slug}" class="btn btn-danger btn-sm"/>
+                                    </a>
+                                </c:if>
+                                <c:if test="${m.getClass().simpleName.equals('ListCategoryPosts')}">
+                                    <a href="${m.category.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
                                     <spring:message code="action.edit"></spring:message>
-                                </a>
-                            </c:if>
-
-                            <a href="#" class="btn btn-danger btn-sm"
-                               onclick="document.getElementById('deleteComponentForm${m.externalId}').submit();"><spring:message
-                                    code="action.delete"/></a>
-
-                            <form id="deleteComponentForm${m.externalId}"
-                                  action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/deleteComponent/${m.getExternalId()}"
-                                  method="POST"></form>
+                                    </a>
+                                </c:if>
+                                <c:if test="${m.getClass().simpleName.equals('StrategyBasedComponent')}">
+                                    <c:if test="${m.componentType().simpleName.equals('ListPosts')}">
+                                        <a href="${pageContext.request.contextPath}/cms/posts/${page.site.slug}"
+                                           role="button"
+                                           class="btn btn-default btn-sm"/>
+                                        <spring:message code="action.edit"></spring:message>
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${m.componentType().simpleName.equals('ListOfCategories')}">
+                                        <a href="${pageContext.request.contextPath}/cms/categories/${page.site.slug}"
+                                           role="button"
+                                           class="btn btn-default btn-sm"/>
+                                        <spring:message code="action.edit"></spring:message>
+                                        </a>
+                                    </c:if>
+                                </c:if>
+                                <form id="deleteComponentForm${m.externalId}"
+                                      action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/deleteComponent/${m.getExternalId()}"
+                                      method="POST"></form>
+                            </div>
                         </td>
                     </tr>
                 </c:forEach>

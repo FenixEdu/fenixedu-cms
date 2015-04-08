@@ -29,7 +29,6 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-
 import pt.ist.fenixframework.Atomic;
 
 /**
@@ -90,10 +89,8 @@ public class Page extends Page_Base implements Sluggable {
     /**
      * Searches a {@link Component} of this page by oid.
      *
-     * @param oid
-     *            the oid of the {@link Component} to be searched.
-     * @return
-     *         the {@link Component} with the given oid if it is a component of this page and null otherwise.
+     * @param oid the oid of the {@link Component} to be searched.
+     * @return the {@link Component} with the given oid if it is a component of this page and null otherwise.
      */
     public Component componentForOid(String oid) {
         for (Component c : getComponentsSet()) {
@@ -133,7 +130,7 @@ public class Page extends Page_Base implements Sluggable {
      * returns the group of people who can view this site.
      *
      * @return group
-     *         the access group for this site
+     * the access group for this site
      */
     public Group getCanViewGroup() {
         return getViewGroup().toGroup();
@@ -142,8 +139,7 @@ public class Page extends Page_Base implements Sluggable {
     /**
      * sets the access group for this site
      *
-     * @param group
-     *            the group of people who can view this site
+     * @param group the group of people who can view this site
      */
     @Atomic
     public void setCanViewGroup(Group group) {
@@ -151,7 +147,7 @@ public class Page extends Page_Base implements Sluggable {
     }
 
     public static Page create(Site site, Menu menu, MenuItem parent, LocalizedString name, boolean published, String template,
-            User creator, Component... components) {
+                              User creator, Component... components) {
         Page page = new Page(site);
         page.setSite(site);
         page.setName(name);
@@ -199,5 +195,10 @@ public class Page extends Page_Base implements Sluggable {
             }
         }
         return null;
+    }
+
+    public String getEditUrl() {
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/"
+                + getSite().getSlug() + "/" + getSlug() + "/edit";
     }
 }

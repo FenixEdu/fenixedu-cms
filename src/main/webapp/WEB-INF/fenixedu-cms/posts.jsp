@@ -32,9 +32,9 @@
 
 
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-sm-12">
         <div class="input-group">
-            <input id="search-query" type="text" class="form-control" placeholder="Search for...">
+            <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
 
           <span class="input-group-btn">
 
@@ -50,12 +50,13 @@
               </button>
 
               <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                  <li><a href="#" onclick="searchPosts(null)">None</a></li>
                   <c:forEach var="cat" items="${site.categories}">
-                      <li><a href="#" onclick="search('${cat.slug}', $('#search-query'))">${cat.name.content}</a></li>
+                      <li><a href="#" onclick='searchPosts("${cat.slug}")'>${cat.name.content}</a></li>
                   </c:forEach>
               </ul>
 
-            <button class="btn btn-default" type="submit" onclick="search(null, $('#search-query'))">search!</button>
+            <button class="btn btn-default" type="submit" onclick="searchPosts()">Search</button>
 
           </span>
         </div>
@@ -68,7 +69,8 @@
 
 <script type="application/javascript">
 
-    function search(categorySlug, query) {
+    function searchPosts(categorySlug) {
+        var query = $('#search-query').val();
         var searchQuery = "";
         searchQuery += categorySlug ? "category=" + categorySlug : "";
         searchQuery += query ? "query=" + query : "";
@@ -107,9 +109,9 @@
                     </td>
                     <td>
                         <c:forEach var="cat" items="${post.categoriesSet}">
-                            <a href="${pageContext.request.contextPath}/cms/categories/${site.slug}"
-                               class="badge">${cat.name.content}</a>
-                        </c:forEach></td>
+                            <a href="${cat.getEditUrl()}" class="badge">${cat.name.content}</a>
+                        </c:forEach>
+                    </td>
                     <td>
                         <div class="btn-group">
                             <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit"

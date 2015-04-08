@@ -89,7 +89,7 @@ public class AdminCategory {
         return new RedirectView("/cms/categories/" + s.getSlug() + "", true);
     }
 
-    @RequestMapping(value = "{slugSite}/{slugCategories}", method = RequestMethod.POST)
+    @RequestMapping(value = "{slugSite}/{slugCategories}", method = RequestMethod.GET)
     public RedirectView viewCategory(@PathVariable(value = "slugSite") String slugSite,
                                      @PathVariable(value = "slugCategories") String slugCategories) {
         return new RedirectView("/cms/posts/" + slugSite + "?category=" + slugCategories, true);
