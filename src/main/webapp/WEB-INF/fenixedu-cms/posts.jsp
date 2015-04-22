@@ -36,29 +36,28 @@
         <div class="input-group">
             <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
 
-          <span class="input-group-btn">
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                        aria-expanded="false">
+                    <c:if test="${category!=null}">
+                        ${category.name.content}
+                    </c:if>
+                    <c:if test="${category==null}">
+                        Category
+                    </c:if>
+                    <span class="caret"></span>
+                </button>
 
-              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
-                      aria-expanded="false">
-                  <c:if test="${category!=null}">
-                      ${category.name.content}
-                  </c:if>
-                  <c:if test="${category==null}">
-                      Category
-                  </c:if>
-                  <span class="caret"></span>
-              </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                    <li><a href="#" onclick="searchPosts(null)">None</a></li>
+                    <c:forEach var="cat" items="${site.categories}">
+                        <li><a href="#" onclick='searchPosts("${cat.slug}")'>${cat.name.content}</a></li>
+                    </c:forEach>
+                </ul>
 
-              <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                  <li><a href="#" onclick="searchPosts(null)">None</a></li>
-                  <c:forEach var="cat" items="${site.categories}">
-                      <li><a href="#" onclick='searchPosts("${cat.slug}")'>${cat.name.content}</a></li>
-                  </c:forEach>
-              </ul>
+                <button class="btn btn-default" type="submit" onclick="searchPosts()">Search</button>
 
-            <button class="btn btn-default" type="submit" onclick="searchPosts()">Search</button>
-
-          </span>
+            </span>
         </div>
         <!-- /input-group -->
     </div>
