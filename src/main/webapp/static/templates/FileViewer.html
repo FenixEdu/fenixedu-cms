@@ -1,0 +1,62 @@
+    <div class="row tab-pane active" id="file">
+        <div class="col-sm-12">
+            
+            <div>
+
+            <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#fileNewModal">New</button>
+
+            <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#fileImport">Upload</button>
+
+            <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#fileImport">Templates</button>
+
+            <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#fileImport">Settings</button>
+
+            </div>
+    
+            <ol class="breadcrumb">
+                <li><a href="#/">{{ theme }}</a></li>
+                <li ng-repeat="dir in node.getPath()">
+                    <a href="#{{dir.path}}">{{dir.name}}</a>
+                </li>
+              
+            </ol>
+            <table ng-hide="loading" class="table faded">
+                <thead>
+                <tr>
+                    <th><input type="checkbox"> Name</th>
+                    <th><spring:message code="theme.view.label.size"/></th>
+                    <th>Modified</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr ngf-drop ng-model="file" ngf-drag-over-class="dragover" ngf-multiple="true" ngf-allow-dir="true" context-menu="contextFor(file)" data-target="menu" ng-repeat="file in node.getFiles()">
+                        <td ng-dblclick="open(file)"><input type="checkbox">
+                            <i style="color:#3399FF;" class="{{file.contentType | fileIcon }}"></i> 
+                            {{ file.name }}
+                        </td>
+                        <td>{{file.size | bytes }}</td>
+                        <td>{{ file.modified | fuzzy }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="dropdown position-fixed" id="menu">
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a class="pointer" role="menuitem" tabindex="1">
+         Edit
+      </a>
+    </li>
+    <li>
+      <a class="pointer" role="menuitem" tabindex="1">
+          Make a template
+      </a>
+    </li>
+     <li>
+      <a class="text-danger" ng-click="deleteContextFile()" class="pointer" role="menuitem" tabindex="1">
+          Delete this file
+      </a>
+    </li>
+  </ul>
+            </div>
+        </div>
+    </div>

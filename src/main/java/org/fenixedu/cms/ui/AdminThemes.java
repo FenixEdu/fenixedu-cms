@@ -21,6 +21,8 @@ package org.fenixedu.cms.ui;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -29,12 +31,13 @@ import java.util.zip.ZipFile;
 import javax.servlet.http.HttpServletRequest;
 
 import org.fenixedu.bennu.core.domain.Bennu;
-import org.fenixedu.bennu.spring.portal.SpringFunctionality;
+import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
 import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.CMSThemeFile;
 import org.fenixedu.cms.domain.CMSThemeFiles;
 import org.fenixedu.cms.domain.CMSThemeLoader;
+import org.fenixedu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.cms.routing.CMSURLHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
@@ -53,12 +57,15 @@ import pt.ist.fenixframework.Atomic;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
-@SpringFunctionality(app = AdminSites.class, title = "application.admin-themes.title", accessGroup = "#managers")
+@BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/themes")
 public class AdminThemes {
 
     private final Map<String, String> supportedContentTypes;
+    private final Map<String, String> supportedImagesContentTypes;
     private final CMSURLHandler urlHandler;
 
     @Autowired
@@ -77,8 +84,40 @@ public class AdminThemes {
         builder.put("application/json", "json");
 
         builder.put("text/css", "css");
-
+        
         this.supportedContentTypes = builder.build();
+        
+        builder = ImmutableMap.builder();
+        
+        builder.put("image/jpeg", "JPEG");
+        
+        builder.put("image/jp2", "JPEG 2000");
+        builder.put("image/jpx", "JPEG 2000");
+        builder.put("image/jpm", "JPEG 2000");
+        builder.put("video/mj2", "JPEG 2000");
+        
+        builder.put("image/vnd.ms-photo", "JPEG XR");
+        builder.put("image/jxr", "JPEG XR");
+        
+        builder.put("image/webp", "WebP");
+        
+        builder.put("image/gif", "GIF");
+        
+        builder.put("image/png", "PNG");
+        
+        builder.put("video/x-mng", "MNG");
+        
+        builder.put("image/tiff", "TIFF");
+        builder.put("image/tiff-fx","TIFF");
+        
+        builder.put("image/svg+xml", "SVG");
+        
+        builder.put("application/pdf", "PDF");
+        builder.put("image/x‑xbitmap", "X-BMP");
+        builder.put("image/bmp", "BMP");
+  
+        this.supportedImagesContentTypes = builder.build();
+
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -90,7 +129,6 @@ public class AdminThemes {
     @RequestMapping(value = "{type}/see", method = RequestMethod.GET)
     public String viewTheme(Model model, @PathVariable(value = "type") String type) {
         model.addAttribute("theme", CMSTheme.forType(type));
-        model.addAttribute("supportedTypes", supportedContentTypes.keySet());
         return "fenixedu-cms/viewTheme";
     }
 
@@ -131,7 +169,7 @@ public class AdminThemes {
         CMSThemeFile file = CMSTheme.forType(type).fileForPath(path);
 
         model.addAttribute("theme", CMSTheme.forType(type));
-        model.addAttribute("linkBack", "/cms/themes/" + theme.getType() + "/see");
+        model.addAttribute("linkBack", "/cms/themes/" + theme.getType() + "/edit");
         model.addAttribute("file", file);
 
         String contentType = file.getContentType();
@@ -139,9 +177,15 @@ public class AdminThemes {
         if (supportedContentTypes.containsKey(contentType)) {
             model.addAttribute("type", supportedContentTypes.get(contentType));
             model.addAttribute("content", new String(file.getContent(), StandardCharsets.UTF_8));
+            return "fenixedu-cms/editThemeFile";
+        }else if (supportedImagesContentTypes.containsKey(contentType)){
+        	model.addAttribute("type", supportedContentTypes.get(contentType));
+            model.addAttribute("content", Base64.getEncoder().encodeToString(file.getContent()));
+            return  "fenixedu-cms/viewThemeImageFile";
+        }else{
+        	throw new ResourceNotFoundException();
         }
 
-        return "fenixedu-cms/editThemeFile";
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -296,5 +340,31 @@ public class AdminThemes {
         String[] r = filename.split("/");
         CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename, file.getContent());
         theme.changeFiles(theme.getFiles().without(file.getFullPath()).with(newFile));
+    }
+
+    @RequestMapping(value = "{type}/edit", method = RequestMethod.GET)
+    public String editTheme(Model model, @PathVariable(value = "type") String type) {
+        model.addAttribute("theme", CMSTheme.forType(type));
+        model.addAttribute("supportedTypes", supportedContentTypes.keySet());
+        return "fenixedu-cms/editTheme";
+    }
+
+    @RequestMapping(value = "{type}/listFiles", method = RequestMethod.GET)
+    @ResponseBody
+    public String listFiles(Model model, @PathVariable(value = "type") String type) {
+        CMSTheme theme = CMSTheme.forType(type);
+        Collection<CMSThemeFile> totalFiles = theme.getFiles().getFiles();
+        JsonArray result = new JsonArray();
+        for (CMSThemeFile file : totalFiles) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("name", file.getFileName());
+            obj.addProperty("path", file.getFullPath());
+            obj.addProperty("size", file.getFileSize());
+            obj.addProperty("contentType", file.getContentType());
+            obj.addProperty("modified", file.getLastModified().toString());
+            result.add(obj);
+        }
+
+        return result.toString();
     }
 }

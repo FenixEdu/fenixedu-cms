@@ -1,27 +1,33 @@
 /**
  * Copyright © 2014 Instituto Superior Técnico
- *
+ * <p/>
  * This file is part of FenixEdu CMS.
- *
+ * <p/>
  * FenixEdu CMS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p/>
  * FenixEdu CMS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * <p/>
  * You should have received a copy of the GNU Lesser General Public License
  * along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.fenixedu.cms.ui;
 
-import com.google.common.base.Strings;
-import com.google.common.math.IntMath;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+
+import java.io.IOException;
+import java.math.RoundingMode;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
@@ -35,18 +41,21 @@ import org.joda.time.DateTime;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+
 import pt.ist.fenixframework.Atomic;
 
-import java.io.IOException;
-import java.math.RoundingMode;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.google.common.base.Strings;
+import com.google.common.math.IntMath;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/posts")
@@ -158,13 +167,14 @@ public class AdminPosts {
     }
 
     @RequestMapping(value = "{slug}/{postSlug}/edit", method = RequestMethod.POST)
-    public RedirectView editPost(Model model, @PathVariable(value = "slug") String slug,
-                                 @PathVariable(value = "postSlug") String postSlug, @RequestParam String newSlug, @RequestParam LocalizedString name,
-                                 @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories, @RequestParam(
+    public RedirectView editPost(Model model, HttpServletRequest request, @PathVariable(value = "slug") String slug,
+            @PathVariable(value = "postSlug") String postSlug, @RequestParam String newSlug, @RequestParam LocalizedString name,
+            @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories, @RequestParam(
             required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationStarts, @RequestParam(
             required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationEnds, @RequestParam(
             required = false, defaultValue = "false") boolean active, @RequestParam String viewGroup,
-                                 RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes) {
+
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);

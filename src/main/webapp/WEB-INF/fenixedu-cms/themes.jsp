@@ -21,10 +21,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<h1><spring:message code="site.manage.title" /></h1>
+<div class="page-header">
+  <h1>Sites</h1>
+  <h2><small>Themes</small></h2>
+</div>
 <p>
-  <a href="${pageContext.request.contextPath}/cms/themes/new" class="btn btn-default"><spring:message code="site.manage.label.newTheme" /></a>
-  <a href="${pageContext.request.contextPath}/cms/themes/create" class="btn btn-default"><spring:message code="site.manage.label.addTheme" /></a>
+  <a href="${pageContext.request.contextPath}/cms/themes/new" class="btn btn-default">New</a>
+  <a href="${pageContext.request.contextPath}/cms/themes/create" class="btn btn-default">Import</a>
   <c:if test="${themes.size() == 0}">
     <a href="${pageContext.request.contextPath}/cms/themes/loadDefault" class="btn btn-default"><spring:message code="site.manage.label.loadDefault" /></a>
   </c:if>
@@ -32,58 +35,38 @@
 
 <c:choose>
       <c:when test="${themes.size() == 0}">
-     	<spring:message code="site.manage.label.emptySites" />
+        <div class="panel panel-default">
+        <div class="panel-body">
+     	  <spring:message code="site.manage.label.emptySites" />
+          </div>
+        </div>
       </c:when>
 
       <c:otherwise>
-		<table class="table table-striped table-bordered">
-	      	<thead>
-				<tr>
-					<th class="col-md-6"><spring:message code="site.manage.label.name" /></th>
-					<th><spring:message code="site.manage.label.createdBy" /></th>
-					<th><spring:message code="site.manage.label.templates" /></th>
-                    <th>&nbsp;</th>
-				</tr>
-	      	</thead>
-			<tbody>
+	      	<div class="row">
 				<c:forEach var="i" items="${themes}">
-				<tr class="item-theme">
-					<td>
-						<h5><span class="item-theme-name">${i.getName()}</span>
-							<c:if test="${i.isDefault()}">
-								<span class="label label-success"><spring:message code="site.manage.label.default" /></span>
-							</c:if>
-						</h5>
-						<div><small><spring:message code="site.manage.label.type" />:<code class="item-theme-type">${i.type}</code></small></div>
-						<div><small class="item-theme-description">${i.getDescription()}</small></div>
-					</td>
-					<td>
+				<div class="col-sm-6 col-md-4">
 
-                        <c:choose>
-                            <c:when test="${i.createdBy.username != null}">
-                                ${i.createdBy.username}
-                            </c:when>
-                            <c:otherwise>
-                                <i>Imported</i>
-                            </c:otherwise>
-                        </c:choose>
-                    </td>
-					<td>${i.templatesSet.size()}</td>
-					<td>
-						<div class="btn-group">
-                            <a class="btn btn-danger btn-sm" onclick="document.getElementById('deleteThemeForm').submit();"><span class="glyphicon glyphicon-trash"></a>
-							<a class="btn btn-default btn-sm" href="${pageContext.request.contextPath}/cms/themes/${i.type}/see"><spring:message code="action.more" /></a>
-						</div>
-                        <a class="btn btn-default btn-sm btn-duplicate" href="#" ><spring:message code="action.duplicate" /></a>
-                        <form id="deleteThemeForm" action="${pageContext.request.contextPath}/cms/themes/${i.type}/delete" method="post"></form>
-					</td>
-				</tr>
+                <div class="thumbnail">
+                    <img src="http://i.imgur.com/t8i1Zrn.png" style="max-width:100%" data-holder-rendered="true" >
+                  <div class="caption">
+                    <h3><a href="${pageContext.request.contextPath}/cms/themes/${i.type}/see">${i.getName()}</a></h3>
+                    <p>${i.getDescription()}</p>
+                        <c:if test="${i.isDefault()}">
+                            <span class="label label-success"><spring:message code="site.manage.label.default" /></span>
+                        </c:if>
+                    <div class="btn-group pull-right">
+                        <a class="btn btn-icon btn-default" href="${pageContext.request.contextPath}/cms/themes/${i.type}/see"><i class="glyphicon glyphicon-cog"></i></a>
+                    </div>
+				    </div>
+                </div>
+                </div>
 				</c:forEach>
-			</tbody>
-		</table>
-        </table>
+			</div>
       </c:otherwise>
 </c:choose>
+
+
 
 
 <div class="modal fade" id="duplicateModal" tabindex="-1" role="dialog" aria-hidden="true">

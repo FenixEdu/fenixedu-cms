@@ -19,3 +19,4 @@ output/
 # Maven #
 target/
 bin/
+.DS_Store*

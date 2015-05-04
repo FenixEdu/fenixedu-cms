@@ -1,18 +1,18 @@
 /**
  * Copyright © 2014 Instituto Superior Técnico
- *
+ * <p/>
  * This file is part of FenixEdu CMS.
- *
+ * <p/>
  * FenixEdu CMS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p/>
  * FenixEdu CMS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * <p/>
  * You should have received a copy of the GNU Lesser General Public License
  * along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
@@ -58,7 +60,7 @@ public class AdminSites {
     private static final int ITEMS_PER_PAGE = 30;
 
     @RequestMapping
-    public String list(Model model) {
+    public String list(HttpServletRequest request, Model model) {
         return list(0, model);
     }
 
@@ -123,7 +125,7 @@ public class AdminSites {
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
     public RedirectView edit(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
             @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug, @RequestParam(
-                    required = false) Boolean published, RedirectAttributes redirectAttributes, @RequestParam String viewGroup,
+            required = false) Boolean published, RedirectAttributes redirectAttributes, @RequestParam String viewGroup,
             @RequestParam String postGroup, @RequestParam String adminGroup, @RequestParam String folder,
             @RequestParam String analyticsCode) {
 

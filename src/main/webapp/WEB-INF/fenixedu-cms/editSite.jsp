@@ -27,7 +27,7 @@
 </h2>
 <div class="row">
     <form class="form-horizontal" action="" method="post" role="form">
-        <div class="col-sm-9">
+        <div class="col-sm-8">
             <div class="${emptyName ? "form-group has-error" : "form-group"}">
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.edit.label.slug"/></label>
 
@@ -90,16 +90,6 @@
             </div>
 
             <div class="form-group">
-                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                        code="site.create.label.published"/></label>
-
-                <div class="col-sm-2">
-                    <input name="published" type="checkbox" value="true" ${site.published ? "checked='checked'" : ""}>
-
-                </div>
-            </div>
-
-            <div class="form-group">
                 <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
 
                 <div class="col-sm-10">
@@ -144,22 +134,30 @@
             </div>
 
         </div>
-        <div class="col-sm-3">
-            <div class="well">
-                <div>
-                    <b>Created by</b>: ${site.createdBy.username}
-                </div>
-                <div>
-                    <b>Created at</b>: ${site.creationDate.toString('dd MMM, yyyy HH:mm:ss')}
+        <div class="col-sm-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading">Information</div>
+                <div class="panel-body">
+                    <dl>
+                        <dt><spring:message
+                        code="site.create.label.published"/></dt>
+                        <dd> <input name="published" type="checkbox" value="true" ${site.published ? "checked='checked'" : ""}></dd>
+                        <dt>Created by</dt>
+                        <dd>${site.createdBy.username}</dd>
+                        <dt>Created at</dt>
+                        <dd>${site.creationDate.toString('dd MMM, yyyy HH:mm:ss')}</dd>
+                    </dl>
                 </div>
             </div>
 
-            <div class="well">
-                <h4><spring:message code="site.edit.danger.zone"/></h4>
-
-                <a href="#" data-toggle="modal" data-target="#confirmDeleteModal" class="btn btn-danger"><spring:message
-                        code="action.delete"/></a>
+            <div class="panel panel-danger">
+                <div class="panel-heading"><spring:message code="site.edit.danger.zone"/></div>
+                <div class="panel-body">
+                    <p class="help-block">Once you delete a site, there is no going back. Please be certain.</p>
+                    <a href="#" data-toggle="modal" data-target="#confirmDeleteModal" class="btn btn-danger">Delete this Site </a>
+                </div>
             </div>
+
         </div>
     </form>
 </div>

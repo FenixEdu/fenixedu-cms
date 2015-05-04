@@ -28,7 +28,7 @@
 
 ${portal.toolkit()}
 
-<h2 class="page-header" style="margin-top: 0">
+<!-- <h2 class="page-header" style="margin-top: 0">
     <spring:message code="post.edit.title"/>
     <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small>
     <div class="pull-right">
@@ -36,109 +36,126 @@ ${portal.toolkit()}
             <a href="${post.address}" target="_blank" class="btn btn-default">Link</a>
         </c:if>
     </div>
-</h2>
+</h2> -->
 
-<!-- Nav tabs -->
-<ul class="nav nav-tabs" role="tablist">
-    <li class="active"><a href="#postContent" role="tab" data-toggle="tab"><spring:message
-            code="page.edit.label.post"/></a></li>
-    <li><a href="#files" role="tab" data-toggle="tab">Post Files</a></li>
-    <li><a href="#attachments" role="tab" data-toggle="tab">Attachments</a></li>
-    <li><a href="#pages" role="tab" data-toggle="tab">Pages</a></li>
-</ul>
+    <div class="page-header">
+    <h1>${site.name.content}</h1>
+    <h2><small>Edit Post</small></h2>
+        <div class="row">
+            <div class="col-sm-12">
+                <button type="submit" class="btn btn-primary">Update</button>
+                <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">Metadata</a>
+            </div>
+        </div>
+    </div>
 
-<!-- Tab panes -->
-<div class="tab-content">
 
-    <div class="tab-pane active" id="postContent">
-        <form class="form-horizontal" action="" method="post" role="form">
 
-            <br/>
+<form class="form" action="" method="post" role="form">
 
-            <div class="${emptyName ? "form-group has-error" : "form-group"}">
-                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                        code="site.edit.label.slug"/></label>
+    <!-- Nav tabs -->
+<!--     <ul class="nav nav-tabs" role="tablist">
+        <li class="active"><a href="#postContent" role="tab" data-toggle="tab"><spring:message code="page.edit.label.post"/></a></li>
+        <li><a href="#files" role="tab" data-toggle="tab">Post Files</a></li>
+        <li><a href="#attachments" role="tab" data-toggle="tab">Attachments</a></li>
 
-                <div class="col-sm-5">
+    </ul> -->
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div class="tab-pane active" id="postContent">
+            <p>
+            </p>
+<!--             <div class="col-sm-12">
+                <div class="${emptyName ? "form-group has-error" : "form-group"}">                
                     <div class="input-group">
 
-                        <span class="input-group-addon"><code>/${site.baseUrl}/${site.viewPostPage.slug}/</code></span>
+                        <span class="input-group-addon"></span>
                         <input required type="text" name="newSlug" class="form-control" id="inputEmail3"
                                placeholder="<spring:message code="site.edit.label.slug" />" value='${post.slug}' \>
                     </div>
-                </div>
-            </div>
+                </div> -->
+            
 
             <div class="${emptyName ? "form-group has-error" : "form-group"}">
-                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                        code="post.edit.label.name"/></label>
 
-                <div class="col-sm-10">
                     <input bennu-localized-string required-any name="name" id="inputEmail3"
                            placeholder="<spring:message code="post.edit.label.name" />"
                            value='<c:out value="${post.name.json()}"/>'>
                     <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
                             code="post.edit.error.emptyName"/></p></c:if>
-                </div>
             </div>
+            <p>
+            <div>Permalink: <samp>/${site.baseUrl}/${site.viewPostPage.slug}/</samp> <button class="btn btn-default btn-xs">Edit</button> <button class="btn btn-default btn-xs">View Post</button></div>
+            </p>
 
             <div class="form-group">
-                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                        code="post.edit.label.body"/></label>
-
-                <div class="col-sm-10">
-                        <textarea id="htmlEditor" bennu-html-editor bennu-localized-string name="body" rows="3"><c:out
-                                value="${post.body.json()}"/></textarea>
-                </div>
+                    <textarea id="htmlEditor" bennu-html-editor bennu-localized-string name="body" rows="3"><c:out value="${post.body.json()}"/></textarea>
             </div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">Publish</div>
+    <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>Published</dt>
+                <dd><input type="checkbox" value="true" ${post.active ? 'checked="checked"' : ''} name="active" /></dd>
+                <dt>Author</dt>
+                <dd><input bennu-user-autocomplete class="form-control" type="text" value="${post.createdBy.username}"></dd>
+                <dt>Access Control</dt>
+                <dd><input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
+                           value="${ post.canViewGroup.expression }"/></dd>
+            </dl>
 
             <div class="form-group">
-                <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                        code="post.edit.label.visible"/></label>
-
-                <div class="col-sm-10">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" value="true" ${post.active ? 'checked="checked"' : ''}
-                                   name="active"/>
-                        </label>
-                    </div>
-                </div>
+                
             </div>
 
-            <div class="form-group">
-                <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
+    </div>
+</div>
 
-                <div class="col-sm-10">
-                    <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
-                           value="${ post.canViewGroup.expression }"/>
-                </div>
-            </div>
+<div class="panel panel-default">
+  <div class="panel-heading">Excerpt</div>
+  <div class="panel-body">
+    <div class="row">
+        <div class="col-sm-12">
 
-            <div class="form-group">
-                <label for="inputEmail3" class="col-sm-2 control-label">Publication date</label>
+            <textarea bennu-localized-string name="excerpt" id="excerpt" value=''></textarea>
+            <p class="help-block">Excerpts are optional hand-crafted summaries of your content that can be used in your theme.</p>
+        </div>
 
-                <div class="col-sm-5">
-                    <label>
-                        Start
-                    </label>
-                    <input bennu-datetime name="publicationStarts" id="inputEmail3" value='${post.publicationBegin}'>
-                </div>
+    </div>
+  </div>
+</div>
 
-                <div class="col-sm-5">
-                    <label>
-                        End
-                    </label>
-                    <input bennu-datetime name="publicationEnds" id="inputEmail3" value='${post.publicationEnd}'>
-                </div>
-            </div>
+<div class="panel panel-default">
+  <div class="panel-heading">Visible period</div>
+  <div class="panel-body">
+    <div class="row">
+        <div class="col-sm-6">
+            <label>
+                Start
+            </label>
+            <input bennu-datetime name="publicationStarts" id="inputEmail3" value='${post.publicationBegin}'>
+        </div>
 
-            <c:if test="${site.categoriesSet.size() > 0}">
-                <div class="form-group">
-                    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                            code="site.manage.label.categories"/></label>
+        <div class="col-sm-6">
+            <label>
+                End
+            </label>
+            <input bennu-datetime name="publicationEnds" id="inputEmail3" value='${post.publicationEnd}'>
+        </div>
+    </div>
 
-                    <div class="col-sm-10">
+    <input bennu-date name="publicationEnds" id="inputEmail3" value='${post.publicationEnd}'>
+    <input bennu-time name="publicationEnds" id="inputEmail3" value='${post.publicationEnd}'>
+  </div>
+</div>
+<c:if test="${site.categoriesSet.size() > 0}">
+<div class="panel panel-default">
+  <div class="panel-heading"><spring:message code="site.manage.label.categories"/></div>
+  <div class="panel-body">
+    <div class="row">
+
                         <c:forEach var="c" items="${site.categoriesSet}" varStatus="loop">
                             <div class="col-sm-4">
                                 <div class="checkbox">
@@ -157,18 +174,15 @@ ${portal.toolkit()}
                                 </div>
                             </div>
                         </c:forEach>
-                    </div>
-                </div>
-            </c:if>
-
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <button type="submit" class="btn btn-primary"><spring:message code="action.save"/></button>
-                    <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">Metadata</a>
-                </div>
-            </div>
-        </form>
     </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <button class="btn btn-default btn-xs">Add New Category</button>
+        </div>
+    </div>
+  </div>
+</div>
+</c:if>
 
     <div class="tab-pane" id="files">
         <div class="col-sm-12">

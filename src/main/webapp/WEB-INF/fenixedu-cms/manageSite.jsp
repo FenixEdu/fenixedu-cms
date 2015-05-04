@@ -23,9 +23,28 @@
 
 <c:set var="locale" value="<%= org.fenixedu.commons.i18n.I18N.getLocale() %>"/>
 
-<div class="main">
-	<h2 class="page-header">${site.name.content}
-		<c:if test="${not site.published}">
+
+	<div class="page-header">
+  	<h1>${site.name.content}</h1>
+  	<h2><small>Site Managment</small></h2>
+  	<div class="row">
+	  <div class="col-sm-8">
+	    <button type="button" class="btn btn-primary">New post</button>
+	    
+	    <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/edit" class="btn btn-default">Settings</a>
+			
+			<c:if test="${site.published}">
+				<a href="${site.fullUrl}" target="_blank" class="btn btn-default"><spring:message code="action.link"/></a>
+			</c:if>
+	  </div>
+	  <div class="col-sm-4">
+	    <input type="search" class="form-control pull-right" placeholder="Search posts...">
+	  </div>
+	</div>
+	</div>
+
+
+<!-- 		<c:if test="${not site.published}">
 			<span class="badge"><spring:message code="site.manage.label.unpublished"/></span>
 		</c:if>
 		<div class="button-group pull-right">
@@ -33,8 +52,7 @@
 			<c:if test="${site.published}">
 				<a href="${site.fullUrl}" target="_blank" class="btn btn-default"><spring:message code="action.link"/></a>
 			</c:if>
-		</div>
-	</h2>
+		</div> -->
 
 	<div class="row placeholders">
 		<div class="col-xs-6 col-sm-3 placeholder">
@@ -106,16 +124,13 @@
 			<p><strong><spring:message code="site.manage.label.visibility"/>: </strong> ${site.canViewGroup.presentationName}</p>
 		</div>
 	</div>
-</div>
+
 
 
 <style>
 .sub-header {
   padding-bottom: 10px;
   border-bottom: 1px solid #eee;
-}
-.main .page-header {
-  margin-top: 0;
 }
 .pretty-number {
 	border-radius: 50%;

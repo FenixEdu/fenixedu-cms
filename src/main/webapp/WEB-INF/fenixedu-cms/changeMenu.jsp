@@ -38,11 +38,11 @@ ${portal.toolkit()}
 </form>
 <div class="container">
     <script src="${pageContext.request.contextPath}/bennu-admin/fancytree/jquery-ui.min.js"></script>
-    <link href="${pageContext.request.contextPath}/static/css/skin-awesome/ui.fancytree.css" rel="stylesheet" type="text/css">
-    <script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.min.js" type="text/javascript"></script>
+    <link href="${pageContext.request.contextPath}/webjars/fenixedu-canvas/fancytree/skin-fenixedu/ui.fancytree.css" rel="stylesheet" type="text/css">
+    <script src="${pageContext.request.contextPath}/webjars/fenixedu-canvas/fancytree/js/jquery.fancytree-all.js" type="text/javascript"></script>
     <script src="${pageContext.request.contextPath}/static/jquery.js" type="text/javascript"></script>
     <div class="row" style="min-height:400px">
-        <div class="col-md-4 well well-sm" style="min-height:400px">
+        <div class="col-md-4" style="min-height:400px">
             <div style="outline:none;" id="tree"></div>
         </div>
         <div id="options" class="col-md-6">

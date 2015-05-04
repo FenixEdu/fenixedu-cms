@@ -25,7 +25,7 @@ import javax.script.ScriptException;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.NashornStrategy;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
-import org.fenixedu.bennu.spring.portal.SpringFunctionality;
+import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSFolder;
 import org.fenixedu.cms.domain.CMSFolder.FolderResolver;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -41,7 +41,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Strings;
 
-@SpringFunctionality(app = AdminSites.class, title = "application.admin-folders.title", accessGroup = "#managers")
+@BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/folders")
 public class AdminFolders {
 
