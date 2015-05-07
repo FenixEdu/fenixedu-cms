@@ -30,6 +30,7 @@ class Site{
   Boolean published;
   boolean embedded;
   public String analyticsCode;
+  public String themeType;
 }
 
 public class PersistentSiteViewersGroup extends .org.fenixedu.bennu.core.domain.groups.PersistentGroup;
@@ -43,7 +44,7 @@ class Page{
   DateTime modificationDate;
   LocalizedString name;
   String slug;
-
+  String templateType;
   Boolean published;
 }
 
@@ -109,6 +110,25 @@ class component.StaticPost extends component.Component{}
 
 class PostFile{
     Integer index;
+}
+
+relation SiteCMSTheme{
+  public CMSTheme playsRole theme{
+    multiplicity 0..1;
+  }
+  public Site playsRole sites{
+    multiplicity 0..*;
+  }
+}
+
+relation DefaultPage{
+  public CMSTemplate playsRole defaultTemplate{
+    multiplicity 0..1;
+  }
+
+  protected CMSTheme playsRole defaultTemplateTheme{
+    multiplicity 0..1;
+  }
 }
 
 relation SiteViewersGroup {
@@ -219,19 +239,6 @@ relation PostFile{
 
   protected .org.fenixedu.bennu.io.domain.GroupBasedFile playsRole files{
     multiplicity 0..*;
-  }
-}
-
-
-
-
-relation CMSThemeSite{
-  CMSTheme playsRole theme{
-    multiplicity 0..1;
-  }
-
-  Site playsRole sites{
-    multiplicity *;
   }
 }
 

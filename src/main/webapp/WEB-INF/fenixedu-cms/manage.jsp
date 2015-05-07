@@ -30,7 +30,7 @@
 <p>
 <div class="row">
   <div class="col-sm-8">
-    <a href="${pageContext.request.contextPath}/cms/sites/new" class="btn btn-primary">Create</a>
+    <a href="${pageContext.request.contextPath}/cms/sites/new" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>
     <a href="${pageContext.request.contextPath}/cms/folders" class="btn btn-default"><i class="glyphicon glyphicon-folder-close"></i> Folders</a>
     <a href="${pageContext.request.contextPath}/cms/themes" class="btn btn-default"><i class="icon icon-brush"></i> Themes</a>
     <button type="button" class="btn btn-default">Settings</button>

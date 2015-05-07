@@ -24,6 +24,7 @@ import java.util.Optional;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
+import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;
@@ -48,93 +49,106 @@ import static java.util.Optional.ofNullable;
 @RequestMapping("/cms/pages")
 public class AdminPages {
 
-    @RequestMapping(value = "{slug}", method = RequestMethod.GET)
-    public String pages(Model model, @PathVariable(value = "slug") String slug) {
-        Site site = Site.fromSlug(slug);
+	@RequestMapping(value = "{slug}", method = RequestMethod.GET)
+	public String pages(Model model, @PathVariable(value = "slug") String slug) {
+		Site site = Site.fromSlug(slug);
 
-        AdminSites.canEdit(site);
+		AdminSites.canEdit(site);
 
-        model.addAttribute("site", site);
-        model.addAttribute("pages", site.getPagesSet());
-        return "fenixedu-cms/pages";
-    }
+		model.addAttribute("site", site);
+		model.addAttribute("pages", site.getPagesSet());
+		return "fenixedu-cms/pages";
+	}
 
-    @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
-    public String createPage(Model model, @PathVariable(value = "slug") String slug) {
-        Site s = Site.fromSlug(slug);
+	@RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
+	public String createPage(Model model,
+			@PathVariable(value = "slug") String slug) {
+		Site s = Site.fromSlug(slug);
 
-        AdminSites.canEdit(s);
+		AdminSites.canEdit(s);
 
-        model.addAttribute("site", s);
-        return "fenixedu-cms/createPage";
-    }
+		model.addAttribute("site", s);
+		return "fenixedu-cms/createPage";
+	}
 
-    @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
-    public RedirectView createPage(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
-            RedirectAttributes redirectAttributes) {
-        if (Strings.isNullOrEmpty(name)) {
-            redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/pages/" + slug + "/create", true);
-        } else {
-            Site s = Site.fromSlug(slug);
+	@RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
+	public RedirectView createPage(Model model,
+			@PathVariable(value = "slug") String slug,
+			@RequestParam String name, RedirectAttributes redirectAttributes) {
+		if (Strings.isNullOrEmpty(name)) {
+			redirectAttributes.addFlashAttribute("emptyName", true);
+			return new RedirectView("/cms/pages/" + slug + "/create", true);
+		} else {
+			Site s = Site.fromSlug(slug);
 
-            AdminSites.canEdit(s);
+			AdminSites.canEdit(s);
 
-            Page page = createPage(name, s);
-            return new RedirectView("/cms/pages/" + s.getSlug() + "/" + page.getSlug() + "/edit", true);
-        }
-    }
+			Page page = createPage(name, s);
+			return new RedirectView("/cms/pages/" + s.getSlug() + "/"
+					+ page.getSlug() + "/edit", true);
+		}
+	}
 
-    @Atomic
-    private Page createPage(String name, Site s) {
-        Page p = new Page(s);
-        p.setName(new LocalizedString(I18N.getLocale(), name));
-        return p;
-    }
+	@Atomic
+	private Page createPage(String name, Site s) {
+		Page p = new Page(s);
+		p.setName(new LocalizedString(I18N.getLocale(), name));
+		return p;
+	}
 
-    @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.GET)
-    public String edit(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPage") String slugPage) {
-        Site s = Site.fromSlug(slugSite);
+	@RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.GET)
+	public String edit(Model model,
+			@PathVariable(value = "slugSite") String slugSite,
+			@PathVariable(value = "slugPage") String slugPage) {
+		Site s = Site.fromSlug(slugSite);
 
-        AdminSites.canEdit(s);
+		AdminSites.canEdit(s);
 
-        if (slugPage.equals("--**--")) {
-            slugPage = "";
-        }
+		if (slugPage.equals("--**--")) {
+			slugPage = "";
+		}
 
-        Page p = s.pageForSlug(slugPage);
-        model.addAttribute("site", s);
-        model.addAttribute("page", p);
-        model.addAttribute("availableComponents", Component.availableComponents(s));
+		Page p = s.pageForSlug(slugPage);
+		model.addAttribute("site", s);
+		model.addAttribute("page", p);
+		model.addAttribute("availableComponents",
+				Component.availableComponents(s));
 
-        return "fenixedu-cms/editPage";
-    }
+		return "fenixedu-cms/editPage";
+	}
 
-    @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST)
-    public RedirectView edit(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPage") String slugPage, @RequestParam LocalizedString name, @RequestParam String slug,
-            @RequestParam String template, @RequestParam(required = false) Boolean published, @RequestParam String viewGroup,
-            RedirectAttributes redirectAttributes) {
-        if (name != null && name.isEmpty()) {
-            redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage + "/edit", true);
-        }
-        Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
-        Page p = s.pageForSlug(slugPage.equals("--**--") ? "" : slugPage);
-        editPage(name, slug, template, s, p, ofNullable(published).orElse(false), Group.parse(viewGroup));
-        return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage + "/edit", true);
-    }
+	@RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST)
+	public RedirectView edit(Model model,
+			@PathVariable(value = "slugSite") String slugSite,
+			@PathVariable(value = "slugPage") String slugPage,
+			@RequestParam LocalizedString name, @RequestParam String slug,
+			@RequestParam String template,
+			@RequestParam(required = false) Boolean published,
+			@RequestParam String viewGroup,
+			RedirectAttributes redirectAttributes) {
+		if (name != null && name.isEmpty()) {
+			redirectAttributes.addFlashAttribute("emptyName", true);
+			return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage
+					+ "/edit", true);
+		}
+		Site s = Site.fromSlug(slugSite);
+		AdminSites.canEdit(s);
+		Page p = s.pageForSlug(slugPage.equals("--**--") ? "" : slugPage);
+		editPage(name, slug, template, s, p, ofNullable(published)
+				.orElse(false), Group.parse(viewGroup));
+		return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage
+				+ "/edit", true);
+	}
 
-    @Atomic(mode = TxMode.WRITE)
+	@Atomic(mode = TxMode.WRITE)
     private void editPage(LocalizedString name, String slug, String template, Site s, Page p, boolean published, Group canView) {
         p.setName(name);
         if (!Objects.equals(slug, p.getSlug())) {
             p.setSlug(slug);
         }
-        if (s != null && s.getTheme() != null) {
-            CMSTemplate t = s.getTheme().templateForType(template);
+        CMSTheme theme = s.getTheme();
+        if (s != null && s.getTheme() != null && theme != null) {
+            CMSTemplate t = theme.templateForType(template);
             p.setTemplate(t);
         }
         if(p.getPublished() != published) {
@@ -145,31 +159,33 @@ public class AdminPages {
         }
     }
 
-    @RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)
-    public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPage") String slugPage) {
-        Site s = Site.fromSlug(slugSite);
+	@RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)
+	public RedirectView delete(Model model,
+			@PathVariable(value = "slugSite") String slugSite,
+			@PathVariable(value = "slugPage") String slugPage) {
+		Site s = Site.fromSlug(slugSite);
 
-        AdminSites.canEdit(s);
+		AdminSites.canEdit(s);
 
-        s.pageForSlug(slugPage).delete();
-        return new RedirectView("/cms/pages/" + s.getSlug() + "", true);
-    }
+		s.pageForSlug(slugPage).delete();
+		return new RedirectView("/cms/pages/" + s.getSlug() + "", true);
+	}
 
-    @RequestMapping(value = "{type}/defaultPage", method = RequestMethod.POST)
-    public RedirectView moveFile(Model model, @PathVariable String type, @RequestParam String page) {
-        Site s = Site.fromSlug(type);
+	@RequestMapping(value = "{type}/defaultPage", method = RequestMethod.POST)
+	public RedirectView moveFile(Model model, @PathVariable String type,
+			@RequestParam String page) {
+		Site s = Site.fromSlug(type);
 
-        AdminSites.canEdit(s);
+		AdminSites.canEdit(s);
 
-        setInitialPage(page, s);
+		setInitialPage(page, s);
 
-        return new RedirectView("/cms/pages/" + type, true);
-    }
+		return new RedirectView("/cms/pages/" + type, true);
+	}
 
-    @Atomic
-    private void setInitialPage(String page, Site s) {
-        s.setInitialPage(s.pageForSlug(page));
-    }
+	@Atomic
+	private void setInitialPage(String page, Site s) {
+		s.setInitialPage(s.pageForSlug(page));
+	}
 
 }

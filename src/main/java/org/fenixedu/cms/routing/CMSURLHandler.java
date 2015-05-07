@@ -75,325 +75,368 @@ import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 public final class CMSURLHandler implements SemanticURLHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(CMSURLHandler.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(CMSURLHandler.class);
 
-    private final DateTimeFormatter formatter = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm:ss z");
+	private final DateTimeFormatter formatter = DateTimeFormat
+			.forPattern("E, d MMM yyyy HH:mm:ss z");
 
-    private final PebbleEngine engine = new PebbleEngine(new ClasspathLoader() {
-        @Override
-        public Reader getReader(String templateName) throws LoaderException {
-            String[] parts = templateName.split("/", 2);
+	private final PebbleEngine engine = new PebbleEngine(new ClasspathLoader() {
+		@Override
+		public Reader getReader(String templateName) throws LoaderException {
+			String[] parts = templateName.split("/", 2);
 
-            if (parts.length != 2) {
-                throw new IllegalArgumentException("Not a valid name: " + templateName);
-            }
-            CMSTheme theme = CMSTheme.forType(parts[0]);
-            if (theme == null) {
-                throw new IllegalArgumentException("Theme " + parts[0] + " not found!");
-            }
+			if (parts.length != 2) {
+				throw new IllegalArgumentException("Not a valid name: "
+						+ templateName);
+			}
+			CMSTheme theme = CMSTheme.forType(parts[0]);
+			if (theme == null) {
+				throw new IllegalArgumentException("Theme " + parts[0]
+						+ " not found!");
+			}
 
-            byte[] bytes = theme.contentForPath(parts[1]);
-            if (bytes == null) {
-                throw new IllegalArgumentException("Theme " + parts[0] + " does not contain resource '" + parts[1] + '"');
-            }
-            return new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8);
-        }
-    });
+			byte[] bytes = theme.contentForPath(parts[1]);
+			if (bytes == null) {
+				throw new IllegalArgumentException("Theme " + parts[0]
+						+ " does not contain resource '" + parts[1] + '"');
+			}
+			return new InputStreamReader(new ByteArrayInputStream(bytes),
+					StandardCharsets.UTF_8);
+		}
+	});
 
-    public CMSURLHandler() {
-        engine.addExtension(new CMSExtensions());
-        if (CMSConfigurationManager.isInThemeDevelopmentMode()) {
-            engine.setTemplateCache(null);
-            logger.info("CMS Theme Development Mode enabled!");
-        } else {
-            engine.setTemplateCache(CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build());
-        }
-    }
+	public CMSURLHandler() {
+		engine.addExtension(new CMSExtensions());
+		if (CMSConfigurationManager.isInThemeDevelopmentMode()) {
+			engine.setTemplateCache(null);
+			logger.info("CMS Theme Development Mode enabled!");
+		} else {
+			engine.setTemplateCache(CacheBuilder.newBuilder()
+					.expireAfterWrite(10, TimeUnit.MINUTES).build());
+		}
+	}
 
-    public static String rewritePageUrl(HttpServletRequest request) {
-        String requestURL = request.getRequestURL().toString();
-        String queryString = request.getQueryString();
-        if (requestURL.endsWith("/")) {
-            requestURL = requestURL.substring(0, requestURL.length() - 1);
-        }
-        return queryString == null ? requestURL : requestURL + "?" + queryString;
-    }
+	public static String rewritePageUrl(HttpServletRequest request) {
+		String requestURL = request.getRequestURL().toString();
+		String queryString = request.getQueryString();
+		if (requestURL.endsWith("/")) {
+			requestURL = requestURL.substring(0, requestURL.length() - 1);
+		}
+		return queryString == null ? requestURL : requestURL + "?"
+				+ queryString;
+	}
 
-    @Override
-    public void handleRequest(MenuFunctionality menu, final HttpServletRequest req, HttpServletResponse res, FilterChain fc)
-            throws IOException, ServletException {
-        String pageSlug = req.getRequestURI().substring(req.getContextPath().length());
-        Site site = getSite(menu, pageSlug);
-        if (site == null) {
-            res.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-        res.setCharacterEncoding(Charset.defaultCharset().name());
-        handleRequest(site, req, res, pageSlug);
-    }
+	@Override
+	public void handleRequest(MenuFunctionality menu,
+			final HttpServletRequest req, HttpServletResponse res,
+			FilterChain fc) throws IOException, ServletException {
+		String pageSlug = req.getRequestURI().substring(
+				req.getContextPath().length());
+		Site site = getSite(menu, pageSlug);
+		if (site == null) {
+			res.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+		res.setCharacterEncoding(Charset.defaultCharset().name());
+		handleRequest(site, req, res, pageSlug);
+	}
 
-    public void handleRequest(Site site, HttpServletRequest req, HttpServletResponse res, String pageSlug) throws IOException,
-            ServletException {
+	public void handleRequest(Site site, HttpServletRequest req,
+			HttpServletResponse res, String pageSlug) throws IOException,
+			ServletException {
 
-        if (site.getCanViewGroup().isMember(Authenticate.getUser())) {
-            if (site.getPublished()) {
-                try {
-                    String baseUrl = "/" + site.getBaseUrl();
-                    if (pageSlug.startsWith(baseUrl)) {
-                        pageSlug = pageSlug.substring(baseUrl.length());
-                    }
-                    if (pageSlug.endsWith("/") && !req.getRequestURI().equals(req.getContextPath() + "/")) {
-                        handleLeadingSlash(req, res, site);
-                    } else if (pageSlug.startsWith("/static/")) {
-                        handleStaticResource(req, res, site, pageSlug);
-                    } else if (pageSlug.startsWith("/rss")) {
-                        handleRSS(req, res, site, pageSlug);
-                    } else {
-                        renderCMSPage(req, res, site, pageSlug);
-                    }
-                } catch (Exception e) {
-                    logger.error("Exception while rendering CMS page " + req.getRequestURI(), e);
-                    if (res.isCommitted()) {
-                        return;
-                    }
-                    res.reset();
-                    res.resetBuffer();
-                    errorPage(req, res, site, 500);
-                }
-            } else {
-                res.sendError(404);
-            }
-        } else {
-            res.sendError(404);
-            return;
-        }
-    }
+		if (site.getCanViewGroup().isMember(Authenticate.getUser())) {
+			if (site.getPublished()) {
+				try {
+					String baseUrl = "/" + site.getBaseUrl();
+					if (pageSlug.startsWith(baseUrl)) {
+						pageSlug = pageSlug.substring(baseUrl.length());
+					}
+					if (pageSlug.endsWith("/")
+							&& !req.getRequestURI().equals(
+									req.getContextPath() + "/")) {
+						handleLeadingSlash(req, res, site);
+					} else if (pageSlug.startsWith("/static/")) {
+						handleStaticResource(req, res, site, pageSlug);
+					} else if (pageSlug.startsWith("/rss")) {
+						handleRSS(req, res, site, pageSlug);
+					} else {
+						renderCMSPage(req, res, site, pageSlug);
+					}
+				} catch (Exception e) {
+					logger.error(
+							"Exception while rendering CMS page "
+									+ req.getRequestURI(), e);
+					if (res.isCommitted()) {
+						return;
+					}
+					res.reset();
+					res.resetBuffer();
+					errorPage(req, res, site, 500);
+				}
+			} else {
+				res.sendError(404);
+			}
+		} else {
+			res.sendError(404);
+			return;
+		}
+	}
 
-    private void handleRSS(HttpServletRequest req, HttpServletResponse res, Site site, String slug) throws IOException,
-            XMLStreamException, ServletException {
-        slug = slug.replaceFirst("/", "");
+	private void handleRSS(HttpServletRequest req, HttpServletResponse res,
+			Site site, String slug) throws IOException, XMLStreamException,
+			ServletException {
+		slug = slug.replaceFirst("/", "");
 
-        Locale locale =
-                Strings.isNullOrEmpty(req.getParameter("locale")) ? I18N.getLocale() : new Locale.Builder().setLanguageTag(
-                        req.getParameter("locale")).build();
+		Locale locale = Strings.isNullOrEmpty(req.getParameter("locale")) ? I18N
+				.getLocale() : new Locale.Builder().setLanguageTag(
+				req.getParameter("locale")).build();
 
-        String[] parts = slug.split("/");
+		String[] parts = slug.split("/");
 
-        if (parts.length == 1) {
-            res.setContentType("application/rss+xml;charset=UTF-8");
-            res.getOutputStream().write(RSSService.generateRSSForSite(site, locale).getBytes(StandardCharsets.UTF_8));
-        } else {
-            Category category = site.categoryForSlug(parts[1]);
-            if (category == null) {
-                errorPage(req, res, site, 404);
-            } else {
-                res.setContentType("application/rss+xml;charset=UTF-8");
-                res.getOutputStream().write(RSSService.generateRSSForCategory(category, locale).getBytes(StandardCharsets.UTF_8));
-            }
-        }
+		if (parts.length == 1) {
+			res.setContentType("application/rss+xml;charset=UTF-8");
+			res.getOutputStream().write(
+					RSSService.generateRSSForSite(site, locale).getBytes(
+							StandardCharsets.UTF_8));
+		} else {
+			Category category = site.categoryForSlug(parts[1]);
+			if (category == null) {
+				errorPage(req, res, site, 404);
+			} else {
+				res.setContentType("application/rss+xml;charset=UTF-8");
+				res.getOutputStream().write(
+						RSSService.generateRSSForCategory(category, locale)
+								.getBytes(StandardCharsets.UTF_8));
+			}
+		}
 
-    }
+	}
 
-    private Site getSite(MenuFunctionality menu, String url) {
-        if (menu.getSites() != null) {
-            return menu.getSites();
-        }
-        return Optional.ofNullable(menu.getCmsFolder()).map((x) -> {
-            return x.resolveSite(url);
-        }).orElse(null);
-    }
+	private Site getSite(MenuFunctionality menu, String url) {
+		if (menu.getSites() != null) {
+			return menu.getSites();
+		}
+		return Optional.ofNullable(menu.getCmsFolder()).map((x) -> {
+			return x.resolveSite(url);
+		}).orElse(null);
+	}
 
-    private void handleStaticResource(final HttpServletRequest req, HttpServletResponse res, Site sites, String pageSlug)
-            throws IOException, ServletException {
-        pageSlug = pageSlug.replaceFirst("/", "");
-        byte[] bytes = sites.getTheme().contentForPath(pageSlug);
-        if (bytes != null) {
-            CMSThemeFile templateFile = sites.getTheme().fileForPath(pageSlug);
-            String etag =
-                    "W/\"" + bytes.length + "-" + (templateFile == null ? "na" : templateFile.getLastModified().getMillis())
-                            + "\"";
-            res.setHeader("ETag", etag);
-            if (etag.equals(req.getHeader("If-None-Match"))) {
-                res.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                return;
-            }
-            res.setHeader("Expires", formatter.print(DateTime.now().plusHours(12)));
-            res.setHeader("Cache-Control", "max-age=43200");
-            res.setContentLength(bytes.length);
-            if (templateFile != null) {
-                res.setContentType(templateFile.getContentType());
-            } else {
-                res.setContentType(new MimetypesFileTypeMap().getContentType(pageSlug));
-            }
-            res.getOutputStream().write(bytes);
-        } else {
-            res.sendError(404);
-        }
-    }
+	private void handleStaticResource(final HttpServletRequest req,
+			HttpServletResponse res, Site sites, String pageSlug)
+			throws IOException, ServletException {
+		pageSlug = pageSlug.replaceFirst("/", "");
+		CMSTheme theme = sites.getTheme();
+		if (theme != null) {
+			byte[] bytes = theme.contentForPath(pageSlug);
+			if (bytes != null) {
+				CMSThemeFile templateFile = theme.fileForPath(pageSlug);
+				String etag = "W/\""
+						+ bytes.length
+						+ "-"
+						+ (templateFile == null ? "na" : templateFile
+								.getLastModified().getMillis()) + "\"";
+				res.setHeader("ETag", etag);
+				if (etag.equals(req.getHeader("If-None-Match"))) {
+					res.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+					return;
+				}
+				res.setHeader("Expires",
+						formatter.print(DateTime.now().plusHours(12)));
+				res.setHeader("Cache-Control", "max-age=43200");
+				res.setContentLength(bytes.length);
+				if (templateFile != null) {
+					res.setContentType(templateFile.getContentType());
+				} else {
+					res.setContentType(new MimetypesFileTypeMap()
+							.getContentType(pageSlug));
+				}
+				res.getOutputStream().write(bytes);
+				return;
+			}
+		}
+		res.sendError(404);
+	}
 
-    private void renderCMSPage(final HttpServletRequest req, HttpServletResponse res, Site sites, String pageSlug)
-            throws ServletException, IOException, PebbleException {
-        if (pageSlug.startsWith("/")) {
-            pageSlug = pageSlug.substring(1);
-        }
-        String[] parts = pageSlug.split("/");
+	private void renderCMSPage(final HttpServletRequest req,
+			HttpServletResponse res, Site sites, String pageSlug)
+			throws ServletException, IOException, PebbleException {
+		if (pageSlug.startsWith("/")) {
+			pageSlug = pageSlug.substring(1);
+		}
+		String[] parts = pageSlug.split("/");
 
-        String pageName = parts[0];
+		String pageName = parts[0];
 
-        Page page;
-        if (Strings.isNullOrEmpty(pageName) && sites.getInitialPage() != null) {
-            page = sites.getInitialPage();
-        } else {
-            page = sites.getPagesSet().stream().filter(p -> pageName.equals(p.getSlug())).findAny().orElse(null);
-        }
+		Page page;
+		if (Strings.isNullOrEmpty(pageName) && sites.getInitialPage() != null) {
+			page = sites.getInitialPage();
+		} else {
+			page = sites.getPagesSet().stream()
+					.filter(p -> pageName.equals(p.getSlug())).findAny()
+					.orElse(null);
+		}
 
-        if (page == null || page.getTemplate() == null) {
-            errorPage(req, res, sites, 404);
-        } else if (!page.isPublished() || !page.getCanViewGroup().isMember(Authenticate.getUser())) {
-            errorPage(req, res, sites, 404);
-        } else {
-            try {
-                renderPage(req, pageSlug, res, sites, page, parts);
-            } catch (ResourceNotFoundException e) {
-                errorPage(req, res, sites, 404);
-            }
-        }
-    }
+		if (page == null || page.getTemplate() == null) {
+			errorPage(req, res, sites, 404);
+		} else if (!page.isPublished()
+				|| !page.getCanViewGroup().isMember(Authenticate.getUser())) {
+			errorPage(req, res, sites, 404);
+		} else {
+			try {
+				renderPage(req, pageSlug, res, sites, page, parts);
+			} catch (ResourceNotFoundException e) {
+				errorPage(req, res, sites, 404);
+			}
+		}
+	}
 
-    private void handleLeadingSlash(final HttpServletRequest req, HttpServletResponse res, Site sites) throws PebbleException,
-            IOException, ServletException {
-        if (req.getMethod().equals("GET")) {
-            res.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-            res.setHeader("Location", rewritePageUrl(req));
-            return;
-        } else if (req.getMethod().equals("POST")) {
-            if (CoreConfiguration.getConfiguration().developmentMode()) {
-                PebbleEngine engine = new PebbleEngine(new StringLoader());
-                engine.addExtension(new CMSExtensions());
-                PebbleTemplate compiledTemplate =
-                        engine.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
-                res.setStatus(500);
-                res.setContentType("text/html");
-                compiledTemplate.evaluate(res.getWriter());
-            } else {
-                errorPage(req, res, sites, 500);
-            }
-        }
-    }
+	private void handleLeadingSlash(final HttpServletRequest req,
+			HttpServletResponse res, Site sites) throws PebbleException,
+			IOException, ServletException {
+		if (req.getMethod().equals("GET")) {
+			res.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+			res.setHeader("Location", rewritePageUrl(req));
+			return;
+		} else if (req.getMethod().equals("POST")) {
+			if (CoreConfiguration.getConfiguration().developmentMode()) {
+				PebbleEngine engine = new PebbleEngine(new StringLoader());
+				engine.addExtension(new CMSExtensions());
+				PebbleTemplate compiledTemplate = engine
+						.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
+				res.setStatus(500);
+				res.setContentType("text/html");
+				compiledTemplate.evaluate(res.getWriter());
+			} else {
+				errorPage(req, res, sites, 500);
+			}
+		}
+	}
 
-    private static String getFullURL(HttpServletRequest request) {
-        StringBuffer requestURL = request.getRequestURL();
-        String queryString = request.getQueryString();
-        if (queryString != null) {
-            requestURL.append('?').append(queryString);
-        }
-        return requestURL.toString();
-    }
+	private static String getFullURL(HttpServletRequest request) {
+		StringBuffer requestURL = request.getRequestURL();
+		String queryString = request.getQueryString();
+		if (queryString != null) {
+			requestURL.append('?').append(queryString);
+		}
+		return requestURL.toString();
+	}
 
-    private void renderPage(final HttpServletRequest req, String reqPagePath, HttpServletResponse res, Site site, Page page,
-            String[] requestContext) throws PebbleException, IOException {
+	private void renderPage(final HttpServletRequest req, String reqPagePath,
+			HttpServletResponse res, Site site, Page page,
+			String[] requestContext) throws PebbleException, IOException {
 
-        TemplateContext global = new TemplateContext();
-        global.setRequestContext(requestContext);
-        for (String key : req.getParameterMap().keySet()) {
-            global.put(key, req.getParameter(key));
-        }
+		TemplateContext global = new TemplateContext();
+		global.setRequestContext(requestContext);
+		for (String key : req.getParameterMap().keySet()) {
+			global.put(key, req.getParameter(key));
+		}
 
-        global.put("page", makePageWrapper(page));
-        populateSiteInfo(req, page, site, global);
+		global.put("page", makePageWrapper(page));
+		populateSiteInfo(req, page, site, global);
 
-        List<TemplateContext> components = new ArrayList<TemplateContext>();
+		List<TemplateContext> components = new ArrayList<TemplateContext>();
 
-        for (Component component : page.getComponentsSet()) {
-            TemplateContext local = new TemplateContext();
-            component.handle(page, local, global);
-            components.add(local);
-        }
+		for (Component component : page.getComponentsSet()) {
+			TemplateContext local = new TemplateContext();
+			component.handle(page, local, global);
+			components.add(local);
+		}
 
-        global.put("components", components);
+		global.put("components", components);
 
-        PebbleTemplate compiledTemplate = engine.getTemplate(site.getTheme().getType() + "/" + page.getTemplate().getFilePath());
+		CMSTheme theme = site.getTheme();
 
-        res.setStatus(200);
-        res.setContentType("text/html");
-        compiledTemplate.evaluate(res.getWriter(), global);
-    }
+		PebbleTemplate compiledTemplate = engine.getTemplate(theme.getType()
+				+ "/" + page.getTemplate().getFilePath());
 
-    private void populateSiteInfo(final HttpServletRequest req, Page page, Site site, TemplateContext context) {
-        context.put("request", makeRequestWrapper(req));
-        context.put("app", makeAppWrapper());
-        context.put("site", site.makeWrap());
-        context.put("menus", makeMenuWrapper(site, page));
-        context.put("staticDir", site.getStaticDirectory());
-        context.put("devMode", CoreConfiguration.getConfiguration().developmentMode());
-    }
+		res.setStatus(200);
+		res.setContentType("text/html");
+		compiledTemplate.evaluate(res.getWriter(), global);
+	}
 
-    private Map<String, Object> makeMenuWrapper(Site site, Page page) {
-        HashMap<String, Object> result = new HashMap<String, Object>();
-        for (Menu menu : site.getMenusSet()) {
-            result.put(menu.getSlug(), page == null ? menu.makeWrap() : menu.makeWrap(page));
-        }
-        return result;
-    }
+	private void populateSiteInfo(final HttpServletRequest req, Page page,
+			Site site, TemplateContext context) {
+		context.put("request", makeRequestWrapper(req));
+		context.put("app", makeAppWrapper());
+		context.put("site", site.makeWrap());
+		context.put("menus", makeMenuWrapper(site, page));
+		context.put("staticDir", site.getStaticDirectory());
+		context.put("devMode", CoreConfiguration.getConfiguration()
+				.developmentMode());
+	}
 
-    private Map<String, Object> makeAppWrapper() {
-        HashMap<String, Object> result = new HashMap<String, Object>();
-        PortalConfiguration configuration = PortalConfiguration.getInstance();
-        result.put("title", configuration.getApplicationTitle());
-        result.put("subtitle", configuration.getApplicationSubTitle());
-        result.put("copyright", configuration.getApplicationCopyright());
-        result.put("support", configuration.getSupportEmailAddress());
-        result.put("locale", I18N.getLocale());
-        result.put("supportedLocales", CoreConfiguration.supportedLocales());
-        return result;
-    }
+	private Map<String, Object> makeMenuWrapper(Site site, Page page) {
+		HashMap<String, Object> result = new HashMap<String, Object>();
+		for (Menu menu : site.getMenusSet()) {
+			result.put(menu.getSlug(),
+					page == null ? menu.makeWrap() : menu.makeWrap(page));
+		}
+		return result;
+	}
 
-    private Map<String, Object> makePageWrapper(Page page) {
-        HashMap<String, Object> result = new HashMap<String, Object>();
+	private Map<String, Object> makeAppWrapper() {
+		HashMap<String, Object> result = new HashMap<String, Object>();
+		PortalConfiguration configuration = PortalConfiguration.getInstance();
+		result.put("title", configuration.getApplicationTitle());
+		result.put("subtitle", configuration.getApplicationSubTitle());
+		result.put("copyright", configuration.getApplicationCopyright());
+		result.put("support", configuration.getSupportEmailAddress());
+		result.put("locale", I18N.getLocale());
+		result.put("supportedLocales", CoreConfiguration.supportedLocales());
+		return result;
+	}
 
-        result.put("name", page.getName());
-        result.put("user", new UserWrap(page.getCreatedBy()));
-        result.put("createdBy", new UserWrap(page.getCreatedBy()));
-        result.put("creationDate", page.getCreationDate());
-        return result;
-    }
+	private Map<String, Object> makePageWrapper(Page page) {
+		HashMap<String, Object> result = new HashMap<String, Object>();
 
-    private Map<String, Object> makeRequestWrapper(HttpServletRequest req) {
-        HashMap<String, Object> result = new HashMap<String, Object>();
+		result.put("name", page.getName());
+		result.put("user", new UserWrap(page.getCreatedBy()));
+		result.put("createdBy", new UserWrap(page.getCreatedBy()));
+		result.put("creationDate", page.getCreationDate());
+		return result;
+	}
 
-        result.put("user", new UserWrap(Authenticate.getUser()));
+	private Map<String, Object> makeRequestWrapper(HttpServletRequest req) {
+		HashMap<String, Object> result = new HashMap<String, Object>();
 
-        result.put("method", req.getMethod());
-        result.put("protocol", req.getProtocol());
+		result.put("user", new UserWrap(Authenticate.getUser()));
 
-        result.put("url", getFullURL(req));
-        result.put("contentType", req.getContentType());
-        result.put("contextPath", req.getContextPath());
+		result.put("method", req.getMethod());
+		result.put("protocol", req.getProtocol());
 
-        return result;
-    }
+		result.put("url", getFullURL(req));
+		result.put("contentType", req.getContentType());
+		result.put("contextPath", req.getContextPath());
 
-    private void errorPage(final HttpServletRequest req, HttpServletResponse res, Site site, int errorCode)
-            throws ServletException, IOException {
-        CMSTheme cmsTheme = site.getTheme();
-        if (cmsTheme != null && cmsTheme.definesPath(errorCode + ".html")) {
-            try {
-                PebbleTemplate compiledTemplate = engine.getTemplate(cmsTheme.getType() + "/" + errorCode + ".html");
-                TemplateContext global = new TemplateContext();
-                populateSiteInfo(req, null, site, global);
-                res.setStatus(errorCode);
-                res.setContentType("text/html");
-                compiledTemplate.evaluate(res.getWriter(), global);
-            } catch (PebbleException e) {
-                throw new ServletException("Could not render error page for " + errorCode);
-            }
-        } else {
-            res.sendError(errorCode, req.getRequestURI());
-        }
-    }
+		return result;
+	}
 
-    public void invalidateEntry(String key) {
-        engine.getTemplateCache().invalidate(key);
-    }
+	private void errorPage(final HttpServletRequest req,
+			HttpServletResponse res, Site site, int errorCode)
+			throws ServletException, IOException {
+		CMSTheme cmsTheme = site.getTheme();
+		if (cmsTheme != null && cmsTheme.definesPath(errorCode + ".html")) {
+			try {
+				PebbleTemplate compiledTemplate = engine.getTemplate(cmsTheme
+						.getType() + "/" + errorCode + ".html");
+				TemplateContext global = new TemplateContext();
+				populateSiteInfo(req, null, site, global);
+				res.setStatus(errorCode);
+				res.setContentType("text/html");
+				compiledTemplate.evaluate(res.getWriter(), global);
+			} catch (PebbleException e) {
+				throw new ServletException("Could not render error page for "
+						+ errorCode);
+			}
+		} else {
+			res.sendError(errorCode, req.getRequestURI());
+		}
+	}
+
+	public void invalidateEntry(String key) {
+		engine.getTemplateCache().invalidate(key);
+	}
 
 }

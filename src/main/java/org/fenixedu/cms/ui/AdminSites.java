@@ -36,6 +36,7 @@ import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.exceptions.CmsDomainException;
+import org.fenixedu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -139,18 +140,23 @@ public class AdminSites {
             Site s = Site.fromSlug(slug);
 
             AdminSites.canEdit(s);
-
-            editSite(name, description, theme, newSlug, published, s, viewGroup, postGroup, adminGroup, folder, analyticsCode);
+            CMSTheme themeObj = CMSTheme.forType(theme);
+            if (themeObj == null){
+            	throw new ResourceNotFoundException();
+            }
+            editSite(name, description, themeObj, newSlug, published, s, viewGroup, postGroup, adminGroup, folder, analyticsCode);
             return new RedirectView("/cms/sites/" + newSlug, true);
         }
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private void editSite(LocalizedString name, LocalizedString description, String theme, String slug, Boolean published,
+    private void editSite(LocalizedString name, LocalizedString description, CMSTheme themeObj, String slug, Boolean published,
             Site s, String viewGroup, String postGroup, String adminGroup, String folder, String analyticsCode) {
-        s.setName(name);
+        
+    	s.setName(name);
         s.setDescription(description);
-        s.setTheme(CMSTheme.forType(theme));
+        
+        s.setThemeType(themeObj.getType());
         if (!Strings.isNullOrEmpty(folder)) {
             s.setFolder(FenixFramework.getDomainObject(folder));
         } else if (s.getFolder() != null) {

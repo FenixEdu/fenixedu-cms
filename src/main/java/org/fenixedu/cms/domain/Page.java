@@ -29,6 +29,7 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
+
 import pt.ist.fenixframework.Atomic;
 
 /**
@@ -36,169 +37,206 @@ import pt.ist.fenixframework.Atomic;
  */
 public class Page extends Page_Base implements Sluggable {
 
-    /**
-     * the logged {@link User} creates a new Page.
-     */
-    public Page(Site site) {
-        super();
-        DateTime now = new DateTime();
-        this.setCreationDate(now);
-        this.setModificationDate(now);
-        if (Authenticate.getUser() == null) {
-            throw CmsDomainException.forbiden();
-        }
-        this.setCreatedBy(Authenticate.getUser());
-        this.setCanViewGroup(AnyoneGroup.get());
-        this.setSite(site);
-        this.setPublished(true);
-    }
+	/**
+	 * the logged {@link User} creates a new Page.
+	 */
+	public Page(Site site) {
+		super();
+		DateTime now = new DateTime();
+		this.setCreationDate(now);
+		this.setModificationDate(now);
+		if (Authenticate.getUser() == null) {
+			throw CmsDomainException.forbiden();
+		}
+		this.setCreatedBy(Authenticate.getUser());
+		this.setCanViewGroup(AnyoneGroup.get());
+		this.setSite(site);
+		this.setPublished(true);
+	}
 
-    @Override
-    public Site getSite() {
-        return super.getSite();
-    }
+	@Override
+	public Site getSite() {
+		return super.getSite();
+	}
 
-    @Override
-    public void setName(LocalizedString name) {
-        LocalizedString prevName = getName();
-        super.setName(name);
+	@Override
+	public void setName(LocalizedString name) {
+		LocalizedString prevName = getName();
+		super.setName(name);
 
-        this.setModificationDate(new DateTime());
-        if (prevName == null) {
-            setSlug(StringNormalizer.slugify(name.getContent()));
-        }
-    }
+		this.setModificationDate(new DateTime());
+		if (prevName == null) {
+			setSlug(StringNormalizer.slugify(name.getContent()));
+		}
+	}
 
-    @Override
-    public void setSlug(String slug) {
-        super.setSlug(SlugUtils.makeSlug(this, slug));
-    }
+	@Override
+	public void setSlug(String slug) {
+		super.setSlug(SlugUtils.makeSlug(this, slug));
+	}
 
-    /**
-     * A slug is valid if there are no other page on that site that have the same slug.
-     *
-     * @param slug
-     * @return true if it is a valid slug.
-     */
-    @Override
-    public boolean isValidSlug(String slug) {
-        Page p = getSite().pageForSlug(slug);
-        return p == null || p == this;
-    }
+	/**
+	 * A slug is valid if there are no other page on that site that have the
+	 * same slug.
+	 *
+	 * @param slug
+	 * @return true if it is a valid slug.
+	 */
+	@Override
+	public boolean isValidSlug(String slug) {
+		Page p = getSite().pageForSlug(slug);
+		return p == null || p == this;
+	}
 
-    /**
-     * Searches a {@link Component} of this page by oid.
-     *
-     * @param oid the oid of the {@link Component} to be searched.
-     * @return the {@link Component} with the given oid if it is a component of this page and null otherwise.
-     */
-    public Component componentForOid(String oid) {
-        for (Component c : getComponentsSet()) {
-            if (c.getExternalId().equals(oid)) {
-                return c;
-            }
-        }
-        return null;
-    }
+	/**
+	 * Searches a {@link Component} of this page by oid.
+	 *
+	 * @param oid
+	 *            the oid of the {@link Component} to be searched.
+	 * @return the {@link Component} with the given oid if it is a component of
+	 *         this page and null otherwise.
+	 */
+	public Component componentForOid(String oid) {
+		for (Component c : getComponentsSet()) {
+			if (c.getExternalId().equals(oid)) {
+				return c;
+			}
+		}
+		return null;
+	}
 
-    @Atomic
-    public void delete() {
-        for (Component component : getComponentsSet()) {
-            this.removeComponents(component);
-            component.delete();
-        }
+	@Atomic
+	public void delete() {
+		for (Component component : getComponentsSet()) {
+			this.removeComponents(component);
+			component.delete();
+		}
 
-        for (MenuItem mi : getMenuItemsSet()) {
-            mi.delete();
-        }
+		for (MenuItem mi : getMenuItemsSet()) {
+			mi.delete();
+		}
 
-        this.setTemplate(null);
-        this.setSite(null);
-        this.setCreatedBy(null);
-        this.setViewGroup(null);
-        this.deleteDomainObject();
-    }
+		this.setTemplate(null);
+		this.setSite(null);
+		this.setCreatedBy(null);
+		this.setViewGroup(null);
+		this.deleteDomainObject();
+	}
 
-    /**
-     * @return the URL link for this page.
-     */
-    public String getAddress() {
-        return CoreConfiguration.getConfiguration().applicationUrl() + "/" + getSite().getBaseUrl() + "/" + getSlug();
-    }
+	/**
+	 * @return the URL link for this page.
+	 */
+	public String getAddress() {
+		return CoreConfiguration.getConfiguration().applicationUrl() + "/"
+				+ getSite().getBaseUrl() + "/" + getSlug();
+	}
 
-    /**
-     * returns the group of people who can view this site.
-     *
-     * @return group
-     * the access group for this site
-     */
-    public Group getCanViewGroup() {
-        return getViewGroup().toGroup();
-    }
+	/**
+	 * returns the group of people who can view this site.
+	 *
+	 * @return group the access group for this site
+	 */
+	public Group getCanViewGroup() {
+		return getViewGroup().toGroup();
+	}
 
-    /**
-     * sets the access group for this site
-     *
-     * @param group the group of people who can view this site
-     */
-    @Atomic
-    public void setCanViewGroup(Group group) {
-        setViewGroup(group.toPersistentGroup());
-    }
+	/**
+	 * sets the access group for this site
+	 *
+	 * @param group
+	 *            the group of people who can view this site
+	 */
+	@Atomic
+	public void setCanViewGroup(Group group) {
+		setViewGroup(group.toPersistentGroup());
+	}
 
-    public static Page create(Site site, Menu menu, MenuItem parent, LocalizedString name, boolean published, String template,
-                              User creator, Component... components) {
-        Page page = new Page(site);
-        page.setSite(site);
-        page.setName(name);
-        if (components != null && components.length > 0) {
-            for (Component component : components) {
-                page.addComponents(component);
-            }
-        }
-        page.setTemplate(site.getTheme().templateForType(template));
-        if (creator == null) {
-            page.setCreatedBy(site.getCreatedBy());
-        } else {
-            page.setCreatedBy(creator);
-        }
-        page.setPublished(published);
-        if (menu != null) {
-            MenuItem.create(menu, page, name, parent);
-        }
-        return page;
-    }
+	public static Page create(Site site, Menu menu, MenuItem parent,
+			LocalizedString name, boolean published, String template,
+			User creator, Component... components) {
+		Page page = new Page(site);
+		page.setSite(site);
+		page.setName(name);
+		if (components != null && components.length > 0) {
+			for (Component component : components) {
+				page.addComponents(component);
+			}
+		}
 
-    @Override
-    public void setPublished(Boolean published) {
-        setModificationDate(new DateTime());
-        super.setPublished(published);
-    }
+		page.setTemplate(site.getTheme().templateForType(template));
+		if (creator == null) {
+			page.setCreatedBy(site.getCreatedBy());
+		} else {
+			page.setCreatedBy(creator);
+		}
+		page.setPublished(published);
+		if (menu != null) {
+			MenuItem.create(menu, page, name, parent);
+		}
+		return page;
+	}
 
-    @Override
-    public void setTemplate(CMSTemplate template) {
-        setModificationDate(new DateTime());
-        super.setTemplate(template);
-    }
+	@Override
+	public void setPublished(Boolean published) {
+		setModificationDate(new DateTime());
+		super.setPublished(published);
+	}
 
-    public boolean isPublished() {
-        return getPublished() != null ? getPublished().booleanValue() : false;
-    }
+	@Override
+	public void setTemplate(CMSTemplate template) {
+		setModificationDate(new DateTime());
+		super.setTemplate(template);
+		setTemplateType(template.getType());
+	}
 
-    public String getRssUrl() {
-        for (Component component : getComponentsSet()) {
-            if (component instanceof ListCategoryPosts) {
-                ListCategoryPosts listPosts = (ListCategoryPosts) component;
-                if (listPosts.getCategory() != null) {
-                    return listPosts.getCategory().getRssUrl();
-                }
-            }
-        }
-        return null;
-    }
+	public boolean isPublished() {
+		return getPublished() != null ? getPublished().booleanValue() : false;
+	}
 
-    public String getEditUrl() {
-        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/"
-                + getSite().getSlug() + "/" + getSlug() + "/edit";
-    }
+	public String getRssUrl() {
+		for (Component component : getComponentsSet()) {
+			if (component instanceof ListCategoryPosts) {
+				ListCategoryPosts listPosts = (ListCategoryPosts) component;
+				if (listPosts.getCategory() != null) {
+					return listPosts.getCategory().getRssUrl();
+				}
+			}
+		}
+		return null;
+	}
+
+	public String getEditUrl() {
+		return CoreConfiguration.getConfiguration().applicationUrl()
+				+ "/cms/pages/" + getSite().getSlug() + "/" + getSlug()
+				+ "/edit";
+	}
+
+	@Override
+	public CMSTemplate getTemplate() {
+		String templateType = getTemplateType();
+		CMSTemplate template = getTemplate();
+		CMSTheme theme = getSite().getTheme();
+		if (templateType != null) {
+			if (template != null && template.getTheme() == theme
+					&& template.getType().equals(templateType)) {
+				return template;
+			}
+			
+			if (theme != null) {
+				template = theme.templateForType(templateType);
+				if (template != null){
+					return template;
+				}
+			}
+			
+			if (theme.getDefaultTemplate() != null){
+				return theme.getDefaultTemplate();
+			}
+			
+			return CMSTheme.getDefaultTheme().getDefaultTemplate();
+			
+		} else {
+			return null;
+		}
+	}
 }

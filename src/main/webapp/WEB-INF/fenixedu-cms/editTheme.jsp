@@ -304,3 +304,56 @@ angular.module('cmsFileViewer')
         }; 
     });
 </script>
+
+<div class="modal fade" id="templates-modal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                <h4 class="modal-title">Templates</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <table class="table table-hover table-bordered">
+                        <c:forEach var="template" items="${theme.templatesSet}">
+                            <tr>
+                                <td>
+                                    <h5>${template.name} (<samp>${template.type}</samp>) </h5>
+
+
+                                    <div>
+                                        ${template.description}
+                                    </div>
+
+                                    <p>
+                                        <code>${template.filePath}</code>
+                                    </p>
+
+                                    <div class="btn-group pull-right">
+                                        <a class="btn btn-danger btn-icon deleteBtn" data-toggle="modal" data-file="${template.type}">
+                                            <i class="glyphicon glyphicon-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </table>
+                    <p class="help-block">If you want to create a new template, right click on the file and select 'Make a Template'</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<script type="text/javascript">
+    $(function () {
+        $('.deleteBtn').popover({
+            placement:"right",
+            title: 'Are you sure? <span class="close"></span>',
+            html: true,
+            content: '<p class="help-block">You are about to delete this template. The template file will remain unaffected. Are you sure?</p> <button class="btn btn-danger">Delete this Template</button>'
+        });
+    })
+</script>

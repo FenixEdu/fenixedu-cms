@@ -26,7 +26,7 @@
   <h2><small>Themes</small></h2>
 </div>
 <p>
-  <a href="${pageContext.request.contextPath}/cms/themes/new" class="btn btn-default">New</a>
+  <a data-toggle="modal" href='#createNewThemeModal' class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>
   <a href="${pageContext.request.contextPath}/cms/themes/create" class="btn btn-default">Import</a>
   <c:if test="${themes.size() == 0}">
     <a href="${pageContext.request.contextPath}/cms/themes/loadDefault" class="btn btn-default"><spring:message code="site.manage.label.loadDefault" /></a>
@@ -128,4 +128,89 @@
         modal.modal('show');
     }
     $(".btn-duplicate").on("click",showDuplicateModal)
+</script>
+
+<div class="modal fade" id="createNewThemeModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="form-horizontal" enctype="multipart/form-data" action="themes/new" method="post" role="form">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
+                <h3 class="modal-title">New Theme</h3>
+                <small>Starting with an empty theme</small>
+            </div>
+            <div class="modal-body">
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.name"/></label>
+                        <div class="col-sm-10">
+                            <input type="text" name="name" class="form-control" placeholder="Name">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.type"/></label>
+                        <div class="col-sm-10">
+                            <input type="text" name="type" class="form-control" placeholder="Type">
+                            <p class="help-block">This code is used internally and is not shared with the users. Howerver it must be unique.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.description"/></label>
+                        <div class="col-sm-10">
+                            <textarea name="description" class="form-control" placeholder="Description"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.extends"/></label>
+                        <div class="col-sm-10">
+                            <select class="form-control" name="extends" id="">
+                                <option value="">-</option>
+                                <c:forEach var="theme" items="${themes}">
+                                    <option value="${theme.type}">${theme.name}</option>
+                                </c:forEach>
+                            </select>
+                            <p class="help-block">If your new theme is going to be minor changes over another one, you may extend it and reuse most of its code.</p>
+                        </div>
+                    </div>
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type="text/javascript">
+function slugify(text)
+{
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-')           // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+    .replace(/^-+/, '')             // Trim - from start of text
+    .replace(/-+$/, '');            // Trim - from end of text
+}
+    $("#createNewThemeModal [name='name']").on("keyup",function(e){
+        var te = $("#createNewThemeModal [name='type']");
+
+        if (!te.data("written")){
+            te.val(slugify($(e.target).val()));
+        }
+    });
+
+    $("#createNewThemeModal [name='type']").on("keyup", function(e){
+        e=$(e.target);
+        
+        if (!e.val() || e.val().length == 0) {
+            $("#createNewThemeModal [name='type']").data("written", false);
+        }else if (!$("#createNewThemeModal [name='type']").data("written")){
+            $("#createNewThemeModal [name='type']").data("written", true);
+        }
+
+    });
 </script>

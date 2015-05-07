@@ -27,6 +27,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
 
+import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.CMSThemeLoader;
 import org.fenixedu.cms.domain.RegisterSiteTemplate;
 import org.fenixedu.cms.domain.Site;
@@ -40,9 +41,11 @@ public class CMSInitializer implements ServletContainerInitializer {
     public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
         if (c != null) {
             for (Class<?> type : c) {
-                if (type.isAnnotationPresent(ComponentType.class)) {
+                
+            	if (type.isAnnotationPresent(ComponentType.class)) {
                     Component.register(type);
                 }
+                
                 if (type.isAnnotationPresent(RegisterSiteTemplate.class)) {
                     RegisterSiteTemplate annotation = type.getAnnotation(RegisterSiteTemplate.class);
                     Site.register(annotation.type(), type);
@@ -53,9 +56,7 @@ public class CMSInitializer implements ServletContainerInitializer {
     }
 
     private void registerDefaultTheme(ServletContext ctx) {
-        InputStream in = ctx.getResourceAsStream("/WEB-INF/cms-default-theme.zip");
-        ZipInputStream zin = new ZipInputStream(in);
-        CMSThemeLoader.createFromZipStream(zin);
+        CMSTheme.loadDefaultTheme();
     }
 
 }

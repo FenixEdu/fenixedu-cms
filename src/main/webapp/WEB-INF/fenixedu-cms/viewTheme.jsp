@@ -27,9 +27,9 @@
 </div>
 
 <p>
-    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/edit" class="btn btn-default">Edit</a>
+    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/edit" class="btn btn-primary"><i class="glyphicon glyphicon-edit"></i> Edit</a>
 
-    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/edit" class="btn btn-default">Export</a>
+    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/edit" class="btn btn-default"><i class="glyphicon glyphicon-cloud-download"></i> Export</a>
 </p>
 
 <div class="row">

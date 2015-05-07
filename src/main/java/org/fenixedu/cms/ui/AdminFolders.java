@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014 Instituto Superior Técnico
+x * Copyright © 2014 Instituto Superior Técnico
  *
  * This file is part of FenixEdu CMS.
  *
