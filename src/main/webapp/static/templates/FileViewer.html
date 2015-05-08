@@ -3,13 +3,13 @@
             
             <div>
 
-            <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#fileNewModal"><i class="glyphicon glyphicon-plus"></i> New</button>
+            <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#new-file-modal"><i class="glyphicon glyphicon-plus"></i> New</button>
 
             <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#fileImport"><i class="glyphicon glyphicon-cloud-upload"></i> Upload</button>
 
             <button class="btn btn-sm btn-default" data-toggle="modal" href='#templates-modal'>Templates</button>
 
-            <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#fileImport">Settings</button>
+            <button class="btn btn-sm btn-default" data-toggle="modal" href='#settings-modal'>Settings</button>
 
             </div>
     
@@ -20,25 +20,38 @@
                 </li>
               
             </ol>
-            <table ng-hide="loading" class="table faded">
-                <thead>
-                <tr>
-                    <th><input type="checkbox"> Name</th>
-                    <th><spring:message code="theme.view.label.size"/></th>
-                    <th>Modified</th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr ngf-drop ng-model="file" ngf-drag-over-class="dragover" ngf-multiple="true" ngf-allow-dir="true" context-menu="contextFor(file)" data-target="menu" ng-repeat="file in node.getFiles()">
-                        <td ng-dblclick="open(file)"><input type="checkbox">
-                            <i style="color:#3399FF;" class="{{file.contentType | fileIcon }}"></i> 
-                            {{ file.name }}
-                        </td>
-                        <td>{{file.size | bytes }}</td>
-                        <td>{{ file.modified | fuzzy }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            
+              <table ng-hide="loading" ng-if="node.getFiles().length != 0" class="table faded">
+                  <thead>
+                  <tr>
+                      <th><input type="checkbox"> Name</th>
+                      <th><spring:message code="theme.view.label.size"/></th>
+                      <th>Modified</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                        <tr ngf-drop ng-model="$parent.$parent.files" ngf-drag-over-class="dragover" ngf-multiple="true" ngf-allow-dir="true" context-menu="contextFor(file)" data-target="menu" ng-repeat="file in node.getFiles()">
+                            <td ng-dblclick="open(file)"><input type="checkbox">
+                                <i style="color:#3399FF;" class="{{file.contentType | fileIcon }}"></i> 
+                                {{ file.name }}
+                            </td>
+                            <td>{{file.size | bytes }}</td>
+                            <td>{{ file.modified | fuzzy }}</td>
+                        </tr>
+                  </tbody>
+
+              </table>
+
+              <div ng-if="node.getFiles().length == 0">
+                <style type="text/css">
+                  .drop-box{
+                    height:500px;
+                  }
+                </style>
+                <div class="drop-box" ngf-drop ng-model="$parent.files" ngf-drag-over-class="dragover" ngf-multiple="true" ngf-allow-dir="true">
+                  <p><span>Drag and drop files</span>Upload files to this directory</p>
+                </div>
+              </div>
             <div class="dropdown position-fixed" id="menu">
   <ul class="dropdown-menu" role="menu">
     <li>
@@ -52,7 +65,7 @@
       </a>
     </li>
      <li>
-      <a class="text-danger" ng-click="deleteContextFile()" class="pointer" role="menuitem" tabindex="1">
+      <a class="pointer" ng-click="deleteContextFile()" class="pointer" role="menuitem" tabindex="1">
           <i class="glyphicon glyphicon-trash"></i> Delete this file
       </a>
     </li>

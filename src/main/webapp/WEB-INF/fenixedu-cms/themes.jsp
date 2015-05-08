@@ -48,7 +48,16 @@
 				<div class="col-sm-6 col-md-4">
 
                 <div class="thumbnail">
-                    <img src="http://i.imgur.com/t8i1Zrn.png" style="max-width:100%" data-holder-rendered="true" >
+                    <c:if test="${i.previewImage != null}">
+                        <img src="${cms.downloadUrl(i.previewImage)}" style="max-width:100%" data-holder-rendered="true" />
+                    </c:if>
+                    <c:if test="${i.previewImage == null}">
+                        <div style="max-width:100%; height:250px; background:#efefef;" >
+                            <div style="font-size:60px; color:#999; display:table; margin: 0 auto; padding-top:110px;">
+                                <h5>No thumbnail avaible</h5>
+                            </div>
+                        </div>
+                    </c:if>
                   <div class="caption">
                     <h3><a href="${pageContext.request.contextPath}/cms/themes/${i.type}/see">${i.getName()}</a></h3>
                     <p>${i.getDescription()}</p>
@@ -137,7 +146,7 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
                 <h3 class="modal-title">New Theme</h3>
-                <small>Starting with an empty theme</small>
+                <small>Make a new theme from scratch</small>
             </div>
             <div class="modal-body">
                     <div class="form-group">
@@ -214,3 +223,4 @@ function slugify(text)
 
     });
 </script>
+

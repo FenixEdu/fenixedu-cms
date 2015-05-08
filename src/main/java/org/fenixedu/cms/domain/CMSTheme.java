@@ -35,6 +35,7 @@ import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
+import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.cms.CMSConfigurationManager;
 import org.joda.time.DateTime;
 
@@ -206,7 +207,13 @@ public class CMSTheme extends CMSTheme_Base {
 		for (CMSTemplate template : this.getTemplatesSet()) {
 			template.delete();
 		}
-
+		if (getPreviewImage() != null){
+		
+			GroupBasedFile f = getPreviewImage();
+			setPreviewImage(null);
+			f.delete();
+		}
+		
 		this.deleteDomainObject();
 
 	}

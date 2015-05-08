@@ -72,7 +72,6 @@ class MenuItem{
 class Post{
   LocalizedString name;
   String slug;
-  LocalizedString body;
   DateTime creationDate;
   DateTime modificationDate;
   Boolean active;
@@ -80,6 +79,48 @@ class Post{
   DateTime publicationEnd;
   LocalizedString location;
   PostMetadata metadata;
+}
+
+class PostContentRevision{
+  LocalizedString body;
+  DateTime revisionDate;
+}
+
+relation PostContentRevisions{
+  public PostContentRevision playsRole previous{
+    multiplicity 0..1;
+  }
+  public PostContentRevision playsRole next{
+    multiplicity 0..1;
+  }
+}
+
+relation PostRevisionRevision{
+  public PostContentRevision playsRole revisions{
+    multiplicity 0..*;
+  }
+  public Post playsRole post{
+    multiplicity 1..1;
+  }
+}
+
+relation NewestRevision{
+  public PostContentRevision playsRole latestRevision{
+    multiplicity 0..1;
+  }
+  protected Post playsRole isLastestRevision{
+    multiplicity 0..1;
+  }
+}
+
+relation PostContentRevisionOwer{
+  public .org.fenixedu.bennu.core.domain.User playsRole createdBy{
+    multiplicity 1..1;
+  }
+
+  public PostContentRevision playsRole revisions{
+    multiplicity 0..*;
+  }
 }
 
 public class component.Component{
@@ -190,6 +231,16 @@ relation CMSTemplateCMSTheme{
   }
   CMSTemplate playsRole templates{
     multiplicity *;
+  }
+}
+
+relation ThemePreview{
+  .org.fenixedu.bennu.io.domain.GroupBasedFile playsRole previewImage{
+    multiplicity 0..1;
+  }
+
+  CMSTheme playsRole themePreview{
+    multiplicity 0..1;
   }
 }
 

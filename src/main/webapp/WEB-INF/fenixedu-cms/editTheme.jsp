@@ -44,7 +44,12 @@ ${portal.angularToolkit()}
     min-height: 500px;
 }
 .dragover{
-    background: red;
+    border: 1px dashed #39f;
+    color: #39f;
+    transition: all 0.15s ease-in-out;
+}
+.pointer i{
+    color: #39f;
 }
 </style>
 <script>
@@ -127,10 +132,9 @@ function chdir(rootNode, path){
     var pivot = rootNode;
     for (var i = 0; i < pathArr.length; i++) {
         var cur = pathArr[i];
-        console.log(cur)
         pivot = pivot.files[cur];
         if (!pivot){
-            throw "Directory not found '" + pathArr + "'"
+            return null;
         }
     };
     return pivot;
@@ -164,7 +168,8 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
         if (files && files.length) {
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
-                var filename = file.name;
+                var filename = file.path;
+                if (file.type === "directory") { continue; }
                 if($scope.node.parent){
                     filename = $scope.node.path + "/" + filename;
                 }
@@ -175,9 +180,9 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
                     file: file
                 }).progress(function (evt) {
                     var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-                    console.log('progress: ' + progressPercentage + '% ' + evt.consolefig.file.name);
+                    //console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
                 }).success(function (data, status, headers, config) {
-                    console.log('file ' + config.file.name + 'uploaded. Response: ');
+                    //console.log('file ' + config.file.name + 'uploaded. Response: ');
                     $http.get("/cms/themes/${theme.type}/listFiles").success(function(e){ 
                         $rootScope.root = generateTree(e);
                         $rootScope.theme = "${theme.name}"
@@ -197,13 +202,20 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
     }
 
     $scope.deleteContextFile = function(){
-        $.post(Bennu.contextPath + "/cms/themes/${theme.type}/deleteFile", {
-            path : $scope.contextFile.path
-        }, function() {
-            $http.get("/cms/themes/${theme.type}/listFiles").success(function(e){ 
-                $rootScope.root = generateTree(e);
-                $rootScope.theme = "${theme.name}"
-                $scope.node = chdir($rootScope.root,$routeParams.resourceUrl);
+        var modal = $("#delete-confirmation-modal");
+        $(".filename", modal).html($scope.contextFile.path);
+        modal.modal("show");
+        $(".confirm", modal).off("click");
+        $(".confirm", modal).on("click",function(){
+            modal.modal("hide");
+            $.post(Bennu.contextPath + "/cms/themes/${theme.type}/deleteFile", {
+                path : $scope.contextFile.path
+            }, function() {
+                $http.get("/cms/themes/${theme.type}/listFiles").success(function(e){ 
+                    $rootScope.root = generateTree(e);
+                    $rootScope.theme = "${theme.name}"
+                    $scope.node = chdir($rootScope.root,$routeParams.resourceUrl);
+                });
             });
         });
     }
@@ -309,12 +321,14 @@ angular.module('cmsFileViewer')
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
-                <h4 class="modal-title">Templates</h4>
+                <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
+                <h3 class="modal-title">Templates</h3>
+                <small>View templates for ${theme.name}</small>
             </div>
             <div class="modal-body">
                 <div>
-                    <table class="table table-hover table-bordered">
+                    <c:if test="${theme.templatesSet.size() != 0}">
+                    <table  class="table table-hover table-bordered">
                         <c:forEach var="template" items="${theme.templatesSet}">
                             <tr>
                                 <td>
@@ -338,6 +352,14 @@ angular.module('cmsFileViewer')
                             </tr>
                         </c:forEach>
                     </table>
+                    </c:if>
+                    <c:if test="${theme.templatesSet.size() == 0}">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            This theme has no templates yet.
+                        </div>
+                    </div>
+                    </c:if>
                     <p class="help-block">If you want to create a new template, right click on the file and select 'Make a Template'</p>
                 </div>
             </div>
@@ -357,3 +379,119 @@ angular.module('cmsFileViewer')
         });
     })
 </script>
+
+<div class="modal fade" id="settings-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="form-horizontal" enctype="multipart/form-data" action="editSettings" method="post" role="form">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
+                <h3 class="modal-title">Edit Theme</h3>
+                <small>Change information about ${theme.name}</small>
+            </div>
+            <div class="modal-body">
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.name"/></label>
+                        <div class="col-sm-10">
+                            <input type="text" name="name" class="form-control" placeholder="Name" value="${theme.name}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.type"/></label>
+                        <div class="col-sm-10">
+                            <input disabled="disable" type="text" name="type" class="form-control" placeholder="Type" value="${theme.type}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.description"/></label>
+                        <div class="col-sm-10">
+                            <textarea name="description" class="form-control" placeholder="Description">${theme.description}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.extends"/></label>
+                        <div class="col-sm-10">
+                            <select class="form-control" name="extends" id="">
+                                <option value="">-</option>
+                                <c:forEach var="theme" items="${themes}">
+                                <c:if test="${theme.getExtends() == theme}">
+                                    <option selected value="${theme.type}">${theme.name}</option>
+                                </c:if>
+                                <c:if test="${theme.getExtends() != theme}">
+                                    <option value="${theme.type}">${theme.name}</option>    
+                                </c:if>
+                                
+                                </c:forEach>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">Thumbnail</label>
+                        <div class="col-sm-10">
+                            <input type="file" name="thumbnail" />
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="new-file-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <form action="newFile" class="form-horizontal" method="post">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
+                <h3 class="modal-title">New File</h3>
+                <small>Create a empty file</small>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
+                            code="theme.view.fileName"/>:</label>
+
+                    <div class="col-sm-10">
+                        <input type="text" name="filename" class="form-control">
+
+                        <p class="help-block">Use the full path, with directories, here.</p>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Create File</button>
+            </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div class="modal fade" id="delete-confirmation-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
+                <h3 class="modal-title">Delete File</h3>
+                <small>Are you sure?</small>
+            </div>
+            <div class="modal-body">
+                <p>You are about to delete the file '<span class="filename"></span>'. There is no way to rollback this opeartion. Are you sure? </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="confirm btn btn-danger">Delete</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

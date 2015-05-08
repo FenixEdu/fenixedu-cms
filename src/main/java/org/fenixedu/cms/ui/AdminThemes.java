@@ -31,6 +31,8 @@ import java.util.zip.ZipFile;
 import javax.servlet.http.HttpServletRequest;
 
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.groups.AnyoneGroup;
+import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
 import org.fenixedu.cms.domain.CMSTheme;
@@ -39,6 +41,8 @@ import org.fenixedu.cms.domain.CMSThemeFiles;
 import org.fenixedu.cms.domain.CMSThemeLoader;
 import org.fenixedu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.cms.routing.CMSURLHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
@@ -64,307 +68,397 @@ import com.google.gson.JsonObject;
 @RequestMapping("/cms/themes")
 public class AdminThemes {
 
-    private final Map<String, String> supportedContentTypes;
-    private final Map<String, String> supportedImagesContentTypes;
-    private final CMSURLHandler urlHandler;
+	private final Map<String, String> supportedContentTypes;
+	private final Map<String, String> supportedImagesContentTypes;
+	private final CMSURLHandler urlHandler;
+	
+	private final static Logger logger = LoggerFactory.getLogger(AdminThemes.class);
 
-    @Autowired
-    public AdminThemes(CMSURLHandler urlHandler) {
-        this.urlHandler = urlHandler;
+	@Autowired
+	public AdminThemes(CMSURLHandler urlHandler) {
+		this.urlHandler = urlHandler;
 
-        ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+		ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
 
-        builder.put("text/plain", "plain_text");
+		builder.put("text/plain", "plain_text");
 
-        builder.put("text/html", "twig");
+		builder.put("text/html", "twig");
 
-        builder.put("text/javascript", "javascript");
-        builder.put("application/javascript", "javascript");
+		builder.put("text/javascript", "javascript");
+		builder.put("application/javascript", "javascript");
 
-        builder.put("application/json", "json");
+		builder.put("application/json", "json");
 
-        builder.put("text/css", "css");
-        
-        this.supportedContentTypes = builder.build();
-        
-        builder = ImmutableMap.builder();
-        
-        builder.put("image/jpeg", "JPEG");
-        
-        builder.put("image/jp2", "JPEG 2000");
-        builder.put("image/jpx", "JPEG 2000");
-        builder.put("image/jpm", "JPEG 2000");
-        builder.put("video/mj2", "JPEG 2000");
-        
-        builder.put("image/vnd.ms-photo", "JPEG XR");
-        builder.put("image/jxr", "JPEG XR");
-        
-        builder.put("image/webp", "WebP");
-        
-        builder.put("image/gif", "GIF");
-        
-        builder.put("image/png", "PNG");
-        
-        builder.put("video/x-mng", "MNG");
-        
-        builder.put("image/tiff", "TIFF");
-        builder.put("image/tiff-fx","TIFF");
-        
-        builder.put("image/svg+xml", "SVG");
-        
-        builder.put("application/pdf", "PDF");
-        builder.put("image/x‑xbitmap", "X-BMP");
-        builder.put("image/bmp", "BMP");
-  
-        this.supportedImagesContentTypes = builder.build();
+		builder.put("text/css", "css");
 
-    }
+		this.supportedContentTypes = builder.build();
 
-    @RequestMapping(method = RequestMethod.GET)
-    public String themes(Model model) {
-        model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
-        return "fenixedu-cms/themes";
-    }
+		builder = ImmutableMap.builder();
 
-    @RequestMapping(value = "{type}/see", method = RequestMethod.GET)
-    public String viewTheme(Model model, @PathVariable(value = "type") String type) {
-        model.addAttribute("theme", CMSTheme.forType(type));
-        return "fenixedu-cms/viewTheme";
-    }
+		builder.put("image/jpeg", "JPEG");
 
-    @RequestMapping(value = "loadDefault", method = RequestMethod.GET)
-    public RedirectView loadDefaultThemes(Model model) {
-        //TODO
-        return new RedirectView("/cms/themes", true);
-    }
+		builder.put("image/jp2", "JPEG 2000");
+		builder.put("image/jpx", "JPEG 2000");
+		builder.put("image/jpm", "JPEG 2000");
+		builder.put("video/mj2", "JPEG 2000");
 
-    @RequestMapping(value = "{type}/delete", method = RequestMethod.POST)
-    public RedirectView deleteTheme(Model model, @PathVariable(value = "type") String type) {
-        CMSTheme.forType(type).delete();
-        return new RedirectView("/cms/themes", true);
-    }
+		builder.put("image/vnd.ms-photo", "JPEG XR");
+		builder.put("image/jxr", "JPEG XR");
 
-    @RequestMapping(value = "create", method = RequestMethod.GET)
-    public String addTheme(Model model) {
-        return "fenixedu-cms/addTheme";
-    }
+		builder.put("image/webp", "WebP");
 
-    @RequestMapping(value = "create", method = RequestMethod.POST)
-    public RedirectView addTheme(@RequestParam Boolean isDefault, @RequestParam("uploadedFile") MultipartFile uploadedFile)
-            throws IOException {
-        File tempFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
-        Files.write(uploadedFile.getBytes(), tempFile);
-        CMSTheme theme = CMSThemeLoader.createFromZip(new ZipFile(tempFile));
-        if (isDefault) {
-            Bennu.getInstance().setDefaultCMSTheme(theme);
-        }
-        return new RedirectView("/cms/themes", true);
-    }
+		builder.put("image/gif", "GIF");
 
-    @RequestMapping(value = "{type}/editFile/**", method = RequestMethod.GET)
-    public String editFile(Model model, @PathVariable(value = "type") String type, HttpServletRequest request) {
-        CMSTheme theme = CMSTheme.forType(type);
-        String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-        path = path.substring(("/cms/themes/" + theme.getType() + "/editFile/").length());
-        CMSThemeFile file = CMSTheme.forType(type).fileForPath(path);
+		builder.put("image/png", "PNG");
 
-        model.addAttribute("theme", CMSTheme.forType(type));
-        model.addAttribute("linkBack", "/cms/themes/" + theme.getType() + "/edit");
-        model.addAttribute("file", file);
+		builder.put("video/x-mng", "MNG");
 
-        String contentType = file.getContentType();
+		builder.put("image/tiff", "TIFF");
+		builder.put("image/tiff-fx", "TIFF");
 
-        if (supportedContentTypes.containsKey(contentType)) {
-            model.addAttribute("type", supportedContentTypes.get(contentType));
-            model.addAttribute("content", new String(file.getContent(), StandardCharsets.UTF_8));
-            return "fenixedu-cms/editThemeFile";
-        }else if (supportedImagesContentTypes.containsKey(contentType)){
-        	model.addAttribute("type", supportedContentTypes.get(contentType));
-            model.addAttribute("content", Base64.getEncoder().encodeToString(file.getContent()));
-            return  "fenixedu-cms/viewThemeImageFile";
-        }else{
-        	throw new ResourceNotFoundException();
-        }
+		builder.put("image/svg+xml", "SVG");
 
-    }
+		builder.put("application/pdf", "PDF");
+		builder.put("image/x‑xbitmap", "X-BMP");
+		builder.put("image/bmp", "BMP");
 
-    @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(value = "{type}/editFile/**", method = RequestMethod.PUT)
-    public void saveFileEdition(@PathVariable(value = "type") String type, HttpServletRequest request, @RequestBody String content) {
-        CMSTheme theme = CMSTheme.forType(type);
-        String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-        path = path.substring(("/cms/themes/" + theme.getType() + "/editFile/").length());
-        CMSThemeFile file = theme.fileForPath(path);
+		this.supportedImagesContentTypes = builder.build();
 
-        CMSThemeFile newFile = new CMSThemeFile(file.getFileName(), file.getFullPath(), content.getBytes(StandardCharsets.UTF_8));
+	}
 
-        theme.changeFiles(theme.getFiles().with(newFile));
+	@RequestMapping(method = RequestMethod.GET)
+	public String themes(Model model) {
+		model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
+		return "fenixedu-cms/themes";
+	}
 
-        urlHandler.invalidateEntry(type + "/" + file.getFullPath());
-    }
+	@RequestMapping(value = "{type}/see", method = RequestMethod.GET)
+	public String viewTheme(Model model,
+			@PathVariable(value = "type") String type) {
+		model.addAttribute("theme", CMSTheme.forType(type));
+		return "fenixedu-cms/viewTheme";
+	}
 
-    @RequestMapping(value = "{type}/deleteFile", method = RequestMethod.POST)
-    public RedirectView deleteFile(@PathVariable(value = "type") String type, @RequestParam String path) {
-        CMSTheme theme = CMSTheme.forType(type);
-        theme.changeFiles(theme.getFiles().without(path));
-        return new RedirectView("/cms/themes/" + type + "/see", true);
-    }
+	@RequestMapping(value = "loadDefault", method = RequestMethod.GET)
+	public RedirectView loadDefaultThemes(Model model) {
+		// TODO
+		return new RedirectView("/cms/themes", true);
+	}
 
-    @RequestMapping(value = "new", method = RequestMethod.GET)
-    public String newTheme(Model model) {
-        model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
-        return "fenixedu-cms/newTheme";
-    }
+	@RequestMapping(value = "{type}/delete", method = RequestMethod.POST)
+	public RedirectView deleteTheme(Model model,
+			@PathVariable(value = "type") String type) {
+		CMSTheme.forType(type).delete();
+		return new RedirectView("/cms/themes", true);
+	}
 
-    @RequestMapping(value = "new", method = RequestMethod.POST)
-    public RedirectView newTheme(Model model, @RequestParam String type, @RequestParam String name,
-            @RequestParam String description, @RequestParam(value = "extends") String ext) {
-        CMSTheme theme = CMSTheme.forType(ext);
-        newTheme(type, name, description, theme);
-        return new RedirectView("/cms/themes/" + type + "/see", true);
-    }
+	@RequestMapping(value = "create", method = RequestMethod.GET)
+	public String addTheme(Model model) {
+		return "fenixedu-cms/addTheme";
+	}
 
-    @Atomic
-    public void newTheme(String type, String name, String description, CMSTheme ext) {
-        CMSTheme theme = new CMSTheme();
-        theme.setType(type);
-        theme.setName(name);
-        theme.setDescription(description);
-        theme.setBennu(Bennu.getInstance());
-        theme.setExtended(ext);
-        theme.changeFiles(new CMSThemeFiles(new HashMap<String, CMSThemeFile>()));
-    }
+	@RequestMapping(value = "create", method = RequestMethod.POST)
+	public RedirectView addTheme(@RequestParam Boolean isDefault,
+			@RequestParam("uploadedFile") MultipartFile uploadedFile)
+			throws IOException {
+		File tempFile = File.createTempFile(UUID.randomUUID().toString(),
+				".zip");
+		Files.write(uploadedFile.getBytes(), tempFile);
+		CMSTheme theme = CMSThemeLoader.createFromZip(new ZipFile(tempFile));
+		if (isDefault) {
+			Bennu.getInstance().setDefaultCMSTheme(theme);
+		}
+		return new RedirectView("/cms/themes", true);
+	}
 
-    @RequestMapping(value = "{type}/newFile", method = RequestMethod.POST)
-    public RedirectView newFile(@PathVariable(value = "type") String type, @RequestParam String filename) {
-        CMSTheme theme = CMSTheme.forType(type);
-        String[] r = filename.split("/");
-        if (theme.fileForPath(filename) == null) {
-            CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename, new byte[0]);
-            theme.changeFiles(theme.getFiles().with(newFile));
-            return new RedirectView("/cms/themes/" + type + "/editFile/" + filename, true);
-        } else {
-            throw new RuntimeException("File already exists");
-        }
-    }
+	@RequestMapping(value = "{type}/editFile/**", method = RequestMethod.GET)
+	public String editFile(Model model,
+			@PathVariable(value = "type") String type,
+			HttpServletRequest request) {
+		CMSTheme theme = CMSTheme.forType(type);
+		String path = (String) request
+				.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+		path = path.substring(("/cms/themes/" + theme.getType() + "/editFile/")
+				.length());
+		CMSThemeFile file = CMSTheme.forType(type).fileForPath(path);
 
-    @RequestMapping(value = "{type}/importFile", method = RequestMethod.POST)
-    public RedirectView importTheme(@PathVariable(value = "type") String type, @RequestParam String filename,
-            @RequestParam("uploadedFile") MultipartFile uploadedFile) throws IOException {
-        CMSTheme theme = CMSTheme.forType(type);
-        String[] r = filename.split("/");
-        if (theme.fileForPath(filename) == null) {
-            CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename, uploadedFile.getBytes());
-            theme.changeFiles(theme.getFiles().with(newFile));
-            return new RedirectView("/cms/themes/" + type + "/see", true);
-        } else {
-            throw new RuntimeException("File already exists");
-        }
-    }
+		model.addAttribute("theme", CMSTheme.forType(type));
+		model.addAttribute("linkBack", "/cms/themes/" + theme.getType()
+				+ "/edit");
+		model.addAttribute("file", file);
 
-    @RequestMapping(value = "{type}/newTemplate", method = RequestMethod.POST)
-    public RedirectView newTemplate(@PathVariable(value = "type") String type, @RequestParam(value = "type") String templateType,
-            @RequestParam String name, @RequestParam String description, @RequestParam String filename) {
-        CMSTheme theme = CMSTheme.forType(type);
-        if (theme.templateForType(templateType) == null) {
-            newTemplate(templateType, name, description, filename, theme);
-            return new RedirectView("/cms/themes/" + type + "/see#templates", true);
-        } else {
-            throw new RuntimeException("Template already exists");
-        }
-    }
+		String contentType = file.getContentType();
 
-    @Atomic
-    private void newTemplate(String templateType, String name, String description, String filename, CMSTheme theme) {
-        CMSTemplate tp = new CMSTemplate();
-        tp.setName(name);
-        tp.setDescription(description);
-        tp.setType(templateType);
-        tp.setTheme(theme);
-        tp.setFilePath(filename);
-    }
+		if (supportedContentTypes.containsKey(contentType)) {
+			model.addAttribute("type", supportedContentTypes.get(contentType));
+			model.addAttribute("content", new String(file.getContent(),
+					StandardCharsets.UTF_8));
+			return "fenixedu-cms/editThemeFile";
+		} else if (supportedImagesContentTypes.containsKey(contentType)) {
+			model.addAttribute("type", supportedContentTypes.get(contentType));
+			model.addAttribute("content",
+					Base64.getEncoder().encodeToString(file.getContent()));
+			return "fenixedu-cms/viewThemeImageFile";
+		} else {
+			throw new ResourceNotFoundException();
+		}
 
-    @RequestMapping(value = "{type}/deleteTemplate", method = RequestMethod.POST)
-    public RedirectView deleteTemplate(@PathVariable(value = "type") String type,
-            @RequestParam(value = "type") String templateType) {
-        CMSTheme theme = CMSTheme.forType(type);
-        deleteTemplate(templateType, theme);
-        return new RedirectView("/cms/themes/" + type + "/see#templates", true);
-    }
+	}
 
-    @Atomic
-    private void deleteTemplate(String templateType, CMSTheme theme) {
-        theme.templateForType(templateType).delete();
-    }
+	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping(value = "{type}/editFile/**", method = RequestMethod.PUT)
+	public void saveFileEdition(@PathVariable(value = "type") String type,
+			HttpServletRequest request, @RequestBody String content) {
+		CMSTheme theme = CMSTheme.forType(type);
+		String path = (String) request
+				.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+		path = path.substring(("/cms/themes/" + theme.getType() + "/editFile/")
+				.length());
+		CMSThemeFile file = theme.fileForPath(path);
 
-    @RequestMapping(value = "{type}/duplicate", method = RequestMethod.POST)
-    public RedirectView duplicateTheme(Model model, @PathVariable String type,
-            @RequestParam(value = "newThemeType") String newThemeType, @RequestParam String name, @RequestParam String description) {
-        CMSTheme orig = CMSTheme.forType(type);
-        duplicateTheme(orig, newThemeType, name, description);
-        return new RedirectView("/cms/themes/" + newThemeType + "/see", true);
-    }
+		CMSThemeFile newFile = new CMSThemeFile(file.getFileName(),
+				file.getFullPath(), content.getBytes(StandardCharsets.UTF_8));
 
-    @Atomic
-    public void duplicateTheme(CMSTheme orig, String type, String name, String description) {
-        CMSTheme theme = new CMSTheme();
-        theme.setType(type);
-        theme.setName(name);
-        theme.setDescription(description);
-        theme.setBennu(orig.getBennu());
-        theme.setExtended(orig.getExtended());
-        theme.changeFiles(orig.getFiles());
-        for (CMSTemplate originalTemplate : orig.getTemplatesSet()) {
-            CMSTemplate tp = new CMSTemplate();
-            tp.setTheme(theme);
-            tp.setFilePath(originalTemplate.getFilePath());
-            tp.setType(originalTemplate.getType());
-            tp.setDescription(originalTemplate.getDescription());
-            tp.setName(originalTemplate.getName());
-        }
-    }
+		theme.changeFiles(theme.getFiles().with(newFile));
 
-    @RequestMapping(value = "{type}/moveFile", method = RequestMethod.POST)
-    public RedirectView moveFile(Model model, @PathVariable String type, @RequestParam String origFilename,
-            @RequestParam String filename) {
-        CMSTheme theme = CMSTheme.forType(type);
-        CMSThemeFile file = theme.fileForPath(origFilename);
+		urlHandler.invalidateEntry(type + "/" + file.getFullPath());
+	}
 
-        moveFile(filename, file, theme);
+	@RequestMapping(value = "{type}/deleteFile", method = RequestMethod.POST)
+	public RedirectView deleteFile(@PathVariable(value = "type") String type,
+			@RequestParam String path) {
+		CMSTheme theme = CMSTheme.forType(type);
+		theme.changeFiles(theme.getFiles().without(path));
+		return new RedirectView("/cms/themes/" + type + "/see", true);
+	}
 
-        return new RedirectView("/cms/themes/" + type + "/see", true);
-    }
+	@RequestMapping(value = "new", method = RequestMethod.GET)
+	public String newTheme(Model model) {
+		model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
+		return "fenixedu-cms/newTheme";
+	}
 
-    @Atomic
-    private void moveFile(String filename, CMSThemeFile file, CMSTheme theme) {
-        String[] r = filename.split("/");
-        CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename, file.getContent());
-        theme.changeFiles(theme.getFiles().without(file.getFullPath()).with(newFile));
-    }
+	@RequestMapping(value = "new", method = RequestMethod.POST)
+	public RedirectView newTheme(Model model, @RequestParam String type,
+			@RequestParam String name, @RequestParam String description,
+			@RequestParam(value = "extends") String ext) {
+		CMSTheme theme = CMSTheme.forType(ext);
+		newTheme(type, name, description, theme);
+		return new RedirectView("/cms/themes/" + type + "/see", true);
+	}
 
-    @RequestMapping(value = "{type}/edit", method = RequestMethod.GET)
-    public String editTheme(Model model, @PathVariable(value = "type") String type) {
-        model.addAttribute("theme", CMSTheme.forType(type));
-        model.addAttribute("supportedTypes", supportedContentTypes.keySet());
-        return "fenixedu-cms/editTheme";
-    }
+	@Atomic
+	public void newTheme(String type, String name, String description,
+			CMSTheme ext) {
+		CMSTheme theme = new CMSTheme();
+		theme.setType(type);
+		theme.setName(name);
+		theme.setDescription(description);
+		theme.setBennu(Bennu.getInstance());
+		theme.setExtended(ext);
+		theme.changeFiles(new CMSThemeFiles(new HashMap<String, CMSThemeFile>()));
+	}
 
-    @RequestMapping(value = "{type}/listFiles", method = RequestMethod.GET)
-    @ResponseBody
-    public String listFiles(Model model, @PathVariable(value = "type") String type) {
-        CMSTheme theme = CMSTheme.forType(type);
-        Collection<CMSThemeFile> totalFiles = theme.getFiles().getFiles();
-        JsonArray result = new JsonArray();
-        for (CMSThemeFile file : totalFiles) {
-            JsonObject obj = new JsonObject();
-            obj.addProperty("name", file.getFileName());
-            obj.addProperty("path", file.getFullPath());
-            obj.addProperty("size", file.getFileSize());
-            obj.addProperty("contentType", file.getContentType());
-            obj.addProperty("modified", file.getLastModified().toString());
-            result.add(obj);
-        }
+	@RequestMapping(value = "{type}/newFile", method = RequestMethod.POST)
+	public RedirectView newFile(@PathVariable(value = "type") String type,
+			@RequestParam String filename) {
+		CMSTheme theme = CMSTheme.forType(type);
+		String[] r = filename.split("/");
+		if (theme.fileForPath(filename) == null) {
+			CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename,
+					new byte[0]);
+			theme.changeFiles(theme.getFiles().with(newFile));
+			return new RedirectView("/cms/themes/" + type + "/editFile/"
+					+ filename, true);
+		} else {
+			throw new RuntimeException("File already exists");
+		}
+	}
 
-        return result.toString();
-    }
+	@RequestMapping(value = "{type}/importFile", method = RequestMethod.POST)
+	public RedirectView importFile(@PathVariable(value = "type") String type,
+			@RequestParam String filename,
+			@RequestParam("uploadedFile") MultipartFile uploadedFile)
+			throws IOException {
+		CMSTheme theme = CMSTheme.forType(type);
+		String[] r = filename.split("/");
+		if (theme.fileForPath(filename) == null) {
+			addFile(filename, uploadedFile, theme, r);
+			return new RedirectView("/cms/themes/" + type + "/see", true);
+		} else {
+			throw new RuntimeException("File already exists");
+		}
+	}
+	
+	@Atomic
+	private void addFile(String filename, MultipartFile uploadedFile,
+			CMSTheme theme, String[] r) throws IOException {
+		CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename,
+				uploadedFile.getBytes());
+		theme.changeFiles(theme.getFiles().with(newFile));
+	}
+
+	@RequestMapping(value = "{type}/newTemplate", method = RequestMethod.POST)
+	public RedirectView newTemplate(@PathVariable(value = "type") String type,
+			@RequestParam(value = "type") String templateType,
+			@RequestParam String name, @RequestParam String description,
+			@RequestParam String filename) {
+		CMSTheme theme = CMSTheme.forType(type);
+		if (theme.templateForType(templateType) == null) {
+			newTemplate(templateType, name, description, filename, theme);
+			return new RedirectView("/cms/themes/" + type + "/see#templates",
+					true);
+		} else {
+			throw new RuntimeException("Template already exists");
+		}
+	}
+
+	@Atomic
+	private void newTemplate(String templateType, String name,
+			String description, String filename, CMSTheme theme) {
+		CMSTemplate tp = new CMSTemplate();
+		tp.setName(name);
+		tp.setDescription(description);
+		tp.setType(templateType);
+		tp.setTheme(theme);
+		tp.setFilePath(filename);
+	}
+
+	@RequestMapping(value = "{type}/deleteTemplate", method = RequestMethod.POST)
+	public RedirectView deleteTemplate(
+			@PathVariable(value = "type") String type,
+			@RequestParam(value = "type") String templateType) {
+		CMSTheme theme = CMSTheme.forType(type);
+		deleteTemplate(templateType, theme);
+		return new RedirectView("/cms/themes/" + type + "/see#templates", true);
+	}
+
+	@Atomic
+	private void deleteTemplate(String templateType, CMSTheme theme) {
+		theme.templateForType(templateType).delete();
+	}
+
+	@RequestMapping(value = "{type}/duplicate", method = RequestMethod.POST)
+	public RedirectView duplicateTheme(Model model, @PathVariable String type,
+			@RequestParam(value = "newThemeType") String newThemeType,
+			@RequestParam String name, @RequestParam String description) {
+		CMSTheme orig = CMSTheme.forType(type);
+		duplicateTheme(orig, newThemeType, name, description);
+		return new RedirectView("/cms/themes/" + newThemeType + "/see", true);
+	}
+
+	@Atomic
+	public void duplicateTheme(CMSTheme orig, String type, String name,
+			String description) {
+		CMSTheme theme = new CMSTheme();
+		theme.setType(type);
+		theme.setName(name);
+		theme.setDescription(description);
+		theme.setBennu(orig.getBennu());
+		theme.setExtended(orig.getExtended());
+		theme.changeFiles(orig.getFiles());
+		for (CMSTemplate originalTemplate : orig.getTemplatesSet()) {
+			CMSTemplate tp = new CMSTemplate();
+			tp.setTheme(theme);
+			tp.setFilePath(originalTemplate.getFilePath());
+			tp.setType(originalTemplate.getType());
+			tp.setDescription(originalTemplate.getDescription());
+			tp.setName(originalTemplate.getName());
+		}
+	}
+
+	@RequestMapping(value = "{type}/moveFile", method = RequestMethod.POST)
+	public RedirectView moveFile(Model model, @PathVariable String type,
+			@RequestParam String origFilename, @RequestParam String filename) {
+		CMSTheme theme = CMSTheme.forType(type);
+		CMSThemeFile file = theme.fileForPath(origFilename);
+
+		moveFile(filename, file, theme);
+
+		return new RedirectView("/cms/themes/" + type + "/see", true);
+	}
+
+	@Atomic
+	private void moveFile(String filename, CMSThemeFile file, CMSTheme theme) {
+		String[] r = filename.split("/");
+		CMSThemeFile newFile = new CMSThemeFile(r[r.length - 1], filename,
+				file.getContent());
+		theme.changeFiles(theme.getFiles().without(file.getFullPath())
+				.with(newFile));
+	}
+
+	@RequestMapping(value = "{type}/edit", method = RequestMethod.GET)
+	public String editTheme(Model model,
+			@PathVariable(value = "type") String type) {
+		model.addAttribute("theme", CMSTheme.forType(type));
+		model.addAttribute("supportedTypes", supportedContentTypes.keySet());
+		return "fenixedu-cms/editTheme";
+	}
+
+	@RequestMapping(value = "{type}/listFiles", method = RequestMethod.GET)
+	@ResponseBody
+	public String listFiles(Model model,
+			@PathVariable(value = "type") String type) {
+		CMSTheme theme = CMSTheme.forType(type);
+		Collection<CMSThemeFile> totalFiles = theme.getFiles().getFiles();
+		JsonArray result = new JsonArray();
+		for (CMSThemeFile file : totalFiles) {
+			JsonObject obj = new JsonObject();
+			obj.addProperty("name", file.getFileName());
+			obj.addProperty("path", file.getFullPath());
+			obj.addProperty("size", file.getFileSize());
+			obj.addProperty("contentType", file.getContentType());
+			obj.addProperty("modified", file.getLastModified().toString());
+			result.add(obj);
+		}
+
+		return result.toString();
+	}
+
+	@RequestMapping(value = "{type}/editSettings", method = RequestMethod.POST)
+	public RedirectView editThemeSettings(
+			@PathVariable(value = "type") String type,
+			@RequestParam String name,
+			@RequestParam String description,
+			@RequestParam(value = "extends") String ext,
+			@RequestParam(value = "thumbnail", required = false) MultipartFile thumbnail) {
+
+		CMSTheme theme = CMSTheme.forType(type);
+
+		CMSTheme extTheme = null;
+
+		if (!ext.equals("")) {
+			extTheme = CMSTheme.forType(ext);
+		}
+
+		editTheme(theme, name, description, extTheme, thumbnail);
+
+		return new RedirectView("/cms/themes/" + type + "/see");
+	}
+
+	@Atomic
+	private void editTheme(CMSTheme theme, String name, String description,
+			CMSTheme extTheme, MultipartFile thumbnail) {
+		theme.setName(name);
+		theme.setDescription(description);
+		
+		if(extTheme !=  null){
+			theme.setExtended(extTheme);
+		}
+		
+		if(!thumbnail.isEmpty()){
+			GroupBasedFile old = theme.getPreviewImage();
+			if(old != null){
+				old.setThemePreview(null);
+				old.delete();
+			}
+			GroupBasedFile newthumbnail = null;
+			try {
+				newthumbnail = new GroupBasedFile(thumbnail.getOriginalFilename(), thumbnail.getOriginalFilename(), thumbnail.getBytes(), AnyoneGroup.get());
+			} catch (IOException e) {
+				logger.error("Can't create thumbnail file", e);
+			}
+			theme.setPreviewImage(newthumbnail);
+		}
+	}
 }

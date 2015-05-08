@@ -34,9 +34,19 @@
 
 <div class="row">
     <div class="col-sm-8">
-        <div class="hidden-xs thumbnail">
-             <img src="http://i.imgur.com/t8i1Zrn.png" style="max-width:100%" data-holder-rendered="true" />
-        </div>
+              <c:choose>
+                  <c:when test="${theme.previewImage == null}">
+                     <div class="hidden-xs thumbnail" style="min-height:500px; background:#efefef;">
+                          <h5 style="display:table;margin: 0 auto; margin-top:220px;">No thumbnail avaible</h5>
+                     </div>
+                  </c:when>
+                  <c:otherwise>
+                      <div class="hidden-xs thumbnail ">
+                      <img src="${cms.downloadUrl(theme.previewImage)}">
+                      </div>
+                  </c:otherwise>
+              </c:choose>
+        
 
 
         <p>
