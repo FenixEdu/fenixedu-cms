@@ -116,6 +116,14 @@ public class CMSThemeFiles {
         files.remove(path);
         return new CMSThemeFiles(files);
     }
+    
+    public CMSThemeFiles without(String[] paths){
+    	Map<String, CMSThemeFile> files = new HashMap<String, CMSThemeFile>(this.files);
+        for(String path : paths){
+        	files.remove(path);
+        }
+        return new CMSThemeFiles(files);
+    }
 
     public long getTotalSize() {
         return files.values().stream().mapToLong(CMSThemeFile::getFileSize).sum();

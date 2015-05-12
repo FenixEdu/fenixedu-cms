@@ -20,3 +20,4 @@ output/
 target/
 bin/
 .DS_Store*
+/target/

@@ -18,16 +18,26 @@
  */
 package org.fenixedu.cms.ui;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageInputStream;
 import javax.servlet.http.HttpServletRequest;
 
 import org.fenixedu.bennu.core.domain.Bennu;
@@ -41,6 +51,7 @@ import org.fenixedu.cms.domain.CMSThemeFiles;
 import org.fenixedu.cms.domain.CMSThemeLoader;
 import org.fenixedu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.cms.routing.CMSURLHandler;
+import org.fenixedu.commons.stream.StreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,10 +67,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.view.RedirectView;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 import pt.ist.fenixframework.Atomic;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -71,8 +85,9 @@ public class AdminThemes {
 	private final Map<String, String> supportedContentTypes;
 	private final Map<String, String> supportedImagesContentTypes;
 	private final CMSURLHandler urlHandler;
-	
-	private final static Logger logger = LoggerFactory.getLogger(AdminThemes.class);
+
+	private final static Logger logger = LoggerFactory
+			.getLogger(AdminThemes.class);
 
 	@Autowired
 	public AdminThemes(CMSURLHandler urlHandler) {
@@ -195,14 +210,87 @@ public class AdminThemes {
 					StandardCharsets.UTF_8));
 			return "fenixedu-cms/editThemeFile";
 		} else if (supportedImagesContentTypes.containsKey(contentType)) {
-			model.addAttribute("type", supportedContentTypes.get(contentType));
-			model.addAttribute("content",
-					Base64.getEncoder().encodeToString(file.getContent()));
+
+			if (contentType.equals("image/svg+xml")) {
+				model.addAttribute("isSVG", true);
+				model.addAttribute("content", new String(file.getContent()));
+			} else {
+				model.addAttribute("isSVG", false);
+				model.addAttribute("content", Base64.getEncoder()
+						.encodeToString(file.getContent()));
+			}
+
+			model.addAttribute("file", file);
+			try {
+				BufferedImage read = ImageIO.read(new ByteArrayInputStream(file
+						.getContent()));
+				model.addAttribute("height", read.getHeight());
+				model.addAttribute("width", read.getHeight());
+
+				ImageInputStream iis = ImageIO
+						.createImageInputStream(new ByteArrayInputStream(file
+								.getContent()));
+				Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+
+				if (readers.hasNext()) {
+
+					// pick the first available ImageReader
+					ImageReader reader = readers.next();
+
+					// attach source to the reader
+					reader.setInput(iis, true);
+
+					// read metadata of first image
+					IIOMetadata metadata = reader.getImageMetadata(0);
+
+					String name = metadata.getNativeMetadataFormatName();
+					JsonObject obj = generateMetadata(metadata.getAsTree(name));
+
+					obj.addProperty("name", file.getContentType());
+
+					model.addAttribute("metadata", obj);
+				}
+
+			} catch (Exception e) {
+
+			}
+
 			return "fenixedu-cms/viewThemeImageFile";
 		} else {
 			throw new ResourceNotFoundException();
 		}
 
+	}
+
+	private JsonObject generateMetadata(Node node) {
+		JsonObject obj = new JsonObject();
+		obj.addProperty("name", node.getNodeName());
+		NamedNodeMap map = node.getAttributes();
+		if (map != null) {
+
+			// print attribute values
+			int length = map.getLength();
+			for (int i = 0; i < length; i++) {
+				Node attr = map.item(i);
+				obj.addProperty(attr.getNodeName(), attr.getNodeValue());
+			}
+		}
+
+		Node child = node.getFirstChild();
+		if (child == null) {
+			return obj;
+		}
+
+		JsonArray array = new JsonArray();
+		while (child != null) {
+			JsonObject kid = generateMetadata(child);
+			array.add(kid);
+
+			child = child.getNextSibling();
+		}
+		obj.add("children", array);
+
+		return obj;
 	}
 
 	@ResponseStatus(HttpStatus.OK)
@@ -289,7 +377,7 @@ public class AdminThemes {
 			throw new RuntimeException("File already exists");
 		}
 	}
-	
+
 	@Atomic
 	private void addFile(String filename, MultipartFile uploadedFile,
 			CMSTheme theme, String[] r) throws IOException {
@@ -421,7 +509,8 @@ public class AdminThemes {
 			@RequestParam String name,
 			@RequestParam String description,
 			@RequestParam(value = "extends") String ext,
-			@RequestParam(value = "thumbnail", required = false) MultipartFile thumbnail) {
+			@RequestParam(value = "thumbnail", required = false) MultipartFile thumbnail,
+			@RequestParam(value = "defaultTemplate", required = false) String defaultTemplate) {
 
 		CMSTheme theme = CMSTheme.forType(type);
 
@@ -431,34 +520,81 @@ public class AdminThemes {
 			extTheme = CMSTheme.forType(ext);
 		}
 
-		editTheme(theme, name, description, extTheme, thumbnail);
+		editTheme(theme, name, description, extTheme, thumbnail, defaultTemplate);
 
 		return new RedirectView("/cms/themes/" + type + "/see");
 	}
 
 	@Atomic
 	private void editTheme(CMSTheme theme, String name, String description,
-			CMSTheme extTheme, MultipartFile thumbnail) {
+			CMSTheme extTheme, MultipartFile thumbnail, String defaultTheme) {
 		theme.setName(name);
 		theme.setDescription(description);
-		
-		if(extTheme !=  null){
+		theme.setDefaultTemplate(theme.templateForType(defaultTheme));
+
+		if (extTheme != null) {
 			theme.setExtended(extTheme);
 		}
-		
-		if(!thumbnail.isEmpty()){
+		if (!thumbnail.isEmpty()) {
 			GroupBasedFile old = theme.getPreviewImage();
-			if(old != null){
+			if (old != null) {
 				old.setThemePreview(null);
 				old.delete();
 			}
 			GroupBasedFile newthumbnail = null;
 			try {
-				newthumbnail = new GroupBasedFile(thumbnail.getOriginalFilename(), thumbnail.getOriginalFilename(), thumbnail.getBytes(), AnyoneGroup.get());
+				newthumbnail = new GroupBasedFile(
+						thumbnail.getOriginalFilename(),
+						thumbnail.getOriginalFilename(), thumbnail.getBytes(),
+						AnyoneGroup.get());
 			} catch (IOException e) {
 				logger.error("Can't create thumbnail file", e);
 			}
 			theme.setPreviewImage(newthumbnail);
 		}
+	}
+
+	@RequestMapping(value = "{type}/deleteDir", method = RequestMethod.POST)
+	public RedirectView deleteDir(@PathVariable(value = "type") String type,
+			@RequestParam(value = "path") String path) {
+		CMSTheme theme = CMSTheme.forType(type);
+		deleteDirectory(theme, path);
+		return new RedirectView("/cms/themes/" + type + "/see#templates", true);
+	}
+
+	@Atomic
+	private void deleteDirectory(CMSTheme theme, String directory) {
+		List<String> result = Lists.newArrayList();
+
+		for (CMSThemeFile file : theme.getFiles().getFiles()) {
+			if (file.getFullPath().startsWith(directory)) {
+				result.add(file.getFullPath());
+			}
+		}
+
+		theme.setFiles(theme.getFiles().without(
+				result.toArray(new String[result.size()])));
+	}
+
+	@RequestMapping(value = "{type}/templates", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public String getTemplates(@PathVariable(value = "type") String type) {
+		CMSTheme theme = CMSTheme.forType(type);
+		JsonObject obj = new JsonObject();
+
+		obj.add("templates",
+				theme.getAllTemplates().stream()
+						.sorted(Comparator.comparing(x -> x.getType()))
+						.map(x -> {
+							JsonObject o = new JsonObject();
+							o.addProperty("type", x.getType());
+							o.addProperty("description", x.getDescription());
+							o.addProperty("name", x.getName());
+							o.addProperty("file", x.getFilePath());
+							o.addProperty("default", x.isDefault());
+							return o;
+						}).collect(StreamUtils.toJsonArray()));
+
+		return obj.toString();
 	}
 }

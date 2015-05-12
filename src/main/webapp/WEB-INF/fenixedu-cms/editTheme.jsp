@@ -36,6 +36,20 @@ ${portal.angularToolkit()}
 </div>
 </div>
 <style type="text/css">
+td{
+    font-size:13px;
+    font-weight: normal;
+    height:44px;
+    line-height: 18.7513;
+    padding-bottom:10px;
+    padding-top: 10px;
+    padding-right: 10px;
+}
+.fileicon {
+    font-size: 21px;
+    line-height: 1px;
+}
+
     .position-fixed {
   position: fixed;
 }
@@ -53,6 +67,11 @@ ${portal.angularToolkit()}
 }
 </style>
 <script>
+
+var textTypes =["text/plain","text/html","text/javascript","application/javascript","application/json","text/css"]
+var imagesTypes = ["image/jpeg","image/jp2","image/jpx","image/jpm","video/mj2","image/vnd.ms-photo","image/jxr","image/webp","image/gif","image/png","video/x-mng","image/tiff","image/tiff-fx","image/svg+xml","application/pdf","image/x‑xbitmap","image/bmp"];
+
+var supported = textTypes.concat(imagesTypes);
 
 var Directory = function(name, path, parent){
     this.name = name;
@@ -151,13 +170,77 @@ app.config(['$routeProvider','$locationProvider', function($routeProvider, $loca
     $http.get("/cms/themes/${theme.type}/listFiles").success(function(e){ 
         $rootScope.root = generateTree(e);
         $rootScope.theme = "${theme.name}"
-        if ($location.path()){
-            $location.path($location.path());
-        }else{
-            $location.path("/");
-        }
+        
+            if ($location.path()){
+                $location.path($location.path());
+            }else{
+                $location.path("/");
+            }
+        
+    });
+    $http.get("/cms/themes/${theme.type}/templates").success(function(e){ 
+        genTemplates(e);
     });
 });
+
+function genTemplates(json){
+    $("#templates-modal .content").empty();
+    if(json.templates.length){
+        var result = '<table  class="table table-bordered">'
+        for (var i = 0; i < json.templates.length; i++) {
+            var template = json.templates[i];
+            result += '<tr><td><h5>' + template.name + ' (<samp>' + template.type + '</samp>) </h5><div>' + template.description +'</div>'+"<p></p>" +
+            '<div class="btn-group"><code>' +template.file+'</code></div><div class="btn-group pull-right"><a class="btn btn-primary btn-icon editBtn" data-toggle="modal" data-file="' + template.file + '"><i class="glyphicon glyphicon-edit"></i></a><a class="btn btn-primary btn-icon deleteBtn" data-toggle="modal" data-type="' + template.type + '"><i class="glyphicon glyphicon-trash"></i></a></div></td></tr>'
+        };
+        result += "</table>"
+        $("#templates-modal .content").html(result);
+    }else{
+        $("#templates-modal .content").html('<div class="panel panel-default"><div class="panel-body">This theme has no templates yet.</div></div>');
+    }
+
+    var select = $("#default-theme-select").empty();
+    select.append("<option name='**null**'>-</option>");
+    for (var i = 0; i < json.templates.length; i++) {
+        var template = json.templates[i];
+        if(template.default){
+            select.append("<option selected name='" + template.type + "'>" + template.name + "</option>");
+        }else{
+            select.append("<option name='" + template.type + "'>" + template.name + "</option>");
+        }
+    }
+
+    $('.deleteBtn').on("click",function(e){
+        window.deleteFile = $(e.target).closest("a").data("type");
+    });
+    var dom = $('<div><p class="help-block">You are about to delete this template. The template file will remain unaffected. Are you sure?</p> <button class="btn btn-danger btn-sm">Delete this Template</button><div>');
+
+    $("button", dom).on("click",function(e){
+        var target = window.deleteFile;
+        $.post("/cms/themes/${theme.type}/deleteTemplate",{
+            type:target
+        }).success(function(){
+            $("#templates-modal").modal("hide");
+            $.get("/cms/themes/${theme.type}/templates").success(function(e){
+                genTemplates(e);
+            })
+        })
+    });
+
+    $('.deleteBtn').popover({
+            title: 'Are you sure? <span class="close"></span>',
+            html: true,
+            content: dom
+        }).on('shown.bs.popover', function(e){
+            var popover = jQuery(this);
+            jQuery(this).parent().find('div.popover .close').on('click', function(e){
+                popover.popover('hide');
+                window.deleteFile = null;
+            });
+        });
+    $('.editBtn').on("click",function(e){
+        window.location = "/cms/themes/${theme.type}/editFile/" + $(e.target).closest("a").data("file");
+    })
+}
 
 app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routeParams,Upload) {
     $scope.$watch('files', function () {
@@ -168,7 +251,7 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
         if (files && files.length) {
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
-                var filename = file.path;
+                var filename = file.name;
                 if (file.type === "directory") { continue; }
                 if($scope.node.parent){
                     filename = $scope.node.path + "/" + filename;
@@ -195,6 +278,20 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
 
     $scope.contextFor = function(f){
         $scope.contextFile = f;
+        if (f.contentType == "application/vnd.fenixedu.docs.directory"){
+            $("#context-menu .directory").show();
+            $("#context-menu .file").hide();
+
+        }else{
+            $("#context-menu .directory").hide();
+            $("#context-menu .file").show();
+            if (supported.indexOf(f.contentType) < 0){
+                $("#context-menu .edit").hide();
+            }
+            if (textTypes.indexOf(f.contentType) < 0){
+                $("#context-menu .template").hide();
+            }
+        }
     }
 
     $scope.editFile = function(){
@@ -220,6 +317,29 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
         });
     }
 
+    $scope.makeTemplate = function(){
+        $("#make-template-modal input[name='filename']").val($scope.contextFile.path);
+        $("#make-template-modal").modal("show");
+    }
+
+    $scope.deleteDirectory = function(){
+        var modal = $("#delete-confirmation-modal");
+        $(".filename", modal).html($scope.contextFile.path);
+        modal.modal("show");
+        $(".confirm", modal).off("click");
+        $(".confirm", modal).on("click",function(){
+            modal.modal("hide");
+            $.post(Bennu.contextPath + "/cms/themes/${theme.type}/deleteDir", {
+                path : $scope.contextFile.path.substr(1)
+            }, function() {
+                $http.get("/cms/themes/${theme.type}/listFiles").success(function(e){ 
+                    $rootScope.root = generateTree(e);
+                    $rootScope.theme = "${theme.name}"
+                    $scope.node = chdir($rootScope.root,$routeParams.resourceUrl);
+                });
+            });
+        });
+    }
 
     $scope.node = chdir($rootScope.root,$routeParams.resourceUrl);
     
@@ -326,42 +446,9 @@ angular.module('cmsFileViewer')
                 <small>View templates for ${theme.name}</small>
             </div>
             <div class="modal-body">
-                <div>
-                    <c:if test="${theme.templatesSet.size() != 0}">
-                    <table  class="table table-hover table-bordered">
-                        <c:forEach var="template" items="${theme.templatesSet}">
-                            <tr>
-                                <td>
-                                    <h5>${template.name} (<samp>${template.type}</samp>) </h5>
-
-
-                                    <div>
-                                        ${template.description}
-                                    </div>
-
-                                    <p>
-                                        <code>${template.filePath}</code>
-                                    </p>
-
-                                    <div class="btn-group pull-right">
-                                        <a class="btn btn-danger btn-icon deleteBtn" data-toggle="modal" data-file="${template.type}">
-                                            <i class="glyphicon glyphicon-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                    </table>
-                    </c:if>
-                    <c:if test="${theme.templatesSet.size() == 0}">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            This theme has no templates yet.
-                        </div>
-                    </div>
-                    </c:if>
-                    <p class="help-block">If you want to create a new template, right click on the file and select 'Make a Template'</p>
+                <div class="content"> 
                 </div>
+                    <p class="help-block">If you want to create a new template, right click on the file and select 'Make a Template'</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -369,16 +456,6 @@ angular.module('cmsFileViewer')
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-<script type="text/javascript">
-    $(function () {
-        $('.deleteBtn').popover({
-            placement:"right",
-            title: 'Are you sure? <span class="close"></span>',
-            html: true,
-            content: '<p class="help-block">You are about to delete this template. The template file will remain unaffected. Are you sure?</p> <button class="btn btn-danger">Delete this Template</button>'
-        });
-    })
-</script>
 
 <div class="modal fade" id="settings-modal">
     <div class="modal-dialog">
@@ -435,6 +512,14 @@ angular.module('cmsFileViewer')
                             <input type="file" name="thumbnail" />
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">Default template</label>
+                        <div class="col-sm-10">
+                            <select id="default-theme-select" name="defaultTemplate" class="form-control"></select>
+                            <p class="help-block">The default template is the template used when a theme is missing a template.</p>
+                        </div>
+                    </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -486,7 +571,7 @@ angular.module('cmsFileViewer')
                 <small>Are you sure?</small>
             </div>
             <div class="modal-body">
-                <p>You are about to delete the file '<span class="filename"></span>'. There is no way to rollback this opeartion. Are you sure? </p>
+                <p>You are about to delete '<span class="filename"></span>'. There is no way to rollback this opeartion. Are you sure? </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -495,3 +580,104 @@ angular.module('cmsFileViewer')
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+<div class="modal fade" id="make-template-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
+                <h3 class="modal-title">Make template</h3>
+                <small>Create a new template</small>
+            </div>
+            <div class="modal-body form-horizontal">
+            
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">File</label>
+                        <div class="col-sm-10">
+                            <input disabled="disabled" type="text" name="filename" class="form-control" placeholder="Filename">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.name"/></label>
+                        <div class="col-sm-10">
+                            <input type="text" name="name" class="form-control" placeholder="Name">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.type"/></label>
+                        <div class="col-sm-10">
+                            <input type="text" name="type" class="form-control" placeholder="Type">
+                            <p class="help-block">This code is used internally and is not shared with the users. Howerver it must be unique for this theme.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.description"/></label>
+                        <div class="col-sm-10">
+                            <textarea name="description" class="form-control" placeholder="Description"></textarea>
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" onclick="makeTemplate()" class="btn btn-primary">Create</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type="text/javascript">
+function makeTemplate(){
+    var filename = $("#make-template-modal input[name='filename']").val();
+    var name = $("#make-template-modal input[name='name']").val();
+    var type = $("#make-template-modal input[name='type']").val();
+    var description = $("#make-template-modal textarea[name='description']").val();
+    $.post("/cms/themes/${theme.type}/newTemplate",{
+        type:type,
+        name:name,
+        description:description,
+        filename:filename
+    }).success(function(){
+        $("#make-template-modal").modal('hide');
+        $("#make-template-modal input[name='filename']").val("");
+        $("#make-template-modal input[name='name']").val("");
+        $("#make-template-modal input[name='type']").val("");
+        $("#make-template-modal textarea[name='description']").val("");
+
+        $.get("/cms/themes/${theme.type}/templates").success(function(e){
+            genTemplates(e);
+        })
+    })
+}
+
+
+function slugify(text)
+{
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-')           // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+    .replace(/^-+/, '')             // Trim - from start of text
+    .replace(/-+$/, '');            // Trim - from end of text
+}
+    $("#make-template-modal [name='name']").on("keyup",function(e){
+        var te = $("#make-template-modal [name='type']");
+
+        if (!te.data("written")){
+            te.val(slugify($(e.target).val()));
+        }
+    });
+
+    $("#make-template-modal [name='type']").on("keyup", function(e){
+        e=$(e.target);
+        
+        if (!e.val() || e.val().length == 0) {
+            $("#make-template-modal [name='type']").data("written", false);
+        }else if (!$("#make-template-modal [name='type']").data("written")){
+            $("#make-template-modal [name='type']").data("written", true);
+        }
+
+    });
+</script>
