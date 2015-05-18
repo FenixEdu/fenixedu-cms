@@ -36,10 +36,11 @@
     <button type="button" data-target="#sites-settings" data-toggle="modal"  class="btn btn-default"  class="btn btn-default">Settings</button>
   </div>
   <div class="col-sm-4">
-    <input type="search" class="form-control pull-right" placeholder="Search sites">
+      <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
   </div>
 </div>
 </p>
+
 </c:if>
 <c:choose>
     <c:when test="${sites.size() == 0}">
@@ -184,3 +185,17 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+
+<script type="application/javascript">
+	(function () {
+		$('#search-query').keypress(function (e) {
+			if (e.which == 13) {
+				searchPosts($('#search-query').val());
+			}
+		});
+		function searchPosts(query) {
+			window.location.search = query ? "query=" + query : "";
+		}
+	})();
+</script>

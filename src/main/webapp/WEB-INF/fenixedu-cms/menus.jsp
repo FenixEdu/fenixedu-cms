@@ -27,7 +27,9 @@
 </h2>
 
 <p>
-<a href="${pageContext.request.contextPath}/cms/menus/${site.slug}/create" class="btn btn-default btn-primary"><spring:message code="menu.manage.label.createMenu" /></a>
+    <a href="${pageContext.request.contextPath}/cms/menus/${site.slug}/create" class="btn btn-default btn-primary">
+        <span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="menu.manage.label.createMenu" />
+    </a>
 </p>
 
 <c:choose>

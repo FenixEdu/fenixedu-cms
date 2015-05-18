@@ -23,7 +23,7 @@
 
 <c:set var="locale" value="<%= org.fenixedu.commons.i18n.I18N.getLocale() %>"/>
 <script type="text/javascript">
-	var db = ${views};
+	var db = ${views != null ? views : '[]'}
 </script>
 
 	<div class="page-header">
@@ -33,6 +33,7 @@
 
 	<div class="row">
 	  <div class="col-sm-8">
+
 	    <button type="button" class="btn btn-primary"><i class="icon icon-plus"></i> New...</button>
 	    <div class="btn-group">
 	    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuDivider" data-toggle="dropdown" aria-expanded="true">
@@ -243,24 +244,24 @@
 
 <div class="row">
 	<div class="col-sm-6 glance ">
-		<i class="glance-icon glyphicon glyphicon-pushpin"></i> <a href="">${site.postSet.size()} Posts</a>
+		<i class="glance-icon glyphicon glyphicon-pushpin"></i> <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}">${site.postSet.size()} Posts</a>
 	</div>
 	<div class="col-sm-6 glance ">
-		<i class="glance-icon glyphicon glyphicon-file"></i> <a href="">${site.pagesSet.size()} Pages</a>
+		<i class="glance-icon glyphicon glyphicon-file"></i> <a href="${pageContext.request.contextPath}/cms/pages/${site.slug}"">${site.pagesSet.size()} Pages</a>
 	</div>
 </div>
 <div class="row">
 	<div class="col-sm-6 glance ">
-		<i class="glance-icon glyphicon glyphicon-th-list"></i> <a href="">${site.menusSet.size()} Menus</a>
+		<i class="glance-icon glyphicon glyphicon-th-list"></i> <a href="${pageContext.request.contextPath}/cms/pages/${site.slug}"">${site.menusSet.size()} Menus</a>
 	</div>
 	<div class="col-sm-6 glance ">
-		<i class="glance-icon glyphicon glyphicon-edit"></i> <a href="">Published</a>
+		<i class="glance-icon glyphicon glyphicon-edit"></i> <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/edit">Published</a>
 	</div>
 </div>
 
 <div class="row">
 	<div class="col-sm-6 glance ">
-		<i class="glance-icon icon icon-brush"></i> <a href="">${site.theme.name}</a>
+		<i class="glance-icon icon icon-brush"></i> <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/edit">${site.theme.name}</a>
 	</div>
 	<div class="col-sm-6 glance ">
 		<i style="color:#9AC338;" class="glance-icon glyphicon glyphicon-eye-open"></i> Public

@@ -1,18 +1,18 @@
 /**
  * Copyright © 2014 Instituto Superior Técnico
- * <p/>
+ *
  * This file is part of FenixEdu CMS.
- * <p/>
+ *
  * FenixEdu CMS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * <p/>
+ *
  * FenixEdu CMS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * <p/>
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -82,8 +82,8 @@ public class AdminSites {
     private static final int ITEMS_PER_PAGE = 30;
 
     @RequestMapping
-    public String list(HttpServletRequest request, Model model) {
-        return list(0, model);
+    public String list(Model model, @RequestParam(required = false) String query) {
+        return list(0, model, query);
     }
 
     @RequestMapping("/{slug}")
@@ -128,14 +128,15 @@ public class AdminSites {
     }
 
     @RequestMapping(value = "manage/{page}", method = RequestMethod.GET)
-    public String list(@PathVariable(value = "page") int page, Model model) {
-        List<List<Site>> pages = Lists.partition(getSites(), ITEMS_PER_PAGE);
+    public String list(@PathVariable(value = "page") int page, Model model, @RequestParam(required = false) String query) {
+        List<Site> allSites = Strings.isNullOrEmpty(query) ? getSites() : SearchUtils.searchSites(getSites(), query);
+        List<List<Site>> pages = Lists.partition(allSites, ITEMS_PER_PAGE);
         int currentPage = normalize(page, pages);
         model.addAttribute("numberOfPages", pages.size());
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("sites", pages.isEmpty() ? Collections.emptyList() : pages.get(currentPage));
-
         model.addAttribute("isManager", DynamicGroup.get("managers").isMember(Authenticate.getUser()));
+        model.addAttribute("query", query);
 
         String redirectUrl = CoreConfiguration.getConfiguration().applicationUrl() + "/cms/sites/google/oauth2callback";
         model.addAttribute("googleAuthJSOrigin", CoreConfiguration.getConfiguration().applicationUrl());

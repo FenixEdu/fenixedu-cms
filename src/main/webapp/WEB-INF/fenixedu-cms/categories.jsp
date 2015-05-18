@@ -26,7 +26,8 @@
   <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
 </h2>
 
-<a href="${pageContext.request.contextPath}/cms/categories/${site.slug}/create" class="btn btn-default btn-primary"><spring:message code="categories.manage.createCategories"/></a>
+<a href="${pageContext.request.contextPath}/cms/categories/${site.slug}/create" class="btn btn-default btn-primary">
+	<span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="categories.manage.createCategories"/></a>
 </p>
 
 <c:choose>
@@ -40,7 +41,7 @@
             <tr>
               <th><spring:message code="categories.manage.label.name"/></th>
               <th><spring:message code="categories.manage.label.creationDate"/></th>
-              <th>Posts</th>
+              <th><spring:message code="site.dashboard.label.posts"/></th>
               <th><spring:message code="categories.manage.label.operations"/></th>
             </tr>
           </thead>
@@ -61,6 +62,7 @@
               <td>${category.creationDate.toString('dd MMMM yyyy, HH:mm', locale)} <small>- ${category.createdBy.name}</small></td>
               <td>${category.postsSet.size()}</td>
               <td>
+                  <a href="${category.editUrl}" class="btn btn-sm btn-default">Edit</a>
 	               <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteCategoryForm${category.externalId}').submit();" ${category.postsSet.size() > 0 ? 'disabled' : ''}><spring:message code="action.delete"/></button>
 					       <form id="deleteCategoryForm${category.externalId}" action="${pageContext.request.contextPath}/cms/categories/${category.site.slug}/${category.slug}/delete" method="POST"></form>
               </td>

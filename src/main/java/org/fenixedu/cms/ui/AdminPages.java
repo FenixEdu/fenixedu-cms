@@ -18,9 +18,7 @@
  */
 package org.fenixedu.cms.ui;
 
-import java.util.Objects;
-import java.util.Optional;
-
+import com.google.common.base.Strings;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
@@ -37,11 +35,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-import com.google.common.base.Strings;
+import java.util.Collection;
+import java.util.Objects;
 
 import static java.util.Optional.ofNullable;
 
@@ -49,16 +47,20 @@ import static java.util.Optional.ofNullable;
 @RequestMapping("/cms/pages")
 public class AdminPages {
 
-	@RequestMapping(value = "{slug}", method = RequestMethod.GET)
-	public String pages(Model model, @PathVariable(value = "slug") String slug) {
-		Site site = Site.fromSlug(slug);
+    @RequestMapping(value = "{slug}", method = RequestMethod.GET)
+    public String pages(Model model, @PathVariable(value = "slug") String slug, @RequestParam(required = false) String query) {
+        Site site = Site.fromSlug(slug);
 
-		AdminSites.canEdit(site);
-
-		model.addAttribute("site", site);
-		model.addAttribute("pages", site.getPagesSet());
-		return "fenixedu-cms/pages";
-	}
+        AdminSites.canEdit(site);
+        model.addAttribute("query", query);
+        Collection<Page> pages = site.getPagesSet();
+        if (!Strings.isNullOrEmpty(query)) {
+            pages = SearchUtils.searchPages(pages, query);
+        }
+        model.addAttribute("site", site);
+        model.addAttribute("pages", pages);
+        return "fenixedu-cms/pages";
+    }
 
 	@RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
 	public String createPage(Model model,
