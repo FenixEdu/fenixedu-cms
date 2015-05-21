@@ -99,7 +99,7 @@
 		<dependency>
 			<groupId>org.fenixedu</groupId>
 			<artifactId>bennu-spring</artifactId>
-			<version>${version.org.fenixedu.bennu.spring}</version>
+			<version>${version.org.fenixedu.bennu}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.fenixedu</groupId>
