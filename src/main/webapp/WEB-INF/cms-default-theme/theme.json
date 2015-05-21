@@ -2,6 +2,7 @@
 	"type":"cms-default-theme",
 	"name":"Bennu CMS Default Theme",
 	"description":"This is the Bennu CMS Default Theme",
+	"thumbnail":"static/image/thumbnail.png",
 	"templates":{
 		"posts":{
 			"name": "Posts Page",

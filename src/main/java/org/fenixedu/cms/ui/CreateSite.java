@@ -21,8 +21,10 @@ package org.fenixedu.cms.ui;
 import javax.servlet.http.HttpServletRequest;
 
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
@@ -68,21 +70,20 @@ public class CreateSite {
     @Atomic
     private void createSite(LocalizedString name, LocalizedString description, boolean published, String template, String folder,
             boolean embedded) {
-        Site site = new Site();
-        site.setBennu(Bennu.getInstance());
+        Site site = new Site(name,description);
+        
         if (!Strings.isNullOrEmpty(folder)) {
             site.setFolder(FenixFramework.getDomainObject(folder));
         }
         site.setEmbedded(embedded);
-        site.setDescription(description);
-        site.setName(name);
-        site.setSlug(StringNormalizer.slugify(name.getContent()));
         site.updateMenuFunctionality();
         site.setPublished(published);
-
+        
         if (!template.equals("null")) {
             Site.templateFor(template).makeIt(site);
         }
+        
+        SiteActivity.createdSite(site, Authenticate.getUser());
     }
 
 }

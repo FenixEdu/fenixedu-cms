@@ -139,6 +139,11 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
 		this.setViewGroup(null);
 		this.getAttachments().delete();
 		this.getPostFiles().delete();
+		
+		for(PostContentRevision revision : this.getRevisionsSet()){
+		    revision.delete();
+		}
+		
 		this.deleteDomainObject();
 
 	}

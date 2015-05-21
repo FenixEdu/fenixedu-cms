@@ -18,6 +18,7 @@
  */
 package org.fenixedu.cms.domain;
 
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ListCategoryPosts;
 import org.fenixedu.cms.domain.component.ListOfCategories;
@@ -43,7 +44,7 @@ public class BlogTemplate implements SiteTemplate {
      */
     @Override
     public void makeIt(Site site) {
- 
+
         site.setTheme(CMSTheme.forType("cms-default-theme"));
         makeCategory(site);
         makePosts(site);
@@ -91,7 +92,7 @@ public class BlogTemplate implements SiteTemplate {
         post.setBody(new LocalizedString(I18N.getLocale(), "This is a simple blog that was generated for you, so "
                 + "you can start understanding how the CMS works. Access to admin space to alter "
                 + "stuff around or to create new posts."));
-
+        SiteActivity.createdPost(post, Authenticate.getUser());
         post = new Post(site);
         post.addCategories(site.categoryForSlug("random-text"));
         post.setName(new LocalizedString(I18N.getLocale(), "This is a post"));
@@ -101,7 +102,7 @@ public class BlogTemplate implements SiteTemplate {
                 + "in tellus quam. Ut rutrum eget enim vel suscipit. Curabitur ornare, mauris at volutpat "
                 + "congue, elit dolor imperdiet ligula, eget malesuada lacus lacus eu tortor. Maecenas ac "
                 + "lacus nisl. Aliquam erat volutpat."));
-
+        SiteActivity.createdPost(post, Authenticate.getUser());
         post = new Post(site);
         post.addCategories(site.categoryForSlug("random-text"));
         post.setName(new LocalizedString(I18N.getLocale(), "This is a another post"));
@@ -113,10 +114,11 @@ public class BlogTemplate implements SiteTemplate {
                 + "mollis tellus. Phasellus consequat rhoncus sem, sit amet consectetur risus pharetra laoreet. Integer at "
                 + "tristique elit. Suspendisse arcu nunc, vestibulum non nulla ut, feugiat varius ipsum. Nulla sagittis dui "
                 + "accumsan auctor pulvinar."));
-
+        SiteActivity.createdPost(post, Authenticate.getUser());
         about = new Post(site);
         about.setName(new LocalizedString(I18N.getLocale(), "About " + site.getCreatedBy().getUsername()));
         about.setBody(new LocalizedString(I18N.getLocale(), "This is a simple page show how to create a page about you."));
+        SiteActivity.createdPost(post, Authenticate.getUser());
     }
 
     private Page makeHomepage(Site site) {

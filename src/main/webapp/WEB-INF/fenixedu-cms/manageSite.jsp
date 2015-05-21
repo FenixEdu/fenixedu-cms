@@ -22,12 +22,16 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <c:set var="locale" value="<%= org.fenixedu.commons.i18n.I18N.getLocale() %>"/>
-
+<script type="text/javascript">
+	var db = ${views};
+</script>
 
 	<div class="page-header">
-  	<h1>${site.name.content}</h1>
-  	<h2><small>Site Managment</small></h2>
-  	<div class="row">
+  	<h1>Sites</h1>
+  	<h2><small>${site.name.content}</small></h2>
+	</div>
+
+	<div class="row">
 	  <div class="col-sm-8">
 	    <button type="button" class="btn btn-primary">New post</button>
 	    
@@ -41,87 +45,215 @@
 	    <input type="search" class="form-control pull-right" placeholder="Search posts...">
 	  </div>
 	</div>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.js"></script>
+	<div class="row">
+		<div class="col-sm-12">
+			<h3>Analytics</h3>
+
+			<div class="graph">
+			<div class="row">
+				<div class="col-sm-12">
+				<div class="btn-group pull-right">
+					<button type="button" class="btn btn-default btn-xs">30 Days</button>
+					<button type="button" class="btn btn-default btn-xs">7 Days</button>
+				</div>
+				</div>
+			</div>
+			<svg id="visualisation" width="100%" height="350">
+				
+				<defs>
+				  <pattern id="pattern1"
+				           x="0" y="0" width="49" height="49"
+				           patternUnits="userSpaceOnUse" >
+
+				      <rect x="0" y="0" width="50" height="50" style="fill:white;stroke-width:2;stroke:#f3f3f3;"/>
+
+				  </pattern>
+				</defs>
+
+				<rect x="0" y="0" width="100%" height="450" style=" fill: url(#pattern1);" />    
+			</svg>
+				<p class="help-block">
+					This Analytics view is provided by <a href="http://google.com/analytics">Google Analytics</a>. To get more insights about your data, visit their site.
+				</p>
+			</div>
+
+			<script type="text/javascript">
+				var listDb = []
+				var i = 0;
+				for (var x in db) {
+					db[x].i = i++; 
+					listDb.push(db[x]);
+				};
+				function genGraph(){
+					$("path", $("#visualisation")).remove();
+					$("circle", $("#visualisation")).remove();
+				var vis = d3.select('#visualisation'),
+				    WIDTH = $("#visualisation").width(),
+				    HEIGHT = $("#visualisation").height(),
+				    MARGINS = {
+				      top: 20,
+				      right: 20,
+				      bottom: 20,
+				      left: 20
+				    },
+				    xRange = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([d3.min(listDb, function(d) {
+				      return parseInt(d.i);
+				    }), d3.max(listDb, function(d) {
+				      return parseInt(d.i);
+				    })]),
+				    yRange = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([d3.min(listDb, function(d) {
+				      return parseInt(d.pageviews);
+				    }), d3.max(listDb, function(d) {
+				      return parseInt(d.pageviews);
+				    })]);
+
+
+				var lineFunc = d3.svg.line()
+				.x(function(d) {
+					return xRange(parseInt(d.i));
+				})
+				.y(function(d) {
+					return yRange(parseInt(d.pageviews));
+				})
+				.interpolate('cardinal');
+
+				var lineFuncV = d3.svg.line()
+				.x(function(d) {
+					return xRange(parseInt(d.i));
+				})
+				.y(function(d) {
+					return yRange(parseInt(d.visitors));
+				})
+				.interpolate('cardinal');
+
+				var lineInitFunc = d3.svg.line()
+				.x(function(d) {
+					return xRange(parseInt(d.i));
+				})
+				.y(function(d) {
+					return $("#visualisation").height();
+				})
+				.interpolate('cardinal');
+
+				vis.append('svg:path')
+				  .attr('d', lineInitFunc(listDb))
+				  .attr('stroke', '#3399FF')
+				  .attr('stroke-width', 2)
+				  .attr('fill', 'none').transition().attr('d', lineFunc(listDb)).duration(1000).each("end",function(){
+			  			vis.selectAll("foo").data(listDb).enter().append("svg:circle")
+     						.attr("stroke", "#3399FF")
+			         		.attr("fill", function(d, i) { return "#3399FF" })
+			         		.attr("cx", function(d, i) { return xRange(parseInt(d.i)); })
+			         		.attr("cy", function(d, i) { return yRange(parseInt(d.pageviews)); })
+			         		.attr("r", function(d, i) { return 3 });
+				  });
+
+
+				vis.append('svg:path')
+				  .attr('d', lineInitFunc(listDb))
+				  .attr('stroke', '#9AC338')
+				  .attr('stroke-width', 2)
+				  .attr('fill', 'none').transition().attr('d', lineFuncV(listDb)).duration(1000).each("end",function(){
+			  			vis.selectAll("bar").data(listDb).enter().append("svg:circle")
+     						.attr("stroke", "#9AC338")
+			         		.attr("fill", function(d, i) { return "#9AC338" })
+			         		.attr("cx", function(d, i) { return xRange(parseInt(d.i)); })
+			         		.attr("cy", function(d, i) { return yRange(parseInt(d.visitors)); })
+			         		.attr("r", function(d, i) { return 3 });
+				  });
+				
+				};
+				genGraph();
+				$( window ).resize(function() {
+  genGraph();
+});
+
+
+			</script>
+		</div>
 	</div>
+	<style type="text/css">
+	.activity-line{
 
+		padding-bottom: 20px;
 
-<!-- 		<c:if test="${not site.published}">
-			<span class="badge"><spring:message code="site.manage.label.unpublished"/></span>
-		</c:if>
-		<div class="button-group pull-right">
-			<a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/edit" class="btn btn-primary"><spring:message code="action.edit"/></a>
-			<c:if test="${site.published}">
-				<a href="${site.fullUrl}" target="_blank" class="btn btn-default"><spring:message code="action.link"/></a>
-			</c:if>
-		</div> -->
+		line-height: 22px;
+	}
+	.glance{
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
 
-	<div class="row placeholders">
-		<div class="col-xs-6 col-sm-3 placeholder">
-			<div class="pretty-number">
-				${site.postSet.size()}
-			</div>
-			<h4><spring:message code="site.manage.label.posts"/></h4>
-			<span class="text-muted"><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}"><spring:message code="action.show.all"/></a></span>
-		</div>
-		<div class="col-xs-6 col-sm-3 placeholder">
-			<div class="pretty-number green">
-				${site.pagesSet.size()}
-			</div>
-			<h4><spring:message code="site.manage.label.pages"/></h4>
-			<span class="text-muted"><a href="${pageContext.request.contextPath}/cms/pages/${site.slug}"><spring:message code="action.show.all"/></a></span>
-		</div>
-		<div class="col-xs-6 col-sm-3 placeholder">
-			<div class="pretty-number">
-				${site.categoriesSet.size()}
-			</div>
-			<h4><spring:message code="site.manage.label.categories"/></h4>
-			<span class="text-muted"><a href="${pageContext.request.contextPath}/cms/categories/${site.slug}"><spring:message code="action.show.all"/></a></span>
-		</div>
-		<div class="col-xs-6 col-sm-3 placeholder">
-			<div class="pretty-number green">
-				<img height="50" src="${pageContext.request.contextPath}/static/img/menu.svg"/>
-			</div>
-			<h4><spring:message code="site.manage.label.menus"/></h4>
-			<span class="text-muted"><a href="${pageContext.request.contextPath}/cms/menus	/${site.slug}"><spring:message code="action.show.all"/></a></span>
-		</div>
-	</div>
-
+	.activity-day{
+		border-bottom:1px solid #f3f3f3; margin-bottom:10px;
+	}
+	.activity-day i{
+		font-size: 21px; line-height: 1px;
+		padding-right: 15px;
+		color:#878787;
+	}
+	</style>
 	<div class="row">
 		<div class="col-sm-7">
-			<h3 class="sub-header"><spring:message code="site.manage.label.latest.posts"/> <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/create" class="btn btn-primary pull-right"><spring:message code="action.create"/></a></h3>
-			<div class="table-responsive">
-				<table class="table table-striped">
-					<thead>
-						<tr>
-							<th><spring:message code="page.manage.label.name" /></th>
-							<th><spring:message code="site.manage.label.creationDate"/></th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						<c:forEach var="post" items="${site.latestPosts}">
-							<tr>
-								<td>
-									<c:if test="${site.published}">
-										<a href="${post.address}" target="_blank">${post.name.content}</a>
-									</c:if>
-									<c:if test="${!site.published}">
-										${post.name.content}
-									</c:if>
-								</td>
-								<td>${post.creationDate.toString('dd MMMM yyyy, HH:mm', locale)} <small>- ${post.createdBy.name}</small></td>
-								<td><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit"><spring:message code="action.edit"/></a></td>
-							</tr>
-						</c:forEach>
-					</tbody>
-				</table>
-			</div>
+			<h3 class="sub-header"> Activity </h3>
+			<c:set var="activities" value="${site.lastFiveDaysOfActivity}"/>
+			<c:choose>
+			    <c:when test="${activities.size() == 0}">
+				    <div class="panel panel-default">
+			          <div class="panel-body">
+			            <spring:message code="site.manage.label.emptySites"/>
+			          </div>
+			        </div>
+			    </c:when>
+
+			    <c:otherwise> 
+			        <c:forEach var="activity" items="${activities}">
+			           	<div class="row activity-day">
+							<div class="col-sm-2">
+								${activity.date}
+							</div>
+							<div class="col-sm-10">
+								<c:forEach var="item" items="${activity.items}">
+									<div class="activity-line">
+										${item.getRender()}
+									</div>
+								</c:forEach>
+							</div>
+						</div>
+			        </c:forEach>
+			    </c:otherwise>
+			</c:choose>
+
 		</div>
 		<div class="col-sm-5">
-			<h3 class="sub-header">${site.name.content}</h3>
-			<p><strong><spring:message code="site.edit.label.theme"/>: </strong> ${site.theme.name}</p>
-			<p><strong><spring:message code="site.edit.label.description"/>	: </strong> ${site.description.content}</p>
-			<p><strong><spring:message code="site.edit.label.slug"/>: </strong> <code>${site.fullUrl}</code></p>
-			<p><strong><spring:message code="site.manage.label.visibility"/>: </strong> ${site.canViewGroup.presentationName}</p>
+			<h3 class="sub-header">On Glance</h3>
+
+<div class="row">
+	<div class="col-sm-6 glance ">
+		<i class="glance-icon glyphicon glyphicon-pushpin"></i> <a href="">${site.postSet.size()} Posts</a>
+	</div>
+	<div class="col-sm-6 glance ">
+		<i class="glance-icon glyphicon glyphicon-file"></i> <a href="">${site.pagesSet.size()} Pages</a>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-6 glance ">
+		<i class="glance-icon glyphicon glyphicon-th-list"></i> <a href="">${site.menusSet.size()} Menus</a>
+	</div>
+	<div class="col-sm-6 glance ">
+		<i class="glance-icon glyphicon glyphicon-edit"></i> <a href="">Published</a>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-sm-6 glance ">
+		<i class="glance-icon icon icon-brush"></i> <a href="">${site.theme.name}</a>
+	</div>
+	<div class="col-sm-6 glance ">
+		<i style="color:#9AC338;" class="glance-icon glyphicon glyphicon-eye-open"></i> Public
+	</div>
+</div>
 		</div>
 	</div>
 

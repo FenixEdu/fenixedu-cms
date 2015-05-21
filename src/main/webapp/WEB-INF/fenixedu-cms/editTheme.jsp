@@ -55,7 +55,6 @@ td{
 }
 
 .fileViwer{
-    min-height: 500px;
 }
 .dragover{
     border: 1px dashed #39f;
@@ -164,8 +163,11 @@ var app = angular.module('cmsFileViewer', ['ngRoute','ng-context-menu','ngFileUp
 app.config(['$routeProvider','$locationProvider', function($routeProvider, $locationProvider) {
     $routeProvider.when("/:resourceUrl*?", {
         templateUrl: Bennu.contextPath + "/static/templates/FileViewer.html",
-        controller:'viewerCtrl',
-    })
+        controller:'viewerCtrl'
+    }).otherwise({
+        templateUrl: Bennu.contextPath + "/static/templates/FileViewer.html",
+        controller:'viewerCtrl'
+    });
 }]).run(function($http,$rootScope,$location){
     $http.get("/cms/themes/${theme.type}/listFiles").success(function(e){ 
         $rootScope.root = generateTree(e);
@@ -173,10 +175,7 @@ app.config(['$routeProvider','$locationProvider', function($routeProvider, $loca
         
             if ($location.path()){
                 $location.path($location.path());
-            }else{
-                $location.path("/");
             }
-        
     });
     $http.get("/cms/themes/${theme.type}/templates").success(function(e){ 
         genTemplates(e);
@@ -516,8 +515,15 @@ angular.module('cmsFileViewer')
                     <div class="form-group">
                         <label for="inputEmail3" class="col-sm-2 control-label">Default template</label>
                         <div class="col-sm-10">
-                            <select id="default-theme-select" name="defaultTemplate" class="form-control"></select>
-                            <p class="help-block">The default template is the template used when a theme is missing a template.</p>
+                            <c:if test="${theme.isDefault()}">
+                                <select disabled="disabled" id="default-theme-select" name="defaultTemplate" class="form-control"></select>
+                                <p class="help-block">The default template is the template used when a theme is missing a template. It can not be changed in default themes.</p>
+                            </c:if>
+                            <c:if test="${not theme.isDefault()}">
+                                <select id="default-theme-select" name="defaultTemplate" class="form-control"></select>
+                                <p class="help-block">The default template is the template used when a theme is missing a template.</p>
+                            </c:if>
+                            
                         </div>
                     </div>
             </div>

@@ -29,7 +29,7 @@
 <p>
     <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/edit" class="btn btn-primary"><i class="glyphicon glyphicon-edit"></i> Edit</a>
 
-    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/edit" class="btn btn-default"><i class="glyphicon glyphicon-cloud-download"></i> Export</a>
+    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/export" target="_blank" class="btn btn-default"><i class="glyphicon glyphicon-cloud-download"></i> Export</a>
 </p>
 
 <div class="row">
@@ -75,15 +75,15 @@
             </dl>
           </div>
         </div>
-
+        <c:if test="${not theme.isDefault()}">
         <div class="panel panel-danger">
           <div class="panel-heading">Danger Zone</div>
           <div class="panel-body">
             <p class="help-block">Once you delete a theme, there is no going back. Please be certain.</p>
             <button data-toggle="modal" data-target="#deleteModal" class="btn btn-danger">Delete this Theme</button>
-            
           </div>
         </div>
+        </c:if>
     </div>
 </div>
 

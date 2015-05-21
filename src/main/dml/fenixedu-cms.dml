@@ -134,6 +134,7 @@ class CMSTheme{
   String description;
   String type;
   CMSThemeFiles files;
+  String previewImagePath;
 }
 
 class CMSTemplate{
@@ -547,3 +548,87 @@ relation PostViewGroup {
         multiplicity 1..1;
     }
 }
+
+/* Google API Service
+/* ################################
+ */
+
+class GoogleAPIService{
+  String clientId;
+  String clientSecret;
+}
+
+relation GoogleAPIServiceBennu{
+  .org.fenixedu.bennu.core.domain.Bennu playsRole bennu{
+    multiplicity 1..1;
+  }
+
+  GoogleAPIService playsRole googleAPISerivce{
+    multiplicity 0..1;
+  }
+}
+
+class GoogleAPIConnection{
+  String accessToken;
+  String refreshToken;
+  String accountId;
+}
+
+relation GoogleAPIConnSerice{
+  GoogleAPIConnection playsRole connections{
+    multiplicity 0..*;
+  }
+
+  GoogleAPIService playsRole service{
+    multiplicity 1..1;
+  }
+}
+
+relation GoogleAPISite{
+  Site playsRole site{
+    multiplicity 1..1;
+  }
+
+  GoogleAPIConnection playsRole googleAPIConnection{
+    multiplicity 0..1;
+  }
+}
+
+class SiteActivity{
+  DateTime eventDate;
+  JsonElement content;
+}
+
+relation ActivitySite{
+  Site playsRole site{
+    multiplicity 1..1;
+  }
+
+  SiteActivity playsRole activityLines{
+    multiplicity 0..*;
+  }
+}
+
+relation LastActivitySite{
+  protected Site playsRole lastActivityLineSite{
+    multiplicity 0..1;
+  }
+
+  SiteActivity playsRole lastActivityLine{
+    multiplicity 0..1;
+  }
+}
+
+relation PreviousActivity{
+  SiteActivity playsRole previous{
+    multiplicity 0..1;
+  }
+
+  SiteActivity playsRole next{
+    multiplicity 0..1;
+  }
+}
+
+
+
+

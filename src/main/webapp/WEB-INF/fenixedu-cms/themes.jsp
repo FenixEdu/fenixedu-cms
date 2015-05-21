@@ -27,7 +27,7 @@
 </div>
 <p>
   <a data-toggle="modal" href='#createNewThemeModal' class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>
-  <a href="${pageContext.request.contextPath}/cms/themes/create" class="btn btn-default">Import</a>
+  <a href="${pageContext.request.contextPath}/cms/themes/create" class="btn btn-default"><i class="glyphicon-cloud-upload"></i> Import</a>
   <c:if test="${themes.size() == 0}">
     <a href="${pageContext.request.contextPath}/cms/themes/loadDefault" class="btn btn-default"><spring:message code="site.manage.label.loadDefault" /></a>
   </c:if>

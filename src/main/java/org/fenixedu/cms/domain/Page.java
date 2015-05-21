@@ -186,7 +186,11 @@ public class Page extends Page_Base implements Sluggable {
 	public void setTemplate(CMSTemplate template) {
 		setModificationDate(new DateTime());
 		super.setTemplate(template);
-		setTemplateType(template.getType());
+		if (template != null){
+		    setTemplateType(template.getType());
+		}else{
+		    setTemplateType(null);
+		}
 	}
 
 	public boolean isPublished() {
@@ -214,7 +218,10 @@ public class Page extends Page_Base implements Sluggable {
 	@Override
 	public CMSTemplate getTemplate() {
 		String templateType = getTemplateType();
-		CMSTemplate template = getTemplate();
+		if (templateType == null){
+		    return null;
+		}
+		CMSTemplate template = super.getTemplate();
 		CMSTheme theme = getSite().getTheme();
 		if (templateType != null) {
 			if (template != null && template.getTheme() == theme
