@@ -151,6 +151,7 @@ class component.ListCategoryPosts extends component.Component{}
 class component.StaticPost extends component.Component{}
 
 class PostFile{
+    Boolean isEmbedded;
     Integer index;
 }
 
@@ -264,6 +265,16 @@ relation CMSThemeCMSTheme{
   }
 }
 
+relation PostHasPostFiles{
+  Post playsRole post{
+    multiplicity 1..1;
+  }
+
+  PostFile playsRole files{
+    multiplicity 0..*;
+  }
+}
+
 relation FilePostFile{
   .org.fenixedu.bennu.io.domain.GroupBasedFile playsRole files{
     multiplicity 0..1;
@@ -271,26 +282,6 @@ relation FilePostFile{
 
   PostFile playsRole postFile{
     multiplicity 0..1;
-  }
-}
-
-relation PostAttachments{
-  Post playsRole post{
-    multiplicity 1..1;
-  }
-
-  protected PostFile playsRole attachements{
-    multiplicity 0..*;
-  }
-}
-
-relation PostFile{
-  Post playsRole post{
-    multiplicity 0..1;
-  }
-
-  protected .org.fenixedu.bennu.io.domain.GroupBasedFile playsRole files{
-    multiplicity 0..*;
   }
 }
 
