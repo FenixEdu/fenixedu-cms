@@ -39,20 +39,19 @@ ${portal.toolkit()}
 </h2> -->
 
     <div class="page-header">
-    <h1>${site.name.content}</h1>
-    <h2><small>Edit Post</small></h2>
+    <h1>Sites</h1>
+    <h2><small>${site.name.content}</small></h2>
+    </div>
+<form class="form" action="" method="post" role="form" novalidate>
+
         <div class="row">
             <div class="col-sm-12">
                 <button type="submit" class="btn btn-primary">Update</button>
+                <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/versions" class="btn btn-default">Versions</a>
                 <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">Metadata</a>
             </div>
         </div>
-    </div>
-
-
-
-<form class="form" action="" method="post" role="form">
-
+        <p></p>
     <!-- Nav tabs -->
 <!--     <ul class="nav nav-tabs" role="tablist">
         <li class="active"><a href="#postContent" role="tab" data-toggle="tab"><spring:message code="page.edit.label.post"/></a></li>
@@ -60,21 +59,6 @@ ${portal.toolkit()}
         <li><a href="#attachments" role="tab" data-toggle="tab">Attachments</a></li>
 
     </ul> -->
-
-    <!-- Tab panes -->
-    <div class="tab-content">
-        <div class="tab-pane active" id="postContent">
-            <p>
-            </p>
-<!--             <div class="col-sm-12">
-                <div class="${emptyName ? "form-group has-error" : "form-group"}">                
-                    <div class="input-group">
-
-                        <span class="input-group-addon"></span>
-                        <input required type="text" name="newSlug" class="form-control" id="inputEmail3"
-                               placeholder="<spring:message code="site.edit.label.slug" />" value='${post.slug}' \>
-                    </div>
-                </div> -->
             
 
             <div class="${emptyName ? "form-group has-error" : "form-group"}">
@@ -86,7 +70,14 @@ ${portal.toolkit()}
                             code="post.edit.error.emptyName"/></p></c:if>
             </div>
             <p>
-            <div>Permalink: <samp>/${site.baseUrl}/${site.viewPostPage.slug}/</samp> <button class="btn btn-default btn-xs">Edit</button> <button class="btn btn-default btn-xs">View Post</button></div>
+
+            <div>Permalink: 
+            input
+            <samp>/${site.baseUrl}/${site.viewPostPage.slug}/</samp> 
+            <input required type="hidden" name="newSlug" class="form-control" id="inputEmail3"
+                               placeholder="<spring:message code="site.edit.label.slug" />" value='${post.slug}' \>
+
+                               <button class="btn btn-default btn-xs">Edit</button> <a href="${post.address}"class="btn btn-default btn-xs">View Post</a></div>
             </p>
 
             <div class="form-group">

@@ -21,51 +21,46 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<h2 class="page-header" style="margin-top: 0">
-    <spring:message code="post.manage.title"/>
-    <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small>
-    <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/create"
-       class="btn btn-default btn-primary pull-right">
-        <spring:message code="page.manage.label.createPost"/>
-    </a>
-</h2>
-
+<div class="page-header">
+    <h1>Sites</h1>
+    <h2><small>${site.name.content}</small></h2>
+</div>
 
 <div class="row">
-    <div class="col-sm-12">
-        <div class="input-group">
-            <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
+    <div class="col-sm-8"><a href="" class="btn btn-primary"><i class="icon icon-plus"></i> New</a></div>
+    <div class="col-sm-4">
+        <div class="row">
+        <div class="col-sm-4">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                    aria-expanded="false">
+                <c:if test="${category!=null}">
+                    ${category.name.content}
+                </c:if>
+                <c:if test="${category==null}">
+                    Category
+                </c:if>
+                <span class="caret"></span>
+            </button>
 
-            <span class="input-group-btn">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
-                        aria-expanded="false">
-                    <c:if test="${category!=null}">
-                        ${category.name.content}
-                    </c:if>
-                    <c:if test="${category==null}">
-                        Category
-                    </c:if>
-                    <span class="caret"></span>
-                </button>
-
-                <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                    <li><a href="#" onclick="searchPosts(null)">None</a></li>
-                    <c:forEach var="cat" items="${site.categories}">
-                        <li><a href="#" onclick='searchPosts("${cat.slug}")'>${cat.name.content}</a></li>
-                    </c:forEach>
-                </ul>
-
-                <button class="btn btn-default" type="submit" onclick="searchPosts()">Search</button>
-
-            </span>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                <li><a href="#" onclick="searchPosts(null)">All</a></li>
+                <c:forEach var="cat" items="${site.categories}">
+                    <li><a href="#" onclick='searchPosts("${cat.slug}")'>${cat.name.content}</a></li>
+                </c:forEach>
+            </ul>            
+        </div>  
         </div>
-        <!-- /input-group -->
+            <div class="col-sm-8">
+                <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
+            </div>
+        </div>
     </div>
     <!-- /.col-lg-6 -->
 </div>
 <!-- /.row -->
 
-
+<p></p>
 <script type="application/javascript">
 
     function searchPosts(categorySlug) {
@@ -76,15 +71,25 @@
         window.location.search = searchQuery;
     }
 
+    $("#search-query").keyup(function(e){
+        if(e.keyCode == 13){
+            searchPosts();
+        }
+    });
+
 </script>
 
 <c:choose>
     <c:when test="${posts.size() == 0}">
-        <p><spring:message code="page.manage.label.emptyPosts"/></p>
+    <div class="panel panel-default">
+        <div class="panel-body">
+           <spring:message code="page.manage.label.emptyPosts"/>
+        </div>
+    </div>
     </c:when>
 
     <c:otherwise>
-        <table class="table table-striped">
+        <table class="table">
             <thead>
             <tr>
                 <th><spring:message code="page.manage.label.name"/></th>
@@ -97,11 +102,7 @@
             <c:forEach var="post" items="${posts}">
                 <tr>
                     <td>
-                        <h5><a href="${post.address}" target="_blank">${post.name.content}</a></h5>
-
-                        <div>
-                            <small><spring:message code="page.manage.label.url"/>:<code>${post.slug}</code></small>
-                        </div>
+                        <h5><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit">${post.name.content}</a></h5>
                     </td>
                     <td>${post.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
                         <small>- ${post.createdBy.name}</small>
@@ -114,9 +115,25 @@
                     <td>
                         <div class="btn-group">
                             <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit"
-                               class="btn btn-sm btn-default"><spring:message code="action.edit"/></a>
-                            <a href="#" class="btn btn-danger btn-sm" data-post="${post.slug}"><spring:message
-                                    code="action.delete"/></a>
+                               class="btn btn-icon btn-default">
+                               <i class="glyphicon glyphicon-edit"></i>
+                            </a>
+                            <a href="${post.address}"
+                               class="btn btn-icon btn-default">
+                               <i class="glyphicon glyphicon-link"></i>
+                            </a>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-icon dropdown-toggle" data-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <i class="icon icon-dot-3"></i>
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <li><a href="#"><i class="glyphicon glyphicon-bullhorn"></i> Unpublish</a></li>
+                                    <li><a href="#"><i class="glyphicon glyphicon-trash"></i> Delete</a></li>
+                                </ul>            
+                            </div>  
                         </div>
 
                     </td>

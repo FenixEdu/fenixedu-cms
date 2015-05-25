@@ -18,11 +18,11 @@
  */
 package org.fenixedu.cms.ui;
 
-
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,6 +35,7 @@ import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.PostContentRevision;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
@@ -51,6 +52,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.FenixFramework;
 
 import com.google.common.base.Strings;
 import com.google.common.math.IntMath;
@@ -64,10 +66,9 @@ public class AdminPosts {
     private static final int PER_PAGE = 20;
 
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
-    public String posts(Model model, @PathVariable(value = "slug") String slug,
-                        @RequestParam(required = false, defaultValue = "1") int page,
-                        @RequestParam(required = false) String query,
-                        @RequestParam(required = false) String category) {
+    public String posts(Model model, @PathVariable(value = "slug") String slug, @RequestParam(required = false,
+            defaultValue = "1") int page, @RequestParam(required = false) String query,
+            @RequestParam(required = false) String category) {
         Site site = Site.fromSlug(slug);
 
         AdminSites.canEdit(site);
@@ -98,15 +99,16 @@ public class AdminPosts {
         model.addAttribute("query", query);
         model.addAttribute("currentPage", page);
         model.addAttribute("pages", pages);
-        model.addAttribute("posts",
+        model.addAttribute(
+                "posts",
                 posts.stream().sorted(Post.CREATION_DATE_COMPARATOR).skip((page - 1) * PER_PAGE).limit(PER_PAGE)
                         .collect(Collectors.toList()));
         return "fenixedu-cms/posts";
     }
 
     private boolean matches(Post post, String query) {
-        return containsContent(post.getName(), query) || containsContent(post.getBody(), query) ||
-                post.getCategoriesSet().stream().filter(cat -> matches(cat, query)).findAny().isPresent();
+        return containsContent(post.getName(), query) || containsContent(post.getBody(), query)
+                || post.getCategoriesSet().stream().filter(cat -> matches(cat, query)).findAny().isPresent();
     }
 
     private boolean matches(Category category, String query) {
@@ -130,7 +132,7 @@ public class AdminPosts {
 
     @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
     public RedirectView createPost(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
-                                   RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes) {
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/posts/" + slug + "/create", true);
@@ -155,7 +157,7 @@ public class AdminPosts {
 
     @RequestMapping(value = "{slug}/{postSlug}/edit", method = RequestMethod.GET)
     public String editPost(Model model, @PathVariable(value = "slug") String slug,
-                           @PathVariable(value = "postSlug") String postSlug) {
+            @PathVariable(value = "postSlug") String postSlug) {
         Site s = Site.fromSlug(slug);
 
         AdminSites.canEdit(s);
@@ -170,11 +172,10 @@ public class AdminPosts {
     public RedirectView editPost(Model model, HttpServletRequest request, @PathVariable(value = "slug") String slug,
             @PathVariable(value = "postSlug") String postSlug, @RequestParam String newSlug, @RequestParam LocalizedString name,
             @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories, @RequestParam(
-            required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationStarts, @RequestParam(
-            required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationEnds, @RequestParam(
-            required = false, defaultValue = "false") boolean active, @RequestParam String viewGroup,
+                    required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationStarts, @RequestParam(
+                    required = false) @DateTimeFormat(iso = ISO.DATE_TIME) DateTime publicationEnds, @RequestParam(
+                    required = false, defaultValue = "false") boolean active, @RequestParam String viewGroup,
             RedirectAttributes redirectAttributes) {
-
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
@@ -189,7 +190,7 @@ public class AdminPosts {
 
     @Atomic
     private void editPost(Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories,
-                          DateTime publicationStarts, DateTime publicationEnds, boolean active, Group viewGroup) {
+            DateTime publicationStarts, DateTime publicationEnds, boolean active, Group viewGroup) {
         post.setName(Post.sanitize(name));
         post.setBody(Post.sanitize(body));
         post.setSlug(newSlug);
@@ -210,7 +211,7 @@ public class AdminPosts {
 
     @RequestMapping(value = "{slugSite}/{slugPost}/delete", method = RequestMethod.POST)
     public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
-                               @PathVariable(value = "slugPost") String slugPost) {
+            @PathVariable(value = "slugPost") String slugPost) {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -222,7 +223,7 @@ public class AdminPosts {
     @RequestMapping(value = "{slugSite}/{slugPost}/addAttachment", method = RequestMethod.POST)
     public RedirectView addAttachment(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "slugPost") String slugPost, @RequestParam(required = true) String name,
-                                      @RequestParam("attachment") MultipartFile attachment) throws IOException {
+            @RequestParam("attachment") MultipartFile attachment) throws IOException {
 
         Site s = Site.fromSlug(slugSite);
 
@@ -237,11 +238,9 @@ public class AdminPosts {
 
     @RequestMapping(value = "{slugSite}/{slugPost}/addAttachment.json", method = RequestMethod.POST,
             produces = "application/json")
-    public
-    @ResponseBody
-    String addAttachmentJson(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+    public @ResponseBody String addAttachmentJson(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "slugPost") String slugPost, @RequestParam(required = true) String name,
-                             @RequestParam("attachment") MultipartFile attachment) throws IOException {
+            @RequestParam("attachment") MultipartFile attachment) throws IOException {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -304,9 +303,7 @@ public class AdminPosts {
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/addFile", method = RequestMethod.POST, produces = "application/json")
-    public
-    @ResponseBody
-    RedirectView addFile(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+    public @ResponseBody RedirectView addFile(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "slugPost") String slugPost, @RequestParam("attachment") MultipartFile attachment) throws IOException {
 
         Site s = Site.fromSlug(slugSite);
@@ -321,9 +318,7 @@ public class AdminPosts {
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/addFile.json", method = RequestMethod.POST, produces = "application/json")
-    public
-    @ResponseBody
-    String addFileJson(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+    public @ResponseBody String addFileJson(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "slugPost") String slugPost, @RequestParam("attachment") MultipartFile[] attachments) throws IOException {
         Site s = Site.fromSlug(slugSite);
 
@@ -379,4 +374,74 @@ public class AdminPosts {
             file.delete();
         }
     }
+
+    @RequestMapping(value = "{slugSite}/{slugPost}/versions", method = RequestMethod.GET)
+    public String versions(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(value = "slugPost") String slugPost) {
+        Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+        
+        Post p = s.postForSlug(slugPost);
+        model.addAttribute("post", p);
+        model.addAttribute("site", s);
+        return "fenixedu-cms/versions";
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPost}/versionData", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    public String versionData(Model model, @PathVariable(value = "slugSite") String slugSite,
+            @PathVariable(value = "slugPost") String slugPost, @RequestParam(required = false) PostContentRevision revision) {
+        Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
+        Post p = s.postForSlug(slugPost);
+
+        if (revision == null) {
+            revision = p.getLatestRevision();
+        }
+        
+        if (revision.getPost() != p) {
+            throw new RuntimeException("Invalid Revision");
+        }
+
+        JsonObject json = new JsonObject();
+
+        json.add("content", revision.getBody().json());
+        json.addProperty("modifiedAt", revision.getRevisionDate().toString());
+        json.addProperty("user", revision.getCreatedBy().getUsername());
+        json.addProperty("userName", revision.getCreatedBy().getProfile().getDisplayName());
+        json.addProperty("id", revision.getExternalId());
+        json.addProperty("next", Optional.ofNullable(revision.getNext()).map(x -> x.getExternalId()).orElse(null));
+        json.addProperty("previous", Optional.ofNullable(revision.getPrevious()).map(x -> x.getExternalId()).orElse(null));
+        
+        if (revision.getPrevious() != null){
+            json.add("previousContent", revision.getPrevious().getBody().json());
+        }
+
+        return json.toString();
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPost}/revertTo", method = RequestMethod.POST)
+    public RedirectView reverttTo(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+            value = "slugPost") String slugPost, @RequestParam PostContentRevision revision) {
+        Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
+        Post p = s.postForSlug(slugPost);
+
+        if (revision.getPost() != p) {
+            throw new RuntimeException("Invalid Revision");
+        }
+
+        FenixFramework.atomic(() -> {
+            p.setBody(revision.getBody());
+        });
+
+        // SiteActivity.revertedToRevision
+
+        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
+    }
+
 }
