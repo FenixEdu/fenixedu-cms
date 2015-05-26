@@ -149,6 +149,20 @@ public class AdminPosts {
         model.addAttribute("post", p);
         return "fenixedu-cms/editPost";
     }
+    
+    @RequestMapping(value="{slug}/{postSlug}/createCategory", method=RequestMethod.POST)
+    public RedirectView createCategory(@PathVariable(value = "slug") String slug, @PathVariable(value = "postSlug") String postSlug, @RequestParam LocalizedString name) {
+        Site site = Site.fromSlug(slug);
+        AdminSites.canEdit(site);
+        Post post = site.postForSlug(postSlug);
+        
+        FenixFramework.atomic(()->{
+            Category p = new Category(site);
+            p.setName(name);
+        });
+        
+        return new RedirectView("/cms/posts/" + site.getSlug() + "/" + post.getSlug() + "/edit", true);
+    }
 
     @RequestMapping(value = "{slug}/{postSlug}/edit", method = RequestMethod.POST)
     public RedirectView editPost(@PathVariable(value = "slug") String slug, @PathVariable(value = "postSlug") String postSlug,

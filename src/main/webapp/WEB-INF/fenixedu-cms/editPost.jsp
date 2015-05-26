@@ -27,7 +27,7 @@
 <script src="${pageContext.request.contextPath}/static/js/jquery.jsonview.js"></script>
 
 ${portal.toolkit()}
-<form class="form" action="" method="post" role="form">
+<form class="form" action="" method="post" role="form" id="postForm">
 	<div class="page-header">
 		<h1>${site.name.content}</h1>
 
@@ -111,7 +111,7 @@ ${portal.toolkit()}
 				</div>
 				<div class="row">
 					<div class="col-sm-12">
-						<button class="btn btn-default btn-xs">Add New Category</button>
+						<a class="btn btn-default btn-xs" data-toggle="modal" data-target="#addCategory">Add New Category</a>
 					</div>
 				</div>
 			</div>
@@ -248,6 +248,37 @@ ${portal.toolkit()}
 	</form>
 </div>
 
+<div class="modal fade" id="addCategory" tabindex="-1" role="dialog" aria-hidden="true">
+	<form class="form-horizontal" action="createCategory" method="post" role="form">
+		<div class="modal-dialog">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">&times;</span>
+						<span class="sr-only">Close</span>
+					</button>
+					<h4><spring:message code="categories.create.title" /></h4>
+				</div>
+				
+				<div class="modal-body">
+					<div class="${emptyName ? "form-group has-error" : "form-group"}">
+						<label class="col-sm-2 control-label"><spring:message code="categories.create.label.name"/></label>
+						<div class="col-sm-10">
+							<input type="text" name="name" bennu-localized-string required-any class="form-control"  placeholder="<spring:message code="categories.create.label.name"/>">
+							<c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="categories.create.error.emptyName"/></p></c:if>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary"><spring:message code="label.make"/></button>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+
 <div class="modal fade" id="attachmentDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -314,29 +345,33 @@ ${portal.toolkit()}
 </form>
 
 <script type="application/javascript">
-	<c:choose>
-		<c:when test="${post.metadata != null}">
-			$(".json-data").JSONView(${post.metadata}, {collapsed: true});
-		</c:when>
-		<c:otherwise>
-			$(".json-data").JSONView({}, {collapsed: true});
-		</c:otherwise>
-	</c:choose>
+	(function(){	
+		<c:choose>
+			<c:when test="${post.metadata != null}">
+				$(".json-data").JSONView(${post.metadata}, {collapsed: true});
+			</c:when>
+			<c:otherwise>
+				$(".json-data").JSONView({}, {collapsed: true});
+			</c:otherwise>
+		</c:choose>
 
-	$("[data-target='#attachmentDeleteModal']").on('click', function (event) {
-		var index = $(event.target).closest("[data-file-index]").attr('data-file-index');
-		var filename = $(event.target).closest("[data-file]").attr('data-file');
-		$('#fileName').html(filename);
-		$('#deleteAttachment')[0].file.value = index;
-	});
+		$("[data-target='#attachmentDeleteModal']").on('click', function (event) {
+			var index = $(event.target).closest("[data-file-index]").attr('data-file-index');
+			var filename = $(event.target).closest("[data-file]").attr('data-file');
+			$('#fileName').html(filename);
+			$('#deleteAttachment')[0].file.value = index;
+		});
 
-	$("[data-origin]").on("click", function (e) {
-		debugger;
-		var form = $("#moveAttachment")[0];
-		$(form.origin).val($(e.currentTarget).data("origin"));
-		$(form.destiny).val($(e.currentTarget).data("destiny"));
-		form.submit();
-	});
+		$("[data-origin]").on("click", function (e) {
+			debugger;
+			var form = $("#moveAttachment")[0];
+			$(form.origin).val($(e.currentTarget).data("origin"));
+			$(form.destiny).val($(e.currentTarget).data("destiny"));
+			form.submit();
+		});
+		$("#htmlEditor").data("fileHandler", submitFiles);
+
+	})();
 
 	function submitFiles(files, cb) {
 		
@@ -368,6 +403,5 @@ ${portal.toolkit()}
 
 		xhr.send(formData);
 	}
-	$("#htmlEditor").data("fileHandler", submitFiles);
 </script>
 
