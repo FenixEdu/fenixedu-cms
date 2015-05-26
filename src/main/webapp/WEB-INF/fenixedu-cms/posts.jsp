@@ -29,12 +29,35 @@
 <p>
 
 <div class="row">
-	<div class="col-sm-2">
-		<a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/create"
-		   class="btn btn-default btn-primary pull-left">
-			<span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="page.manage.label.createPost"/>
-		</a>
-	</div>
+    <div class="col-sm-5"><a href="" data-toggle="modal" data-target="#create-post" class="btn btn-primary"><i class="icon icon-plus"></i> New</a></div>
+    <div class="col-sm-7">
+        <div class="pull-right">
+            <div class="form-inline">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                        <c:choose>
+                            <c:when test="${category!=null}">${category.name.content}</c:when>
+                            <c:otherwise>Category</c:otherwise>
+                        </c:choose>
+                        <span class="caret"></span>
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                        <li><a href="#" onclick="searchPosts(null)">All</a></li>
+                        <c:forEach var="cat" items="${site.categories}">
+                            <li><a href="#" onclick='searchPosts("${cat.slug}")'>${cat.name.content}</a></li>
+                        </c:forEach>
+                    </ul>
+                </div>
+                <div class="form-group">
+                    <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p></p>
 
 
 	<div class="col-sm-4 pull-right">
