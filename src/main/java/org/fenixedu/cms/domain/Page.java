@@ -18,6 +18,9 @@
  */
 package org.fenixedu.cms.domain;
 
+import java.util.Comparator;
+import java.util.Optional;
+
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
@@ -25,6 +28,7 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ListCategoryPosts;
+import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -37,6 +41,8 @@ import pt.ist.fenixframework.Atomic;
  */
 public class Page extends Page_Base implements Sluggable {
 
+    public static Comparator<Page> PAGE_NAME_COMPARATOR = (p1, p2) -> p1.getName().compareTo(p2.getName());
+    
 	/**
 	 * the logged {@link User} creates a new Page.
 	 */
@@ -210,9 +216,9 @@ public class Page extends Page_Base implements Sluggable {
 	}
 
 	public String getEditUrl() {
-		return CoreConfiguration.getConfiguration().applicationUrl()
-				+ "/cms/pages/" + getSite().getSlug() + "/" + getSlug()
-				+ "/edit";
+		return CoreConfiguration.getConfiguration().applicationUrl() 
+		        + "/cms/pages/" + getSite().getSlug() + "/" 
+		        + getSlug() + (isStaticPage() ? "/edit" : "/advanced/edit");
 	}
 
 	@Override
@@ -246,4 +252,12 @@ public class Page extends Page_Base implements Sluggable {
 			return null;
 		}
 	}
+	
+	public boolean isStaticPage() {
+	    return getComponentsSet().stream().filter(component->StaticPost.class.isInstance(component)).findAny().isPresent();
+	}
+
+    public Optional<Post> getStaticPost() {
+        return getComponentsSet().stream().filter(component->StaticPost.class.isInstance(component)).map(component->((StaticPost)component).getPost()).findFirst();
+    }
 }

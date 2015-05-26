@@ -19,6 +19,7 @@
 package org.fenixedu.cms.ui;
 
 import com.google.common.base.Strings;
+
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
@@ -35,11 +36,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -53,7 +56,7 @@ public class AdminPages {
 
         AdminSites.canEdit(site);
         model.addAttribute("query", query);
-        Collection<Page> pages = site.getPagesSet();
+        Collection<Page> pages = site.getPagesSet().stream().filter(Page::isStaticPage).sorted(Page.PAGE_NAME_COMPARATOR).collect(Collectors.toList());
         if (!Strings.isNullOrEmpty(query)) {
             pages = SearchUtils.searchPages(pages, query);
         }
@@ -113,8 +116,10 @@ public class AdminPages {
 		Page p = s.pageForSlug(slugPage);
 		model.addAttribute("site", s);
 		model.addAttribute("page", p);
-		model.addAttribute("availableComponents",
-				Component.availableComponents(s));
+		if(p.isStaticPage()) {
+		    model.addAttribute("post", p.getStaticPost());
+		}
+		model.addAttribute("availableComponents", Component.availableComponents(s));
 
 		return "fenixedu-cms/editPage";
 	}
@@ -189,5 +194,20 @@ public class AdminPages {
 	private void setInitialPage(String page, Site s) {
 		s.setInitialPage(s.pageForSlug(page));
 	}
+	
+    @RequestMapping(value = "{slug}/advanced", method = RequestMethod.GET)
+    public String advancedPages(Model model, @PathVariable(value = "slug") String slug, @RequestParam(required = false) String query) {
+        Site site = Site.fromSlug(slug);
+
+        AdminSites.canEdit(site);
+        model.addAttribute("query", query);
+        Collection<Page> pages = site.getPagesSet();
+        if (!Strings.isNullOrEmpty(query)) {
+            pages = SearchUtils.searchPages(pages, query);
+        }
+        model.addAttribute("site", site);
+        model.addAttribute("pages", pages);
+        return "fenixedu-cms/pagesAdvanced";
+    }
 
 }

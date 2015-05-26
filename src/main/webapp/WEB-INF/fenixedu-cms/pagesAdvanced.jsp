@@ -30,10 +30,11 @@
 
 <div class="row">
 	<div class="col-sm-4">
-		<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" class="btn btn-primary">
-			<span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="page.manage.label.createPage"/>
+		<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" class="btn btn-default btn-primary">
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="page.manage.label.createPage"/></a>
+		<a href="#" data-toggle="modal" data-target="#defaultModal" class="btn btn-default">
+			<spring:message code="page.manage.label.change.default.page"/>
 		</a>
-		<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/advanced" class="btn btn-default">Advanced</a>
 	</div>
 	<div class="col-sm-3 pull-right">
 		<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
@@ -87,32 +88,16 @@
 						<div class="btn-group">
 							<c:choose>
 								<c:when test="${page.slug != ''}">
-									<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit" class="btn btn-sm btn-default">
-										<i class="glyphicon glyphicon-edit"></i>
-									</a>
+									<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit"
+									   class="btn btn-sm btn-default"><spring:message code="action.edit"/></a>
 								</c:when>
 								<c:otherwise>
-									<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/--**--/edit" class="btn btn-sm btn-default">
-										<i class="glyphicon glyphicon-edit"></i>
-									</a>
+									<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/--**--/edit"
+									   class="btn btn-sm btn-default"><spring:message code="action.edit"/></a>
 								</c:otherwise>
 							</c:choose>
-							
-							<a href="${page.address}" class="btn btn-default btn-sm">
-								<i class="glyphicon glyphicon-link"></i>
-							</a>
-
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-sm btn-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <i class="icon icon-dot-3"></i>
-                                </button>
-
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li><a href="#"><i class="glyphicon glyphicon-bullhorn">&nbsp;Unpublish</i></a></li>
-                                    <li><a href="#" data-page="${page.slug}"><i class="glyphicon glyphicon-trash">&nbsp;Delete</i></a></li>
-                                </ul>
-                            </div>
-
+							<a href="#" class="btn btn-danger btn-sm" data-page="${page.slug}"><spring:message
+									code="action.delete"/></a>
 						</div>
 					</td>
 				</tr>
