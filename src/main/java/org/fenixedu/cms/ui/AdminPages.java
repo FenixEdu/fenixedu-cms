@@ -19,32 +19,30 @@
 package org.fenixedu.cms.ui;
 
 import com.google.common.base.Strings;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.io.domain.GroupBasedFile;
+import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.CMSTemplate;
-import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.domain.component.Component;
-import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
+import org.joda.time.DateTime;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
+import pt.ist.fenixframework.FenixFramework;
 
+import java.io.IOException;
 import java.util.Collection;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static java.util.Optional.ofNullable;
+import java.util.stream.Stream;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/pages")
@@ -56,7 +54,7 @@ public class AdminPages {
 
         AdminSites.canEdit(site);
         model.addAttribute("query", query);
-        Collection<Page> pages = site.getPagesSet().stream().filter(Page::isStaticPage).sorted(Page.PAGE_NAME_COMPARATOR).collect(Collectors.toList());
+        Collection<Page> pages = getStaticPages(site);
         if (!Strings.isNullOrEmpty(query)) {
             pages = SearchUtils.searchPages(pages, query);
         }
@@ -65,149 +63,327 @@ public class AdminPages {
         return "fenixedu-cms/pages";
     }
 
-	@RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
-	public String createPage(Model model,
-			@PathVariable(value = "slug") String slug) {
-		Site s = Site.fromSlug(slug);
-
-		AdminSites.canEdit(s);
-
-		model.addAttribute("site", s);
-		return "fenixedu-cms/createPage";
-	}
-
-	@RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
-	public RedirectView createPage(Model model,
-			@PathVariable(value = "slug") String slug,
-			@RequestParam String name, RedirectAttributes redirectAttributes) {
-		if (Strings.isNullOrEmpty(name)) {
-			redirectAttributes.addFlashAttribute("emptyName", true);
-			return new RedirectView("/cms/pages/" + slug + "/create", true);
-		} else {
-			Site s = Site.fromSlug(slug);
-
-			AdminSites.canEdit(s);
-
-			Page page = createPage(name, s);
-			return new RedirectView("/cms/pages/" + s.getSlug() + "/"
-					+ page.getSlug() + "/edit", true);
-		}
-	}
-
-	@Atomic
-	private Page createPage(String name, Site s) {
-		Page p = new Page(s);
-		p.setName(new LocalizedString(I18N.getLocale(), name));
-		return p;
-	}
-
-	@RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.GET)
-	public String edit(Model model,
-			@PathVariable(value = "slugSite") String slugSite,
-			@PathVariable(value = "slugPage") String slugPage) {
-		Site s = Site.fromSlug(slugSite);
-
-		AdminSites.canEdit(s);
-
-		if (slugPage.equals("--**--")) {
-			slugPage = "";
-		}
-
-		Page p = s.pageForSlug(slugPage);
-		model.addAttribute("site", s);
-		model.addAttribute("page", p);
-		if(p.isStaticPage()) {
-		    model.addAttribute("post", p.getStaticPost());
-		}
-		model.addAttribute("availableComponents", Component.availableComponents(s));
-
-		return "fenixedu-cms/editPage";
-	}
-
-	@RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST)
-	public RedirectView edit(Model model,
-			@PathVariable(value = "slugSite") String slugSite,
-			@PathVariable(value = "slugPage") String slugPage,
-			@RequestParam LocalizedString name, @RequestParam String slug,
-			@RequestParam String template,
-			@RequestParam(required = false) Boolean published,
-			@RequestParam String viewGroup,
-			RedirectAttributes redirectAttributes) {
-		if (name != null && name.isEmpty()) {
-			redirectAttributes.addFlashAttribute("emptyName", true);
-			return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage
-					+ "/edit", true);
-		}
-		Site s = Site.fromSlug(slugSite);
-		AdminSites.canEdit(s);
-		Page p = s.pageForSlug(slugPage.equals("--**--") ? "" : slugPage);
-		editPage(name, slug, template, s, p, ofNullable(published)
-				.orElse(false), Group.parse(viewGroup));
-		return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage
-				+ "/edit", true);
-	}
-
-	@Atomic(mode = TxMode.WRITE)
-    private void editPage(LocalizedString name, String slug, String template, Site s, Page p, boolean published, Group canView) {
-        p.setName(name);
-        if (!Objects.equals(slug, p.getSlug())) {
-            p.setSlug(slug);
-        }
-        CMSTheme theme = s.getTheme();
-        if (s != null && s.getTheme() != null && theme != null) {
-            CMSTemplate t = theme.templateForType(template);
-            p.setTemplate(t);
-        }
-        if(p.getPublished() != published) {
-            p.setPublished(published);
-        }
-        if(!p.getCanViewGroup().equals(canView)) {
-            p.setCanViewGroup(canView);
-        }
+    @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
+    public String createPage(Model model, @PathVariable(value = "slug") String slug) {
+        Site site = Site.fromSlug(slug);
+        AdminSites.canEdit(site);
+        model.addAttribute("site", site);
+        return "fenixedu-cms/createPage";
     }
 
-	@RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)
-	public RedirectView delete(Model model,
-			@PathVariable(value = "slugSite") String slugSite,
-			@PathVariable(value = "slugPage") String slugPage) {
-		Site s = Site.fromSlug(slugSite);
-
-		AdminSites.canEdit(s);
-
-		s.pageForSlug(slugPage).delete();
-		return new RedirectView("/cms/pages/" + s.getSlug() + "", true);
-	}
-
-	@RequestMapping(value = "{type}/defaultPage", method = RequestMethod.POST)
-	public RedirectView moveFile(Model model, @PathVariable String type,
-			@RequestParam String page) {
-		Site s = Site.fromSlug(type);
-
-		AdminSites.canEdit(s);
-
-		setInitialPage(page, s);
-
-		return new RedirectView("/cms/pages/" + type, true);
-	}
-
-	@Atomic
-	private void setInitialPage(String page, Site s) {
-		s.setInitialPage(s.pageForSlug(page));
-	}
-	
-    @RequestMapping(value = "{slug}/advanced", method = RequestMethod.GET)
-    public String advancedPages(Model model, @PathVariable(value = "slug") String slug, @RequestParam(required = false) String query) {
+    @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
+    public RedirectView createPage(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name) {
         Site site = Site.fromSlug(slug);
+        AdminSites.canEdit(site);
+        Page page = createPageAndPost(name, site);
+        return pageRedirect(page);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.GET)
+    public String edit(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(value = "slugPage") String slugPage) {
+        Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
+        if (slugPage.equals("--**--")) {
+            slugPage = "";
+        }
+
+        Page p = s.pageForSlug(slugPage);
+        model.addAttribute("site", s);
+        model.addAttribute("page", p);
+        p.getStaticPost().ifPresent(post -> model.addAttribute("post", post));
+        model.addAttribute("availableComponents", Component.availableComponents(s));
+
+        return "fenixedu-cms/editPage";
+    }
+
+    @RequestMapping(value = "{slug}/{pageSlug}/createCategory", method = RequestMethod.POST)
+    public RedirectView createCategory(@PathVariable String slug, @PathVariable String pageSlug, @RequestParam LocalizedString name) {
+        Site site = Site.fromSlug(slug);
+        AdminSites.canEdit(site);
+        Page page = site.pageForSlug(pageSlug);
+
+        FenixFramework.atomic(() -> {
+            Category p = new Category(site);
+            p.setName(name);
+        });
+
+        return pageRedirect(page);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST)
+    public RedirectView edit(@PathVariable String slugSite, @PathVariable String slugPage,
+                             @RequestParam String newSlug, @RequestParam LocalizedString name,
+                             @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories,
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) DateTime publicationStarts,
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) DateTime publicationEnds,
+                             @RequestParam(required = false, defaultValue = "false") boolean active, @RequestParam String viewGroup) {
+        Site site = Site.fromSlug(slugSite);
+        Page page = site.pageForSlug(slugPage);
+        page.getStaticPost().ifPresent(post ->
+                editPageAndPost(page, post, name, body, newSlug, categories, publicationStarts, publicationEnds, active, Group.parse(viewGroup)));
+        return pageRedirect(page);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)
+    public RedirectView delete(@PathVariable(value = "slugSite") String slugSite, @PathVariable(value = "slugPage") String slugPage) {
+        Site s = Site.fromSlug(slugSite);
+        AdminSites.canEdit(s);
+        Page page = s.pageForSlug(slugPage);
+        FenixFramework.atomic(() -> {
+            page.getStaticPost().ifPresent(Post::delete);
+            page.delete();
+        });
+        return allPagesRedirect(s);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPage}/addAttachment", method = RequestMethod.POST)
+    public RedirectView addAttachment(@PathVariable String slugSite, @PathVariable String slugPage,
+                                      @RequestParam(required = true) String name, @RequestParam MultipartFile attachment) {
+
+        Site site = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(site);
-        model.addAttribute("query", query);
-        Collection<Page> pages = site.getPagesSet();
-        if (!Strings.isNullOrEmpty(query)) {
-            pages = SearchUtils.searchPages(pages, query);
-        }
-        model.addAttribute("site", site);
-        model.addAttribute("pages", pages);
-        return "fenixedu-cms/pagesAdvanced";
+        Page page = site.pageForSlug(slugPage);
+        page.getStaticPost().ifPresent(post -> {
+            try {
+                addAttachment(name, attachment, post);
+            } catch (IOException e) {
+                //TODO: add error message
+            }
+        });
+
+        return pageRedirect(page);
     }
 
+    @RequestMapping(value = "{slugSite}/{slugPage}/addAttachment.json", method = RequestMethod.POST,
+            produces = "application/json")
+    public
+    @ResponseBody
+    String addAttachmentJson(@PathVariable String slugSite, @PathVariable String slugPage, @RequestParam(required = true) String name,
+                             @RequestParam("attachment") MultipartFile attachment) throws IOException {
+        Site site = Site.fromSlug(slugSite);
+        AdminSites.canEdit(site);
+        Page page = site.pageForSlug(slugPage);
+        JsonObject obj = new JsonObject();
+        page.getStaticPost().ifPresent(post -> FenixFramework.atomic(() -> {
+            try {
+                GroupBasedFile f = new GroupBasedFile(name, name, attachment.getBytes(), AnyoneGroup.get());
+                post.addAttachment(f, 0);
+                obj.addProperty("displayname", f.getDisplayName());
+                obj.addProperty("filename", f.getFilename());
+                obj.addProperty("url", FileDownloadServlet.getDownloadUrl(f));
+            } catch (IOException e) {
+                //TODO: add error message
+            }
+        }));
+        return obj.toString();
+    }
+
+    @Atomic
+    private GroupBasedFile addAttachment(String name, MultipartFile attachment, Post p) throws IOException {
+        GroupBasedFile f = new GroupBasedFile(name, attachment.getOriginalFilename(), attachment.getBytes(), AnyoneGroup.get());
+        p.addAttachment(f, 0);
+        return f;
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPage}/deleteAttachment", method = RequestMethod.POST)
+    public RedirectView deleteAttachment(@PathVariable String slugSite, @PathVariable String slugPage, @RequestParam Integer file) {
+        Site site = Site.fromSlug(slugSite);
+        AdminSites.canEdit(site);
+        Page page = site.pageForSlug(slugPage);
+        page.getStaticPost().ifPresent(post -> FenixFramework.atomic(() -> post.getFilesSorted().get(file).delete()));
+        return pageRedirect(page);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPage}/moveAttachment", method = RequestMethod.POST)
+    public RedirectView moveAttachment(@PathVariable String slugSite, @PathVariable String slugPage,
+                                       @RequestParam Integer origin, @RequestParam Integer destiny) throws IOException {
+        Site site = Site.fromSlug(slugSite);
+        AdminSites.canEdit(site);
+        Page page = site.pageForSlug(slugPage);
+        page.getStaticPost().ifPresent(post -> FenixFramework.atomic(() -> post.moveFile(origin, destiny)));
+        return pageRedirect(page);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPage}/addFile.json", method = RequestMethod.POST, produces = "application/json")
+    public
+    @ResponseBody
+    String addFileJson(@PathVariable String slugSite, @PathVariable String slugPage, @RequestParam MultipartFile[] attachment) {
+        Site site = Site.fromSlug(slugSite);
+        AdminSites.canEdit(site);
+        Page page = site.pageForSlug(slugPage);
+        JsonArray array = new JsonArray();
+
+        page.getStaticPost().ifPresent(post ->
+                Stream.of(attachment).map(multipartFile -> {
+                    JsonObject obj = new JsonObject();
+                    FenixFramework.atomic(() -> {
+                        String filename = multipartFile.getOriginalFilename();
+                        try {
+                            GroupBasedFile f = new GroupBasedFile(filename, filename, multipartFile.getBytes(), AnyoneGroup.get());
+                            post.addEmbeddedFile(f, 0);
+                            obj.addProperty("displayname", f.getDisplayName());
+                            obj.addProperty("filename", f.getFilename());
+                            obj.addProperty("url", FileDownloadServlet.getDownloadUrl(f));
+                        } catch (IOException e) {
+                            //TODO - add error message
+                        }
+                    });
+                    return obj;
+                }).filter(obj -> !obj.isJsonNull()).forEach(x -> array.add(x)));
+
+        return array.toString();
+    }
+
+    /**
+     * Versions
+     */
+
+    @RequestMapping(value = "{slugSite}/{slugPost}/versions", method = RequestMethod.GET)
+    public String versions(Model model, @PathVariable String slugSite, @PathVariable String slugPost) {
+        Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
+        Post p = s.postForSlug(slugPost);
+        model.addAttribute("post", p);
+        model.addAttribute("site", s);
+        return "fenixedu-cms/versions";
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPost}/versionData", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    public String versionData(@PathVariable String slugSite, @PathVariable String slugPost, @RequestParam(required = false) PostContentRevision revision) {
+        Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
+        Post p = s.postForSlug(slugPost);
+
+        if (revision == null) {
+            revision = p.getLatestRevision();
+        }
+
+        if (revision.getPost() != p) {
+            throw new RuntimeException("Invalid Revision");
+        }
+
+        JsonObject json = new JsonObject();
+
+        json.add("content", revision.getBody().json());
+        json.addProperty("modifiedAt", revision.getRevisionDate().toString());
+        json.addProperty("user", revision.getCreatedBy().getUsername());
+        json.addProperty("userName", revision.getCreatedBy().getProfile().getDisplayName());
+        json.addProperty("id", revision.getExternalId());
+        json.addProperty("next", Optional.ofNullable(revision.getNext()).map(x -> x.getExternalId()).orElse(null));
+        json.addProperty("previous", Optional.ofNullable(revision.getPrevious()).map(x -> x.getExternalId()).orElse(null));
+
+        if (revision.getPrevious() != null) {
+            json.add("previousContent", revision.getPrevious().getBody().json());
+        }
+
+        return json.toString();
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPost}/revertTo", method = RequestMethod.POST)
+    public RedirectView revertTo(@PathVariable String slugSite, @PathVariable String slugPost, @RequestParam PostContentRevision revision) {
+        Site s = Site.fromSlug(slugSite);
+
+        AdminSites.canEdit(s);
+
+        Post p = s.postForSlug(slugPost);
+
+        if (revision.getPost() != p) {
+            throw new RuntimeException("Invalid Revision");
+        }
+
+        FenixFramework.atomic(() -> {
+            p.setBody(revision.getBody());
+        });
+
+        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
+    }
+
+    private Collection<Page> getStaticPages(Site site) {
+        return site.getPagesSet().stream().filter(Page::isStaticPage)
+                .sorted(Page.PAGE_NAME_COMPARATOR).collect(Collectors.toList());
+    }
+
+    public RedirectView allPagesRedirect(Site site) {
+        return new RedirectView("/cms/pages/" + site.getSlug() + "", true);
+    }
+
+    public RedirectView pageRedirect(Page page) {
+        return new RedirectView("/cms/pages/" + page.getSite().getSlug() + "/" + page.getSlug() + "/edit", true);
+    }
+
+    /**
+     * Services
+     */
+
+    @Atomic
+    private void editPageAndPost(Page page, Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories,
+                                 DateTime publicationStarts, DateTime publicationEnds, boolean active, Group viewGroup) {
+        Site site = page.getSite();
+        LocalizedString nameSanitized = Post.sanitize(name);
+        LocalizedString bodySanitized = Post.sanitize(body);
+
+        Optional.ofNullable(categories).ifPresent(categoriesSlugs ->
+                Stream.of(categoriesSlugs).map(site::categoryForSlug)
+                        .filter(category -> category != null).forEach(post::addCategories));
+
+        if (!post.getName().equals(nameSanitized)) {
+            post.setName(nameSanitized);
+        }
+        if (!post.getBody().equals(bodySanitized)) {
+            post.setBody(bodySanitized);
+        }
+        if (!post.getSlug().equals(newSlug)) {
+            post.setSlug(newSlug);
+        }
+
+        if (post.getPublicationBegin() != publicationStarts) {
+            post.setPublicationBegin(publicationStarts);
+        }
+
+        if (post.getPublicationEnd() != publicationEnds) {
+            post.setPublicationEnd(publicationEnds);
+        }
+
+        if (post.getActive() != active) {
+            post.setActive(active);
+        }
+
+        if (!post.getCanViewGroup().equals(viewGroup)) {
+            post.setCanViewGroup(viewGroup);
+        }
+
+        if (!page.getName().equals(nameSanitized)) {
+            page.setName(nameSanitized);
+        }
+
+        if (!page.getSlug().equals(newSlug)) {
+            page.setSlug(newSlug);
+        }
+
+        if (!page.getPublished() != active) {
+            page.setPublished(active);
+        }
+
+        if (!page.getCanViewGroup().equals(viewGroup)) {
+            page.setCanViewGroup(viewGroup);
+        }
+    }
+
+    @Atomic
+    private Page createPageAndPost(LocalizedString name, Site site) {
+        Page page = new Page(site);
+        page.setName(name);
+        Post post = new Post(site);
+        post.setName(name);
+        post.setBody(new LocalizedString());
+        return page;
+    }
 }

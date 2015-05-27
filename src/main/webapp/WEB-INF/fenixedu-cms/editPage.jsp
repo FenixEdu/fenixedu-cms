@@ -18,251 +18,390 @@
     along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
 
 --%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<h2 class="page-header" style="margin-top: 0">
-    <spring:message code="page.edit.title"/> - ${page.name.content}
-    <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small>
-    <c:if test="${page.published}">
-        <div class="button-group pull-right">
-            <a href="${page.address}" target="_blank" class="btn btn-default"><spring:message code="action.link"/></a>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
+
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/jquery.jsonview.css"/>
+<script src="${pageContext.request.contextPath}/static/js/jquery.jsonview.js"></script>
+
+${portal.toolkit()}
+<form class="form" action="" method="post" role="form" id="postForm">
+    <div class="page-header">
+        <h1>${site.name.content}</h1>
+
+        <h2>
+            <small>Edit Page</small>
+        </h2>
+        <div class="row">
+            <div class="col-sm-12">
+                <button type="submit" class="btn btn-primary">Update</button>
+                <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/versions" class="btn btn-default">Versions</a>
+                <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">Metadata</a>
+            </div>
         </div>
-    </c:if>
-</h2>
+    </div>
 
-<div ng-app="componentsApp" ng-controller="ComponentController">
-    <form id="mainForm" class="form-horizontal" action="" method="post" role="form">
+    <div class="${emptyName ? "form-group has-error" : "form-group"}">
 
-        <div class="${emptyName ? "form-group has-error" : "form-group"}">
-            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                    code="page.edit.label.slug"/></label>
+        <input bennu-localized-string required-any name="name" id="inputEmail3"
+               placeholder="<spring:message code="post.edit.label.name" />"
+               value='<c:out value="${post.name.json()}"/>'>
+        <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
+                code="post.edit.error.emptyName"/></p></c:if>
+    </div>
 
-            <div class="col-sm-5">
-                <div class="input-group">
+    <p>
+        <div>Permalink:
+            <samp>/${site.baseUrl}/${site.viewPostPage.slug}/</samp>
+            <input required type="hidden" name="newSlug" class="form-control" placeholder="<spring:message code="site.edit.label.slug" />" value='${post.slug}' \>
+            <button class="btn btn-default btn-xs">Edit</button>
+            <a href="${page.address}" target="_blank" class="btn btn-default btn-xs">View Page</a>
+        </div>
+    </p>
 
-                    <span class="input-group-addon"><code>/${site.baseUrl}/</code></span>
-                    <input type="text" name="slug" class="form-control" id="inputEmail3"
-                           placeholder="<spring:message code="page.edit.label.slug" />" value='${page.slug}' \>
+    <div class="form-group">
+            <textarea id="htmlEditor" bennu-html-editor bennu-localized-string name="body" rows="3"><c:out value="${post.body.json()}"/></textarea>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">Publish</div>
+        <div class="panel-body">
+                <dl class="dl-horizontal">
+                    <dt>Published</dt>
+                    <dd><input type="checkbox" value="true" ${post.active ? 'checked="checked"' : ''} name="active" /></dd>
+                    <dt>Author</dt>
+                    <dd><input bennu-user-autocomplete class="form-control" type="text" value="${post.createdBy.username}"></dd>
+                    <dt>Access Control</dt>
+                    <dd><input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
+                               value="${ post.canViewGroup.expression }"/></dd>
+                </dl>
+
+                <div class="form-group">
+                    
+                </div>
+
+        </div>
+    </div>
+
+    <c:if test="${site.categoriesSet.size() > 0}">
+        <div class="panel panel-default">
+            <div class="panel-heading"><spring:message code="site.manage.label.categories"/></div>
+            <div class="panel-body">
+                <div class="row">
+
+                    <c:forEach var="c" items="${site.categoriesSet}" varStatus="loop">
+                        <div class="col-sm-4">
+                            <div class="checkbox">
+                                <label>
+                                    <c:choose>
+                                        <c:when test="${post.categoriesSet.contains(c)}">
+                                            <input type="checkbox" name="categories" value="${c.slug}"
+                                                   checked="checked"/> ${c.name.content}
+                                        </c:when>
+                                        <c:otherwise>
+                                            <input type="checkbox" name="categories"
+                                                   value="${c.slug}"/> ${c.name.content}
+                                        </c:otherwise>
+                                    </c:choose>
+                                </label>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <a class="btn btn-default btn-xs" data-toggle="modal" data-target="#addCategory">Add New Category</a>
+                    </div>
                 </div>
             </div>
-
         </div>
+    </c:if>
 
-        <div class="${emptyName ? "form-group has-error" : "form-group"}">
-            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                    code="page.edit.label.name"/></label>
+    <div class="panel panel-default">
+        <div class="panel-heading">Files</div>
+        <div class="panel-body">
 
-            <div class="col-sm-10">
-                <input bennu-localized-string type="text" name="name" id="inputEmail3"
-                       placeholder="<spring:message code="page.edit.label.name" />" value='${page.name.json()}' \>
-                <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
-                        code="page.edit.error.emptyName"/></p>
-                </c:if>
-            </div>
+            <p><a class="btn btn-default btn-xs" data-toggle="modal" data-target="#addAttachment">Add Attachment</a></p>
+
+            <c:choose>
+                <c:when test="${post.filesSorted.size() > 0}">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                        <tr>
+                            <th class="center">#</th>
+                            <th class="col-md-6"><spring:message code="theme.view.label.name"/></th>
+                            <th>Presentation</th>
+                            <th><spring:message code="theme.view.label.type"/></th>
+                            <th>&nbsp;</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        <c:forEach var="postFile" items="${post.filesSorted}" varStatus="loop">
+                            <c:set var="file" value="${postFile.files}"></c:set>
+                            <tr>
+                                <td class="center">
+                                    <h5>${loop.index + 1}</h5>
+                                </td>
+
+                                <td>
+                                    <a href="${cms.downloadUrl(file)}" target="_blank"><h5>${file.displayName}</h5></a>
+                                </td>
+
+                                <td>
+                                    <center>
+                                        <c:choose>
+                                            <c:when test="${postFile.isEmbedded}">
+                                                Embedded
+                                            </c:when>
+                                            <c:otherwise>
+                                                Attachment
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </center>
+                                </td>
+
+                                <td><code>${file.contentType}</code></td>
+
+                                <td>
+                                    <button class="btn btn-danger btn-sm" data-toggle="modal"
+                                            data-target="#attachmentDeleteModal"
+                                            type="button" data-file="${file.displayName}"
+                                            data-file-index="${loop.index}">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    </button>
+                                    <a href="${cms.downloadUrl(file)}" target="_blank" class="btn btn-default btn-sm">Link</a>
+
+                                    <div class="btn-group">
+
+                                        <c:choose>
+                                            <c:when test="${loop.index != 0}">
+                                                <button class="btn btn-default btn-sm" data-origin="${loop.index}"
+                                                        data-destiny="${loop.index - 1}" type="button"><span
+                                                        class="glyphicon glyphicon-chevron-up"></span></button>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <button class="btn btn-default disabled btn-sm" type="button"><span
+                                                        class="glyphicon glyphicon-chevron-up"></span></button>
+                                            </c:otherwise>
+                                        </c:choose>
+
+                                        <c:choose>
+                                            <c:when test="${loop.index != post.filesSorted.size() -1}">
+                                                <button class="btn btn-default btn-sm" data-origin="${loop.index}"
+                                                        data-destiny="${loop.index + 1}" type="button"><span
+                                                        class="glyphicon glyphicon-chevron-down"></span></button>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <button class="btn btn-default disabled btn-sm" data-toggle="modal" type="button">
+                                                    <span class="glyphicon glyphicon-chevron-down"></span></button>
+                                            </c:otherwise>
+                                        </c:choose>
+
+                                    </div>
+
+                                </td>
+                            </tr>
+                        </c:forEach>
+                        </tbody>
+                    </table>
+                </c:when>
+                <c:otherwise>
+                    <i>Post has no attachments</i>
+                </c:otherwise>
+            </c:choose>
         </div>
+    </div>
+</form>
 
+<div class="modal fade" id="addAttachment" tabindex="-1" role="dialog" aria-hidden="true">
+    <form action="addAttachment" enctype="multipart/form-data" class="form-horizontal" method="post">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4><spring:message code="action.new"/></h4>
+                </div>
+                <div class="modal-body">
 
-        <div class="form-group">
-            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                    code="page.edit.label.template"/></label>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label"><spring:message code="theme.view.fileName"/>:</label>
 
-            <div class="col-sm-10">
-                <select name="template" class="form-control" id="tempate">
-                    <option value="null">-</option>
-                    <c:forEach var="i" items="${site.theme.allTemplates}">
-                        <option value="${i.type}" ${i == page.template ? 'selected' : ''}>${i.name}</option>
-                    </c:forEach>
-                </select>
-            </div>
-        </div>
+                        <div class="col-sm-10"><input required type="text" name="name" class="form-control"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label"><spring:message code="theme.add.label.file"/>:</label>
 
-        <div class="form-group">
-            <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
+                        <div class="col-sm-10"><input type="file" name="attachment" class="form-control"></div>
+                    </div>
 
-            <div class="col-sm-10">
-                <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
-                       value="${ page.canViewGroup.expression }"/>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                    code="site.create.label.published"/></label>
-
-            <div class="col-sm-2">
-                <input name="published" type="checkbox" value="true" ${page.published ? "checked='checked'" : ""}>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" onclick="$('#mainForm').submit()" class="btn btn-default btn-primary">
-                    <spring:message
-                            code="action.save"/></button>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary"><spring:message code="label.make"/></button>
+                </div>
             </div>
         </div>
     </form>
-    <hr>
-    <h3><spring:message code="page.edit.label.pageComponents"/>:</h3>
+</div>
 
-    <p>
-
-    <div class="btn-group">
-        <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
-            <spring:message code="page.edit.label.addComponent"/>
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-            <li ng-repeat="component in components">
-                <a href="#" ng-if="component.stateless" ng-click="installStateless(component)">{{component.name}}</a>
-                <a href="#" ng-if="!component.stateless" ng-click="openModal(component)">{{component.name}}</a>
-            </li>
-        </ul>
-    </div>
-    </p>
-
-    <c:choose>
-        <c:when test="${page.componentsSet.size() == 0}">
-            <p><spring:message code="page.edit.label.emtpySiteMenus"/></p>
-        </c:when>
-
-        <c:otherwise>
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th><spring:message code="page.edit.label.name"/></th>
-                    <th><spring:message code="page.edit.label.creationDate"/></th>
-                    <th><spring:message code="page.edit.label.operations"/></th>
-                </tr>
-                </thead>
-                <tbody>
-                <c:forEach var="m" items="${page.componentsSet}">
-                    <tr>
-                        <td>
-                            <h5>${m.name}</h5>
-
-                            <div>
-                                <small>${m.description}</code></small>
-                            </div>
-                        </td>
-                        <td>${m.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
-                            <small>- ${m.createdBy.name}</small>
-                        </td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <a href="#" class="btn btn-danger btn-sm"
-                                   onclick="document.getElementById('deleteComponentForm${m.externalId}').submit();"><spring:message
-                                        code="action.delete"/></a>
-
-
-                                <c:if test="${m.getClass().simpleName.equals('StaticPost')}">
-                                    <a href="${m.post.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
-                                    <spring:message code="action.edit"></spring:message>
-                                    </a>
-                                </c:if>
-                                <c:if test="${m.getClass().simpleName.equals('ListCategoryPosts')}">
-                                    <a href="${m.category.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
-                                    <spring:message code="action.edit"></spring:message>
-                                    </a>
-                                </c:if>
-                                <c:if test="${m.getClass().simpleName.equals('StrategyBasedComponent')}">
-                                    <c:if test="${m.componentType().simpleName.equals('ListPosts')}">
-                                        <a href="${pageContext.request.contextPath}/cms/posts/${page.site.slug}"
-                                           role="button"
-                                           class="btn btn-default btn-sm"/>
-                                        <spring:message code="action.edit"></spring:message>
-                                        </a>
-                                    </c:if>
-                                    <c:if test="${m.componentType().simpleName.equals('ListOfCategories')}">
-                                        <a href="${pageContext.request.contextPath}/cms/categories/${page.site.slug}"
-                                           role="button"
-                                           class="btn btn-default btn-sm"/>
-                                        <spring:message code="action.edit"></spring:message>
-                                        </a>
-                                    </c:if>
-                                </c:if>
-                                <form id="deleteComponentForm${m.externalId}"
-                                      action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/deleteComponent/${m.getExternalId()}"
-                                      method="POST"></form>
-                            </div>
-                        </td>
-                    </tr>
-                </c:forEach>
-                </tbody>
-            </table>
-        </c:otherwise>
-    </c:choose>
-
-    <div class="modal fade" id="componentModal" tabindex="-1" role="dialog" aria-labelledby="componentModal"
-         aria-hidden="true">
-        <form class="modal-dialog form-horizontal" ng-submit="createComponent()">
+<div class="modal fade" id="addCategory" tabindex="-1" role="dialog" aria-hidden="true">
+    <form class="form-horizontal" action="createCategory" method="post" role="form">
+        <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">{{component.name}}</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group" ng-repeat="item in data">
-                        <label for="{{item.key}}" class="col-sm-2 control-label">{{item.title}} <span style="color: red"
-                                                                                                      ng-if="item.required">*</span></label>
 
-                        <div class="col-sm-10" ng-if="isSelect(item)">
-                            <select class="form-control" ng-model="selected[item.key]" ng-required="item.required"
-                                    ng-options="value.value as value.label for value in item.values">
-                                <option value="">-- Pick One --</option>
-                            </select>
-                        </div>
-                        <div class="col-sm-10" ng-if="!isSelect(item) && item.type != 'BOOLEAN'">
-                            <input type="{{item.type}}" ng-model="selected[item.key]" class="form-control"
-                                   ng-required="item.required"/>
-                        </div>
-                        <div class="col-sm-10" ng-if="item.type == 'BOOLEAN'">
-                            <input type="checkbox" ng-model="selected[item.key]"/>
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4><spring:message code="categories.create.title" /></h4>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="${emptyName ? "form-group has-error" : "form-group"}">
+                        <label class="col-sm-2 control-label"><spring:message code="categories.create.label.name"/></label>
+                        <div class="col-sm-10">
+                            <input type="text" name="name" bennu-localized-string required-any class="form-control"  placeholder="<spring:message code="categories.create.label.name"/>">
+                            <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="categories.create.error.emptyName"/></p></c:if>
                         </div>
                     </div>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message
-                            code="action.close"/></button>
-                    <button type="submit" class="btn btn-primary"><spring:message code="action.create"/></button>
+                    <button type="submit" class="btn btn-primary"><spring:message code="label.make"/></button>
                 </div>
             </div>
-        </form>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="attachmentDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+                <h4><spring:message code="action.delete"/></h4>
+            </div>
+            <div class="modal-body">
+                <spring:message code="theme.view.label.delete.confirmation"/> <b id="fileName"></b>?
+            </div>
+            <div class="modal-footer">
+                <form action="deleteAttachment" id="deleteAttachment" method="POST">
+                    <input type="hidden" name="file"/>
+                    <button type="submit" class="btn btn-danger"><spring:message code="label.yes"/></button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message
+                            code="label.no"/></button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
+<div class="modal fade" id="viewMetadata" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+                <h4>Metadata</h4>
+            </div>
+            <div class="modal-body">
+                <div class="clearfix">
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <div class="json-data"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
-${portal.toolkit()}
-<script src="${pageContext.request.contextPath}/bennu-core/js/angular.min.js"></script>
+<style type="text/css">
+    .json-data {
+        height: 400px;
+        overflow: scroll;
+        border: 1px solid #ddd;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 3px;
+    }
+</style>
 
-<script type="text/javascript">
-    angular.module('componentsApp', []).controller('ComponentController', ['$scope', '$http', function ($scope, $http) {
-        $scope.components = ${availableComponents};
-        $scope.installStateless = function (component) {
-            $http.post('${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent', {type: component.type}).
-                    success(function () {
-                        location.reload();
-                    });
-        };
-        $scope.openModal = function (component) {
-            $scope.component = component;
-            $("#componentModal").modal('show');
-            $scope.selected = {};
-            $http.post('${pageContext.request.contextPath}/cms/components/componentArguments/${page.externalId}?type=' + component.type).
-                    success(function (data) {
-                        $scope.data = data;
-                    });
-        };
-        $scope.createComponent = function () {
-            $http.post('${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent',
-                    {type: $scope.component.type, parameters: $scope.selected}).success(function () {
-                        location.reload();
-                    });
+<form action="moveAttachment" id="moveAttachment" class="hidden" method="post">
+    <input type="hidden" name="origin" value="${loop.index}"/>
+    <input type="hidden" name="destiny" value="${loop.index + 1}"/>
+</form>
+
+<script type="application/javascript">
+    (function(){    
+        <c:choose>
+            <c:when test="${post.metadata != null}">
+                $(".json-data").JSONView(${post.metadata}, {collapsed: true});
+            </c:when>
+            <c:otherwise>
+                $(".json-data").JSONView({}, {collapsed: true});
+            </c:otherwise>
+        </c:choose>
+
+        $("[data-target='#attachmentDeleteModal']").on('click', function (event) {
+            var index = $(event.target).closest("[data-file-index]").attr('data-file-index');
+            var filename = $(event.target).closest("[data-file]").attr('data-file');
+            $('#fileName').html(filename);
+            $('#deleteAttachment')[0].file.value = index;
+        });
+
+        $("[data-origin]").on("click", function (e) {
+            debugger;
+            var form = $("#moveAttachment")[0];
+            $(form.origin).val($(e.currentTarget).data("origin"));
+            $(form.destiny).val($(e.currentTarget).data("destiny"));
+            form.submit();
+        });
+        $("#htmlEditor").data("fileHandler", submitFiles);
+
+    })();
+
+    function submitFiles(files, cb) {
+        
+        function transferComplete(event) {
+            var objs = JSON.parse(event.currentTarget.response);
+            cb(objs.map(function (x) {
+                return x.url
+            }));
         }
-        $scope.isSelect = function (item) {
-            return item.type == 'DOMAIN_OBJECT' || item.type == 'ENUM' || item.values.length > 0;
+
+        function updateProgress(event) {
+            if (event.lengthComputable) {
+                var complete = (event.loaded / event.total * 100 | 0);
+                //progress.value = progress.innerHTML = complete;
+                console.log(complete);
+            }
         }
-    }]);
+
+        var formData = new FormData();
+        
+        for (var i = 0; i < files.length; i++) {
+            formData.append('attachment', files[i]);
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'addFile.json');
+        xhr.addEventListener("progress", updateProgress, false);
+        xhr.addEventListener("load", transferComplete, false);
+
+        xhr.send(formData);
+    }
 </script>
+

@@ -33,7 +33,7 @@
 		<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" class="btn btn-primary">
 			<span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="page.manage.label.createPage"/>
 		</a>
-		<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/advanced" class="btn btn-default">Advanced</a>
+		<a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}" class="btn btn-default">Advanced</a>
 	</div>
 	<div class="col-sm-3 pull-right">
 		<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
@@ -60,8 +60,7 @@
 			<c:forEach var="page" items="${pages}">
 				<tr>
 					<td>
-						<h5><a target="_blank"
-						       href="${page.address}">${page.name.content}</a>
+						<h5><a target="_blank" href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit">${page.name.content}</a>
 							<c:if test="${page.site.initialPage == page}">
 								<span class="label label-success"><spring:message code="site.manage.label.default"/></span>
 							</c:if>

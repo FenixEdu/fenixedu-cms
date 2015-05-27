@@ -31,7 +31,8 @@
 <div class="row">
 	<div class="col-sm-4">
 		<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" class="btn btn-default btn-primary">
-			<span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="page.manage.label.createPage"/></a>
+			<span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="page.manage.label.createPage"/>
+		</a>
 		<a href="#" data-toggle="modal" data-target="#defaultModal" class="btn btn-default">
 			<spring:message code="page.manage.label.change.default.page"/>
 		</a>
@@ -61,8 +62,7 @@
 			<c:forEach var="page" items="${pages}">
 				<tr>
 					<td>
-						<h5><a target="_blank"
-						       href="${page.address}">${page.name.content}</a>
+						<h5><a target="_blank" href="${pageContext.request.contextPath}/cms/pages/advanced/${page.site.slug}/${page.slug}/edit">${page.name.content}</a>
 							<c:if test="${page.site.initialPage == page}">
 								<span class="label label-success"><spring:message code="site.manage.label.default"/></span>
 							</c:if>
@@ -88,11 +88,11 @@
 						<div class="btn-group">
 							<c:choose>
 								<c:when test="${page.slug != ''}">
-									<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit"
+									<a href="${pageContext.request.contextPath}/cms/pages/advanced/${page.site.slug}/${page.slug}/edit"
 									   class="btn btn-sm btn-default"><spring:message code="action.edit"/></a>
 								</c:when>
 								<c:otherwise>
-									<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/--**--/edit"
+									<a href="${pageContext.request.contextPath}/cms/pages/advanced/${page.site.slug}/--**--/edit"
 									   class="btn btn-sm btn-default"><spring:message code="action.edit"/></a>
 								</c:otherwise>
 							</c:choose>
