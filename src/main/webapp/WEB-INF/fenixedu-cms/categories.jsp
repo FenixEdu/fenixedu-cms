@@ -21,10 +21,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 
-<h2 class="page-header" style="margin-top: 0">
-  <spring:message code="categories.manage.title" />
-  <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
-</h2>
+<div class="page-header">
+    <h1><spring:message code="categories.manage.title" /></h1>
+    <h2><small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small></h2>
+</div>
 
 <a href="${pageContext.request.contextPath}/cms/categories/${site.slug}/create" class="btn btn-default btn-primary">
 	<span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="categories.manage.createCategories"/></a>

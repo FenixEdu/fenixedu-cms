@@ -18,16 +18,19 @@
  */
 package org.fenixedu.cms.ui;
 
-import java.io.IOException;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.analytics.Analytics;
+import com.google.api.services.analytics.model.Account;
+import com.google.api.services.analytics.model.Accounts;
+import com.google.api.services.analytics.model.Webproperties;
+import com.google.api.services.analytics.model.Webproperty;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
@@ -36,43 +39,25 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
-import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.GoogleAPIConnection;
-import org.fenixedu.cms.domain.GoogleAPIService;
-import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.commons.i18n.LocalizedString;
-import org.joda.time.LocalDate;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.services.analytics.Analytics;
-import com.google.api.services.analytics.model.Account;
-import com.google.api.services.analytics.model.Accounts;
-import com.google.api.services.analytics.model.GaData;
-import com.google.api.services.analytics.model.Profile;
-import com.google.api.services.analytics.model.Profiles;
-import com.google.api.services.analytics.model.Webproperties;
-import com.google.api.services.analytics.model.Webproperty;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.io.IOException;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @SpringApplication(group = "logged", path = "cms", title = "application.title.cms")
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")
@@ -239,7 +224,7 @@ public class AdminSites {
 
     @RequestMapping(value = "google/oauth2callback")
     public RedirectView acceptGoogle(@RequestParam(required = false) String error, String state,
-            @RequestParam(required = false) String code) throws IOException {
+                                     @RequestParam(required = false) String code) throws IOException {
         if (error == null) {
             GoogleAuthorizationCodeFlow google = Bennu.getInstance().getGoogleAPISerivce().makeFlow();
 
@@ -257,7 +242,7 @@ public class AdminSites {
 
         return new RedirectView("/cms/sites/"
                 + new JsonParser().parse(new String(Base64.getDecoder().decode(state))).getAsJsonObject().get("site")
-                        .getAsString() + "/edit");
+                .getAsString() + "/edit");
     }
 
     @Atomic
@@ -274,7 +259,7 @@ public class AdminSites {
     @RequestMapping(value = "{slug}/createGoogleProperty", produces = "application/json", method = RequestMethod.POST)
     @ResponseBody
     public String createGoogleProperty(@PathVariable(value = "slug") String slug, @RequestParam String name,
-            @RequestParam String url, @RequestParam String account) throws IOException {
+                                       @RequestParam String url, @RequestParam String account) throws IOException {
         Site s = Site.fromSlug(slug);
 
         AdminSites.canEdit(s);
@@ -308,11 +293,11 @@ public class AdminSites {
     }
 
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
-    public RedirectView edit(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
-            @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug, @RequestParam(
-                    required = false) Boolean published, RedirectAttributes redirectAttributes, @RequestParam String viewGroup,
-            @RequestParam String postGroup, @RequestParam String adminGroup, @RequestParam String folder,
-            @RequestParam String analyticsCode, @RequestParam(required = false) String accountId) {
+    public RedirectView edit(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
+                             @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug, @RequestParam(
+            required = false) Boolean published, RedirectAttributes redirectAttributes, @RequestParam String viewGroup,
+                             @RequestParam String postGroup, @RequestParam String adminGroup, @RequestParam String folder,
+                             @RequestParam String analyticsCode, @RequestParam(required = false) String accountId, @RequestParam String initialPageSlug) {
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
@@ -328,15 +313,15 @@ public class AdminSites {
             if (themeObj == null) {
                 throw new ResourceNotFoundException();
             }
-            editSite(name, description, themeObj, newSlug, published, s, viewGroup, postGroup, adminGroup, folder, analyticsCode,
-                    accountId);
-            return new RedirectView("/cms/sites/" + newSlug, true);
+
+            editSite(name, description, themeObj, newSlug, published, s, viewGroup, postGroup, adminGroup, folder, analyticsCode, accountId, s.pageForSlug(initialPageSlug));
+            return new RedirectView("/cms/sites/" + newSlug + "/edit", true);
         }
     }
 
     @Atomic(mode = TxMode.WRITE)
     private void editSite(LocalizedString name, LocalizedString description, CMSTheme themeObj, String slug, Boolean published,
-            Site s, String viewGroup, String postGroup, String adminGroup, String folder, String analyticsCode, String accountId) {
+                          Site s, String viewGroup, String postGroup, String adminGroup, String folder, String analyticsCode, String accountId, Page initialPage) {
 
         s.setName(name);
         s.setDescription(description);
@@ -366,6 +351,7 @@ public class AdminSites {
         s.setCanViewGroup(Group.parse(viewGroup));
         s.setCanPostGroup(Group.parse(postGroup));
         s.setCanAdminGroup(Group.parse(adminGroup));
+        s.setInitialPage(initialPage);
     }
 
     @RequestMapping(value = "{slug}/delete", method = RequestMethod.POST)

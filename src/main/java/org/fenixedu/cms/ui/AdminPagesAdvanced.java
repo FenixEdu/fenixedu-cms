@@ -19,9 +19,7 @@
 package org.fenixedu.cms.ui;
 
 import com.google.common.base.Strings;
-
 import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
 import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.Page;
@@ -36,13 +34,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -173,23 +169,7 @@ public class AdminPagesAdvanced {
 		return new RedirectView("/cms/pages/advanced/" + s.getSlug() + "", true);
 	}
 
-	@RequestMapping(value = "{type}/defaultPage", method = RequestMethod.POST)
-	public RedirectView moveFile(Model model, @PathVariable String type,
-			@RequestParam String page) {
-		Site s = Site.fromSlug(type);
 
-		AdminSites.canEdit(s);
-
-		setInitialPage(page, s);
-
-		return new RedirectView("/cms/pages/advanced/" + type, true);
-	}
-
-	@Atomic
-	private void setInitialPage(String page, Site s) {
-		s.setInitialPage(s.pageForSlug(page));
-	}
-	
     @RequestMapping(value = "{slug}/advanced", method = RequestMethod.GET)
     public String advancedPages(Model model, @PathVariable(value = "slug") String slug, @RequestParam(required = false) String query) {
         Site site = Site.fromSlug(slug);

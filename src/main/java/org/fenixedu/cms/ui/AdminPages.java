@@ -237,75 +237,6 @@ public class AdminPages {
         return array.toString();
     }
 
-    /**
-     * Versions
-     */
-
-    @RequestMapping(value = "{slugSite}/{slugPost}/versions", method = RequestMethod.GET)
-    public String versions(Model model, @PathVariable String slugSite, @PathVariable String slugPost) {
-        Site s = Site.fromSlug(slugSite);
-
-        AdminSites.canEdit(s);
-
-        Post p = s.postForSlug(slugPost);
-        model.addAttribute("post", p);
-        model.addAttribute("site", s);
-        return "fenixedu-cms/versions";
-    }
-
-    @RequestMapping(value = "{slugSite}/{slugPost}/versionData", method = RequestMethod.POST, produces = "application/json")
-    @ResponseBody
-    public String versionData(@PathVariable String slugSite, @PathVariable String slugPost, @RequestParam(required = false) PostContentRevision revision) {
-        Site s = Site.fromSlug(slugSite);
-
-        AdminSites.canEdit(s);
-
-        Post p = s.postForSlug(slugPost);
-
-        if (revision == null) {
-            revision = p.getLatestRevision();
-        }
-
-        if (revision.getPost() != p) {
-            throw new RuntimeException("Invalid Revision");
-        }
-
-        JsonObject json = new JsonObject();
-
-        json.add("content", revision.getBody().json());
-        json.addProperty("modifiedAt", revision.getRevisionDate().toString());
-        json.addProperty("user", revision.getCreatedBy().getUsername());
-        json.addProperty("userName", revision.getCreatedBy().getProfile().getDisplayName());
-        json.addProperty("id", revision.getExternalId());
-        json.addProperty("next", Optional.ofNullable(revision.getNext()).map(x -> x.getExternalId()).orElse(null));
-        json.addProperty("previous", Optional.ofNullable(revision.getPrevious()).map(x -> x.getExternalId()).orElse(null));
-
-        if (revision.getPrevious() != null) {
-            json.add("previousContent", revision.getPrevious().getBody().json());
-        }
-
-        return json.toString();
-    }
-
-    @RequestMapping(value = "{slugSite}/{slugPost}/revertTo", method = RequestMethod.POST)
-    public RedirectView revertTo(@PathVariable String slugSite, @PathVariable String slugPost, @RequestParam PostContentRevision revision) {
-        Site s = Site.fromSlug(slugSite);
-
-        AdminSites.canEdit(s);
-
-        Post p = s.postForSlug(slugPost);
-
-        if (revision.getPost() != p) {
-            throw new RuntimeException("Invalid Revision");
-        }
-
-        FenixFramework.atomic(() -> {
-            p.setBody(revision.getBody());
-        });
-
-        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
-    }
-
     private Collection<Page> getStaticPages(Site site) {
         return site.getPagesSet().stream().filter(Page::isStaticPage)
                 .sorted(Page.PAGE_NAME_COMPARATOR).collect(Collectors.toList());
@@ -318,10 +249,6 @@ public class AdminPages {
     public RedirectView pageRedirect(Page page) {
         return new RedirectView("/cms/pages/" + page.getSite().getSlug() + "/" + page.getSlug() + "/edit", true);
     }
-
-    /**
-     * Services
-     */
 
     @Atomic
     private void editPageAndPost(Page page, Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories,

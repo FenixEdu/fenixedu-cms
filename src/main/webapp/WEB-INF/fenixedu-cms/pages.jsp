@@ -21,25 +21,23 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<h2 class="page-header" style="margin-top: 0">
-	<spring:message code="page.manage.title"/>
-	<small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small>
-</h2>
-
-<p>
-
-<div class="row">
-	<div class="col-sm-4">
-		<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" class="btn btn-primary">
-			<span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="page.manage.label.createPage"/>
-		</a>
-		<a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}" class="btn btn-default">Advanced</a>
-	</div>
-	<div class="col-sm-3 pull-right">
-		<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
-	</div>
+<div class="page-header">
+    <h1><spring:message code="page.manage.title"/></h1>
+    <h2><small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small></h2>
 </div>
 
+<p>
+	<div class="row">
+		<div class="col-sm-4">
+			<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" class="btn btn-primary">
+				<span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="page.manage.label.createPage"/>
+			</a>
+			<a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}" class="btn btn-default">Advanced</a>
+		</div>
+		<div class="col-sm-3 pull-right">
+			<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
+		</div>
+	</div>
 </p>
 
 <c:choose>

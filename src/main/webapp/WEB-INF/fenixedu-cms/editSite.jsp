@@ -25,9 +25,10 @@
 ${portal.toolkit()}
 
 <div class="page-header">
-  <h1>Sites</h1>
-  <h2><small>${site.name.content}</small></h2>
+    <h1>Settings</h1>
+    <h2><small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small></h2>
 </div>
+
 <form class="form-horizontal" action="" method="post" role="form">
         <div role="tabpanel">
 
@@ -120,14 +121,26 @@ ${portal.toolkit()}
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Homepage:</label>
+
+                        <div class="col-sm-10">
+                            <select name="initialPageSlug" class="form-control">
+                                <option value="---null---">-</option>
+                                <c:forEach var="p" items="${site.pages}">
+                                    <option ${p == site.initialPage ? 'selected' : ''} value="${p.slug}">${p.name.content}</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="col-sm-4">
                     <div class="panel panel-primary">
                         <div class="panel-heading">Information</div>
                         <div class="panel-body">
                             <dl>
-                                <dt><spring:message
-                                code="site.create.label.published"/></dt>
+                                <dt><spring:message code="site.create.label.published"/></dt>
                                 <dd> <input name="published" type="checkbox" value="true" ${site.published ? "checked='checked'" : ""}></dd>
                                 <dt>Created by</dt>
                                 <dd>${site.createdBy.username}</dd>
@@ -395,8 +408,3 @@ $(function(){
         </div>
     </form>
 </div>
-
-
- 
-
-
