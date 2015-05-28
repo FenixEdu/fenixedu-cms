@@ -48,11 +48,9 @@
       	</ul>
       	</div>
 	    <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/edit" class="btn btn-default">Settings</a>
-
-			<c:if test="${site.published}">
-				<a href="${site.fullUrl}" target="_blank" class="btn btn-default"><spring:message code="action.link"/></a>
-			</c:if>
-
+		<c:if test="${site.published}">
+			<a href="${site.fullUrl}" target="_blank" class="btn btn-default"><spring:message code="action.link"/></a>
+		</c:if>
 	  </div>
 	  <div class="col-sm-4">
 	    <input type="search" id="search-query" class="form-control pull-right" placeholder="Search posts...">

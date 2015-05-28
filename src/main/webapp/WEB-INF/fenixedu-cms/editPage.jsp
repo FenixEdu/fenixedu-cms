@@ -34,11 +34,15 @@ ${portal.toolkit()}
         <h2>
             <small>Edit Page</small>
         </h2>
+
         <div class="row">
             <div class="col-sm-12">
                 <button type="submit" class="btn btn-primary">Update</button>
                 <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/versions" class="btn btn-default">Versions</a>
                 <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">Metadata</a>
+                <c:if test="${page.published && post.visible}">
+                    <a href="${page.address}" class="btn btn-default">Link</a>
+                </c:if>
             </div>
         </div>
     </div>
