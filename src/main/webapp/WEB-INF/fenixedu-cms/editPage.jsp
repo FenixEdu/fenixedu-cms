@@ -18,8 +18,12 @@
     along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
 
 --%>
+
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/jquery.jsonview.css"/>
+<script src="${pageContext.request.contextPath}/static/js/jquery.jsonview.js"></script>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
 
@@ -27,12 +31,21 @@
 <script src="${pageContext.request.contextPath}/static/js/jquery.jsonview.js"></script>
 
 ${portal.toolkit()}
+
+<script src="${pageContext.request.contextPath}/bennu-admin/libs/fancytree/jquery-ui.min.js"></script>
+<link href="${pageContext.request.contextPath}/webjars/fenixedu-canvas/fancytree/skin-fenixedu/ui.fancytree.css" rel="stylesheet" type="text/css">
+<script src="${pageContext.request.contextPath}/webjars/fenixedu-canvas/fancytree/js/jquery.fancytree-all.js" type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/static/jquery.js" type="text/javascript"></script>
+
 <form class="form" action="" method="post" role="form" id="postForm">
     <div class="page-header">
         <h1>${site.name.content}</h1>
-
         <h2>
-            <small>Edit Page</small>
+            <small>
+                <a href="${pageContext.request.contextPath}/cms/pages/${site.slug}">
+                    <spring:message code="page.edit.title"/> - ${page.name.content}
+                </a>
+            </small>
         </h2>
 
         <div class="row">
@@ -40,26 +53,23 @@ ${portal.toolkit()}
                 <button type="submit" class="btn btn-primary">Update</button>
                 <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/versions" class="btn btn-default">Versions</a>
                 <a href="#" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">Metadata</a>
-                <c:if test="${page.published && post.visible}">
-                    <a href="${page.address}" class="btn btn-default">Link</a>
+                <a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}/${page.slug}/edit" class="btn btn-default">Advanced</a>
+                <c:if test="${page.site.published && page.published && post.visible}">
+                    <a href="${page.address}" target="_blank" class="btn btn-default">Link</a>
                 </c:if>
             </div>
         </div>
     </div>
 
-    <div class="${emptyName ? "form-group has-error" : "form-group"}">
-
-        <input bennu-localized-string required-any name="name" id="inputEmail3"
-               placeholder="<spring:message code="post.edit.label.name" />"
-               value='<c:out value="${post.name.json()}"/>'>
-        <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
-                code="post.edit.error.emptyName"/></p></c:if>
+    <div class="form-group">
+        <input bennu-localized-string required-any name="name" placeholder='<spring:message code="post.edit.label.name" />' value='<c:out value="${page.name.json()}"/>' />
+        <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="post.edit.error.emptyName"/></p></c:if>
     </div>
 
     <p>
         <div>Permalink:
-            <samp>/${site.baseUrl}/${site.viewPostPage.slug}/</samp>
-            <input required type="hidden" name="newSlug" class="form-control" placeholder="<spring:message code="site.edit.label.slug" />" value='${post.slug}' \>
+            <samp>${site.baseUrl}/${page.slug}</samp>
+            <input required type="hidden" name="newSlug" class="form-control" placeholder="<spring:message code="site.edit.label.slug" />" value='${page.slug}' \>
             <button class="btn btn-default btn-xs">Edit</button>
             <a href="${page.address}" target="_blank" class="btn btn-default btn-xs">View Page</a>
         </div>
@@ -68,59 +78,48 @@ ${portal.toolkit()}
     <div class="form-group">
             <textarea id="htmlEditor" bennu-html-editor bennu-localized-string name="body" rows="3"><c:out value="${post.body.json()}"/></textarea>
     </div>
+
     <div class="panel panel-default">
         <div class="panel-heading">Publish</div>
         <div class="panel-body">
-                <dl class="dl-horizontal">
-                    <dt>Published</dt>
-                    <dd><input type="checkbox" value="true" ${post.active ? 'checked="checked"' : ''} name="active" /></dd>
-                    <dt>Author</dt>
-                    <dd><input bennu-user-autocomplete class="form-control" type="text" value="${post.createdBy.username}"></dd>
-                    <dt>Access Control</dt>
-                    <dd><input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
-                               value="${ post.canViewGroup.expression }"/></dd>
-                </dl>
-
-                <div class="form-group">
-                    
-                </div>
-
+            <dl class="dl-horizontal">
+                <dt>Published</dt>
+                <dd><input type="checkbox" value="true" ${post.active ? 'checked="checked"' : ''} name="active" /></dd>
+                <dt>Author</dt>
+                <dd><input name="createdBy" bennu-user-autocomplete class="form-control" type="text" value="${post.createdBy.username}"></dd>
+                <dt>Access Control</dt>
+                <dd><input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text" value="${ post.canViewGroup.expression }"/></dd>
+            </dl>
         </div>
     </div>
 
-    <c:if test="${site.categoriesSet.size() > 0}">
-        <div class="panel panel-default">
-            <div class="panel-heading"><spring:message code="site.manage.label.categories"/></div>
-            <div class="panel-body">
-                <div class="row">
+    <div class="panel panel-default">
+        <div class="panel-heading"><spring:message code="site.manage.label.categories"/></div>
+        <div class="panel-body">
+            <p>
+                <a class="btn btn-default btn-xs" data-toggle="modal" data-target="#addCategory">Add New Category</a>
+            </p>
 
-                    <c:forEach var="c" items="${site.categoriesSet}" varStatus="loop">
-                        <div class="col-sm-4">
-                            <div class="checkbox">
-                                <label>
-                                    <c:choose>
-                                        <c:when test="${post.categoriesSet.contains(c)}">
-                                            <input type="checkbox" name="categories" value="${c.slug}"
-                                                   checked="checked"/> ${c.name.content}
-                                        </c:when>
-                                        <c:otherwise>
-                                            <input type="checkbox" name="categories"
-                                                   value="${c.slug}"/> ${c.name.content}
-                                        </c:otherwise>
-                                    </c:choose>
-                                </label>
+            <c:choose>
+                <c:when test="${!site.categoriesSet.isEmpty()}">
+                    <div class="row">
+                        <c:forEach var="c" items="${site.categoriesSet}" varStatus="loop">
+                            <div class="col-sm-4">
+                                <div class="checkbox">
+                                    <label><input type="checkbox" name="categories" value="${c.slug}" ${post.categoriesSet.contains(c) ? 'checked="checked"' : ''} /> ${c.name.content}</label>
+                                </div>
                             </div>
-                        </div>
-                    </c:forEach>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <a class="btn btn-default btn-xs" data-toggle="modal" data-target="#addCategory">Add New Category</a>
+                        </c:forEach>
                     </div>
-                </div>
-            </div>
+                </c:when>
+
+                <c:otherwise>
+                    <i>Não existem categorias associadas.</i>
+                </c:otherwise>
+            </c:choose>
+
         </div>
-    </c:if>
+    </div>
 
     <div class="panel panel-default">
         <div class="panel-heading">Files</div>
@@ -217,6 +216,36 @@ ${portal.toolkit()}
             </c:choose>
         </div>
     </div>
+    <br />
+    <div class="panel panel-default">
+        <div class="panel-heading">Menu</div>
+        
+        <div class="panel-body">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Menu: </label>
+                <div class="col-sm-10">
+                    <select id="menu-select" class="form-control">
+                        <option ${menu == null ? 'selected' : ''} value="${null}">None</option>
+                        <c:forEach var="siteMenu" items="${site.getMenusSet()}">
+                            <option ${menu == siteMenu ? 'selected' : ''} value="${ siteMenu.slug }" data-menu-oid="${siteMenu.externalId}">${ siteMenu.name.content }</option>
+                        </c:forEach>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div style="outline:none;" id="tree"></div>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" id="menu" name="menu" value="${menu!=null ? menu.externalId : null}">
+        <input type="hidden" id="menuItem" name="menuItem" value="${menuItem!=null ? menuItem.externalId : null}">
+        <input type="hidden" id="menuItemParent" name="menuItemParent" value="${menuItem!=null && menuItem.parent!=null ? menuItem.parent.externalId : null}">
+        <input type="hidden" id="menuItemName" name="menuItemName" value="${menuItem!=null && menuItem.name!=null ? menuItem.name.content : page.name.content}">
+        <input type="hidden" id="menuItemPosition" name="menuItemPosition" value="${menuItem!=null && menuItem.position!=null ? menuItem.position : 0}">
+    </div>
+</div>
 </form>
 
 <div class="modal fade" id="addAttachment" tabindex="-1" role="dialog" aria-hidden="true">
@@ -332,6 +361,107 @@ ${portal.toolkit()}
     </div>
 </div>
 
+<script type="text/javascript">
+    var originalMenu = $('#menu').val();
+    var originalMenuItem = $('#menuItem').val() || "new_menu_it";
+    var originalMenuItemParent = $('#menuItemParent').val();
+    var menuItemName = $('#menuItemName').val();
+    var originalMenuItemPosition = $('#menuItemPosition').val();
+
+    var tree;
+
+    $('#menu-select').change(function(e){
+        setTimeout(function(){
+            var selectedMenuOid = $('#menu-select :selected').data('menu-oid');
+            loadMenu(selectedMenuOid);
+        })
+    });
+
+    loadMenu(originalMenu);
+
+    function loadMenu(menuOid) {
+
+        function dataUrl() {
+            return "${pageContext.request.contextPath}/cms/menus/${site.slug}/" + menuOid + "/data";
+        }
+
+        function updateMenuItemInfo(menu, menuItem, menuItemParent, menuItemPosition) {
+            $('#menu').val(menu);
+            $('#menuItem').val(menuItem);
+            $('#menuItemParent').val(menuItemParent);
+            $('#menuItemPosition').val(menuItemPosition);
+        }
+
+        function loadTree() {
+            if(!menuOid){
+                updateMenuItemInfo(null, null, null, 0);
+                $('#tree').hide();
+                return false;
+            } else {
+                $('#tree').show();
+                $('#tree').fancytree({
+                    source: {
+                        url: dataUrl()
+                    },
+                    click: function(e, data){ 
+                        var currentNodeKey = data.tree.getActiveNode().key; 
+                        setTimeout(function(){
+                            data.tree.activateKey(currentNodeKey);
+                        });
+                    },
+                    extensions: ["dnd"],
+                    dnd: {
+                        preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
+                        preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
+                        autoExpandMS: 400,
+                        dragStart: function (node, data) {
+                            return node.key == originalMenuItem;
+                        },
+                        dragEnter: function (node, data) {
+                            return true;
+                        },
+                        dragDrop: function (node, data) {
+                            if (data.hitMode === "before") {
+                                updateMenuItemInfo(menuOid, data.otherNode.key, node.key, node.data.position)
+                            } if(data.hitMode === "after") {
+                                updateMenuItemInfo(menuOid, data.otherNode.key, node.key, node.data.position + 1)
+                            } else if (data.hitMode === "over") {
+                                updateMenuItemInfo(menuOid, data.otherNode.key, node.key, (node.children ? node.children.length : 0));
+                            }
+                            data.otherNode.moveTo(node, data.hitMode);
+                            node.setExpanded(true);
+                            return true;
+                        }
+                    },
+                    init: function (e, data) {
+
+                        if(menuOid != originalMenu) {
+                            var position = data.tree.rootNode.children[0] && data.tree.rootNode.children[0].children ? data.tree.rootNode.children[0].children.lenght : 0;
+                            updateMenuItemInfo(menuOid, originalMenuItem, data.tree.rootNode.children[0].key, position);
+                            data.tree.rootNode.children[0].addChildren({key: originalMenuItem, title: menuItemName, active: true, data: {position: position}});
+                        } else {
+                            updateMenuItemInfo(originalMenu, originalMenuItem, originalMenuItemParent, originalMenuItemPosition);
+                            data.tree.activateKey(originalMenuItem);
+                        }
+
+                        data.tree.visit(function (node) {
+                            node.setExpanded(true);
+                        });
+/*
+                        setTimeout(function(){
+                            debugger;
+                            data.tree.activateKey(originalMenuItem);
+                        }, 300);
+*/
+                    }
+                });
+            }
+        }
+
+        loadTree();
+    }
+</script>
+
 <style type="text/css">
     .json-data {
         height: 400px;
@@ -340,6 +470,9 @@ ${portal.toolkit()}
         padding: 20px;
         margin-bottom: 20px;
         border-radius: 3px;
+    }
+    #tree .fancytree-container{
+        min-height: 400px;
     }
 </style>
 

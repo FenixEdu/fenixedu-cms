@@ -50,14 +50,14 @@
           <c:forEach var="menu" items="${menus}">
             <tr>
               <td>
-                <h5>${menu.name.content}</h5>
+                <h5><a href="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.oid}/change">${menu.name.content}</a></h5>
               </td>
               <td>${menu.creationDate.toString('dd MMMM yyyy, HH:mm', locale)} <small>- ${menu.createdBy.name}</small></td>
               <td>
               	<div class="btn-group">
 	                <a href="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.oid}/change" class="btn btn-sm btn-default"><spring:message code="action.manage" /></a>
 	                <a href="#" class="btn btn-danger btn-sm" data-menu="${menu.oid}"><spring:message code="action.delete" /></a>
-				</div>
+				        </div>
               </td>
             </tr>
           </c:forEach>

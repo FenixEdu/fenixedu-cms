@@ -21,7 +21,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<h1><spring:message code="site.create.title"/></h1>
+<div class="page-header">
+    <h1><spring:message code="site.create.title"/></h1>
+    <h2><small><a href="${pageContext.request.contextPath}/cms">CMS</a></small></h2>
+</div>
 
 <form class="form-horizontal" action="" method="post" role="form">
     <div class="${emptyName ? "form-group has-error" : "form-group"}">
@@ -39,9 +42,9 @@
         <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.create.label.description"/></label>
 
         <div class="col-sm-10">
-            <textarea bennu-localized-string required-any name="description"
-                      placeholder="<spring:message code="site.create.label.description"/>" class="form-control"
-                      rows="3"></textarea>
+            <textarea bennu-localized-string required-any
+                 name="description" placeholder="<spring:message code="site.create.label.description"/>"
+                 class="form-control" rows="3"></textarea>
         </div>
     </div>
 
@@ -91,4 +94,3 @@
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
 ${portal.toolkit()}
-

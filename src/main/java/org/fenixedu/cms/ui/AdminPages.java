@@ -28,6 +28,7 @@ import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.domain.component.Component;
+import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 
 import java.io.IOException;
@@ -43,6 +45,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.fenixedu.cms.domain.MenuItem.CREATION_DATE_COMPARATOR;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/pages")
@@ -92,8 +96,11 @@ public class AdminPages {
         Page p = s.pageForSlug(slugPage);
         model.addAttribute("site", s);
         model.addAttribute("page", p);
-        p.getStaticPost().ifPresent(post -> model.addAttribute("post", post));
+        model.addAttribute("post", p.getStaticPost().get());
         model.addAttribute("availableComponents", Component.availableComponents(s));
+        Optional<MenuItem> menuItemOptional = p.getMenuItemsSet().stream().sorted(CREATION_DATE_COMPARATOR).findFirst();
+        model.addAttribute("menuItem", menuItemOptional.orElse(null));
+        model.addAttribute("menu", menuItemOptional.map(MenuItem::getMenu).orElse(null));
 
         return "fenixedu-cms/editPage";
     }
@@ -118,12 +125,21 @@ public class AdminPages {
                              @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories,
                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) DateTime publicationStarts,
                              @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) DateTime publicationEnds,
-                             @RequestParam(required = false, defaultValue = "false") boolean active, @RequestParam String viewGroup) {
+                             @RequestParam(required = false, defaultValue = "false") boolean active, @RequestParam String viewGroup,
+                             @RequestParam(required = false) String menu, @RequestParam(required = false) String menuItem,
+                             @RequestParam(required = false) String menuItemParent, @RequestParam(required = false) Integer menuItemPosition) {
         Site site = Site.fromSlug(slugSite);
         Page page = site.pageForSlug(slugPage);
+        Menu menuObj = getDomainObjectIfPresent(menu);
+        MenuItem menuItemParentObj = getDomainObjectIfPresent(menuItemParent);
         page.getStaticPost().ifPresent(post ->
-                editPageAndPost(page, post, name, body, newSlug, categories, publicationStarts, publicationEnds, active, Group.parse(viewGroup)));
+                editPageAndPost(page, post, name, body, newSlug, categories, publicationStarts, publicationEnds, active,
+                        Group.parse(viewGroup), menuObj, menuItem, menuItemParentObj, menuItemPosition));
         return pageRedirect(page);
+    }
+
+    private <T extends DomainObject> T getDomainObjectIfPresent(String externalId) {
+        return Optional.ofNullable(externalId).map(oid -> (T) FenixFramework.getDomainObject(oid)).orElse(null);
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)
@@ -252,7 +268,7 @@ public class AdminPages {
 
     @Atomic
     private void editPageAndPost(Page page, Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories,
-                                 DateTime publicationStarts, DateTime publicationEnds, boolean active, Group viewGroup) {
+                                 DateTime publicationStarts, DateTime publicationEnds, boolean active, Group viewGroup, Menu menu, String menuItemId, MenuItem menuItemParent, Integer menuItemPosition) {
         Site site = page.getSite();
         LocalizedString nameSanitized = Post.sanitize(name);
         LocalizedString bodySanitized = Post.sanitize(body);
@@ -302,15 +318,40 @@ public class AdminPages {
         if (!page.getCanViewGroup().equals(viewGroup)) {
             page.setCanViewGroup(viewGroup);
         }
+
+        MenuItem menuItem;
+        if (!Strings.isNullOrEmpty(menuItemId) && menu != null) {
+            menuItem = page.getMenuItemsSet().stream()
+                    .filter(current -> current.getExternalId().equals(menuItemId))
+                    .findAny().orElseGet(() -> MenuItem.create(menu, page, name, menuItemParent));
+        } else {
+            menuItem = null;
+        }
+
+        if (menuItem != null) {
+            menuItem.removeFromParent();
+            if (menuItemParent != null) {
+                menuItemParent.add(menuItem);
+            } else {
+                menuItem.setTop(menu);
+            }
+            menu.add(menuItem);
+            menuItem.setPage(page);
+            menuItem.setPosition(menuItemPosition);
+        } else {
+            page.getMenuItemsSet().stream().forEach(MenuItem::delete);
+        }
     }
 
-    @Atomic
+    @Atomic(mode = Atomic.TxMode.WRITE)
     private Page createPageAndPost(LocalizedString name, Site site) {
         Page page = new Page(site);
         page.setName(name);
         Post post = new Post(site);
         post.setName(name);
         post.setBody(new LocalizedString());
+        page.addComponents(new StaticPost(post));
+        page.setTemplateType("view");
         return page;
     }
 }

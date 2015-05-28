@@ -21,15 +21,25 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<h2 class="page-header" style="margin-top: 0">
-    <spring:message code="page.edit.title"/> - ${page.name.content}
-    <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small>
-    <c:if test="${page.published}">
-        <div class="button-group pull-right">
-            <a href="${page.address}" target="_blank" class="btn btn-default"><spring:message code="action.link"/></a>
+<div class="page-header">
+    <h1>${site.name.content}</h1>
+    
+    <h2>
+        <small>
+            <a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}">
+                <spring:message code="page.edit.title"/> - ${page.name.content}
+            </a>
+        </small>
+    </h2>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <c:if test="${page.site.published && page.published}">
+                <a href="${page.address}" target="_blank" class="btn btn-default">Link</a>
+            </c:if>
         </div>
-    </c:if>
-</h2>
+    </div>
+</div>
 
 <div ng-app="componentsApp" ng-controller="ComponentController">
     <form id="mainForm" class="form-horizontal" action="" method="post" role="form">

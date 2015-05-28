@@ -20,24 +20,24 @@
 --%>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+${portal.toolkit()}
 
-<h2 class="page-header" style="margin-top: 0">
-  <spring:message code="page.create.title" />
-  <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
-</h2>
+<div class="page-header">
+    <h1><spring:message code="page.create.title" /></h1>
+    <h2><small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small></h2>
+</div>
 
 <form class="form-horizontal" action="" method="post" role="form">
   <div class="${emptyName ? "form-group has-error" : "form-group"}">
-    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="menu.create.label.name" /></label>
-    <div class="col-sm-10">
-      <input type="text" name="name" class="form-control" id="inputEmail3" placeholder="<spring:message code="menu.create.label.name"/>">
+    <label class="col-sm-1 control-label"><spring:message code="menu.create.label.name" /></label>
+    <div class="col-sm-11">
+      <input type="text" name="name" bennu-localized-string required-any class="form-control" placeholder="<spring:message code="menu.create.label.name"/>">
       <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="menu.create.error.emptyName" /></p></c:if>
     </div>
   </div>
-  
   <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-      <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.create" /></button>
+    <div class="btn-group">
+      <button type="submit" class="btn btn-primary"><spring:message code="action.create" /></button>
     </div>
   </div>
 </form>

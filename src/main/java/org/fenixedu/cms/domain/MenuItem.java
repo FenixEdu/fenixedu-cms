@@ -18,12 +18,8 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.domain.wraps.Wrap;
@@ -31,17 +27,21 @@ import org.fenixedu.cms.domain.wraps.Wrappable;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Models the items of a {@link Menu}
  */
 public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wrappable {
+
+    public static final Comparator<MenuItem> CREATION_DATE_COMPARATOR = Comparator.comparing(MenuItem::getCreationDate);
 
     /**
      * The logged {@link User} creates a new MenuItem.
@@ -65,7 +65,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     /**
      * Adds a children at a given position and shifts the existing items.
      *
-     * @param item the {@link MenuItem} to be added.
+     * @param item     the {@link MenuItem} to be added.
      * @param position the position where the item should be added.
      */
     public void putAt(MenuItem item, int position) {

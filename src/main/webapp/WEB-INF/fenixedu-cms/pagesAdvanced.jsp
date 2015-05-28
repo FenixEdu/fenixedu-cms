@@ -21,12 +21,10 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<h2 class="page-header" style="margin-top: 0">
-	<spring:message code="page.manage.title"/>
-	<small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small>
-</h2>
-
-<p>
+<div class="page-header">
+    <h1><spring:message code="page.manage.title"/></h1>
+    <h2><small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small></h2>
+</div>
 
 <div class="row">
 	<div class="col-sm-4">

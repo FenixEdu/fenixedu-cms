@@ -31,9 +31,7 @@ ${portal.toolkit()}
 	<div class="page-header">
 		<h1>${site.name.content}</h1>
 
-		<h2>
-			<small>Edit Post</small>
-		</h2>
+		<h2><small><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}">Edit Post - ${post.name.content}</small></a></h2>
 		
 		<div class="row">
 			<div class="col-sm-12">
@@ -49,11 +47,8 @@ ${portal.toolkit()}
 
 	<div class="${emptyName ? "form-group has-error" : "form-group"}">
 
-		<input bennu-localized-string required-any name="name" id="inputEmail3"
-		       placeholder="<spring:message code="post.edit.label.name" />"
-		       value='<c:out value="${post.name.json()}"/>'>
-		<c:if test="${emptyName != null}"><p class="text-danger"><spring:message
-				code="post.edit.error.emptyName"/></p></c:if>
+		<input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.edit.label.name" />" value='<c:out value="${post.name.json()}"/>'>
+		<c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="post.edit.error.emptyName"/></p></c:if>
 	</div>
 
 	<p>

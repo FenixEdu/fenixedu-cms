@@ -18,8 +18,9 @@
  */
 package org.fenixedu.cms.ui;
 
-import java.util.Optional;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
@@ -27,19 +28,12 @@ import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import java.util.Optional;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/menus")
@@ -47,7 +41,7 @@ public class AdminMenuItem {
 
     @RequestMapping(value = "{slugSite}/{oidMenu}/change", method = RequestMethod.GET)
     public String change(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "oidMenu") String oidMenu) {
+                         @PathVariable(value = "oidMenu") String oidMenu) {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -82,7 +76,9 @@ public class AdminMenuItem {
     }
 
     @RequestMapping(value = "{slugSite}/{oidMenu}/data", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
-    public @ResponseBody String data(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
+    public
+    @ResponseBody
+    String data(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
             value = "oidMenu") String oidMenu) {
         Site s = Site.fromSlug(slugSite);
 
@@ -112,10 +108,10 @@ public class AdminMenuItem {
 
     @RequestMapping(value = "{slugSite}/{oidMenu}/createItem", method = RequestMethod.POST)
     public RedirectView create(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid,
-            @RequestParam LocalizedString name, @RequestParam String use,
-            @RequestParam(required = false) String url,
-            @RequestParam(required = false) String slugPage) {
+                               @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid,
+                               @RequestParam LocalizedString name, @RequestParam String use,
+                               @RequestParam(required = false) String url,
+                               @RequestParam(required = false) String slugPage) {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -156,9 +152,9 @@ public class AdminMenuItem {
 
     @RequestMapping(value = "{slugSite}/{oidMenu}/changeItem", method = RequestMethod.POST)
     public RedirectView change(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid,
-            @RequestParam String menuItemOidParent, @RequestParam LocalizedString name, @RequestParam String use,
-            @RequestParam String url, @RequestParam String slugPage, @RequestParam Integer position) {
+                               @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid,
+                               @RequestParam String menuItemOidParent, @RequestParam LocalizedString name, @RequestParam String use,
+                               @RequestParam String url, @RequestParam String slugPage, @RequestParam Integer position) {
 
         Site s = Site.fromSlug(slugSite);
 
@@ -188,7 +184,7 @@ public class AdminMenuItem {
 
     @Atomic
     private void changeMenuItem(MenuItem mi, String menuItemOid, LocalizedString name, String use, String url, String slugPage,
-            Site s, Menu m, Integer position) {
+                                Site s, Menu m, Integer position) {
 
         mi.setName(name);
 
@@ -231,14 +227,14 @@ public class AdminMenuItem {
 
     @RequestMapping(value = "{slugSite}/{oidMenu}/delete/{oidMenuItem}", method = RequestMethod.POST)
     public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "oidMenu") String oidMenu, @PathVariable(value = "oidMenuItem") String oidMenuItem) {
+                               @PathVariable(value = "oidMenu") String oidMenu, @PathVariable(value = "oidMenuItem") String oidMenuItem) {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
 
         Menu m = s.menuForOid(oidMenu);
         MenuItem item = FenixFramework.getDomainObject(oidMenuItem);
-        if (item.getMenu() != m) {
+        if (item.getMenu() != m && item.getTop() != m) {
             throw new RuntimeException("Wrong Parents");
         }
         item.delete();

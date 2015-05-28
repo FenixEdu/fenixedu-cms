@@ -28,7 +28,7 @@ ${portal.toolkit()}
 </div>
 
 <div class="row">
-    <div class="col-sm-5"><a href="" data-toggle="modal" data-target="#create-post" class="btn btn-primary"><i class="icon icon-plus"></i> New</a></div>
+    <div class="col-sm-5"><a href="#" data-toggle="modal" data-target="#create-post" class="btn btn-primary"><i class="icon icon-plus"></i> New</a></div>
     <div class="col-sm-7">
         <div class="pull-right">
             <div class="form-inline">

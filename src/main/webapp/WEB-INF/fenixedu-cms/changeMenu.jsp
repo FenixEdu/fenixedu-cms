@@ -20,24 +20,22 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-
-<h2 class="page-header" style="margin-top: 0">
-  <spring:message code="menu.edit.title" />
-  <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
-</h2>
-
 ${portal.toolkit()}
 
-<style>
+<div class="page-header">
+    <h1><spring:message code="menu.edit.title" /> ${menu.name.content}</h1>
+    <h2><small><a href="${pageContext.request.contextPath}/cms/menus/${site.slug}">${site.name.content}</a></small></h2>
+</div>
 
+<style>
     .fancytree-container {
         outline: none;
     }
 </style>
-<form id="deleteForm" method="post" action="">
-</form>
+<form id="deleteForm" method="post" action=""></form>
+
 <div class="container">
-    <script src="${pageContext.request.contextPath}/bennu-admin/fancytree/jquery-ui.min.js"></script>
+    <script src="${pageContext.request.contextPath}/bennu-admin/libs/fancytree/jquery-ui.min.js"></script>
     <link href="${pageContext.request.contextPath}/webjars/fenixedu-canvas/fancytree/skin-fenixedu/ui.fancytree.css" rel="stylesheet" type="text/css">
     <script src="${pageContext.request.contextPath}/webjars/fenixedu-canvas/fancytree/js/jquery.fancytree-all.js" type="text/javascript"></script>
     <script src="${pageContext.request.contextPath}/static/jquery.js" type="text/javascript"></script>
@@ -52,14 +50,14 @@ ${portal.toolkit()}
                 <input type="hidden" name="position" value=""/>
 
                 <div class="form-group">
-                    <button onclick="showModal();return false" class="btn btn-default"><spring:message
-                            code="menu.edit.label.createSubitem"/></button>
+                    <button onclick="showModal();return false" class="btn btn-default">
+                        <spring:message code="menu.edit.label.createSubitem"/>
+                    </button>
                 </div>
 
                 <div class="form-group">
                     <label class="control-label" for="inputSuccess1"><spring:message code="menu.edit.label.menuLabel"/></label>
-                    <input type="text" bennu-localized-string name="name" class="form-control"
-                           placeholder="<spring:message code="menu.edit.label.name"/>">
+                    <input type="text" bennu-localized-string name="name" class="form-control" placeholder="<spring:message code="menu.edit.label.name"/>">
                 </div>
 
                 <div id="menuitem-options">
@@ -123,10 +121,8 @@ ${portal.toolkit()}
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label class="control-label" for="inputSuccess1"><spring:message
-                                    code="menu.edit.label.menuLabel"/></label>
-                            <input type="text" bennu-localized-string name="name" value="{}" class="form-control"
-                                   placeholder="<spring:message code="menu.edit.label.name"/>">
+                            <label class="control-label" for="inputSuccess1"><spring:message code="menu.edit.label.menuLabel"/></label>
+                            <input type="text" bennu-localized-string name="name" value="{}" class="form-control" placeholder="<spring:message code="menu.edit.label.name"/>">
                         </div>
 
                         <div id="menuitem-options">
@@ -138,8 +134,7 @@ ${portal.toolkit()}
                                 </label>
 
                                 <div class="form-group">
-                                    <input type="text" name="url" class="url-select form-control"
-                                           placeholder="<spring:message code="menu.edit.label.url"/>">
+                                    <input type="text" name="url" class="url-select form-control" placeholder="<spring:message code="menu.edit.label.url"/>">
                                 </div>
                             </div>
 
@@ -177,12 +172,9 @@ ${portal.toolkit()}
                         <button type="submit" class="btn btn-primary"><spring:message code="action.create"/></button>
                     </div>
                 </div>
-                <!-- /.modal-content -->
             </div>
-            <!-- /.modal-dialog -->
         </form>
     </div>
-    <!-- /.modal -->
 </div>
 
 <script>

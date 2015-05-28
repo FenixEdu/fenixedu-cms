@@ -52,51 +52,48 @@
     </c:when>
 
   <c:otherwise>
-
     <ul class="list-group">
       <c:forEach var="i" items="${sites}">
         <li class="list-group-item">
-                <h3><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a>
-                    
-                </h3>
-            <div>
-              ${i.getDescription().getContent()}
-            </div>
-          
-              <c:choose>
-                  <c:when test="${ i.published }">
-                      <span class="label label-primary">Public</span>
-                  </c:when>
-                  <c:otherwise>
-                      <span class="label label-default">Draft</span>
-                  </c:otherwise>
-              </c:choose>
-              <c:if test="${i.getEmbedded()}">
-                  <p><span class="label label-info">Embedded</span></p>
-              </c:if>
-              <c:if test="${i.isDefault()}">
-                  <span class="label label-success"><spring:message code="site.manage.label.default"/></span>
-              </c:if>
-            <div class="btn-group pull-right">
-              <a href="${i.fullUrl}" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-link"></i></a>
-              <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-eye-close"></i></a>
-              <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-icon btn-primary"><i class="glyphicon glyphicon-cog"></i></a>
-            </div>
+          <h3><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a></h3>
+          <div>${i.getDescription().getContent()}</div>
+          <c:choose>
+              <c:when test="${ i.published }">
+                  <span class="label label-primary">Public</span>
+              </c:when>
+              <c:otherwise>
+                  <span class="label label-default">Draft</span>
+              </c:otherwise>
+          </c:choose>
+
+          <c:if test="${i.getEmbedded()}">
+            <p><span class="label label-info">Embedded</span></p>
+          </c:if>
+
+          <c:if test="${i.isDefault()}">
+            <span class="label label-success"><spring:message code="site.manage.label.default"/></span>
+          </c:if>
+
+          <div class="btn-group pull-right">
+            <a href="${i.fullUrl}" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-link"></i></a>
+            <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-eye-close"></i></a>
+            <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-icon btn-primary"><i class="glyphicon glyphicon-cog"></i></a>
+          </div>
         </li>
       </c:forEach>
     </ul>
     <c:if test="${numberOfPages != 1}">
-    <div class="row">
-        <div class="col-md-2 col-md-offset-5">
-            <ul class="pagination">
-                <li class="${currentPage <= 0 ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page - 1}">«</a></li>
-                <li class="disabled"><a href="#">${currentPage + 1} / ${numberOfPages}</a></li>
-                <li class="${currentPage + 1 >= numberOfPages ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page + 1}">»</a></li>
-            </ul>
-        </div>
-    </div>
+      <div class="row">
+          <div class="col-md-2 col-md-offset-5">
+              <ul class="pagination">
+                  <li class="${currentPage <= 0 ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page - 1}">«</a></li>
+                  <li class="disabled"><a href="#">${currentPage + 1} / ${numberOfPages}</a></li>
+                  <li class="${currentPage + 1 >= numberOfPages ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page + 1}">»</a></li>
+              </ul>
+          </div>
+      </div>
     </c:if>
-    </c:otherwise>
+  </c:otherwise>
 </c:choose>
 
 <div class="modal fade" id="sites-settings">
@@ -112,11 +109,12 @@
         <div role="tabpanel">
 
   <!-- Nav tabs -->
-  <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
-    <li role="presentation"><a href="#external" aria-controls="external" role="tab" data-toggle="tab">External Applications</a></li>
-  </ul>
-
+  <p>
+    <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" class="active"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
+      <li role="presentation"><a href="#external" aria-controls="external" role="tab" data-toggle="tab">External Applications</a></li>
+    </ul>
+  </p>
   <!-- Tab panes -->
   <div class="tab-content">
     <div role="tabpanel" class="tab-pane active form-horizontal" id="general">
