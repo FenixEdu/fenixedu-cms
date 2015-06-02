@@ -99,12 +99,12 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     /**
      * @return mapping between the type and description for all the registered {@link SiteTemplate}.
      */
-    public static HashMap<String, String> getTemplates() {
-        HashMap<String, String> map = new HashMap<>();
+    public static HashMap<String, RegisterSiteTemplate> getTemplates() {
+        HashMap<String, RegisterSiteTemplate> map = new HashMap<>();
 
         for (Class<?> c : TEMPLATES.values()) {
             RegisterSiteTemplate registerSiteTemplate = c.getAnnotation(RegisterSiteTemplate.class);
-            map.put(registerSiteTemplate.type(), registerSiteTemplate.name() + " - " + registerSiteTemplate.description());
+            map.put(registerSiteTemplate.type(), registerSiteTemplate);
         }
 
         return map;
@@ -487,7 +487,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     @Override
     public boolean isValidSlug(String slug) {
-        Stream<MenuItem> menuItems = Bennu.getInstance().getConfiguration().getMenu().getOrderedChild().stream();
+        Stream<MenuItem> menuItems = PortalConfiguration.getInstance().getMenu().getOrderedChild().stream();
         return !Strings.isNullOrEmpty(slug)
                 && (slug.equals(getSlug()) || menuItems.map(MenuItem::getPath).noneMatch(path -> path.equals(slug)));
     }

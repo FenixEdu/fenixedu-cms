@@ -56,7 +56,7 @@
                 <option value="null">&lt; <spring:message code="site.create.label.emptySite"/> &gt;</option>
 
                 <c:forEach items="${templates}" var="template">
-                    <option value="${template.key}">${template.value}</option>
+                    <option value="${template.key}">${template.value.name()} - ${template.value.description()}</option>
                 </c:forEach>
             </select>
         </div>
