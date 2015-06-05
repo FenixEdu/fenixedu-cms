@@ -156,7 +156,7 @@ public class RSSService {
             throws XMLStreamException {
         writer.add(eventFactory.createStartElement("", "", "item"));
         writer.add(eventFactory.createCharacters("\n"));
-        createNode(writer, eventFactory, "title", contentOf(post.getName(), locale));
+        createNode(writer, eventFactory, "title", sanitizeInputForXml.matcher(contentOf(post.getName(), locale)).replaceAll(""));
         createNode(writer, eventFactory, "description", sanitizeInputForXml.matcher(contentOf(post.getBody(), locale))
                 .replaceAll(""));
         createNode(writer, eventFactory, "link", post.getAddress());
