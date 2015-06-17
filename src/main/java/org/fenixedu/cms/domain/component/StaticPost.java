@@ -18,14 +18,14 @@
  */
 package org.fenixedu.cms.domain.component;
 
-import java.util.Collection;
-
+import org.fenixedu.cms.domain.CloneCache;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.rendering.TemplateContext;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
+
+import java.util.Collection;
 
 @ComponentType(name = "Static Post", description = "Static Post")
 public class StaticPost extends StaticPost_Base {
@@ -41,6 +41,16 @@ public class StaticPost extends StaticPost_Base {
         Post post = this.getPost();
         local.put("post", post.makeWrap());
         global.put("post", post.makeWrap());
+    }
+
+    @Override
+    public StaticPost clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            StaticPost clone = new StaticPost(null);
+            cloneCache.setClone(StaticPost.this, clone);
+            clone.setPost(getPost().clone(cloneCache));
+            return clone;
+        });
     }
 
     @Override

@@ -82,12 +82,20 @@ ${portal.toolkit()}
                         </label>
 
                         <div class="form-group">
-                            <select name="slugPage" class="page-select form-control">
-                                <option value="null">-</option>
-                                <c:forEach var="p" items="${site.sortedPages}">
-                                    <option value="${ p.slug }">${ p.name.content }</option>
-                                </c:forEach>
-                            </select>
+                            <div class="row">
+                                <div class="col-sm-10">
+                                    <select name="slugPage" class="page-select form-control">
+                                        <option value="null">-</option>
+                                        <c:forEach var="p" items="${site.sortedPages}">
+                                            <option value="${ p.slug }" pageEditUrl="${ p.editUrl }">${ p.name.content }</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <a class="btn btn-default" id="page-link" href="#">Manage</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -218,6 +226,7 @@ ${portal.toolkit()}
                     //may want to use $.trim in here
                     return $(this).val() == data.node.data.page;
                 }).prop('selected', true);
+                $("#page-link").attr("href", data.node.data.pageEditUrl);
             }
 
             $("#deleteForm").attr("action", "delete/" + data.node.key);
@@ -260,6 +269,7 @@ ${portal.toolkit()}
                 $(block + " .url-select").prop('readonly', true);
                 $(block + " .url-select").val("");
                 $(block + " .page-select").prop('readonly', false);
+                $(block + " #page-link").prop('readonly', false);
             } else {
                 $(block + " .url-select").prop('readonly', false);
                 $(block + " select option").filter(function () {
@@ -267,6 +277,7 @@ ${portal.toolkit()}
                     return $(this).text() == "-";
                 }).prop('selected', true);
                 $(block + " .page-select").prop('readonly', true);
+                $(block + " #page-link").prop('readonly', true);
             }
         };
     }
@@ -336,6 +347,9 @@ ${portal.toolkit()}
 
     $("select[name=slugPage]").change(function(event) {
         $(event.target).closest('form').find('input[name=use].usepage').prop('checked', true);
+        //$("#page-link").attr("href", $(event.currentTarget).attr("pageEditUrl"));
+        var pageEditUrl = $(event.currentTarget).find("option:selected").attr("pageEditUrl");
+        $("#page-link").attr("href", pageEditUrl);
     });
 </script>
   

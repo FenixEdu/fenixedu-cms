@@ -18,10 +18,6 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Set;
-
 import org.fenixedu.bennu.core.annotation.GroupArgument;
 import org.fenixedu.bennu.core.annotation.GroupArgumentParser;
 import org.fenixedu.bennu.core.annotation.GroupOperator;
@@ -31,6 +27,11 @@ import org.fenixedu.bennu.core.groups.ArgumentParser;
 import org.fenixedu.bennu.core.groups.CustomGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.joda.time.DateTime;
+
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 @GroupOperator("siteViewers")
 public class SiteViewersGroup extends CustomGroup {
@@ -97,7 +98,7 @@ public class SiteViewersGroup extends CustomGroup {
 
     @Override
     public boolean isMember(User user) {
-        if (site.getPublished()) {
+        if (Optional.ofNullable(site.getPublished()).orElse(false)) {
             return site.getCanViewGroup().isMember(user);
         }
         return false;

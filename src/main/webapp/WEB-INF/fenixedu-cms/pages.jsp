@@ -108,7 +108,6 @@ ${portal.toolkit()}
                                     <li><a href="#" data-page="${page.slug}"><i class="glyphicon glyphicon-trash">&nbsp;Delete</i></a></li>
                                 </ul>
                             </div>
-
 						</div>
 					</td>
 				</tr>

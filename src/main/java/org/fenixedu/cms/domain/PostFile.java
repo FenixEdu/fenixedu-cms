@@ -23,50 +23,59 @@ import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
 
-public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wrappable {
+public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wrappable, Cloneable {
 
     public PostFile(Post post, GroupBasedFile file, boolean isEmbedded, int index) {
-	setPost(post);
-	setFiles(file);
-	setIsEmbedded(isEmbedded);
-	setIndex(index);
+        setPost(post);
+        setFiles(file);
+        setIsEmbedded(isEmbedded);
+        setIndex(index);
+    }
+
+    @Override
+    public PostFile clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            GroupBasedFile fileClone = new GroupBasedFile(getFiles().getDisplayName(), getFiles().getFilename(),
+                    getFiles().getContent(), getFiles().getAccessGroup());
+            return new PostFile(getPost(), fileClone, getIsEmbedded(), getIndex());
+        });
     }
 
     @Override
     public void setIsEmbedded(Boolean isEmbedded) {
-	if (isEmbedded) {
-	    getFiles().setAccessGroup(getPost().getCanViewGroup());
-	}
-	super.setIsEmbedded(isEmbedded);
+        if (isEmbedded) {
+            getFiles().setAccessGroup(getPost().getCanViewGroup());
+        }
+        super.setIsEmbedded(isEmbedded);
     }
 
     @Override
     public int compareTo(PostFile o) {
-	return this.getIndex().compareTo(o.getIndex());
+        return this.getIndex().compareTo(o.getIndex());
     }
 
     public void delete() {
-	setFiles(null);
-	setPost(null);
-	deleteDomainObject();
+        setFiles(null);
+        setPost(null);
+        deleteDomainObject();
     }
 
     @Override
     public Wrap makeWrap() {
-	return new PostFileWrap();
+        return new PostFileWrap();
     }
 
     public class PostFileWrap extends Wrap {
-	public String getName() {
-	    return PostFile.this.getFiles().getDisplayName();
-	}
+        public String getName() {
+            return PostFile.this.getFiles().getDisplayName();
+        }
 
-	public String getContentType() {
-	    return PostFile.this.getFiles().getContentType();
-	}
+        public String getContentType() {
+            return PostFile.this.getFiles().getContentType();
+        }
 
-	public String getUrl() {
-	    return FileDownloadServlet.getDownloadUrl(PostFile.this.getFiles());
-	}
+        public String getUrl() {
+            return FileDownloadServlet.getDownloadUrl(PostFile.this.getFiles());
+        }
     }
 }

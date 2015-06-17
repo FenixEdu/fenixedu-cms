@@ -18,19 +18,19 @@
  */
 package org.fenixedu.cms.domain.component;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.CloneCache;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.rendering.TemplateContext;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Component that lists the {@link Post} of a given category.
@@ -62,6 +62,16 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
 
         global.put("posts", posts);
         global.put("pagination", pagination);
+    }
+
+    @Override
+    public Component clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            ListCategoryPosts clone = new ListCategoryPosts(null);
+            cloneCache.setClone(ListCategoryPosts.this, clone);
+            clone.setCategory(getCategory().clone(cloneCache));
+            return clone;
+        });
     }
 
     @Override

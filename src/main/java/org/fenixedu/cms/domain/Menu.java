@@ -18,10 +18,7 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Sets;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
@@ -29,15 +26,20 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-
 import pt.ist.fenixframework.Atomic;
 
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * Model of a Menu for a given {@link Page}
  */
-public class Menu extends Menu_Base implements Wrappable, Sluggable {
+public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
 
     public Menu(Site site) {
         super();
@@ -58,7 +60,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     @Atomic
     public void delete() {
-        Sets.newHashSet(getItemsSet()).forEach(i -> i.delete());
+        Sets.newHashSet(getItemsSet()).stream().distinct().forEach(MenuItem::delete);
         this.setCreatedBy(null);
         this.setSite(null);
         this.deleteDomainObject();
@@ -96,11 +98,9 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     /**
      * Puts a {@link MenuItem} at a given position, shifting the existing ones to the right.
-     * 
-     * @param item
-     *            The {@link MenuItem} to be added.
-     * @param position
-     *            the position to save the item.
+     *
+     * @param item     The {@link MenuItem} to be added.
+     * @param position the position to save the item.
      */
     public void putAt(MenuItem item, int position) {
         if (position < 0) {
@@ -127,9 +127,8 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     /**
      * Removes a given {@link MenuItem} from the Menu.
-     * 
-     * @param mi
-     *            the {@link MenuItem} to be removed.
+     *
+     * @param mi the {@link MenuItem} to be removed.
      */
     public void remove(MenuItem mi) {
         getToplevelItemsSet().remove(mi);
@@ -141,9 +140,8 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     /**
      * Adds a given {@link MenuItem} as the last item.
-     * 
-     * @param mi
-     *            the {@link MenuItem} to be added.
+     *
+     * @param mi the {@link MenuItem} to be added.
      */
     public void add(MenuItem mi) {
         this.putAt(mi, getToplevelItemsSet().size());
@@ -155,6 +153,23 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     public Stream<MenuItem> getItemsSorted() {
         return getItemsSet().stream().sorted();
+    }
+
+    @Override
+    public Menu clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            Collection<MenuItem> menuItems = new HashSet<>(getItemsSet());
+
+            Menu clone = new Menu(getSite());
+            cloneCache.setClone(Menu.this, clone);
+            clone.setName(getName() != null ? fromJson(getName().json()) : null);
+
+            for (MenuItem menuItem : menuItems) {
+                menuItem.clone(cloneCache).setMenu(clone);
+            }
+
+            return clone;
+        });
     }
 
     @SuppressWarnings("unused")
@@ -187,6 +202,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
         public Boolean getTopMenu() {
             return Menu.this.getTopMenu();
         }
+
     }
 
     @Override

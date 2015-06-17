@@ -18,32 +18,27 @@
  */
 package org.fenixedu.cms.domain.component;
 
-import java.util.HashMap;
-
+import com.google.gson.JsonArray;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.cms.rendering.TemplateContext;
 import org.joda.time.DateTime;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-import com.google.gson.JsonArray;
+import java.util.HashMap;
 
-public abstract class Component extends Component_Base {
+public abstract class Component extends Component_Base implements org.fenixedu.cms.domain.Cloneable {
 
     protected static final HashMap<String, ComponentDescriptor> COMPONENTS = new HashMap<>();
 
     /**
      * Registers a new class has a component.
-     * 
-     * @param type
-     *            the type of the component. It must be unique for the application.
-     * @param c
-     *            the class being registered as a component.
+     *
+     * @param type the type of the component. It must be unique for the application.
+     * @param c    the class being registered as a component.
      */
     public static void register(Class<?> c) {
         COMPONENTS.put(c.getName(), new ComponentDescriptor(c));
@@ -51,11 +46,9 @@ public abstract class Component extends Component_Base {
 
     /**
      * Searches for the class of a component with a given type.
-     * 
-     * @param type
-     *            the type of the component.
-     * @return
-     *         the class of the component with the given type.
+     *
+     * @param type the type of the component.
+     * @return the class of the component with the given type.
      */
     public static ComponentDescriptor forType(String type) {
         return COMPONENTS.get(type);
@@ -82,26 +75,21 @@ public abstract class Component extends Component_Base {
     }
 
     /**
-     * 
-     * @return
-     *         the name of the component.
+     * @return the name of the component.
      */
     public String getName() {
         return componentType().getAnnotation(ComponentType.class).name();
     }
 
     /**
-     * 
-     * @return
-     *         the description of the component.
+     * @return the description of the component.
      */
     public String getDescription() {
         return componentType().getAnnotation(ComponentType.class).description();
     }
 
     /**
-     * @return
-     *         the type of the component.
+     * @return the type of the component.
      */
     @Override
     public String getType() {
@@ -110,15 +98,15 @@ public abstract class Component extends Component_Base {
 
     /**
      * Provides the necessary info needed to render the component on a given page and context.
-     * 
-     * @param page
-     *            the page where the component will be rendered.
-     * @param componentContext
-     *            local context for the component.
-     * @param globalContext
-     *            global context where the component is being rendered.
+     *
+     * @param page             the page where the component will be rendered.
+     * @param componentContext local context for the component.
+     * @param globalContext    global context where the component is being rendered.
      */
     public abstract void handle(Page page, TemplateContext componentContext, TemplateContext globalContext);
+
+    @Override
+    public abstract Component clone(CloneCache cloneCache);
 
     @Atomic(mode = TxMode.WRITE)
     public void delete() {

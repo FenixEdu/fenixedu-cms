@@ -27,8 +27,8 @@
 </script>
 
 	<div class="page-header">
-  	<h1>Site</h1>
-  	<h2><small>${site.name.content}</small></h2>
+	  	<h1>Site</h1>
+	  	<a href="${pageContext.request.contextPath}/cms/sites"><h2><small>${site.name.content}</small></h2></a>
 	</div>
 
 	<div class="row">

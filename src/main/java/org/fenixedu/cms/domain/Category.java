@@ -22,6 +22,7 @@ import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.cms.domain.component.Component;
+import org.fenixedu.cms.domain.component.ListCategoryPosts;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
 import org.fenixedu.cms.exceptions.CmsDomainException;
@@ -30,10 +31,15 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import pt.ist.fenixframework.Atomic;
 
+import java.util.Collection;
+import java.util.HashSet;
+
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
 /**
  * Categories give a semantic group for {@link Site} and {@link Post}.
  */
-public class Category extends Category_Base implements Wrappable, Sluggable {
+public class Category extends Category_Base implements Wrappable, Sluggable, Cloneable {
     /**
      * The logged {@link User} creates a new instance of a {@link Category}
      */
@@ -99,6 +105,22 @@ public class Category extends Category_Base implements Wrappable, Sluggable {
             post.removeCategories(this);
         }
         this.deleteDomainObject();
+    }
+
+    @Override
+    public Category clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            Collection<Post> posts = new HashSet<>(getPostsSet());
+            HashSet<Component> components = new HashSet<>(getComponentsSet());
+            Category clone = new Category(getSite());
+            cloneCache.setClone(Category.this, clone);
+            clone.setName(getName() != null ? fromJson(getName().json()) : null);
+            posts.stream().map(post -> post.clone(cloneCache)).forEach(clone::addPosts);
+            components.stream().filter(ListCategoryPosts.class::isInstance)
+                    .map(ListCategoryPosts.class::cast)
+                    .forEach(clone::addComponents);
+            return clone;
+        });
     }
 
     public class CategoryWrap extends Wrap {

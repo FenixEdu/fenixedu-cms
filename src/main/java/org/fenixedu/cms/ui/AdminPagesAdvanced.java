@@ -26,7 +26,6 @@ import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;
-import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -73,25 +72,17 @@ public class AdminPagesAdvanced {
     }
 
     @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
-    public RedirectView createPage(@PathVariable(value = "slug") String slug,
-                                   @RequestParam String name, RedirectAttributes redirectAttributes) {
-        if (Strings.isNullOrEmpty(name)) {
-            redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/pages/advanced/" + slug + "/create", true);
-        } else {
-            Site s = Site.fromSlug(slug);
-
-            AdminSites.canEdit(s);
-
-            Page page = createPage(name, s);
-            return new RedirectView("/cms/pages/advanced/" + s.getSlug() + "/" + page.getSlug() + "/edit", true);
-        }
+    public RedirectView createPage(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name) {
+        Site s = Site.fromSlug(slug);
+        AdminSites.canEdit(s);
+        Page page = createPage(name, s);
+        return new RedirectView("/cms/pages/advanced/" + s.getSlug() + "/" + page.getSlug() + "/edit", true);
     }
 
     @Atomic
-    private Page createPage(String name, Site s) {
+    private Page createPage(LocalizedString name, Site s) {
         Page p = new Page(s);
-        p.setName(new LocalizedString(I18N.getLocale(), name));
+        p.setName(name);
         return p;
     }
 
@@ -159,13 +150,10 @@ public class AdminPagesAdvanced {
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)
-    public RedirectView delete(Model model,
-                               @PathVariable(value = "slugSite") String slugSite,
+    public RedirectView delete(@PathVariable(value = "slugSite") String slugSite,
                                @PathVariable(value = "slugPage") String slugPage) {
         Site s = Site.fromSlug(slugSite);
-
         AdminSites.canEdit(s);
-
         s.pageForSlug(slugPage).delete();
         return new RedirectView("/cms/pages/advanced/" + s.getSlug() + "", true);
     }

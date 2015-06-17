@@ -52,10 +52,7 @@ import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
 import java.io.IOException;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -170,50 +167,50 @@ public class AdminSites {
             model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
             model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet());
             model.addAttribute("defaultSite", Bennu.getInstance().getDefaultSite());
+
+
             GoogleAPIService googleAPISerivce = Bennu.getInstance().getGoogleAPISerivce();
-            model.addAttribute("google", googleAPISerivce);
+            if (googleAPISerivce != null) {
+                model.addAttribute("google", googleAPISerivce);
 
-            GoogleAuthorizationCodeFlow google = googleAPISerivce.makeFlow();
+                GoogleAuthorizationCodeFlow google = googleAPISerivce.makeFlow();
+                String redirectUrl = CoreConfiguration.getConfiguration().applicationUrl() + "/cms/sites/google/oauth2callback";
 
-            String redirectUrl = CoreConfiguration.getConfiguration().applicationUrl() + "/cms/sites/google/oauth2callback";
+                JsonObject obj = new JsonObject();
+                obj.addProperty("site", site.getSlug());
+                String state = Base64.getEncoder().encodeToString(obj.toString().getBytes());
+                String url = google.newAuthorizationUrl().setState(state).setRedirectUri(redirectUrl).build();
+                model.addAttribute("url", url);
 
-            JsonObject obj = new JsonObject();
+                GoogleAPIConnection connection = site.getGoogleAPIConnection();
+                if (connection != null) {
+                    model.addAttribute("googleConnection", connection);
+                    model.addAttribute("url", CoreConfiguration.getConfiguration().applicationUrl());
+                    Analytics analytics = connection.getAnalytics();
+                    Accounts accounts = analytics.management().accounts().list().execute();
+                    JsonArray arr = new JsonArray();
 
-            obj.addProperty("site", site.getSlug());
+                    for (Account account : accounts.getItems()) {
+                        JsonObject o = new JsonObject();
 
-            String url =
-                    google.newAuthorizationUrl().setState(Base64.getEncoder().encodeToString(obj.toString().getBytes()))
-                            .setRedirectUri(redirectUrl).build();
+                        o.addProperty("name", account.getName());
+                        o.addProperty("accountId", account.getId());
 
-            model.addAttribute("url", url);
-            GoogleAPIConnection connection = site.getGoogleAPIConnection();
-            if (connection != null) {
-                model.addAttribute("googleConnection", connection);
-                model.addAttribute("url", CoreConfiguration.getConfiguration().applicationUrl());
-                Analytics analytics = connection.getAnalytics();
-                Accounts accounts = analytics.management().accounts().list().execute();
-                JsonArray arr = new JsonArray();
+                        Webproperties properties = analytics.management().webproperties().list(account.getId()).execute();
+                        JsonArray arr2 = new JsonArray();
+                        for (Webproperty property : properties.getItems()) {
+                            JsonObject o2 = new JsonObject();
 
-                for (Account account : accounts.getItems()) {
-                    JsonObject o = new JsonObject();
+                            o2.addProperty("name", property.getName());
+                            o2.addProperty("id", property.getId());
+                            arr2.add(o2);
+                        }
 
-                    o.addProperty("name", account.getName());
-                    o.addProperty("accountId", account.getId());
-
-                    Webproperties properties = analytics.management().webproperties().list(account.getId()).execute();
-                    JsonArray arr2 = new JsonArray();
-                    for (Webproperty property : properties.getItems()) {
-                        JsonObject o2 = new JsonObject();
-
-                        o2.addProperty("name", property.getName());
-                        o2.addProperty("id", property.getId());
-                        arr2.add(o2);
+                        o.add("properties", arr2);
+                        arr.add(o);
                     }
-
-                    o.add("properties", arr2);
-                    arr.add(o);
+                    model.addAttribute("accounts", arr);
                 }
-                model.addAttribute("accounts", arr);
             }
 
         } catch (Exception e) {
@@ -295,7 +292,7 @@ public class AdminSites {
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
     public RedirectView edit(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
                              @RequestParam LocalizedString description, @RequestParam String theme, @RequestParam String newSlug, @RequestParam(
-            required = false) Boolean published, RedirectAttributes redirectAttributes, @RequestParam String viewGroup,
+            required = false, defaultValue = "false") Boolean published, RedirectAttributes redirectAttributes, @RequestParam String viewGroup,
                              @RequestParam String postGroup, @RequestParam String adminGroup, @RequestParam String folder,
                              @RequestParam String analyticsCode, @RequestParam(required = false) String accountId, @RequestParam String initialPageSlug) {
 
@@ -303,20 +300,28 @@ public class AdminSites {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/sites/" + slug + "/edit", true);
         } else {
-            if (published == null) {
-                published = false;
-            }
             Site s = Site.fromSlug(slug);
-
             AdminSites.canEdit(s);
-            CMSTheme themeObj = CMSTheme.forType(theme);
-            if (themeObj == null) {
-                throw new ResourceNotFoundException();
-            }
+            CMSTheme themeObj = Optional.ofNullable(CMSTheme.forType(theme)).orElseThrow(ResourceNotFoundException::new);
 
             editSite(name, description, themeObj, newSlug, published, s, viewGroup, postGroup, adminGroup, folder, analyticsCode, accountId, s.pageForSlug(initialPageSlug));
             return new RedirectView("/cms/sites/" + newSlug + "/edit", true);
         }
+    }
+
+    @RequestMapping(value = "{siteSlug}/clone", method = RequestMethod.POST)
+    public RedirectView clone(@PathVariable String siteSlug) {
+        Site s = Site.fromSlug(siteSlug);
+        AdminSites.canEdit(s);
+        Site newSite = cloneSite(s);
+        return new RedirectView("/cms/sites/" + newSite.getSlug() + "/edit", true);
+    }
+
+    @Atomic(mode = TxMode.WRITE)
+    private Site cloneSite(Site originalSite) {
+        Site clone = originalSite.clone(new CloneCache());
+        clone.setName(originalSite.getName().append(" (clone)"));
+        return clone;
     }
 
     @Atomic(mode = TxMode.WRITE)

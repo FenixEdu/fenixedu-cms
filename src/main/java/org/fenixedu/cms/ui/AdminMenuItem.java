@@ -62,6 +62,8 @@ public class AdminMenuItem {
         root.add("page", item.getPage() == null ? null : new JsonPrimitive(item.getPage().getSlug()));
         root.add("position", new JsonPrimitive(item.getPosition()));
         root.add("isFolder", new JsonPrimitive(Optional.ofNullable(item.getFolder()).orElse(false)));
+        root.add("pageUrl", item.getPage() == null ? null : new JsonPrimitive(item.getPage().getAddress()));
+        root.add("pageEditUrl", item.getPage() == null ? null : new JsonPrimitive(item.getPage().getEditUrl()));
 
         if (item.getChildrenSet().size() > 0) {
             root.add("folder", new JsonPrimitive(true));

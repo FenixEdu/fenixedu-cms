@@ -19,7 +19,6 @@
 package org.fenixedu.cms.domain;
 
 import com.google.common.collect.ImmutableList;
-
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
@@ -36,21 +35,18 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-
 import pt.ist.fenixframework.Atomic;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * A post models a given content to be presented to the user.
  */
-public class Post extends Post_Base implements Wrappable, Sluggable {
+public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
     public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = Comparator
             .comparing(Post::getCreationDate).reversed();
@@ -125,24 +121,17 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
 
     @Atomic
     public void delete() {
-        for (Component c : this.getComponentSet()) {
-            c.delete();
-        }
-        for (Category c : this.getCategoriesSet()) {
-            removeCategories(c);
-        }
+        setCreatedBy(null);
+        setSite(null);
+        setViewGroup(null);
+        deleteFiles();
+        setLatestRevision(null);
 
-        this.setCreatedBy(null);
-        this.setSite(null);
-        this.setViewGroup(null);
-        this.deleteFiles();
-
-        for (PostContentRevision revision : this.getRevisionsSet()) {
-            revision.delete();
-        }
+        getComponentSet().stream().forEach(Component::delete);
+        getCategoriesSet().stream().forEach(Category::delete);
+        getRevisionsSet().stream().forEach(PostContentRevision::delete);
 
         this.deleteDomainObject();
-
     }
 
     public void removeCategories() {
@@ -196,8 +185,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     }
 
     public static Post create(Site site, Page page, LocalizedString name,
-            LocalizedString body, Category category, boolean active,
-            User creator) {
+                              LocalizedString body, Category category, boolean active,
+                              User creator) {
         Post post = new Post(site);
         post.setSite(site);
         post.setName(name);
@@ -232,6 +221,30 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
 
     public void addAttachment(GroupBasedFile groupBasedFile, int position) {
         new PostFile(this, groupBasedFile, false, position);
+    }
+
+    @Override
+    public Post clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            Collection<Category> categories = new HashSet<>(getCategoriesSet());
+            List<PostFile> files = new ArrayList<>(getFilesSorted());
+            Post clone = new Post(getSite());
+            cloneCache.setClone(Post.this, clone);
+            clone.setBody(getBody() != null ? fromJson(getBody().json()) : null);
+            clone.setName(getName() != null ? fromJson(getName().json()) : null);
+            clone.setBody(getBody() != null ? fromJson(getBody().json()) : null);
+            clone.setLocation(getLocation() != null ? fromJson(getLocation().json()) : null);
+            clone.setMetadata(getMetadata() != null ? getMetadata().clone() : null);
+            clone.setCanViewGroup(getCanViewGroup());
+            clone.setPublicationBegin(getPublicationBegin());
+            clone.setPublicationEnd(getPublicationEnd());
+            clone.setCreatedBy(getCreatedBy());
+            clone.setCreationDate(getCreationDate());
+            clone.setViewGroup(getViewGroup());
+            categories.stream().map(category -> category.clone(cloneCache)).forEach(clone::addCategories);
+            files.stream().map(file -> file.clone(cloneCache)).forEach(clone::addFiles);
+            return clone;
+        });
     }
 
     public Stream<PostFile> getAttachmentFilesSorted() {
@@ -274,7 +287,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     }
 
     public Optional<PostFile> getPostFile(GroupBasedFile groupBasedFile) {
-        return getFilesSet().stream().filter(postFile->postFile.getFiles() == groupBasedFile).findFirst();
+        return getFilesSet().stream().filter(postFile -> postFile.getFiles() == groupBasedFile).findFirst();
     }
 
     @Override

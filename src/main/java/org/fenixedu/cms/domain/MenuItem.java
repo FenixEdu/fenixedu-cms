@@ -36,10 +36,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
 /**
  * Models the items of a {@link Menu}
  */
-public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wrappable {
+public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wrappable, Cloneable {
 
     public static final Comparator<MenuItem> CREATION_DATE_COMPARATOR = Comparator.comparing(MenuItem::getCreationDate);
 
@@ -118,14 +120,14 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
      * </p>
      */
     public void removeFromParent() {
-        if (this.getTop() != null) {
-            this.getTop().remove(this);
-            this.setTop(null);
+        if (getTop() != null) {
+            getTop().remove(this);
         }
-        if (this.getParent() != null) {
-            this.getParent().remove(this);
-            this.setParent(null);
+        if (getParent() != null) {
+            getParent().remove(this);
         }
+        setTop(null);
+        setParent(null);
     }
 
     /**
@@ -161,14 +163,11 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     public void delete() {
         List<MenuItem> items = Lists.newArrayList(getChildrenSet());
         removeFromParent();
-
         items.forEach(i -> remove(i));
-
-        this.setCreatedBy(null);
-        this.setMenu(null);
-        this.setPage(null);
-
-        this.deleteDomainObject();
+        setCreatedBy(null);
+        setMenu(null);
+        setPage(null);
+        deleteDomainObject();
     }
 
     @Override
@@ -183,7 +182,6 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     public static void fixOrder(List<MenuItem> sortedItems) {
         for (int i = 0; i < sortedItems.size(); ++i) {
-
             sortedItems.get(i).setPosition(i);
         }
     }
@@ -201,6 +199,22 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
             }
         }
         return menuItem;
+    }
+
+    @Override
+    public MenuItem clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            MenuItem clone = new MenuItem(null);
+            cloneCache.setClone(MenuItem.this, clone);
+            clone.setName(getName() != null ? fromJson(getName().json()) : null);
+            clone.setPosition(getPosition());
+            clone.setFolder(getFolder());
+            clone.setUrl(getUrl());
+            clone.setPage(getPage() != null ? getPage().clone(cloneCache) : null);
+            clone.setParent(getParent() != null ? getParent().clone(cloneCache) : null);
+            clone.setTop(getTop() != null ? getTop().clone(cloneCache) : null);
+            return clone;
+        });
     }
 
     public class MenuItemWrap extends Wrap {

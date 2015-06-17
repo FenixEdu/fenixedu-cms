@@ -36,6 +36,7 @@ ${portal.toolkit()}
                 <li role="presentation" class="active"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
                 <li role="presentation"><a href="#permissions" aria-controls="permissions" role="tab" data-toggle="tab">Permissions</a></li>
                 <li role="presentation"><a href="#external" aria-controls="external" role="tab" data-toggle="tab">External Applications</a></li>
+                <li role="presentation"><a href="#io" aria-controls="external" role="tab" data-toggle="tab">Import/Export</a></li>
             </ul>
         </p>
     </div>
@@ -187,6 +188,7 @@ ${portal.toolkit()}
                         </div>
                     </div>
         </div>
+
         <div role="tabpanel" class="tab-pane form-horizontal" id="external">
 
             <c:if test="${google != null}">
@@ -342,8 +344,18 @@ ${portal.toolkit()}
 
             </c:if>
         </div>
-    </div>
 
+
+        <div role="tabpanel" class="tab-pane form-horizontal" id="io">
+            <div class="form-group">
+                <label class="col-sm-12 control-label">Create a clone of your site <button type="button" onclick="$('#clone-form').submit();" class="btn btn-default">Clone</button></label>
+                <label class="col-sm-12 control-label">Import a site <button type="button" class="btn btn-default">Import</button></label>
+                <label class="col-sm-12 control-label">Export site <button type="button" class="btn btn-default">Export</button></label>
+            </div>
+        </div>
+
+    </div>
+    
     <div class="form-group">
         <div class="col-sm-12">
             <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.save"/></button>
@@ -353,6 +365,7 @@ ${portal.toolkit()}
     </div>
 
 </form>
+<form id="clone-form" method="post" action="clone"></form>
 
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
     <form method="post" action="${pageContext.request.contextPath}/cms/sites/${site.slug}/delete">

@@ -18,11 +18,12 @@
  */
 package org.fenixedu.cms.domain.component;
 
-import java.util.Objects;
-
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.cms.domain.CloneCache;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.rendering.TemplateContext;
+
+import java.util.Objects;
 
 public final class StrategyBasedComponent extends StrategyBasedComponent_Base {
 
@@ -35,6 +36,11 @@ public final class StrategyBasedComponent extends StrategyBasedComponent_Base {
     @Override
     public void handle(Page page, TemplateContext componentContext, TemplateContext globalContext) {
         getComponent().handle(page, componentContext, globalContext);
+    }
+
+    @Override
+    public StrategyBasedComponent clone(CloneCache cloneCache) {
+        return this;
     }
 
     @Override

@@ -18,14 +18,9 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.api.client.util.Lists;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
@@ -54,17 +49,19 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
-import com.google.api.client.util.Lists;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class Site extends Site_Base implements Wrappable, Sluggable {
+import static org.fenixedu.commons.i18n.LocalizedString.*;
+
+public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     /**
      * maps the registered template types on the tempate classes
      */
@@ -75,11 +72,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * registers a new site template
      *
-     * @param type
-     *            the type of the template. This must be unique on the
-     *            application.
-     * @param c
-     *            the class to be registered as a template.
+     * @param type the type of the template. This must be unique on the
+     *             application.
+     * @param c    the class to be registered as a template.
      */
     public static void register(String type, Class<?> c) {
         TEMPLATES.put(type, c);
@@ -88,10 +83,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * searches for a {@link SiteTemplate} by type.
      *
-     * @param type
-     *            the type of the {@link SiteTemplate} wanted.
+     * @param type the type of the {@link SiteTemplate} wanted.
      * @return the {@link SiteTemplate} with the given type if it exists or null
-     *         otherwise.
+     * otherwise.
      */
     public static SiteTemplate templateFor(String type) {
         try {
@@ -137,6 +131,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
         this.setName(name);
         this.setSlug(StringNormalizer.slugify(name.getContent()));
         this.setDescription(description);
+        setPublished(false);
     }
 
     /**
@@ -151,8 +146,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * sets the access group for this site
      *
-     * @param group
-     *            the group of people who can view this site
+     * @param group the group of people who can view this site
      */
     @Atomic
     public void setCanViewGroup(Group group) {
@@ -171,8 +165,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * sets the access group of people who can post in this site
      *
-     * @param group
-     *            the group of people who can view this site
+     * @param group the group of people who can view this site
      */
     @Atomic
     public void setCanPostGroup(Group group) {
@@ -191,8 +184,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * sets the access group of people who can post in this site
      *
-     * @param group
-     *            the group of people who can view this site
+     * @param group the group of people who can view this site
      */
     @Atomic
     public void setCanAdminGroup(Group group) {
@@ -202,10 +194,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * searches for a {@link Site} by slug.
      *
-     * @param slug
-     *            the slug of the {@link Site} wanted.
+     * @param slug the slug of the {@link Site} wanted.
      * @return the {@link Site} with the given slug if it exists, or null
-     *         otherwise.
+     * otherwise.
      */
     public static Site fromSlug(String slug) {
         if (slug == null) {
@@ -232,10 +223,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * searches for a {@link Page} by slug on this {@link Site}.
      *
-     * @param slug
-     *            the slug of the {@link Page} wanted.
+     * @param slug the slug of the {@link Page} wanted.
      * @return the {@link Page} with the given slug if it exists on this site,
-     *         or null otherwise.
+     * or null otherwise.
      */
     public Page pageForSlug(String slug) {
         return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElse(null);
@@ -244,10 +234,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * searches for a {@link Post} by slug on this {@link Site}.
      *
-     * @param slug
-     *            the slug of the {@link Post} wanted.
+     * @param slug the slug of the {@link Post} wanted.
      * @return the {@link Post} with the given slug if it exists on this site,
-     *         or null otherwise.
+     * or null otherwise.
      */
     public Post postForSlug(String slug) {
         return getPostSet().stream().filter(post -> slug.equals(post.getSlug())).findAny().orElse(null);
@@ -256,10 +245,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * searches for a {@link Category} by slug on this {@link Site}.
      *
-     * @param slug
-     *            the slug of the {@link Category} wanted.
+     * @param slug the slug of the {@link Category} wanted.
      * @return the {@link Category} with the given slug if it exists on this
-     *         site, or null otherwise.
+     * site, or null otherwise.
      */
     public Category categoryForSlug(String slug) {
         return getCategoriesSet().stream().filter(category -> slug.equals(category.getSlug())).findAny().orElse(null);
@@ -304,10 +292,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * searches for a {@link Menu} by oid on this {@link Site}.
      *
-     * @param oid
-     *            the slug of the {@link Menu} wanted.
+     * @param oid the slug of the {@link Menu} wanted.
      * @return the {@link Menu} with the given oid if it exists on this site, or
-     *         null otherwise.
+     * null otherwise.
      */
     public Menu menuForOid(String oid) {
         Menu menu = FenixFramework.getDomainObject(oid);
@@ -321,10 +308,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
      * searches for a {@link Menu} by its slug on this {@link Site}.
      *
-     * @param slug
-     *            the slug of the {@link Menu} wanted.
+     * @param slug the slug of the {@link Menu} wanted.
      * @return the {@link Menu} with the given oid if it exists on this site, or
-     *         null otherwise.
+     * null otherwise.
      */
     public Menu menuForSlug(String slug) {
         return getMenusSet().stream().filter(x -> slug.equals(x.getSlug())).findAny().orElse(null);
@@ -361,31 +347,65 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
         }
     }
 
+    @Override
+    public Site clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            Set<Page> pages = new HashSet<>(getPagesSet());
+            Set<Menu> menus = new HashSet<>(getMenusSet());
+            Set<Category> categories = new HashSet<>(getCategoriesSet());
+            HashSet<Post> posts = new HashSet<>(getPostSet());
+            LocalizedString name = getName() != null ? fromJson(getName().json()) : null;
+            LocalizedString description = getDescription() != null ? fromJson(getDescription().json()) : null;
+            Site clone = new Site(name, description);
+            cloneCache.setClone(Site.this, clone);
+            clone.setCanViewGroup(getCanViewGroup());
+            clone.setCanAdminGroup(getCanAdminGroup());
+            clone.setCanPostGroup(getCanPostGroup());
+            clone.setThemeType(getThemeType());
+            clone.setTheme(getTheme());
+            clone.setEmbedded(getEmbedded());
+            clone.setFolder(getFolder());
+            clone.setAlternativeSite(getAlternativeSite());
+            clone.setAnalyticsCode(getAnalyticsCode());
+            clone.setGoogleAPIConnection(getGoogleAPIConnection());
+            clone.setStyle(getStyle());
+            clone.setPrimaryBennu(getPrimaryBennu());
+            clone.setBennu(getBennu());
+            for (Page originalPage : pages) {
+                Page pageClone = originalPage.clone(cloneCache);
+                clone.addPages(pageClone);
+                pageClone.setSlug(originalPage.getSlug());
+            }
+            for (Post originalPost : posts) {
+                Post postClone = originalPost.clone(cloneCache);
+                clone.addPost(postClone);
+                postClone.setSlug(originalPost.getSlug());
+            }
+            for (Menu originalMenu : menus) {
+                Menu menuClone = originalMenu.clone(cloneCache);
+                clone.addMenus(menuClone);
+                menuClone.setSlug(originalMenu.getSlug());
+            }
+            for (Category originalCategory : categories) {
+                Category categoryClone = originalCategory.clone(cloneCache);
+                clone.addCategories(categoryClone);
+                categoryClone.setSlug(originalCategory.getSlug());
+            }
+            clone.setInitialPage(getInitialPage() != null ? getInitialPage().clone(cloneCache) : null);
+            clone.updateMenuFunctionality();
+            return clone;
+        });
+    }
+
     @Atomic
     public void delete() {
         MenuFunctionality mf = this.getFunctionality();
         this.setFunctionality(null);
         this.setFolder(null);
+        this.setInitialPage(null);
 
         if (mf != null) {
             mf.delete();
-        }
-
-        for (Post post : getPostSet()) {
-            post.delete();
-        }
-
-        for (Category cat : getCategoriesSet()) {
-            cat.delete();
-        }
-
-        for (Menu cat : getMenusSet()) {
-            cat.delete();
-        }
-
-        this.setInitialPage(null);
-        for (Page page : getPagesSet()) {
-            page.delete();
         }
 
         getViewerGroup().delete();
@@ -395,19 +415,23 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
         this.setTheme(null);
         this.setCreatedBy(null);
         this.setBennu(null);
-        for (SiteActivity activity : getActivityLinesSet()) {
-            activity.delete();
-        }
+
         if (getGoogleAPIConnection() != null) {
             getGoogleAPIConnection().delete();
         }
+
+        getActivityLinesSet().stream().forEach(org.fenixedu.cms.domain.SiteActivity::delete);
+        getPostSet().stream().forEach(Post::delete);
+        getCategoriesSet().stream().forEach(Category::delete);
+        getMenusSet().stream().forEach(org.fenixedu.cms.domain.Menu::delete);
+        getPagesSet().stream().forEach(org.fenixedu.cms.domain.Page::delete);
 
         this.deleteDomainObject();
     }
 
     /**
      * @return the {@link ViewPost} of this {@link Site} if it is defined, or
-     *         null otherwise.
+     * null otherwise.
      */
     public Page getViewPostPage() {
         for (Page page : getPagesSet()) {
@@ -422,7 +446,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
 
     /**
      * @return true if a site is the default site, meaning if this site should
-     *         respond to '/' requests
+     * respond to '/' requests
      */
     public boolean isDefault() {
         return Bennu.getInstance().getDefaultSite() == this;
@@ -430,7 +454,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
 
     /**
      * @return the {@link ListCategoryPosts} of this {@link Site} if it is
-     *         defined, or null otherwise.
+     * defined, or null otherwise.
      */
     public Page getViewCategoryPage() {
         for (Page page : getPagesSet()) {

@@ -1,14 +1,13 @@
 package org.fenixedu.cms.domain;
 
-import java.io.StringWriter;
-
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.ui.SiteActivityRender;
 import org.joda.time.DateTime;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.io.StringWriter;
 
 public class SiteActivity extends SiteActivity_Base {
 
@@ -41,7 +40,21 @@ public class SiteActivity extends SiteActivity_Base {
         makeActivity(site, object);
 
     }
-    
+
+    public static void clonedSite(Site site, User user) {
+        JsonObject object = new JsonObject();
+
+        object.addProperty("type", "siteCloned");
+        object.addProperty("site", site.getExternalId());
+        object.add("siteName", site.getName().json());
+        object.addProperty("siteSlug", site.getSlug());
+        object.addProperty("user", user.getUsername());
+        object.addProperty("userName", user.getProfile().getDisplayName());
+
+        makeActivity(site, object);
+
+    }
+
     public static void createdPost(Post post, User user) {
         JsonObject object = new JsonObject();
 
