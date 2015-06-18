@@ -41,6 +41,7 @@ import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
  */
 public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
 
+    @Deprecated
     public Menu(Site site) {
         super();
         if (Authenticate.getUser() == null) {
@@ -51,6 +52,20 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
 
         setSite(site);
         setTopMenu(false);
+    }
+
+    public Menu(Site site, LocalizedString name) {
+        super();
+        if (Authenticate.getUser() == null) {
+            throw CmsDomainException.forbiden();
+        }
+        this.setCreatedBy(Authenticate.getUser());
+        this.setCreationDate(new DateTime());
+
+        setSite(site);
+        setTopMenu(false);
+
+        this.setName(name);
     }
 
     @Override
@@ -99,8 +114,10 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
     /**
      * Puts a {@link MenuItem} at a given position, shifting the existing ones to the right.
      *
-     * @param item     The {@link MenuItem} to be added.
-     * @param position the position to save the item.
+     * @param item
+     *            The {@link MenuItem} to be added.
+     * @param position
+     *            the position to save the item.
      */
     public void putAt(MenuItem item, int position) {
         if (position < 0) {
@@ -128,7 +145,8 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
     /**
      * Removes a given {@link MenuItem} from the Menu.
      *
-     * @param mi the {@link MenuItem} to be removed.
+     * @param mi
+     *            the {@link MenuItem} to be removed.
      */
     public void remove(MenuItem mi) {
         getToplevelItemsSet().remove(mi);
@@ -141,7 +159,8 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
     /**
      * Adds a given {@link MenuItem} as the last item.
      *
-     * @param mi the {@link MenuItem} to be added.
+     * @param mi
+     *            the {@link MenuItem} to be added.
      */
     public void add(MenuItem mi) {
         this.putAt(mi, getToplevelItemsSet().size());

@@ -61,8 +61,6 @@ public class PostFileAdapter implements JsonAdapter<PostFile> {
 
         json.addProperty("url", FileDownloadServlet.getDownloadUrl(file));
 
-        //TODO missing fields
-
         return json;
     }
 

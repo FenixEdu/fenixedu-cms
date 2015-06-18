@@ -10,13 +10,14 @@ import javax.ws.rs.core.MediaType;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.bean.CategoryBean;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
 import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +32,9 @@ public class TestCategoryResource extends TestCmsApi {
     @Test
     public void getCategory() {
         // prepare
-        User user = createAuthenticatedUser("getCategory");
-        Site site = createSite(user, "getCategory");
-        Category category = createCategory(site, "getCategory");
+        User user = CmsTestUtils.createAuthenticatedUser("getCategory");
+        Site site = CmsTestUtils.createSite(user, "getCategory");
+        Category category = CmsTestUtils.createCategory(site, "getCategory");
 
         // execute
         String response = getCategoryTarget(category).request().get(String.class);
@@ -69,9 +70,9 @@ public class TestCategoryResource extends TestCmsApi {
     @Test
     public void editCategory() {
         // prepare
-        User user = createAuthenticatedUser("editCategory");
-        Site site = createSite(user, "editCategory");
-        Category category = createCategory(site, "getCategory");
+        User user = CmsTestUtils.createAuthenticatedUser("editCategory");
+        Site site = CmsTestUtils.createSite(user, "editCategory");
+        Category category = CmsTestUtils.createCategory(site, "getCategory");
 
         CategoryBean categoryBean = new CategoryBean();
         LocalizedString nameEdit =

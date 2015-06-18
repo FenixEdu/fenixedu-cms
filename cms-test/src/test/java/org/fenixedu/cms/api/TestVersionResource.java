@@ -5,13 +5,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostContentRevision;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,11 +27,11 @@ public class TestVersionResource extends TestCmsApi {
     @Test
     public void getOnlyVersion() {
         // prepare
-        User user = createAuthenticatedUser("getOnlyVersion");
+        User user = CmsTestUtils.createAuthenticatedUser("getOnlyVersion");
 
-        Site site = createSite(user, "getOnlyVersion");
+        Site site = CmsTestUtils.createSite(user, "getOnlyVersion");
 
-        Post post = createPost(site, "getOnlyVersion");
+        Post post = CmsTestUtils.createPost(site, "getOnlyVersion");
 
         PostContentRevision version = post.getLatestRevision();
 
@@ -68,14 +69,14 @@ public class TestVersionResource extends TestCmsApi {
     @Test
     public void getMiddleVersion() {
         // prepare
-        User user = createAuthenticatedUser("getMiddleVersion");
+        User user = CmsTestUtils.createAuthenticatedUser("getMiddleVersion");
 
-        Site site = createSite(user, "getMiddleVersion");
+        Site site = CmsTestUtils.createSite(user, "getMiddleVersion");
 
-        Post post = createPost(site, "getMiddleVersion v1");
+        Post post = CmsTestUtils.createPost(site, "getMiddleVersion v1");
         PostContentRevision version1 = post.getLatestRevision();
-        PostContentRevision version2 = createVersion(post, "getMiddleVersion v2");
-        PostContentRevision version3 = createVersion(post, "getMiddleVersion v3");
+        PostContentRevision version2 = CmsTestUtils.createVersion(post, "getMiddleVersion v2");
+        PostContentRevision version3 = CmsTestUtils.createVersion(post, "getMiddleVersion v3");
 
         // execute
         String response = getVersionTarget(version2).request().get(String.class);

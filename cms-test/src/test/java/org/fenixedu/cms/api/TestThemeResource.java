@@ -7,11 +7,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
 import org.fenixedu.cms.api.json.ThemeAdapter;
 import org.fenixedu.cms.domain.CMSTheme;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public class TestThemeResource extends TestCmsApi {
     @Test
     public void getThemesEmpty() {
         // prepare
-        User user = createAuthenticatedUser("getThemesEmpty");
+        User user = CmsTestUtils.createAuthenticatedUser("getThemesEmpty");
 
         // execute
         String response = getThemesTarget().request().get(String.class);
@@ -43,13 +44,13 @@ public class TestThemeResource extends TestCmsApi {
         // prepare
         Set<JsonElement> expectedJsonThemes = new HashSet<JsonElement>();
 
-        User user = createAuthenticatedUser("getSeveralThemes");
+        User user = CmsTestUtils.createAuthenticatedUser("getSeveralThemes");
 
-        CMSTheme theme1 = createTheme("getSeveralThemes1");
+        CMSTheme theme1 = CmsTestUtils.createTheme("getSeveralThemes1");
         JsonElement theme1json = removeNullKeys(new ThemeAdapter().view(theme1, ctx));
         expectedJsonThemes.add(theme1json);
 
-        CMSTheme theme2 = createTheme("getSeveralThemes2");
+        CMSTheme theme2 = CmsTestUtils.createTheme("getSeveralThemes2");
         JsonElement theme2json = removeNullKeys(new ThemeAdapter().view(theme2, ctx));
         expectedJsonThemes.add(theme2json);
 
@@ -70,9 +71,9 @@ public class TestThemeResource extends TestCmsApi {
     @Test
     public void getTheme() {
         // prepare
-        User user = createAuthenticatedUser("getTheme");
+        User user = CmsTestUtils.createAuthenticatedUser("getTheme");
 
-        CMSTheme theme = createTheme("getTheme");
+        CMSTheme theme = CmsTestUtils.createTheme("getTheme");
 
         // execute
         String response = getThemeTarget(theme).request().get(String.class);

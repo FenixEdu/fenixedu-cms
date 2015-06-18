@@ -29,6 +29,7 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
+
 import pt.ist.fenixframework.Atomic;
 
 import java.util.Collection;
@@ -43,6 +44,7 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
     /**
      * The logged {@link User} creates a new instance of a {@link Category}
      */
+    @Deprecated
     public Category(Site site) {
         super();
         if (Authenticate.getUser() == null) {
@@ -51,6 +53,17 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
         this.setSite(site);
+    }
+
+    public Category(Site site, LocalizedString name) {
+        super();
+        if (Authenticate.getUser() == null) {
+            throw CmsDomainException.forbiden();
+        }
+        this.setCreatedBy(Authenticate.getUser());
+        this.setCreationDate(new DateTime());
+        this.setSite(site);
+        this.setName(name);
     }
 
     @Override
@@ -153,7 +166,6 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
     }
 
     public String getEditUrl() {
-        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/categories/"
-                + getSite().getSlug() + "/" + getSlug();
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/categories/" + getSite().getSlug() + "/" + getSlug();
     }
 }

@@ -18,33 +18,44 @@
  */
 package org.fenixedu.cms.ui;
 
-import com.google.common.base.Strings;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.*;
+import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.Menu;
+import org.fenixedu.cms.domain.MenuItem;
+import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.google.common.base.Strings;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import static org.fenixedu.cms.domain.MenuItem.CREATION_DATE_COMPARATOR;
 
@@ -84,7 +95,8 @@ public class AdminPages {
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.GET)
-    public String edit(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(value = "slugPage") String slugPage) {
+    public String edit(Model model, @PathVariable(value = "slugSite") String slugSite,
+            @PathVariable(value = "slugPage") String slugPage) {
         Site s = Site.fromSlug(slugSite);
 
         AdminSites.canEdit(s);
@@ -106,14 +118,14 @@ public class AdminPages {
     }
 
     @RequestMapping(value = "{slug}/{pageSlug}/createCategory", method = RequestMethod.POST)
-    public RedirectView createCategory(@PathVariable String slug, @PathVariable String pageSlug, @RequestParam LocalizedString name) {
+    public RedirectView createCategory(@PathVariable String slug, @PathVariable String pageSlug,
+            @RequestParam LocalizedString name) {
         Site site = Site.fromSlug(slug);
         AdminSites.canEdit(site);
         Page page = site.pageForSlug(pageSlug);
 
         FenixFramework.atomic(() -> {
-            Category p = new Category(site);
-            p.setName(name);
+            Category p = new Category(site, name);
         });
 
         return pageRedirect(page);
@@ -145,7 +157,8 @@ public class AdminPages {
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)
-    public RedirectView delete(@PathVariable(value = "slugSite") String slugSite, @PathVariable(value = "slugPage") String slugPage) {
+    public RedirectView delete(@PathVariable(value = "slugSite") String slugSite,
+            @PathVariable(value = "slugPage") String slugPage) {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         Page page = s.pageForSlug(slugPage);
@@ -158,7 +171,7 @@ public class AdminPages {
 
     @RequestMapping(value = "{slugSite}/{slugPage}/addAttachment", method = RequestMethod.POST)
     public RedirectView addAttachment(@PathVariable String slugSite, @PathVariable String slugPage,
-                                      @RequestParam(required = true) String name, @RequestParam MultipartFile attachment) {
+            @RequestParam(required = true) String name, @RequestParam MultipartFile attachment) {
 
         Site site = Site.fromSlug(slugSite);
 
@@ -177,10 +190,8 @@ public class AdminPages {
 
     @RequestMapping(value = "{slugSite}/{slugPage}/addAttachment.json", method = RequestMethod.POST,
             produces = "application/json")
-    public
-    @ResponseBody
-    String addAttachmentJson(@PathVariable String slugSite, @PathVariable String slugPage, @RequestParam(required = true) String name,
-                             @RequestParam("attachment") MultipartFile attachment) throws IOException {
+    public @ResponseBody String addAttachmentJson(@PathVariable String slugSite, @PathVariable String slugPage, @RequestParam(
+            required = true) String name, @RequestParam("attachment") MultipartFile attachment) throws IOException {
         Site site = Site.fromSlug(slugSite);
         AdminSites.canEdit(site);
         Page page = site.pageForSlug(slugPage);
@@ -217,7 +228,7 @@ public class AdminPages {
 
     @RequestMapping(value = "{slugSite}/{slugPage}/moveAttachment", method = RequestMethod.POST)
     public RedirectView moveAttachment(@PathVariable String slugSite, @PathVariable String slugPage,
-                                       @RequestParam Integer origin, @RequestParam Integer destiny) throws IOException {
+            @RequestParam Integer origin, @RequestParam Integer destiny) throws IOException {
         Site site = Site.fromSlug(slugSite);
         AdminSites.canEdit(site);
         Page page = site.pageForSlug(slugPage);
@@ -226,38 +237,36 @@ public class AdminPages {
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/addFile.json", method = RequestMethod.POST, produces = "application/json")
-    public
-    @ResponseBody
-    String addFileJson(@PathVariable String slugSite, @PathVariable String slugPage, @RequestParam MultipartFile[] attachment) {
+    public @ResponseBody String addFileJson(@PathVariable String slugSite, @PathVariable String slugPage,
+            @RequestParam MultipartFile[] attachment) {
         Site site = Site.fromSlug(slugSite);
         AdminSites.canEdit(site);
         Page page = site.pageForSlug(slugPage);
         JsonArray array = new JsonArray();
 
-        page.getStaticPost().ifPresent(post ->
-                Stream.of(attachment).map(multipartFile -> {
-                    JsonObject obj = new JsonObject();
-                    FenixFramework.atomic(() -> {
-                        String filename = multipartFile.getOriginalFilename();
-                        try {
-                            GroupBasedFile f = new GroupBasedFile(filename, filename, multipartFile.getBytes(), AnyoneGroup.get());
-                            post.addEmbeddedFile(f, 0);
-                            obj.addProperty("displayname", f.getDisplayName());
-                            obj.addProperty("filename", f.getFilename());
-                            obj.addProperty("url", FileDownloadServlet.getDownloadUrl(f));
-                        } catch (IOException e) {
-                            //TODO - add error message
-                        }
-                    });
-                    return obj;
-                }).filter(obj -> !obj.isJsonNull()).forEach(x -> array.add(x)));
+        page.getStaticPost().ifPresent(post -> Stream.of(attachment).map(multipartFile -> {
+            JsonObject obj = new JsonObject();
+            FenixFramework.atomic(() -> {
+                String filename = multipartFile.getOriginalFilename();
+                try {
+                    GroupBasedFile f = new GroupBasedFile(filename, filename, multipartFile.getBytes(), AnyoneGroup.get());
+                    post.addEmbeddedFile(f, 0);
+                    obj.addProperty("displayname", f.getDisplayName());
+                    obj.addProperty("filename", f.getFilename());
+                    obj.addProperty("url", FileDownloadServlet.getDownloadUrl(f));
+                } catch (IOException e) {
+                    //TODO - add error message
+                }
+            });
+            return obj;
+        }).filter(obj -> !obj.isJsonNull()).forEach(x -> array.add(x)));
 
         return array.toString();
     }
 
     private Collection<Page> getStaticPages(Site site) {
-        return site.getPagesSet().stream().filter(Page::isStaticPage)
-                .sorted(Page.PAGE_NAME_COMPARATOR).collect(Collectors.toList());
+        return site.getPagesSet().stream().filter(Page::isStaticPage).sorted(Page.PAGE_NAME_COMPARATOR)
+                .collect(Collectors.toList());
     }
 
     public RedirectView allPagesRedirect(Site site) {
@@ -275,9 +284,9 @@ public class AdminPages {
         LocalizedString nameSanitized = Post.sanitize(name);
         LocalizedString bodySanitized = Post.sanitize(body);
 
-        Optional.ofNullable(categories).ifPresent(categoriesSlugs ->
-                Stream.of(categoriesSlugs).map(site::categoryForSlug)
-                        .filter(category -> category != null).forEach(post::addCategories));
+        Optional.ofNullable(categories).ifPresent(
+                categoriesSlugs -> Stream.of(categoriesSlugs).map(site::categoryForSlug).filter(category -> category != null)
+                .forEach(post::addCategories));
 
         if (!post.getName().equals(nameSanitized)) {
             post.setName(nameSanitized);
@@ -342,8 +351,7 @@ public class AdminPages {
 
     @Atomic(mode = Atomic.TxMode.WRITE)
     private Page createPageAndPost(LocalizedString name, Site site) {
-        Page page = new Page(site);
-        page.setName(name);
+        Page page = new Page(site, name);
         Post post = new Post(site);
         post.setName(name);
         post.setBody(new LocalizedString());

@@ -18,7 +18,6 @@
  */
 package org.fenixedu.cms.ui;
 
-import com.google.common.base.Strings;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.Site;
@@ -31,7 +30,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+
 import pt.ist.fenixframework.Atomic;
+
+import com.google.common.base.Strings;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/categories")
@@ -59,7 +61,7 @@ public class AdminCategory {
 
     @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
     public RedirectView createCategory(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
-                                       RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes) {
         if (Strings.isNullOrEmpty(name)) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/categories/" + slug + "/create", true);
@@ -74,8 +76,7 @@ public class AdminCategory {
 
     @Atomic
     private void createCategory(Site site, String name) {
-        Category p = new Category(site);
-        p.setName(new LocalizedString(I18N.getLocale(), name));
+        Category p = new Category(site, new LocalizedString(I18N.getLocale(), name));
     }
 
     @RequestMapping(value = "{slugSite}/{slugCategories}/delete", method = RequestMethod.POST)
@@ -91,9 +92,8 @@ public class AdminCategory {
 
     @RequestMapping(value = "{slugSite}/{slugCategories}", method = RequestMethod.GET)
     public RedirectView viewCategory(@PathVariable(value = "slugSite") String slugSite,
-                                     @PathVariable(value = "slugCategories") String slugCategories) {
+            @PathVariable(value = "slugCategories") String slugCategories) {
         return new RedirectView("/cms/posts/" + slugSite + "?category=" + slugCategories, true);
     }
-
 
 }

@@ -13,8 +13,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.bean.PostBean;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
 import org.fenixedu.cms.api.json.PostAdapter;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.StringNormalizer;
@@ -22,6 +22,7 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +41,9 @@ public class TestSitePostResource extends TestCmsApi {
     @Test
     public void getSitePostsEmpty() {
         // prepare
-        User user = createAuthenticatedUser("getSitePostsEmpty");
+        User user = CmsTestUtils.createAuthenticatedUser("getSitePostsEmpty");
 
-        Site site = createSite(user, "getSitePostsEmpty");
+        Site site = CmsTestUtils.createSite(user, "getSitePostsEmpty");
 
         // execute
         String response = getSitePostsTarget(site).request().get(String.class);
@@ -57,15 +58,15 @@ public class TestSitePostResource extends TestCmsApi {
         // prepare
         Set<JsonElement> expectedJsonPosts = new HashSet<JsonElement>();
 
-        User user = createAuthenticatedUser("getSiteSeveralPosts");
+        User user = CmsTestUtils.createAuthenticatedUser("getSiteSeveralPosts");
 
-        Site site = createSite(user, "getSiteSeveralPosts");
+        Site site = CmsTestUtils.createSite(user, "getSiteSeveralPosts");
 
-        Post post1 = createPost(site, "getSiteSeveralPosts1");
+        Post post1 = CmsTestUtils.createPost(site, "getSiteSeveralPosts1");
         JsonElement post1json = removeNullKeys(new PostAdapter().view(post1, ctx));
         expectedJsonPosts.add(post1json);
 
-        Post post2 = createPost(site, "getSiteSeveralPosts2");
+        Post post2 = CmsTestUtils.createPost(site, "getSiteSeveralPosts2");
         JsonElement post2json = removeNullKeys(new PostAdapter().view(post2, ctx));
         expectedJsonPosts.add(post2json);
 
@@ -86,9 +87,9 @@ public class TestSitePostResource extends TestCmsApi {
     @Test
     public void createMinPost() {
         // prepare
-        User user = createAuthenticatedUser("createMinPost");
+        User user = CmsTestUtils.createAuthenticatedUser("createMinPost");
 
-        Site site = createSite(user, "createMinPost");
+        Site site = CmsTestUtils.createSite(user, "createMinPost");
 
         PostBean postBean = new PostBean();
 
@@ -121,7 +122,7 @@ public class TestSitePostResource extends TestCmsApi {
                 jsonResponse.get("modificationDate").getAsString());
 
         assertTrue("response post should have a published field", jsonResponse.has("published"));
-        assertEquals("published response should be equal to expected published", true, jsonResponse.get("published")
+        assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")
                 .getAsBoolean());
 
         assertTrue("response site should have an createdBy field", jsonResponse.has("createdBy"));
@@ -141,9 +142,9 @@ public class TestSitePostResource extends TestCmsApi {
     @Test
     public void createFullPost() {
         // prepare
-        User user = createAuthenticatedUser("createFullPost");
+        User user = CmsTestUtils.createAuthenticatedUser("createFullPost");
 
-        Site site = createSite(user, "createFullPost");
+        Site site = CmsTestUtils.createSite(user, "createFullPost");
 
         LocalizedString name = new LocalizedString(Locale.UK, "createFullPost-name-uk").with(Locale.US, "createFullPost-name-us");
         LocalizedString body = new LocalizedString(Locale.UK, "createFullPost-body-uk").with(Locale.US, "createFullPost-body-us");
@@ -180,7 +181,7 @@ public class TestSitePostResource extends TestCmsApi {
                 jsonResponse.get("modificationDate").getAsString().substring(0, 16));  // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
 
         assertTrue("response post should have a published field", jsonResponse.has("published"));
-        assertEquals("published response should be equal to expected published", true, jsonResponse.get("published")
+        assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")
                 .getAsBoolean());
 
         assertTrue("response site should have an createdBy field", jsonResponse.has("createdBy"));

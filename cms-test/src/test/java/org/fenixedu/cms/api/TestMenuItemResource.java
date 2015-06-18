@@ -11,13 +11,14 @@ import javax.ws.rs.core.MediaType;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.bean.MenuItemBean;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +33,10 @@ public class TestMenuItemResource extends TestCmsApi {
     @Test
     public void getMenuItem() {
         // prepare
-        User user = createAuthenticatedUser("getMenuItem");
-        Site site = createSite(user, "getMenuItem");
-        Menu menu = createMenu(site, "getMenuItem");
-        MenuItem menuItem = createMenuItem(menu, "getMenuItem");
+        User user = CmsTestUtils.createAuthenticatedUser("getMenuItem");
+        Site site = CmsTestUtils.createSite(user, "getMenuItem");
+        Menu menu = CmsTestUtils.createMenu(site, "getMenuItem");
+        MenuItem menuItem = CmsTestUtils.createMenuItem(menu, "getMenuItem");
 
         // execute
         String response = getMenuItemTarget(menuItem).request().get(String.class);
@@ -78,10 +79,10 @@ public class TestMenuItemResource extends TestCmsApi {
     @Test
     public void editMenuItem() {
         // prepare
-        User user = createAuthenticatedUser("editMenuItem");
-        Site site = createSite(user, "editMenuItem");
-        Menu menu = createMenu(site, "editMenuItem");
-        MenuItem menuItem = createMenuItem(menu, "editMenuItem");
+        User user = CmsTestUtils.createAuthenticatedUser("editMenuItem");
+        Site site = CmsTestUtils.createSite(user, "editMenuItem");
+        Menu menu = CmsTestUtils.createMenu(site, "editMenuItem");
+        MenuItem menuItem = CmsTestUtils.createMenuItem(menu, "editMenuItem");
 
         LocalizedString nameEdit =
                 new LocalizedString(Locale.UK, "menuItem name uk nameEdit").with(Locale.US, "menuItem name us nameEdit");

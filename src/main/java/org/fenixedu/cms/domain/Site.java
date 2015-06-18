@@ -131,7 +131,8 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         this.setName(name);
         this.setSlug(StringNormalizer.slugify(name.getContent()));
         this.setDescription(description);
-        setPublished(false);
+
+        this.setPublished(false);
     }
 
     /**
@@ -264,8 +265,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     public Category getOrCreateCategoryForSlug(String slug, LocalizedString name) {
         Category c = categoryForSlug(slug);
         if (c == null) {
-            c = new Category(this);
-            c.setName(name);
+            c = new Category(this, name);
             c.setSlug(slug);
         }
         return c;

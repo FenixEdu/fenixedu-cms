@@ -10,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.bean.MenuBean;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.cms.domain.Site;
@@ -18,6 +18,7 @@ import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +33,9 @@ public class TestMenuResource extends TestCmsApi {
     @Test
     public void getMenu() {
         // prepare
-        User user = createAuthenticatedUser("getMenu");
-        Site site = createSite(user, "getMenu");
-        Menu menu = createMenu(site, "getMenu");
+        User user = CmsTestUtils.createAuthenticatedUser("getMenu");
+        Site site = CmsTestUtils.createSite(user, "getMenu");
+        Menu menu = CmsTestUtils.createMenu(site, "getMenu");
         MenuItem menuItem1 = new MenuItem(menu);
         menu.addToplevelItems(menuItem1);
 
@@ -82,9 +83,9 @@ public class TestMenuResource extends TestCmsApi {
     @Test
     public void editMenu() {
         // prepare
-        User user = createAuthenticatedUser("editMenu");
-        Site site = createSite(user, "editMenu");
-        Menu menu = createMenu(site, "editMenu");
+        User user = CmsTestUtils.createAuthenticatedUser("editMenu");
+        Site site = CmsTestUtils.createSite(user, "editMenu");
+        Menu menu = CmsTestUtils.createMenu(site, "editMenu");
 
         LocalizedString nameEdit =
                 new LocalizedString(Locale.UK, "menu name uk nameEdit").with(Locale.US, "menu name us nameEdit");

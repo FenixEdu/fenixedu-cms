@@ -7,14 +7,15 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
 import org.fenixedu.cms.api.json.PostRevisionAdapter;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostContentRevision;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,11 +33,11 @@ public class TestPostVersionResource extends TestCmsApi {
         // prepare
         Set<JsonElement> expectedJsonVersions = new HashSet<JsonElement>();
 
-        User user = createAuthenticatedUser("getPostSeveralVersions");
+        User user = CmsTestUtils.createAuthenticatedUser("getPostSeveralVersions");
 
-        Site site = createSite(user, "getPostSeveralVersions");
+        Site site = CmsTestUtils.createSite(user, "getPostSeveralVersions");
 
-        Post post = createPost(site, "getPostSeveralVersions");
+        Post post = CmsTestUtils.createPost(site, "getPostSeveralVersions");
 
         PostContentRevision version1 = post.getLatestRevision();
 

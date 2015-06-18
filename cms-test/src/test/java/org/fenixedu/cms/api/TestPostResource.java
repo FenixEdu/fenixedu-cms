@@ -11,8 +11,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.bean.PostBean;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
 import org.fenixedu.cms.api.json.PostAdapter;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.StringNormalizer;
@@ -20,6 +20,7 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +35,8 @@ public class TestPostResource extends TestCmsApi {
     @Test
     public void getLastSingleVersion() {
         // prepare
-        User user = createAuthenticatedUser("getLastSingleVersion");
-        Site site = createSite(user, "getLastSingleVersion");
+        User user = CmsTestUtils.createAuthenticatedUser("getLastSingleVersion");
+        Site site = CmsTestUtils.createSite(user, "getLastSingleVersion");
 
         Post post = new Post(site);
         LocalizedString postBody =
@@ -63,14 +64,14 @@ public class TestPostResource extends TestCmsApi {
         assertTrue("response site should have an creationDate field", jsonResponse.has("creationDate"));
         assertEquals("creationDate response should be equal to expected creationDate", creationDate.toString().substring(0, 16),
                 jsonResponse // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
-                .get("creationDate").getAsString().substring(0, 16));
+                        .get("creationDate").getAsString().substring(0, 16));
 
         assertTrue("response site should have an modificationDate field", jsonResponse.has("modificationDate"));
         assertEquals("modificationDate response should be equal to expected", post.getModificationDate().toString(), jsonResponse
                 .get("modificationDate").getAsString());
 
         assertTrue("response post should have a published field", jsonResponse.has("published"));
-        assertEquals("published response should be equal to expected published", true, jsonResponse.get("published")
+        assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")
                 .getAsBoolean());
 
         assertTrue("response site should have an createdBy field", jsonResponse.has("createdBy"));
@@ -90,8 +91,8 @@ public class TestPostResource extends TestCmsApi {
     @Test
     public void getLastSeveralVersions() {
         // prepare
-        User user = createAuthenticatedUser("getLastSeveralVersions");
-        Site site = createSite(user, "getLastSeveralVersions");
+        User user = CmsTestUtils.createAuthenticatedUser("getLastSeveralVersions");
+        Site site = CmsTestUtils.createSite(user, "getLastSeveralVersions");
 
         Post post = new Post(site);
 
@@ -125,14 +126,14 @@ public class TestPostResource extends TestCmsApi {
         assertTrue("response site should have an creationDate field", jsonResponse.has("creationDate"));
         assertEquals("creationDate response should be equal to expected creationDate", creationDate.toString().substring(0, 16),
                 jsonResponse // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
-                .get("creationDate").getAsString().substring(0, 16));
+                        .get("creationDate").getAsString().substring(0, 16));
 
         assertTrue("response site should have an modificationDate field", jsonResponse.has("modificationDate"));
         assertEquals("modificationDate response should be equal to expected", post.getModificationDate().toString(), jsonResponse
                 .get("modificationDate").getAsString());
 
         assertTrue("response post should have a published field", jsonResponse.has("published"));
-        assertEquals("published response should be equal to expected published", true, jsonResponse.get("published")
+        assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")
                 .getAsBoolean());
 
         assertTrue("response site should have an createdBy field", jsonResponse.has("createdBy"));
@@ -152,11 +153,11 @@ public class TestPostResource extends TestCmsApi {
     @Test
     public void editPost() {
         // prepare
-        User user = createAuthenticatedUser("editPost");
+        User user = CmsTestUtils.createAuthenticatedUser("editPost");
 
-        Site site = createSite(user, "editPost");
+        Site site = CmsTestUtils.createSite(user, "editPost");
 
-        Post post = createPost(site, "editPost");
+        Post post = CmsTestUtils.createPost(site, "editPost");
 
         LocalizedString nameEdit =
                 new LocalizedString(Locale.UK, "post name uk nameEdit").with(Locale.US, "post name us nameEdit");

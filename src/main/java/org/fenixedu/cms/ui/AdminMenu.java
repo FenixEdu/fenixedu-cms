@@ -71,8 +71,7 @@ public class AdminMenu {
 
     @Atomic
     private void createMenu(Site site, LocalizedString name) {
-        Menu p = new Menu(site);
-        p.setName(name);
+        new Menu(site, name);
     }
 
     @RequestMapping(value = "{slugSite}/{oidMenu}/delete", method = RequestMethod.POST)

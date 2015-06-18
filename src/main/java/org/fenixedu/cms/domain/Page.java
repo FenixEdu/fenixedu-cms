@@ -49,6 +49,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     /**
      * the logged {@link User} creates a new Page.
      */
+    @Deprecated
     public Page(Site site) {
         super();
         DateTime now = new DateTime();
@@ -60,7 +61,22 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
         this.setCreatedBy(Authenticate.getUser());
         this.setCanViewGroup(AnyoneGroup.get());
         this.setSite(site);
-        this.setPublished(true);
+        this.setPublished(false);
+    }
+
+    public Page(Site site, LocalizedString name) {
+        super();
+        DateTime now = new DateTime();
+        this.setCreationDate(now);
+        this.setModificationDate(now);
+        if (Authenticate.getUser() == null) {
+            throw CmsDomainException.forbiden();
+        }
+        this.setCreatedBy(Authenticate.getUser());
+        this.setCanViewGroup(AnyoneGroup.get());
+        this.setSite(site);
+        this.setPublished(false);
+        this.setName(name);
     }
 
     @Override
@@ -100,9 +116,10 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     /**
      * Searches a {@link Component} of this page by oid.
      *
-     * @param oid the oid of the {@link Component} to be searched.
+     * @param oid
+     *            the oid of the {@link Component} to be searched.
      * @return the {@link Component} with the given oid if it is a component of
-     * this page and null otherwise.
+     *         this page and null otherwise.
      */
     public Component componentForOid(String oid) {
         for (Component c : getComponentsSet()) {
@@ -135,8 +152,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
      * @return the URL link for this page.
      */
     public String getAddress() {
-        return CoreConfiguration.getConfiguration().applicationUrl() + "/"
-                + getSite().getBaseUrl() + "/" + getSlug();
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/" + getSite().getBaseUrl() + "/" + getSlug();
     }
 
     /**
@@ -151,19 +167,17 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     /**
      * sets the access group for this site
      *
-     * @param group the group of people who can view this site
+     * @param group
+     *            the group of people who can view this site
      */
     @Atomic
     public void setCanViewGroup(Group group) {
         setViewGroup(group.toPersistentGroup());
     }
 
-    public static Page create(Site site, Menu menu, MenuItem parent,
-                              LocalizedString name, boolean published, String template,
-                              User creator, Component... components) {
-        Page page = new Page(site);
-        page.setSite(site);
-        page.setName(name);
+    public static Page create(Site site, Menu menu, MenuItem parent, LocalizedString name, boolean published, String template,
+            User creator, Component... components) {
+        Page page = new Page(site, name);
         if (components != null && components.length > 0) {
             for (Component component : components) {
                 page.addComponents(component);
@@ -217,8 +231,8 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     }
 
     public String getEditUrl() {
-        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/" +
-                (isStaticPage() ? "" : "advanced/") + getSite().getSlug() + "/" + getSlug() + "/edit";
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/" + getSite().getSlug() + "/" + getSlug()
+                + (isStaticPage() ? "/edit" : "/advanced/edit");
     }
 
     @Override
@@ -230,8 +244,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
         CMSTemplate template = super.getTemplate();
         CMSTheme theme = getSite().getTheme();
         if (templateType != null) {
-            if (template != null && template.getTheme() == theme
-                    && template.getType().equals(templateType)) {
+            if (template != null && template.getTheme() == theme && template.getType().equals(templateType)) {
                 return template;
             }
 
@@ -258,7 +271,8 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     }
 
     public Optional<Post> getStaticPost() {
-        return getComponentsSet().stream().filter(component -> StaticPost.class.isInstance(component)).map(component -> ((StaticPost) component).getPost()).findFirst();
+        return getComponentsSet().stream().filter(component -> StaticPost.class.isInstance(component))
+                .map(component -> ((StaticPost) component).getPost()).findFirst();
     }
 
     @Override

@@ -73,7 +73,7 @@
         </dependency>
         <dependency>
             <groupId>org.fenixedu</groupId>
-            <artifactId>cms-core</artifactId>
+            <artifactId>fenixedu-cms</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>

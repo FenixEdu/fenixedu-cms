@@ -10,13 +10,14 @@ import javax.ws.rs.core.MediaType;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.bean.PageBean;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +32,9 @@ public class TestPageResource extends TestCmsApi {
     @Test
     public void getPage() {
         // prepare
-        User user = createAuthenticatedUser("getPage");
-        Site site = createSite(user, "getPage");
-        Page page = createPage(site, "getPage");
+        User user = CmsTestUtils.createAuthenticatedUser("getPage");
+        Site site = CmsTestUtils.createSite(user, "getPage");
+        Page page = CmsTestUtils.createPage(site, "getPage");
 
         // execute
         String response = getPageTarget(page).request().get(String.class);
@@ -59,7 +60,7 @@ public class TestPageResource extends TestCmsApi {
                 .get("modificationDate").getAsString());
 
         assertTrue("response post should have a published field", jsonResponse.has("published"));
-        assertEquals("published response should be equal to expected published", true, jsonResponse.get("published")
+        assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")
                 .getAsBoolean());
 
         assertTrue("response site should have an createdBy field", jsonResponse.has("createdBy"));
@@ -77,9 +78,9 @@ public class TestPageResource extends TestCmsApi {
     @Test
     public void editPage() {
         // prepare
-        User user = createAuthenticatedUser("editPage");
-        Site site = createSite(user, "editPage");
-        Page page = createPage(site, "editPage");
+        User user = CmsTestUtils.createAuthenticatedUser("editPage");
+        Site site = CmsTestUtils.createSite(user, "editPage");
+        Page page = CmsTestUtils.createPage(site, "editPage");
 
         LocalizedString nameEdit =
                 new LocalizedString(Locale.UK, "page name uk nameEdit").with(Locale.US, "page name us nameEdit");

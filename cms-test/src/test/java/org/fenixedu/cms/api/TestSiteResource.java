@@ -15,15 +15,16 @@ import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.api.bean.SiteBean;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
 import org.fenixedu.cms.api.json.SiteAdapter;
 import org.fenixedu.cms.domain.CMSTheme;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ public class TestSiteResource extends TestCmsApi {
     @Test
     public void listNewUserAllSites() {
         // prepare
-        createAuthenticatedUser("listNewUserAllSites");
+        CmsTestUtils.createAuthenticatedUser("listNewUserAllSites");
 
         // execute
         String response = getSitesTarget().request().get(String.class);
@@ -63,9 +64,9 @@ public class TestSiteResource extends TestCmsApi {
     @Test
     public void listUserSingleSites() {
         // prepare
-        User user = createAuthenticatedUser("listUserSingleSites");
+        User user = CmsTestUtils.createAuthenticatedUser("listUserSingleSites");
 
-        Site site = createSite(user, "listUserSingleSites");
+        Site site = CmsTestUtils.createSite(user, "listUserSingleSites");
 
         // execute
         String response = getSitesTarget().request().get(String.class);
@@ -87,15 +88,15 @@ public class TestSiteResource extends TestCmsApi {
     @Test
     public void listUserSeveralSites() {
         // prepare
-        User user = createAuthenticatedUser("listUserSeveralSites");
+        User user = CmsTestUtils.createAuthenticatedUser("listUserSeveralSites");
 
         Set<JsonElement> expectedJsonSites = new HashSet<JsonElement>();
 
-        Site site1 = createSite(user, "listUserSeveralSites1");
+        Site site1 = CmsTestUtils.createSite(user, "listUserSeveralSites1");
         JsonElement site1json = removeNullKeys(new SiteAdapter().view(site1, ctx));
         expectedJsonSites.add(site1json);
 
-        Site site2 = createSite(user, "listUserSeveralSites2");
+        Site site2 = CmsTestUtils.createSite(user, "listUserSeveralSites2");
         JsonElement site2json = removeNullKeys(new SiteAdapter().view(site2, ctx));
         expectedJsonSites.add(site2json);
 
@@ -116,7 +117,7 @@ public class TestSiteResource extends TestCmsApi {
     @Test
     public void createMinSite() {
         // prepare
-        User user = createAuthenticatedUser("createMinSite");
+        User user = CmsTestUtils.createAuthenticatedUser("createMinSite");
 
         LocalizedString name = new LocalizedString(Locale.UK, "createMinSite-name-uk").with(Locale.US, "createMinSite-name-us");
         LocalizedString description =
@@ -173,7 +174,7 @@ public class TestSiteResource extends TestCmsApi {
     @Test
     public void createFullSite() {
         // prepare
-        User user = createAuthenticatedUser("createFullSite");
+        User user = CmsTestUtils.createAuthenticatedUser("createFullSite");
 
         CMSTheme theme = new CMSTheme();
         theme.setType("createFullSite-theme-type");
@@ -238,9 +239,9 @@ public class TestSiteResource extends TestCmsApi {
     @Test
     public void getSite() {
         // prepare
-        User user = createAuthenticatedUser("getSite");
+        User user = CmsTestUtils.createAuthenticatedUser("getSite");
 
-        Site site = createSite(user, "getSite");
+        Site site = CmsTestUtils.createSite(user, "getSite");
 
         // execute
         String response = getSiteTarget(site).request().get(String.class);
@@ -259,9 +260,9 @@ public class TestSiteResource extends TestCmsApi {
     @Test
     public void editSite() {
         // prepare
-        User user = createAuthenticatedUser("editSite");
+        User user = CmsTestUtils.createAuthenticatedUser("editSite");
 
-        Site site = createSite(user, "editSite");
+        Site site = CmsTestUtils.createSite(user, "editSite");
 
         LocalizedString nameEdit =
                 new LocalizedString(Locale.UK, "site name uk nameEdit").with(Locale.US, "site name us nameEdit");

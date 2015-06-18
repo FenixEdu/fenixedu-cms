@@ -18,7 +18,16 @@
  */
 package org.fenixedu.cms.domain;
 
-import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
@@ -37,9 +46,7 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import pt.ist.fenixframework.Atomic;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.google.common.collect.ImmutableList;
 
 import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
@@ -48,8 +55,8 @@ import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
  */
 public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
-    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = Comparator
-            .comparing(Post::getCreationDate).reversed();
+    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate)
+            .reversed();
 
     /**
      * The logged {@link User} creates a new Post.
@@ -63,7 +70,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         DateTime now = new DateTime();
         this.setCreationDate(now);
         this.setModificationDate(now);
-        this.setActive(true);
+        this.setActive(false);
         this.setCanViewGroup(AnyoneGroup.get());
         this.setSite(site);
     }
@@ -152,16 +159,13 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     }
 
     public boolean isInPublicationPeriod() {
-        boolean inBegin = getPublicationBegin() == null
-                || getPublicationBegin().isBeforeNow();
-        boolean inEnd = getPublicationEnd() == null
-                || getPublicationEnd().isAfterNow();
+        boolean inBegin = getPublicationBegin() == null || getPublicationBegin().isBeforeNow();
+        boolean inEnd = getPublicationEnd() == null || getPublicationEnd().isAfterNow();
         return inBegin && inEnd;
     }
 
     public boolean isVisible() {
-        return getActive()
-                && (!hasPublicationPeriod() || isInPublicationPeriod());
+        return getActive() && (!hasPublicationPeriod() || isInPublicationPeriod());
     }
 
     /**
@@ -184,11 +188,9 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         getEmbeddedFilesSorted().forEach(postFile -> postFile.getFiles().setAccessGroup(group));
     }
 
-    public static Post create(Site site, Page page, LocalizedString name,
-                              LocalizedString body, Category category, boolean active,
-                              User creator) {
+    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category,
+            boolean active, User creator) {
         Post post = new Post(site);
-        post.setSite(site);
         post.setName(name);
         post.setBody(body);
         post.setCreationDate(new DateTime());
@@ -204,8 +206,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     }
 
     public String getEditUrl() {
-        return CoreConfiguration.getConfiguration().applicationUrl()
-                + "/cms/posts/" + getSite().getSlug() + "/" + getSlug()
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/posts/" + getSite().getSlug() + "/" + getSlug()
                 + "/edit";
     }
 
@@ -353,15 +354,11 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     }
 
     public String getCategories() {
-        return this.getCategoriesSet().stream()
-                .map(x -> x.getName().getContent())
-                .reduce((x, y) -> x + "," + y).orElse("");
+        return this.getCategoriesSet().stream().map(x -> x.getName().getContent()).reduce((x, y) -> x + "," + y).orElse("");
     }
 
     public String getCategoriesString() {
-        return this.getCategoriesSet().stream()
-                .map(x -> x.getName().getContent())
-                .reduce((x, y) -> x + "," + y).orElse("");
+        return this.getCategoriesSet().stream().map(x -> x.getName().getContent()).reduce((x, y) -> x + "," + y).orElse("");
     }
 
     public class PostWrap extends Wrap {
@@ -379,8 +376,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         }
 
         public String getVisibilityGroup() {
-            return Post.this.getCanViewGroup().toPersistentGroup()
-                    .getPresentationName();
+            return Post.this.getCanViewGroup().toPersistentGroup().getPresentationName();
         }
 
         public LocalizedString getBody() {
@@ -416,8 +412,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         }
 
         public String getEditAddress() {
-            return CoreConfiguration.getConfiguration().applicationUrl()
-                    + "/cms/posts/" + Post.this.getSite().getSlug() + "/"
+            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/posts/" + Post.this.getSite().getSlug() + "/"
                     + Post.this.getSlug() + "/edit";
         }
 
@@ -445,8 +440,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     }
 
     public boolean isModified() {
-        return !getCreationDate().toLocalDate().equals(
-                getModificationDate().toLocalDate());
+        return !getCreationDate().toLocalDate().equals(getModificationDate().toLocalDate());
     }
 
     public static LocalizedString sanitize(LocalizedString original) {
@@ -472,12 +466,6 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     }
 
     public Iterable<PostContentRevision> getRevisions() {
-        return new Iterable<PostContentRevision>() {
-
-            @Override
-            public Iterator<PostContentRevision> iterator() {
-                return getRevisionsIterator();
-            }
-        };
+        return () -> getRevisionsIterator();
     }
 }

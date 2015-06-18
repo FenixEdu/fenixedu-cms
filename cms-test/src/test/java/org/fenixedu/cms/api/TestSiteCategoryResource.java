@@ -13,15 +13,16 @@ import javax.ws.rs.core.MediaType;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.bean.CategoryBean;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
 import org.fenixedu.cms.api.json.CategoryAdapter;
 import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +41,9 @@ public class TestSiteCategoryResource extends TestCmsApi {
     @Test
     public void getSiteCategoriesEmpty() {
         // prepare
-        User user = createAuthenticatedUser("getSiteCategoriesEmpty");
+        User user = CmsTestUtils.createAuthenticatedUser("getSiteCategoriesEmpty");
 
-        Site site = createSite(user, "getSiteCategoriesEmpty");
+        Site site = CmsTestUtils.createSite(user, "getSiteCategoriesEmpty");
 
         // execute
         String response = getSiteCategoriesTarget(site).request().get(String.class);
@@ -57,15 +58,15 @@ public class TestSiteCategoryResource extends TestCmsApi {
         // prepare
         Set<JsonElement> expectedJsonCategories = new HashSet<JsonElement>();
 
-        User user = createAuthenticatedUser("getSiteSeveralCategories");
+        User user = CmsTestUtils.createAuthenticatedUser("getSiteSeveralCategories");
 
-        Site site = createSite(user, "getSiteSeveralCategories");
+        Site site = CmsTestUtils.createSite(user, "getSiteSeveralCategories");
 
-        Category category1 = createCategory(site, "getSiteSeveralCategories1");
+        Category category1 = CmsTestUtils.createCategory(site, "getSiteSeveralCategories1");
         JsonElement category1json = removeNullKeys(new CategoryAdapter().view(category1, ctx));
         expectedJsonCategories.add(category1json);
 
-        Category category2 = createCategory(site, "getSiteSeveralCategories2");
+        Category category2 = CmsTestUtils.createCategory(site, "getSiteSeveralCategories2");
         JsonElement category2json = removeNullKeys(new CategoryAdapter().view(category2, ctx));
         expectedJsonCategories.add(category2json);
 
@@ -86,9 +87,9 @@ public class TestSiteCategoryResource extends TestCmsApi {
     @Test
     public void createMinCategory() {
         // prepare
-        User user = createAuthenticatedUser("createMinCategory");
+        User user = CmsTestUtils.createAuthenticatedUser("createMinCategory");
 
-        Site site = createSite(user, "createMinCategory");
+        Site site = CmsTestUtils.createSite(user, "createMinCategory");
 
         CategoryBean categoryBean = new CategoryBean();
 
@@ -127,9 +128,9 @@ public class TestSiteCategoryResource extends TestCmsApi {
     @Test
     public void createFullCategory() {
         // prepare
-        User user = createAuthenticatedUser("createFullCategory");
+        User user = CmsTestUtils.createAuthenticatedUser("createFullCategory");
 
-        Site site = createSite(user, "createFullCategory");
+        Site site = CmsTestUtils.createSite(user, "createFullCategory");
 
         CategoryBean categoryBean = new CategoryBean();
         LocalizedString name =

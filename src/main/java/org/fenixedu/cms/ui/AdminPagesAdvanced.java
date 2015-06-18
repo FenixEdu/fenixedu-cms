@@ -81,8 +81,7 @@ public class AdminPagesAdvanced {
 
     @Atomic
     private Page createPage(LocalizedString name, Site s) {
-        Page p = new Page(s);
-        p.setName(name);
+        Page p = new Page(s, name);
         return p;
     }
 

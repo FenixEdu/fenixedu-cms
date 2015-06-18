@@ -13,8 +13,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.bean.PageBean;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
 import org.fenixedu.cms.api.json.PageAdapter;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.StringNormalizer;
@@ -22,6 +22,7 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +41,9 @@ public class TestSitePageResource extends TestCmsApi {
     @Test
     public void getSitePagesEmpty() {
         // prepare
-        User user = createAuthenticatedUser("getSitePagesEmpty");
+        User user = CmsTestUtils.createAuthenticatedUser("getSitePagesEmpty");
 
-        Site site = createSite(user, "getSitePagesEmpty");
+        Site site = CmsTestUtils.createSite(user, "getSitePagesEmpty");
 
         // execute
         String response = getSitePagesTarget(site).request().get(String.class);
@@ -57,15 +58,15 @@ public class TestSitePageResource extends TestCmsApi {
         // prepare
         Set<JsonElement> expectedJsonPages = new HashSet<JsonElement>();
 
-        User user = createAuthenticatedUser("getSiteSeveralPages");
+        User user = CmsTestUtils.createAuthenticatedUser("getSiteSeveralPages");
 
-        Site site = createSite(user, "getSiteSeveralPages");
+        Site site = CmsTestUtils.createSite(user, "getSiteSeveralPages");
 
-        Page page1 = createPage(site, "getSiteSeveralPages1");
+        Page page1 = CmsTestUtils.createPage(site, "getSiteSeveralPages1");
         JsonElement page1json = removeNullKeys(new PageAdapter().view(page1, ctx));
         expectedJsonPages.add(page1json);
 
-        Page page2 = createPage(site, "getSiteSeveralPages2");
+        Page page2 = CmsTestUtils.createPage(site, "getSiteSeveralPages2");
         JsonElement page2json = removeNullKeys(new PageAdapter().view(page2, ctx));
         expectedJsonPages.add(page2json);
 
@@ -86,9 +87,9 @@ public class TestSitePageResource extends TestCmsApi {
     @Test
     public void createMinPage() {
         // prepare
-        User user = createAuthenticatedUser("createMinPage");
+        User user = CmsTestUtils.createAuthenticatedUser("createMinPage");
 
-        Site site = createSite(user, "createMinPage");
+        Site site = CmsTestUtils.createSite(user, "createMinPage");
 
         PageBean pageBean = new PageBean();
 
@@ -114,14 +115,14 @@ public class TestSitePageResource extends TestCmsApi {
         assertTrue("response page should have an creationDate field", jsonResponse.has("creationDate"));
         assertEquals("creationDate response should be equal to expected creationDate", creationDate.toString().substring(0, 16),
                 jsonResponse // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
-                .get("creationDate").getAsString().substring(0, 16));
+                        .get("creationDate").getAsString().substring(0, 16));
 
         assertTrue("response page should have an modificationDate field", jsonResponse.has("modificationDate"));
         assertEquals("modificationDate response should be equal to creationDate", jsonResponse.get("creationDate").getAsString(),
                 jsonResponse.get("modificationDate").getAsString());
 
         assertTrue("response page should have a published field", jsonResponse.has("published"));
-        assertEquals("published response should be equal to expected published", true, jsonResponse.get("published")
+        assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")
                 .getAsBoolean());
 
         assertTrue("response page should have an createdBy field", jsonResponse.has("createdBy"));
@@ -135,9 +136,9 @@ public class TestSitePageResource extends TestCmsApi {
     @Test
     public void createFullPage() {
         // prepare
-        User user = createAuthenticatedUser("createFullPage");
+        User user = CmsTestUtils.createAuthenticatedUser("createFullPage");
 
-        Site site = createSite(user, "createFullPage");
+        Site site = CmsTestUtils.createSite(user, "createFullPage");
 
         LocalizedString name = new LocalizedString(Locale.UK, "createFullPage-name-uk").with(Locale.US, "createFullPage-name-us");
         PageBean pageBean = new PageBean();

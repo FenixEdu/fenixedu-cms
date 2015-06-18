@@ -1,4 +1,4 @@
-package org.fenixedu.cms.api.domain;
+package org.junit.runners;
 
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;

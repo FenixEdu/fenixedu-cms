@@ -13,8 +13,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.bean.MenuItemBean;
-import org.fenixedu.cms.api.domain.FenixFrameworkRunner;
 import org.fenixedu.cms.api.json.MenuItemAdapter;
+import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.cms.domain.Site;
@@ -22,6 +22,7 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,11 +41,11 @@ public class TestMenuMenuItemResource extends TestCmsApi {
     @Test
     public void getMenuMenuItemsEmpty() {
         // prepare
-        User user = createAuthenticatedUser("getMenuMenuItemsEmpty");
+        User user = CmsTestUtils.createAuthenticatedUser("getMenuMenuItemsEmpty");
 
-        Site site = createSite(user, "getMenuMenuItemsEmpty");
+        Site site = CmsTestUtils.createSite(user, "getMenuMenuItemsEmpty");
 
-        Menu menu = createMenu(site, "getMenuMenuItemsEmpty");
+        Menu menu = CmsTestUtils.createMenu(site, "getMenuMenuItemsEmpty");
 
         // execute
         String response = getMenuMenuItemsTarget(menu).request().get(String.class);
@@ -59,17 +60,17 @@ public class TestMenuMenuItemResource extends TestCmsApi {
         // prepare
         Set<JsonElement> expectedJsonMenuItems = new HashSet<JsonElement>();
 
-        User user = createAuthenticatedUser("getMenuSeveralMenuItems");
+        User user = CmsTestUtils.createAuthenticatedUser("getMenuSeveralMenuItems");
 
-        Site site = createSite(user, "getMenuSeveralMenuItems");
+        Site site = CmsTestUtils.createSite(user, "getMenuSeveralMenuItems");
 
-        Menu menu = createMenu(site, "getMenuSeveralMenuItems");
+        Menu menu = CmsTestUtils.createMenu(site, "getMenuSeveralMenuItems");
 
-        MenuItem menuItem1 = createMenuItem(menu, "getMenuSeveralMenuItems1");
+        MenuItem menuItem1 = CmsTestUtils.createMenuItem(menu, "getMenuSeveralMenuItems1");
         JsonElement menuItem1json = removeNullKeys(new MenuItemAdapter().view(menuItem1, ctx));
         expectedJsonMenuItems.add(menuItem1json);
 
-        MenuItem menuItem2 = createMenuItem(menu, "getMenuSeveralMenuItems2");
+        MenuItem menuItem2 = CmsTestUtils.createMenuItem(menu, "getMenuSeveralMenuItems2");
         JsonElement menuItem2json = removeNullKeys(new MenuItemAdapter().view(menuItem2, ctx));
         expectedJsonMenuItems.add(menuItem2json);
 
@@ -90,11 +91,11 @@ public class TestMenuMenuItemResource extends TestCmsApi {
     @Test
     public void createMinMenuItem() {
         // prepare
-        User user = createAuthenticatedUser("createMinMenuItem");
+        User user = CmsTestUtils.createAuthenticatedUser("createMinMenuItem");
 
-        Site site = createSite(user, "createMinMenuItem");
+        Site site = CmsTestUtils.createSite(user, "createMinMenuItem");
 
-        Menu menu = createMenu(site, "createMinMenuItem");
+        Menu menu = CmsTestUtils.createMenu(site, "createMinMenuItem");
 
         MenuItemBean menuItemBean = new MenuItemBean();
 
@@ -142,11 +143,11 @@ public class TestMenuMenuItemResource extends TestCmsApi {
     @Test
     public void createFullMenuItem() {
         // prepare
-        User user = createAuthenticatedUser("createFullMenuItem");
+        User user = CmsTestUtils.createAuthenticatedUser("createFullMenuItem");
 
-        Site site = createSite(user, "createFullMenuItem");
+        Site site = CmsTestUtils.createSite(user, "createFullMenuItem");
 
-        Menu menu = createMenu(site, "createFullMenuItem");
+        Menu menu = CmsTestUtils.createMenu(site, "createFullMenuItem");
 
         MenuItemBean menuItemBean = new MenuItemBean();
         LocalizedString name =
