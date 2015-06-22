@@ -42,7 +42,7 @@ public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wra
     }
 
     @Override
-    public void setIsEmbedded(Boolean isEmbedded) {
+    public void setIsEmbedded(boolean isEmbedded) {
         if (isEmbedded) {
             getFiles().setAccessGroup(getPost().getCanViewGroup());
         }

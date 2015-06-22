@@ -36,6 +36,8 @@ import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.wraps.UserWrap;
 import org.fenixedu.cms.domain.wraps.Wrap;
@@ -55,6 +57,8 @@ import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
  */
 public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
+    public static final String SIGNAL_CREATED = "fenixedu.cms.post.created";
+
     public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate)
             .reversed();
 
@@ -73,6 +77,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         this.setActive(false);
         this.setCanViewGroup(AnyoneGroup.get());
         this.setSite(site);
+
+        Signal.emit(Post.SIGNAL_CREATED, new DomainObjectEvent<Post>(this));
     }
 
     @Override
@@ -304,7 +310,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     }
 
     @Override
-    public void setActive(Boolean active) {
+    public void setActive(boolean active) {
         super.setActive(active);
         setModificationDate(new DateTime());
     }

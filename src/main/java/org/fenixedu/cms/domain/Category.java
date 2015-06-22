@@ -21,6 +21,8 @@ package org.fenixedu.cms.domain;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ListCategoryPosts;
 import org.fenixedu.cms.domain.wraps.Wrap;
@@ -41,6 +43,9 @@ import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
  * Categories give a semantic group for {@link Site} and {@link Post}.
  */
 public class Category extends Category_Base implements Wrappable, Sluggable, Cloneable {
+
+    public static final String SIGNAL_CREATED = "fenixedu.cms.category.created";
+
     /**
      * The logged {@link User} creates a new instance of a {@link Category}
      */
@@ -53,6 +58,8 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
         this.setSite(site);
+
+        Signal.emit(Category.SIGNAL_CREATED, new DomainObjectEvent<Category>(this));
     }
 
     public Category(Site site, LocalizedString name) {
@@ -64,6 +71,8 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
         this.setCreationDate(new DateTime());
         this.setSite(site);
         this.setName(name);
+
+        Signal.emit(Category.SIGNAL_CREATED, new DomainObjectEvent<Category>(this));
     }
 
     @Override

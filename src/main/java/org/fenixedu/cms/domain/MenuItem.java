@@ -22,6 +22,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
 import org.fenixedu.cms.exceptions.CmsDomainException;
@@ -45,6 +47,8 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     public static final Comparator<MenuItem> CREATION_DATE_COMPARATOR = Comparator.comparing(MenuItem::getCreationDate);
 
+    public static final String SIGNAL_CREATED = "fenixedu.cms.menuItem.created";
+
     /**
      * The logged {@link User} creates a new MenuItem.
      */
@@ -57,6 +61,8 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         this.setCreationDate(new DateTime());
         this.setFolder(false);
         this.setMenu(menu);
+
+        Signal.emit(MenuItem.SIGNAL_CREATED, new DomainObjectEvent<MenuItem>(this));
     }
 
     @Override
@@ -225,7 +231,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         public MenuItemWrap() {
             children =
                     MenuItem.this.getChildrenSorted().stream().filter(MenuItem::isVisible).map((menuItem) -> menuItem.makeWrap())
-                            .collect(Collectors.toList());
+                    .collect(Collectors.toList());
             active = false;
             open = false;
         }
@@ -278,6 +284,6 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     }
 
     public boolean isVisible() {
-        return getPage() == null || getPage().isPublished();
+        return getPage() == null || getPage().getPublished();
     }
 }

@@ -20,6 +20,8 @@ package org.fenixedu.cms.domain;
 
 import com.google.common.collect.Sets;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
 import org.fenixedu.cms.exceptions.CmsDomainException;
@@ -41,6 +43,8 @@ import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
  */
 public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
 
+    public static final String SIGNAL_CREATED = "fenixedu.cms.menu.created";
+
     @Deprecated
     public Menu(Site site) {
         super();
@@ -52,6 +56,8 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
 
         setSite(site);
         setTopMenu(false);
+
+        Signal.emit(Menu.SIGNAL_CREATED, new DomainObjectEvent<Menu>(this));
     }
 
     public Menu(Site site, LocalizedString name) {
@@ -66,6 +72,8 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
         setTopMenu(false);
 
         this.setName(name);
+
+        Signal.emit(Menu.SIGNAL_CREATED, new DomainObjectEvent<Menu>(this));
     }
 
     @Override

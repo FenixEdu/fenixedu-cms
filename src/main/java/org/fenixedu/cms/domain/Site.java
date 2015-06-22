@@ -33,6 +33,8 @@ import org.fenixedu.bennu.portal.domain.MenuContainer;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.domain.MenuItem;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.CMSConfigurationManager;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ListCategoryPosts;
@@ -62,6 +64,9 @@ import java.util.stream.Stream;
 import static org.fenixedu.commons.i18n.LocalizedString.*;
 
 public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
+
+    public static final String SIGNAL_CREATED = "fenixedu.cms.site.created";
+
     /**
      * maps the registered template types on the tempate classes
      */
@@ -133,6 +138,8 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         this.setDescription(description);
 
         this.setPublished(false);
+
+        Signal.emit(Site.SIGNAL_CREATED, new DomainObjectEvent<Site>(this));
     }
 
     /**
@@ -337,13 +344,13 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         if (getFolder() == null) {
             MenuContainer parent =
                     getFunctionality() == null ? PortalConfiguration.getInstance().getMenu() : getFunctionality().getParent();
-            if (getFunctionality() != null) {
-                deleteMenuFunctionality();
-            }
-            this.setFunctionality(new MenuFunctionality(parent, getEmbedded(), getSlug(),
-                    getEmbedded() ? CMSEmbeddedBackend.BACKEND_KEY : CMSBackend.BACKEND_KEY, "anyone", this.getDescription(),
-                    this.getName(), getSlug()));
-            getFunctionality().setAccessGroup(SiteViewersGroup.get(this));
+                    if (getFunctionality() != null) {
+                        deleteMenuFunctionality();
+                    }
+                    this.setFunctionality(new MenuFunctionality(parent, getEmbedded(), getSlug(),
+                            getEmbedded() ? CMSEmbeddedBackend.BACKEND_KEY : CMSBackend.BACKEND_KEY, "anyone", this.getDescription(),
+                                    this.getName(), getSlug()));
+                    getFunctionality().setAccessGroup(SiteViewersGroup.get(this));
         }
     }
 

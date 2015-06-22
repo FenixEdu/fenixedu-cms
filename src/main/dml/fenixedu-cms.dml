@@ -27,7 +27,7 @@ class Site{
   LocalizedString name;
   LocalizedString description;
   String slug;
-  Boolean published;
+  boolean published;
   boolean embedded;
   public String analyticsCode;
   public String themeType;
@@ -45,7 +45,7 @@ class Page{
   LocalizedString name;
   String slug;
   String templateType;
-  Boolean published;
+  boolean published;
 }
 
 class Category{
@@ -58,7 +58,7 @@ class Menu{
   DateTime creationDate;
   LocalizedString name;
   String slug;
-  Boolean topMenu;
+  boolean topMenu;
 }
 
 class MenuItem{
@@ -66,7 +66,7 @@ class MenuItem{
   Integer position;
   LocalizedString name;
   String url;
-  Boolean folder;
+  boolean folder;
 }
 
 class Post{
@@ -74,7 +74,7 @@ class Post{
   String slug;
   DateTime creationDate;
   DateTime modificationDate;
-  Boolean active;
+  boolean active;
   DateTime publicationBegin;
   DateTime publicationEnd;
   LocalizedString location;
@@ -151,7 +151,7 @@ class component.ListCategoryPosts extends component.Component{}
 class component.StaticPost extends component.Component{}
 
 class PostFile{
-    Boolean isEmbedded;
+    boolean isEmbedded;
     Integer index;
 }
 

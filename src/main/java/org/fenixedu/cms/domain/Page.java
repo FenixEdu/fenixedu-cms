@@ -23,6 +23,8 @@ import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ListCategoryPosts;
 import org.fenixedu.cms.domain.component.StaticPost;
@@ -44,6 +46,8 @@ import static org.fenixedu.commons.i18n.LocalizedString.*;
  */
 public class Page extends Page_Base implements Sluggable, Cloneable {
 
+    public static final String SIGNAL_CREATED = "fenixedu.cms.page.created";
+
     public static Comparator<Page> PAGE_NAME_COMPARATOR = (p1, p2) -> p1.getName().compareTo(p2.getName());
 
     /**
@@ -62,6 +66,8 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
         this.setCanViewGroup(AnyoneGroup.get());
         this.setSite(site);
         this.setPublished(false);
+
+        Signal.emit(Page.SIGNAL_CREATED, new DomainObjectEvent<Page>(this));
     }
 
     public Page(Site site, LocalizedString name) {
@@ -77,6 +83,8 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
         this.setSite(site);
         this.setPublished(false);
         this.setName(name);
+
+        Signal.emit(Page.SIGNAL_CREATED, new DomainObjectEvent<Page>(this));
     }
 
     @Override
@@ -198,7 +206,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     }
 
     @Override
-    public void setPublished(Boolean published) {
+    public void setPublished(boolean published) {
         setModificationDate(new DateTime());
         super.setPublished(published);
     }
@@ -215,7 +223,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     }
 
     public boolean isPublished() {
-        return getPublished() != null ? getPublished().booleanValue() : false;
+        return getPublished();
     }
 
     public String getRssUrl() {

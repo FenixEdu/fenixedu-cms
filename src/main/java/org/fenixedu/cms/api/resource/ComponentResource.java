@@ -10,7 +10,7 @@ import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.api.json.ComponentAdapter;
 import org.fenixedu.cms.domain.component.Component;
 
-@Path("/cms/folders")
+@Path("/cms/components")
 public class ComponentResource extends BennuRestResource {
 
     //TODO check args in all methods
