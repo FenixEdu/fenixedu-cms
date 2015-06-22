@@ -421,16 +421,22 @@ ${portal.toolkit()}
                             return true;
                         },
                         dragDrop: function (node, data) {
-                            if (data.hitMode === "before") {
-                                updateMenuItemInfo(menuOid, data.otherNode.key, node.key, node.data.position)
-                            } if(data.hitMode === "after") {
-                                updateMenuItemInfo(menuOid, data.otherNode.key, node.key, node.data.position + 1)
-                            } else if (data.hitMode === "over") {
-                                updateMenuItemInfo(menuOid, data.otherNode.key, node.key, (node.children ? node.children.length : 0));
+                            console.log('dragDrop', node, data.tree.rootNode);
+                            if(!node || !node.parent || node.parent.isRoot()) {
+                                return false;
+                            } else  {
+                                debugger;
+                                if (data.hitMode === "before") {
+                                    updateMenuItemInfo(menuOid, data.otherNode.key, node.parent.key, node.data.position)
+                                } if(data.hitMode === "after") {
+                                    updateMenuItemInfo(menuOid, data.otherNode.key, node.parent.key, node.data.position + 1)
+                                } else if (data.hitMode === "over") {
+                                    updateMenuItemInfo(menuOid, data.otherNode.key, node.key, (node.children ? node.children.length : 0));
+                                }
+                                data.otherNode.moveTo(node, data.hitMode);
+                                node.setExpanded(true);
+                                return true;
                             }
-                            data.otherNode.moveTo(node, data.hitMode);
-                            node.setExpanded(true);
-                            return true;
                         }
                     },
                     init: function (e, data) {
@@ -447,12 +453,6 @@ ${portal.toolkit()}
                         data.tree.visit(function (node) {
                             node.setExpanded(true);
                         });
-/*
-                        setTimeout(function(){
-                            debugger;
-                            data.tree.activateKey(originalMenuItem);
-                        }, 300);
-*/
                     }
                 });
             }

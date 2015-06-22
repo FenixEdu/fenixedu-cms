@@ -131,15 +131,17 @@ public class AdminPages {
         Site site = Site.fromSlug(slugSite);
         Page page = site.pageForSlug(slugPage);
         Menu menuObj = getDomainObjectIfPresent(menu);
+        MenuItem menuItemObj = getDomainObjectIfPresent(menuItem);
         MenuItem menuItemParentObj = getDomainObjectIfPresent(menuItemParent);
         page.getStaticPost().ifPresent(post ->
                 editPageAndPost(page, post, name, body, newSlug, categories, publicationStarts, publicationEnds, active,
-                        Group.parse(viewGroup), menuObj, menuItem, menuItemParentObj, menuItemPosition));
+                        Group.parse(viewGroup), menuObj, menuItemObj, menuItemParentObj, menuItemPosition));
         return pageRedirect(page);
     }
 
     private <T extends DomainObject> T getDomainObjectIfPresent(String externalId) {
-        return Optional.ofNullable(externalId).map(oid -> (T) FenixFramework.getDomainObject(oid)).orElse(null);
+        return Optional.ofNullable(externalId).map(oid -> (T) FenixFramework.getDomainObject(oid))
+                .filter(FenixFramework::isDomainObjectValid).orElse(null);
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)
@@ -268,7 +270,7 @@ public class AdminPages {
 
     @Atomic
     private void editPageAndPost(Page page, Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories,
-                                 DateTime publicationStarts, DateTime publicationEnds, boolean active, Group viewGroup, Menu menu, String menuItemId, MenuItem menuItemParent, Integer menuItemPosition) {
+                                 DateTime publicationStarts, DateTime publicationEnds, boolean active, Group viewGroup, Menu menu, MenuItem menuItem, MenuItem menuItemParent, Integer menuItemPosition) {
         Site site = page.getSite();
         LocalizedString nameSanitized = Post.sanitize(name);
         LocalizedString bodySanitized = Post.sanitize(body);
@@ -319,28 +321,23 @@ public class AdminPages {
             page.setCanViewGroup(viewGroup);
         }
 
-        MenuItem menuItem;
-        if (!Strings.isNullOrEmpty(menuItemId) && menu != null) {
-            menuItem = page.getMenuItemsSet().stream()
-                    .filter(current -> current.getExternalId().equals(menuItemId))
-                    .findAny().orElseGet(() -> MenuItem.create(menu, page, name, menuItemParent));
-        } else {
-            menuItem = null;
+        if (menu == null) {
+            page.getMenuItemsSet().stream().forEach(MenuItem::delete);
+        } else if (menu != null && menuItem == null) {
+            menuItem = new MenuItem(menu);
         }
 
-        if (menuItem != null) {
-            menuItem.removeFromParent();
-            if (menuItemParent != null) {
-                menuItemParent.add(menuItem);
-            } else {
-                menuItem.setTop(menu);
-            }
-            menu.add(menuItem);
+        if (menu != null && menuItem != null) {
+            menuItem.setName(name);
             menuItem.setPage(page);
-            menuItem.setPosition(menuItemPosition);
-        } else {
-            page.getMenuItemsSet().stream().forEach(MenuItem::delete);
+            menuItem.setFolder(page == null);
+            if (menuItemParent != null) {
+                menuItemParent.putAt(menuItem, menuItemPosition);
+            } else {
+                menu.putAt(menuItem, menuItemPosition);
+            }
         }
+
     }
 
     @Atomic(mode = Atomic.TxMode.WRITE)
