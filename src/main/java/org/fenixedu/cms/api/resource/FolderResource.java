@@ -14,7 +14,6 @@ import org.fenixedu.cms.domain.CMSFolder;
 @Path("/cms/folders")
 public class FolderResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET

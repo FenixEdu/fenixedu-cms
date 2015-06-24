@@ -14,7 +14,6 @@ import org.fenixedu.cms.domain.CMSTheme;
 @Path("/cms/themes")
 public class ThemeResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET

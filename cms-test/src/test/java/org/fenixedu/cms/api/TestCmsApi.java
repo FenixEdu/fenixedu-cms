@@ -13,6 +13,7 @@ import org.fenixedu.bennu.core.groups.LoggedGroup;
 import org.fenixedu.bennu.core.groups.NobodyGroup;
 import org.fenixedu.bennu.core.groups.UserGroup;
 import org.fenixedu.bennu.core.json.JsonBuilder;
+import org.fenixedu.bennu.core.rest.DomainExceptionMapper;
 import org.fenixedu.bennu.core.rest.DomainObjectParamConverter;
 import org.fenixedu.bennu.core.rest.JsonAwareResource;
 import org.fenixedu.cms.api.json.CategoryAdapter;
@@ -67,7 +68,7 @@ public class TestCmsApi extends JerseyTest {
     protected Application configure() {
         return new ResourceConfig(DomainObjectParamConverter.class, SiteResource.class, PostResource.class,
                 RevisionResource.class, PageResource.class, CategoryResource.class, MenuResource.class, MenuItemResource.class,
-                ThemeResource.class);
+                ThemeResource.class, DomainExceptionMapper.class);
     }
 
     public static void ensure() {

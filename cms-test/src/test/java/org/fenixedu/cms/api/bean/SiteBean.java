@@ -26,8 +26,13 @@ public class SiteBean {
     public String toJson() {
         JsonObject json = new JsonObject();
 
-        json.add("name", new JsonBuilder().view(getName(), LocalizedStringViewer.class));
-        json.add("description", new JsonBuilder().view(getDescription(), LocalizedStringViewer.class));
+        if (getName() != null) {
+            json.add("name", new JsonBuilder().view(getName(), LocalizedStringViewer.class));
+        }
+
+        if (getDescription() != null) {
+            json.add("description", new JsonBuilder().view(getDescription(), LocalizedStringViewer.class));
+        }
 
         if (getTheme() != null) {
             json.addProperty("theme", getTheme());

@@ -34,7 +34,6 @@ import com.google.common.io.ByteStreams;
 @Path("/cms/posts")
 public class PostResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET
@@ -83,7 +82,7 @@ public class PostResource extends BennuRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/files")
     public String addPostFile(@PathParam("oid") Post post, @Context HttpServletRequest request) throws IOException,
-    ServletException {
+            ServletException {
         Part part = request.getPart("file");
 
         createFileFromRequest(post, part);

@@ -17,7 +17,6 @@ import org.fenixedu.cms.domain.MenuItem;
 @Path("/cms/menuItems")
 public class MenuItemResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET

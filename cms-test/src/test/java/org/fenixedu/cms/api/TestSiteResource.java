@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.json.JsonBuilder;
@@ -112,6 +113,41 @@ public class TestSiteResource extends TestCmsApi {
 
         assertTrue("response should include site1 and site2", expectedJsonSites.contains(jsonResponseArray.get(0))
                 && expectedJsonSites.contains(jsonResponseArray.get(1)));
+    }
+
+    @Test
+    public void createErrorSiteWithoutName() {
+        // prepare
+        User user = CmsTestUtils.createAuthenticatedUser("createErrorSiteWithoutName");
+
+        LocalizedString description =
+                new LocalizedString(Locale.UK, "createErrorSiteWithoutName-description-uk").with(Locale.US,
+                        "createErrorSiteWithoutName-description-us");
+        SiteBean siteBean = new SiteBean(null, description);
+
+        // execute
+        Response response =
+                getSitesTarget().request().post(Entity.entity(siteBean.toJson(), MediaType.APPLICATION_JSON), Response.class);
+        LOGGER.debug("createErrorSiteWithoutName: response = " + response.getStatus() + " (" + response.getStatusInfo() + ")");
+        assertEquals(412, response.getStatus());
+    }
+
+    @Test
+    public void createErrorSiteWithoutDescription() {
+        // prepare
+        User user = CmsTestUtils.createAuthenticatedUser("createErrorSiteWithoutDescription");
+
+        LocalizedString name =
+                new LocalizedString(Locale.UK, "createErrorSiteWithoutDescription-name-uk").with(Locale.US,
+                        "createErrorSiteWithoutDescription-name-us");
+        SiteBean siteBean = new SiteBean(name, null);
+
+        // execute
+        Response response =
+                getSitesTarget().request().post(Entity.entity(siteBean.toJson(), MediaType.APPLICATION_JSON), Response.class);
+        LOGGER.debug("createErrorSiteWithoutDescription: response = " + response.getStatus() + " (" + response.getStatusInfo()
+                + ")");
+        assertEquals(412, response.getStatus());
     }
 
     @Test

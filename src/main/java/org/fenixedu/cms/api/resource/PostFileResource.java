@@ -17,7 +17,6 @@ import org.fenixedu.cms.domain.PostFile;
 @Path("/cms/postFiles")
 public class PostFileResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET

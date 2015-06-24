@@ -17,7 +17,6 @@ import org.fenixedu.cms.domain.Page;
 @Path("/cms/pages")
 public class PageResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET

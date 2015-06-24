@@ -17,7 +17,6 @@ import org.fenixedu.cms.domain.Category;
 @Path("/cms/categories")
 public class CategoryResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET

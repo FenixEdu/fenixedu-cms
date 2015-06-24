@@ -29,7 +29,7 @@ public class MenuAdapter implements JsonAdapter<Menu> {
             menu.setSlug(jObj.get("slug").getAsString());
         }
 
-        if (jObj.has("name") && !jObj.get("name").isJsonNull()) {
+        if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
             menu.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 

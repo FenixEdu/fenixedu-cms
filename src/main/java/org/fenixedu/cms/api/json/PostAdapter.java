@@ -25,36 +25,51 @@ public class PostAdapter implements JsonAdapter<Post> {
 
     @Override
     public Post update(JsonElement json, Post post, JsonBuilder ctx) {
-        //TODO ensure idempotent
 
         JsonObject jObj = json.getAsJsonObject();
 
-        if (jObj.has("name") && !jObj.get("name").isJsonNull()) {
-            post.setName(LocalizedString.fromJson(jObj.get("name")));
+        if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
+            LocalizedString name = LocalizedString.fromJson(jObj.get("name"));
+            if (!post.getName().equals(name)) {
+                post.setName(name);
+            }
         }
 
         if (jObj.has("slug") && !jObj.get("slug").isJsonNull()) {
-            post.setSlug(jObj.get("slug").getAsString());
+            String slug = jObj.get("slug").getAsString();
+            if (!post.getSlug().equals(slug)) {
+                post.setSlug(slug);
+            }
         }
 
-        if (jObj.has("body") && !jObj.get("body").isJsonNull()) {
-            post.setBody(LocalizedString.fromJson(jObj.get("body")));
+        if (jObj.has("body") && !jObj.get("body").isJsonNull() && jObj.get("body").isJsonObject()) {
+            LocalizedString body = LocalizedString.fromJson(jObj.get("body"));
+            if (!post.getBody().equals(body)) {
+                post.setBody(body);
+            }
         }
 
         if (jObj.has("published") && !jObj.get("published").isJsonNull()) {
-            post.setActive(jObj.get("published").getAsBoolean());
+            boolean published = jObj.get("published").getAsBoolean();
+            if (post.getActive() != published) {
+                post.setActive(published);
+            }
         }
 
         if (jObj.has("publicationBegin") && !jObj.get("publicationBegin").isJsonNull()) {
             String date = jObj.get("publicationBegin").getAsString();
             DateTime dateTime = parseDate(date);
-            post.setPublicationBegin(dateTime);
+            if (!dateTime.isEqual(post.getPublicationBegin())) {
+                post.setPublicationBegin(dateTime);
+            }
         }
 
         if (jObj.has("publicationEnd") && !jObj.get("publicationEnd").isJsonNull()) {
             String date = jObj.get("publicationEnd").getAsString();
             DateTime dateTime = parseDate(date);
-            post.setPublicationEnd(dateTime);
+            if (!dateTime.isEqual(post.getPublicationEnd())) {
+                post.setPublicationEnd(dateTime);
+            }
         }
 
         return post;

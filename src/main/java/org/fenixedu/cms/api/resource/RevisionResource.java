@@ -13,15 +13,12 @@ import org.fenixedu.cms.domain.PostContentRevision;
 @Path("/cms/versions")
 public class RevisionResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String listLatestVersion(@PathParam("oid") PostContentRevision revision) {
+    public String getVersion(@PathParam("oid") PostContentRevision revision) {
         return view(revision, PostRevisionAdapter.class);
     }
-
-    //TODO revert?
 }

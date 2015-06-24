@@ -13,7 +13,6 @@ import org.fenixedu.cms.domain.component.Component;
 @Path("/cms/components")
 public class ComponentResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET

@@ -24,7 +24,7 @@ public class CategoryAdapter implements JsonAdapter<Category> {
     public Category update(JsonElement json, Category category, JsonBuilder ctx) {
         JsonObject jObj = json.getAsJsonObject();
 
-        if (jObj.has("name") && !jObj.get("name").isJsonNull()) {
+        if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
             category.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 

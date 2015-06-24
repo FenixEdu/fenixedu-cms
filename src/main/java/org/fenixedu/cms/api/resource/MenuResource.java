@@ -27,7 +27,6 @@ import com.google.gson.JsonParser;
 @Path("/cms/menus")
 public class MenuResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET
@@ -78,7 +77,7 @@ public class MenuResource extends BennuRestResource {
 
         MenuItem menuItem = new MenuItem(menu);
 
-        if (jObj.has("name") && !jObj.get("name").isJsonNull()) {
+        if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
             menuItem.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 

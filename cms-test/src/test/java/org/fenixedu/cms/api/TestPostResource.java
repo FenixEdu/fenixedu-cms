@@ -174,9 +174,9 @@ public class TestPostResource extends TestCmsApi {
         // execute
         String response =
                 getPostTarget(post).request().put(Entity.entity(postBean.toJson(), MediaType.APPLICATION_JSON), String.class);
-        // test
         LOGGER.debug("editPost: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
 
+        // test
         assertTrue("should get post in response", !response.isEmpty() && !response.equals(EMPTY_RESPONSE));
 
         JsonObject jsonResponse = new JsonParser().parse(response).getAsJsonObject();
@@ -202,6 +202,48 @@ public class TestPostResource extends TestCmsApi {
         assertTrue("edited Site should contain publicationEnd field", jsonResponse.has("publicationEnd"));
         assertEquals("edit site should have edited publicationEnd", PostAdapter.parseDate(postBean.getPublicationEnd())
                 .toString(), jsonResponse.get("publicationEnd").getAsString());
+    }
+
+    @Test
+    public void editPostIdempotence() {
+        // prepare
+        User user = CmsTestUtils.createAuthenticatedUser("editPostIdempotence");
+
+        Site site = CmsTestUtils.createSite(user, "editPostIdempotence");
+
+        Post post = CmsTestUtils.createPost(site, "editPostIdempotence");
+
+        LocalizedString nameEdit =
+                new LocalizedString(Locale.UK, "post name uk nameEdit").with(Locale.US, "post name us nameEdit");
+        LocalizedString bodyEdit =
+                new LocalizedString(Locale.UK, "post body uk bodyEdit").with(Locale.US, "post body us bodyEdit");
+        PostBean postBean = new PostBean();
+        postBean.setName(nameEdit);
+        postBean.setBody(bodyEdit);
+        postBean.setSlug("editPost slug");
+        postBean.setPublished(false);
+        postBean.setPublicationBegin("2014-10-05T23:14");
+        postBean.setPublicationEnd("2015-11-06T22:15");
+
+        // execute
+        String preResponse =
+                getPostTarget(post).request().put(Entity.entity(postBean.toJson(), MediaType.APPLICATION_JSON), String.class);
+        LOGGER.debug("editPostIdempotence: preResponse = " + preResponse.replaceAll("(\\r|\\n|\\t)", " "));
+
+        String response =
+                getPostTarget(post).request().put(Entity.entity(postBean.toJson(), MediaType.APPLICATION_JSON), String.class);
+        LOGGER.debug("editPostIdempotence: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
+
+        // test
+        JsonObject jsonPreResponse = new JsonParser().parse(preResponse).getAsJsonObject();
+        JsonObject jsonResponse = new JsonParser().parse(response).getAsJsonObject();
+
+        String preModificationDate = jsonPreResponse.get("modificationDate").getAsString();
+        String modificationDate = jsonResponse.get("modificationDate").getAsString();
+
+        assertEquals("edit method should be idempotent and not change modification date on consecutive calls",
+                preModificationDate, modificationDate);
+
     }
 
 }

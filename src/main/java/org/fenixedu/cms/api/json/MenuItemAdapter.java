@@ -30,7 +30,7 @@ public class MenuItemAdapter implements JsonAdapter<MenuItem> {
             menuItem.setPosition(jObj.get("position").getAsInt());
         }
 
-        if (jObj.has("name") && !jObj.get("name").isJsonNull()) {
+        if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
             menuItem.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 

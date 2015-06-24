@@ -18,6 +18,8 @@
  */
 package org.fenixedu.cms.domain;
 
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -46,11 +48,10 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
+
 import pt.ist.fenixframework.Atomic;
 
 import com.google.common.collect.ImmutableList;
-
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * A post models a given content to be presented to the user.

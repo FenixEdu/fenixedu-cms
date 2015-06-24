@@ -5,6 +5,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.domain.RegisterSiteTemplate;
@@ -16,7 +17,6 @@ import com.google.gson.JsonObject;
 @Path("/cms/templates")
 public class TemplateResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET
@@ -30,17 +30,21 @@ public class TemplateResource extends BennuRestResource {
             array.add(json);
         });
 
-        return view(array);
+        return array.toString();
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}")
-    public String listTemplate(@PathParam("type") String type) {
+    public Response listTemplate(@PathParam("type") String type) {
         RegisterSiteTemplate registerSiteTemplate = Site.getTemplates().get(type);
+
+        if (registerSiteTemplate == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Template not found for type: " + type).build();
+        }
         JsonObject json = jsonFromTemplate(registerSiteTemplate);
 
-        return json.toString();
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
 
     private JsonObject jsonFromTemplate(RegisterSiteTemplate registerSiteTemplate) {

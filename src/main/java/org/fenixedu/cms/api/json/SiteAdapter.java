@@ -22,8 +22,10 @@ public class SiteAdapter implements JsonAdapter<Site> {
 
         JsonObject jObj = json.getAsJsonObject();
 
-        //TODO: getRequired
-        Site site = new Site(LocalizedString.fromJson(jObj.get("name")), LocalizedString.fromJson(jObj.get("description")));
+        JsonElement name = getRequiredValue(jObj, "name");
+        JsonElement description = getRequiredValue(jObj, "description");
+
+        Site site = new Site(LocalizedString.fromJson(name), LocalizedString.fromJson(description));
 
         if (jObj.has("theme") && !jObj.get("theme").isJsonNull()) {
             site.setTheme(FenixFramework.getDomainObject(jObj.get("theme").getAsString()));
@@ -38,9 +40,7 @@ public class SiteAdapter implements JsonAdapter<Site> {
             Site.templateFor(template).makeIt(site);
         }
 
-        //FIXME: padrada (x2) para funcionar
         site.updateMenuFunctionality();
-        site.setPublished(false);
 
         return site;
     }
@@ -54,11 +54,11 @@ public class SiteAdapter implements JsonAdapter<Site> {
             site.setSlug(jObj.get("slug").getAsString());
         }
 
-        if (jObj.has("name") && !jObj.get("name").isJsonNull()) {
+        if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
             site.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 
-        if (jObj.has("description") && !jObj.get("description").isJsonNull()) {
+        if (jObj.has("description") && !jObj.get("description").isJsonNull() && jObj.get("description").isJsonObject()) {
             site.setDescription(LocalizedString.fromJson(jObj.get("description")));
         }
 
@@ -106,9 +106,9 @@ public class SiteAdapter implements JsonAdapter<Site> {
         return json;
     }
 
-    protected String getRequiredValue(JsonObject obj, String property) {
+    protected JsonElement getRequiredValue(JsonObject obj, String property) {
         if (obj.has(property)) {
-            return obj.get(property).getAsString();
+            return obj.get(property);
         }
         throw BennuCoreDomainException.cannotCreateEntity();
     }

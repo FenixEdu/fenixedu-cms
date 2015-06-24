@@ -39,7 +39,6 @@ import com.google.gson.JsonParser;
 @Path("/cms/sites")
 public class SiteResource extends BennuRestResource {
 
-    //TODO check args in all methods
     //TODO: check permissions in all methods
 
     @GET
@@ -111,7 +110,7 @@ public class SiteResource extends BennuRestResource {
 
         Post post = new Post(site);
 
-        if (jObj.has("name") && !jObj.get("name").isJsonNull()) {
+        if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
             post.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 
@@ -119,7 +118,7 @@ public class SiteResource extends BennuRestResource {
             post.setSlug(jObj.get("slug").getAsString());
         }
 
-        if (jObj.has("body") && !jObj.get("body").isJsonNull()) {
+        if (jObj.has("body") && !jObj.get("body").isJsonNull() && jObj.get("body").isJsonObject()) {
             post.setBody(LocalizedString.fromJson(jObj.get("body")));
         }
 
@@ -147,7 +146,7 @@ public class SiteResource extends BennuRestResource {
 
         Page page = new Page(site);
 
-        if (jObj.has("name") && !jObj.get("name").isJsonNull()) {
+        if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
             page.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 
@@ -183,7 +182,7 @@ public class SiteResource extends BennuRestResource {
 
         Category category = new Category(site);
 
-        if (jObj.has("name") && !jObj.get("name").isJsonNull()) {
+        if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
             category.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 
@@ -215,7 +214,7 @@ public class SiteResource extends BennuRestResource {
 
         Menu menu = new Menu(site);
 
-        if (jObj.has("name") && !jObj.get("name").isJsonNull()) {
+        if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
             menu.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 

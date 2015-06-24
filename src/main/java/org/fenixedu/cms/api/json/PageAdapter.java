@@ -24,7 +24,7 @@ public class PageAdapter implements JsonAdapter<Page> {
     public Page update(JsonElement json, Page page, JsonBuilder ctx) {
         JsonObject jObj = json.getAsJsonObject();
 
-        if (jObj.has("name") && !jObj.get("name").isJsonNull()) {
+        if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
             page.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 
