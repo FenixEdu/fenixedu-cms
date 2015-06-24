@@ -45,38 +45,26 @@
     <form id="mainForm" class="form-horizontal" action="" method="post" role="form">
 
         <div class="${emptyName ? "form-group has-error" : "form-group"}">
-            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                    code="page.edit.label.slug"/></label>
-
-            <div class="col-sm-5">
+            <label class="col-sm-2 control-label"><spring:message code="page.edit.label.slug"/></label>
+            <div class="col-sm-10">
                 <div class="input-group">
-
                     <span class="input-group-addon"><code>/${site.baseUrl}/</code></span>
-                    <input type="text" name="slug" class="form-control" id="inputEmail3"
-                           placeholder="<spring:message code="page.edit.label.slug" />" value='${page.slug}' \>
+                    <input type="text" name="slug" class="form-control" placeholder="<spring:message code="page.edit.label.slug" />" value='${page.slug}' \>
                 </div>
             </div>
-
         </div>
 
         <div class="${emptyName ? "form-group has-error" : "form-group"}">
-            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                    code="page.edit.label.name"/></label>
-
+            <label class="col-sm-2 control-label"><spring:message code="page.edit.label.name"/></label>
             <div class="col-sm-10">
-                <input bennu-localized-string type="text" name="name" id="inputEmail3"
-                       placeholder="<spring:message code="page.edit.label.name" />" value='${page.name.json()}' \>
-                <c:if test="${emptyName != null}"><p class="text-danger"><spring:message
-                        code="page.edit.error.emptyName"/></p>
-                </c:if>
+                <input bennu-localized-string type="text" name="name" placeholder="<spring:message code="page.edit.label.name" />" value='${page.name.json()}' \>
+                <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="page.edit.error.emptyName"/></p></c:if>
             </div>
         </div>
 
 
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                    code="page.edit.label.template"/></label>
-
+            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="page.edit.label.template"/></label>
             <div class="col-sm-10">
                 <select name="template" class="form-control" id="tempate">
                     <option value="null">-</option>
@@ -88,18 +76,14 @@
         </div>
 
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
-
+            <label class="col-sm-2 control-label">Can View</label>
             <div class="col-sm-10">
-                <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
-                       value="${ page.canViewGroup.expression }"/>
+                <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text" value="${ page.canViewGroup.expression }"/>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                    code="site.create.label.published"/></label>
-
+            <label class="col-sm-2 control-label"><spring:message code="site.create.label.published"/></label>
             <div class="col-sm-2">
                 <input name="published" type="checkbox" value="true" ${page.published ? "checked='checked'" : ""}>
             </div>
@@ -108,28 +92,30 @@
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
                 <button type="submit" onclick="$('#mainForm').submit()" class="btn btn-default btn-primary">
-                    <spring:message
-                            code="action.save"/></button>
+                    <spring:message code="action.save"/>
+                </button>
             </div>
         </div>
+    
     </form>
+    
     <hr>
+
     <h3><spring:message code="page.edit.label.pageComponents"/>:</h3>
 
     <p>
-
-    <div class="btn-group">
-        <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
-            <spring:message code="page.edit.label.addComponent"/>
-            <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-            <li ng-repeat="component in components">
-                <a href="#" ng-if="component.stateless" ng-click="installStateless(component)">{{component.name}}</a>
-                <a href="#" ng-if="!component.stateless" ng-click="openModal(component)">{{component.name}}</a>
-            </li>
-        </ul>
-    </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
+                <spring:message code="page.edit.label.addComponent"/>
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+                <li ng-repeat="component in components">
+                    <a href="#" ng-if="component.stateless" ng-click="installStateless(component)">{{component.name}}</a>
+                    <a href="#" ng-if="!component.stateless" ng-click="openModal(component)">{{component.name}}</a>
+                </li>
+            </ul>
+        </div>
     </p>
 
     <c:choose>

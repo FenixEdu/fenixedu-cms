@@ -349,8 +349,7 @@ ${portal.toolkit()}
         <div role="tabpanel" class="tab-pane form-horizontal" id="io">
             <div class="form-group">
                 <label class="col-sm-12 control-label">Create a clone of your site <button type="button" onclick="$('#clone-form').submit();" class="btn btn-default">Clone</button></label>
-                <label class="col-sm-12 control-label">Import a site <button type="button" class="btn btn-default">Import</button></label>
-                <label class="col-sm-12 control-label">Export site <button type="button" class="btn btn-default">Export</button></label>
+                <label class="col-sm-12 control-label">Export your site<a href="export" class="btn btn-default">Export</a></label>
             </div>
         </div>
 

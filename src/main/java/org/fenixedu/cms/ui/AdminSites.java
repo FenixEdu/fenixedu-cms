@@ -28,9 +28,11 @@ import com.google.api.services.analytics.model.Webproperties;
 import com.google.api.services.analytics.model.Webproperty;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.tika.io.FilenameUtils;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
@@ -45,16 +47,20 @@ import org.fenixedu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.zip.ZipFile;
 
 @SpringApplication(group = "logged", path = "cms", title = "application.title.cms")
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")
@@ -62,6 +68,7 @@ import java.util.stream.Collectors;
 public class AdminSites {
 
     private static final int ITEMS_PER_PAGE = 30;
+    private static final String ZIP_MIME_TYPE = "application/zip";
 
     @RequestMapping
     public String list(Model model, @RequestParam(required = false) String query) {
@@ -107,6 +114,42 @@ public class AdminSites {
         }
 
         return "fenixedu-cms/manageSite";
+    }
+
+    @RequestMapping(value = "/{slug}/export", method = RequestMethod.GET)
+    public void export(@PathVariable String slug, HttpServletResponse response) {
+        Site site = Site.fromSlug(slug);
+        canEdit(site);
+        try {
+            response.setContentType(ZIP_MIME_TYPE);
+            response.setHeader("Content-Disposition", "attachment;filename=" + FilenameUtils.normalize(slug + ".zip"));
+            new SiteExporter(site).export().writeTo(response.getOutputStream());
+            //TODO - show success message
+        } catch (IOException e) {
+            //TODO - show error message
+            throw new RuntimeException("Error exporting site " + slug, e);
+        }
+    }
+
+    @RequestMapping(value = "/import", method = RequestMethod.POST)
+    public RedirectView importSite(@RequestParam MultipartFile attachment) {
+        try {
+            siteImport(attachment);
+            //TODO - show success message
+        } catch (Exception e) {
+            //TODO - show error message
+            throw new RuntimeException("Error importing site ", e);
+        }
+        return new RedirectView("/cms/sites/", true);
+    }
+
+    @Atomic(mode = TxMode.WRITE)
+    private Site siteImport(MultipartFile siteZipFile) throws Exception {
+        File tempFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
+        Files.write(siteZipFile.getBytes(), tempFile);
+        Site site = new SiteImporter(new ZipFile(tempFile)).importSite();
+        SiteActivity.importedSite(site, Authenticate.getUser());
+        return site;
     }
 
     @RequestMapping(value = "manage/{page}", method = RequestMethod.GET)
@@ -314,13 +357,15 @@ public class AdminSites {
         Site s = Site.fromSlug(siteSlug);
         AdminSites.canEdit(s);
         Site newSite = cloneSite(s);
-        return new RedirectView("/cms/sites/" + newSite.getSlug() + "/edit", true);
+        //TODO - add success message
+        return new RedirectView("/cms/sites/", true);
     }
 
     @Atomic(mode = TxMode.WRITE)
     private Site cloneSite(Site originalSite) {
         Site clone = originalSite.clone(new CloneCache());
         clone.setName(originalSite.getName().append(" (clone)"));
+        SiteActivity.clonedSite(clone, Authenticate.getUser());
         return clone;
     }
 

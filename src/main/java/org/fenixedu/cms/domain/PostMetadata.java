@@ -101,6 +101,10 @@ public class PostMetadata implements Serializable, Wrappable {
         return metadata.toString();
     }
 
+    public JsonElement json() {
+        return metadata;
+    }
+
     public static PostMetadata internalize(String json) {
         return new PostMetadata(new Gson().fromJson(json, JsonElement.class).getAsJsonObject());
     }

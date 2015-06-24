@@ -18,6 +18,7 @@
  */
 package org.fenixedu.cms.domain.component;
 
+import com.google.gson.JsonObject;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.cms.domain.CloneCache;
 import org.fenixedu.cms.domain.Page;
@@ -46,6 +47,13 @@ public final class StrategyBasedComponent extends StrategyBasedComponent_Base {
     @Override
     public Class<?> componentType() {
         return getComponent().getClass();
+    }
+
+    @Override
+    public JsonObject json() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", getType());
+        return json;
     }
 
     static Component componentForType(Class<? extends CMSComponent> type) {

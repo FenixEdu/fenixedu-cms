@@ -19,6 +19,7 @@
 package org.fenixedu.cms.domain.component;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.domain.*;
@@ -125,4 +126,5 @@ public abstract class Component extends Component_Base implements org.fenixedu.c
         return StrategyBasedComponent.componentForType(type);
     }
 
+    public abstract JsonObject json();
 }

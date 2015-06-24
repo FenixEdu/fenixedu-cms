@@ -31,7 +31,7 @@ ${portal.angularToolkit()}
       'use strict';
 
       angular.module('file-model', [])
-
+      
       .directive('fileModel', [
         '$parse',
         function ($parse) {

@@ -18,9 +18,11 @@
  */
 package org.fenixedu.cms.domain.component;
 
+import com.google.gson.JsonObject;
 import org.fenixedu.cms.domain.CloneCache;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.rendering.TemplateContext;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
@@ -36,6 +38,11 @@ public class StaticPost extends StaticPost_Base {
         setPost(post);
     }
 
+    @DynamicComponent
+    private StaticPost(JsonObject json) {
+        this(Site.fromSlug(json.get("site").getAsString()).postForSlug(json.get("post").getAsString()));
+    }
+
     @Override
     public void handle(Page page, TemplateContext local, TemplateContext global) {
         Post post = this.getPost();
@@ -46,7 +53,7 @@ public class StaticPost extends StaticPost_Base {
     @Override
     public StaticPost clone(CloneCache cloneCache) {
         return cloneCache.getOrClone(this, obj -> {
-            StaticPost clone = new StaticPost(null);
+            StaticPost clone = new StaticPost((Post) null);
             cloneCache.setClone(StaticPost.this, clone);
             clone.setPost(getPost().clone(cloneCache));
             return clone;
@@ -86,4 +93,12 @@ public class StaticPost extends StaticPost_Base {
         }
     }
 
+    @Override
+    public JsonObject json() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", getType());
+        jsonObject.addProperty("post", getPost().getSlug());
+        jsonObject.addProperty("site", getPost().getSite().getSlug());
+        return jsonObject;
+    }
 }

@@ -27,10 +27,10 @@ public class SiteActivity extends SiteActivity_Base {
         site.pushActivity(activity);
     }
 
-    public static void createdSite(Site site, User user) {
+    private static JsonObject siteActivity(Site site, User user, String type) {
         JsonObject object = new JsonObject();
 
-        object.addProperty("type", "siteCreated");
+        object.addProperty("type", type);
         object.addProperty("site", site.getExternalId());
         object.add("siteName", site.getName().json());
         object.addProperty("siteSlug", site.getSlug());
@@ -39,20 +39,19 @@ public class SiteActivity extends SiteActivity_Base {
 
         makeActivity(site, object);
 
+        return object;
+    }
+
+    public static void createdSite(Site site, User user) {
+        siteActivity(site, user, "siteCreated");
     }
 
     public static void clonedSite(Site site, User user) {
-        JsonObject object = new JsonObject();
+        siteActivity(site, user, "siteCloned");
+    }
 
-        object.addProperty("type", "siteCloned");
-        object.addProperty("site", site.getExternalId());
-        object.add("siteName", site.getName().json());
-        object.addProperty("siteSlug", site.getSlug());
-        object.addProperty("user", user.getUsername());
-        object.addProperty("userName", user.getProfile().getDisplayName());
-
-        makeActivity(site, object);
-
+    public static void importedSite(Site site, User user) {
+        siteActivity(site, user, "siteImported");
     }
 
     public static void createdPost(Post post, User user) {

@@ -18,10 +18,8 @@
  */
 package org.fenixedu.cms.domain.component;
 
-import org.fenixedu.cms.domain.Category;
-import org.fenixedu.cms.domain.CloneCache;
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.Post;
+import com.google.gson.JsonObject;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.rendering.TemplateContext;
 import pt.ist.fenixframework.Atomic;
@@ -46,6 +44,11 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
         setCategory(cat);
     }
 
+    @DynamicComponent
+    private ListCategoryPosts(JsonObject json) {
+        this(Site.fromSlug(json.get("site").getAsString()).categoryForSlug(json.get("category").getAsString()));
+    }
+
     @Override
     public void handle(Page page, TemplateContext local, TemplateContext global) {
         String slug = global.getRequestContext().length > 1 ? global.getRequestContext()[1] : null;
@@ -67,7 +70,7 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
     @Override
     public Component clone(CloneCache cloneCache) {
         return cloneCache.getOrClone(this, obj -> {
-            ListCategoryPosts clone = new ListCategoryPosts(null);
+            ListCategoryPosts clone = new ListCategoryPosts((Category) null);
             cloneCache.setClone(ListCategoryPosts.this, clone);
             clone.setCategory(getCategory().clone(cloneCache));
             return clone;
@@ -79,6 +82,15 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
     public void delete() {
         this.setCategory(null);
         super.delete();
+    }
+
+    @Override
+    public JsonObject json() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", getType());
+        jsonObject.addProperty("category", getCategory().getSlug());
+        jsonObject.addProperty("site", getCategory().getSite().getSlug());
+        return jsonObject;
     }
 
     @Override
