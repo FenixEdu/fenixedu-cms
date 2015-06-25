@@ -9,11 +9,13 @@ import java.util.Locale;
 import java.util.Set;
 
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.bean.PostBean;
 import org.fenixedu.cms.api.json.PostAdapter;
+import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.CmsTestUtils;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
@@ -82,6 +84,80 @@ public class TestSitePostResource extends TestCmsApi {
 
         assertTrue("response should include post1 and post2", expectedJsonPosts.contains(jsonResponseArray.get(0))
                 && expectedJsonPosts.contains(jsonResponseArray.get(1)));
+    }
+
+    @Test
+    public void getSitePostsBySingleCategory() {
+        // prepare
+        Set<JsonElement> expectedJsonPosts = new HashSet<JsonElement>();
+
+        User user = CmsTestUtils.createAuthenticatedUser("getSitePostsBySingleCategory");
+
+        Site site = CmsTestUtils.createSite(user, "getSitePostsBySingleCategory");
+
+        Post post1 = CmsTestUtils.createPost(site, "getSitePostsBySingleCategory1");
+        Post post2 = CmsTestUtils.createPost(site, "getSitePostsBySingleCategory2");
+        Post post3 = CmsTestUtils.createPost(site, "getSitePostsBySingleCategory3");
+
+        Category category = CmsTestUtils.createCategory(site, "getSitePostsBySingleCategory");
+
+        addCategoryToPost(expectedJsonPosts, post2, category);
+        addCategoryToPost(expectedJsonPosts, post3, category);
+
+        // execute
+        String response = getSitePostsTargetWithCategory(site, category).request().get(String.class);
+        LOGGER.debug("getSitePostsBySingleCategory: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
+
+        //test
+        assertTrue("post list from site shouldn't be empty", !response.isEmpty() && !response.equals(EMPTY_RESPONSE));
+
+        JsonArray jsonResponseArray = new JsonParser().parse(response).getAsJsonArray();
+        assertTrue("response should contain two posts", jsonResponseArray.size() == 2);
+
+        assertTrue("response should include posts with category passed in query param",
+                expectedJsonPosts.contains(jsonResponseArray.get(0)) && expectedJsonPosts.contains(jsonResponseArray.get(1)));
+    }
+
+    @Test
+    public void getSitePostsByMultipleCategories() {
+        // prepare
+        Set<JsonElement> expectedJsonPosts = new HashSet<JsonElement>();
+
+        User user = CmsTestUtils.createAuthenticatedUser("getSitePostsByMultipleCategories");
+
+        Site site = CmsTestUtils.createSite(user, "getSitePostsByMultipleCategories");
+
+        Post post1 = CmsTestUtils.createPost(site, "getSitePostsByMultipleCategories1");
+        Post post2 = CmsTestUtils.createPost(site, "getSitePostsByMultipleCategories2");
+        Post post3 = CmsTestUtils.createPost(site, "getSitePostsByMultipleCategories3");
+
+        Category category1 = CmsTestUtils.createCategory(site, "getSitePostsByMultipleCategories1");
+        Category category2 = CmsTestUtils.createCategory(site, "getSitePostsByMultipleCategories2");
+
+        addCategoryToPost(expectedJsonPosts, post1, category1);
+        addCategoryToPost(expectedJsonPosts, post2, category2);
+
+        // execute
+        WebTarget req = getSitePostsTargetWithCategories(site, category1, category2);
+        LOGGER.debug(req.getUri().toString());
+
+        String response = req.request().get(String.class);
+        LOGGER.debug("getSitePostsByMultipleCategories: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
+
+        //test
+        assertTrue("post list from site shouldn't be empty", !response.isEmpty() && !response.equals(EMPTY_RESPONSE));
+
+        JsonArray jsonResponseArray = new JsonParser().parse(response).getAsJsonArray();
+        assertTrue("response should contain two posts", jsonResponseArray.size() == 2);
+
+        assertTrue("response should include posts with category passed in query param",
+                expectedJsonPosts.contains(jsonResponseArray.get(0)) && expectedJsonPosts.contains(jsonResponseArray.get(1)));
+    }
+
+    public void addCategoryToPost(Set<JsonElement> expectedJsonPosts, Post post, Category category) {
+        post.addCategories(category);
+        JsonElement postJson = removeNullKeys(new PostAdapter().view(post, ctx));
+        expectedJsonPosts.add(postJson);
     }
 
     @Test

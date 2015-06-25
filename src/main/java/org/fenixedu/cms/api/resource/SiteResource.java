@@ -1,5 +1,7 @@
 package org.fenixedu.cms.api.resource;
 
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
@@ -10,6 +12,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -92,8 +95,16 @@ public class SiteResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/posts")
-    public String listSitePosts(@PathParam("oid") Site site) {
-        return view(site.getPostSet(), PostAdapter.class);
+    public String listSitePosts(@PathParam("oid") Site site, @QueryParam("category") final Set<Category> categories) {
+        Set<Post> posts = site.getPostSet();
+
+        if (categories != null && !categories.isEmpty()) {
+            posts =
+                    posts.stream().filter(p -> p.getCategoriesSet().stream().anyMatch(c -> categories.contains(c)))
+                            .collect(Collectors.toSet());
+        }
+
+        return view(posts, PostAdapter.class);
     }
 
     @POST

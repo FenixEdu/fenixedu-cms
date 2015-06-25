@@ -118,8 +118,8 @@ public class TestSitePageResource extends TestCmsApi {
                         .get("creationDate").getAsString().substring(0, 16));
 
         assertTrue("response page should have an modificationDate field", jsonResponse.has("modificationDate"));
-        assertEquals("modificationDate response should be equal to creationDate", jsonResponse.get("creationDate").getAsString(),
-                jsonResponse.get("modificationDate").getAsString());
+        assertEquals("modificationDate response should be equal to creationDate", jsonResponse.get("creationDate").getAsString()
+                .substring(0, 16), jsonResponse.get("modificationDate").getAsString().substring(0, 16)); // 16 to compare only date and time (hours and minutes) YYYY-MM-DD hh:mm
 
         assertTrue("response page should have a published field", jsonResponse.has("published"));
         assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")

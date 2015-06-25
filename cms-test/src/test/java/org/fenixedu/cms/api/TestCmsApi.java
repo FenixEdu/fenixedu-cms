@@ -1,5 +1,7 @@
 package org.fenixedu.cms.api;
 
+import java.util.stream.Stream;
+
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Application;
 
@@ -117,6 +119,14 @@ public class TestCmsApi extends JerseyTest {
 
     public WebTarget getSitePostsTarget(Site site) {
         return getSiteTarget(site).path("posts");
+    }
+
+    public WebTarget getSitePostsTargetWithCategory(Site site, Category category) {
+        return getSitePostsTarget(site).queryParam("category", category.getExternalId());
+    }
+
+    public WebTarget getSitePostsTargetWithCategories(Site site, Category... category) {
+        return getSitePostsTarget(site).queryParam("category", Stream.of(category).map(Category::getExternalId).toArray());
     }
 
     public WebTarget getSitePagesTarget(Site site) {
