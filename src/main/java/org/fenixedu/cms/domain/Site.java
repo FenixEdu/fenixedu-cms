@@ -18,15 +18,22 @@
  */
 package org.fenixedu.cms.domain;
 
-import com.google.api.client.util.Lists;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.core.groups.UserGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuContainer;
@@ -51,17 +58,15 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.fenixedu.commons.i18n.LocalizedString.*;
+import com.google.api.client.util.Lists;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
@@ -78,8 +83,8 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
      * registers a new site template
      *
      * @param type the type of the template. This must be unique on the
-     *             application.
-     * @param c    the class to be registered as a template.
+     *            application.
+     * @param c the class to be registered as a template.
      */
     public static void register(String type, Class<?> c) {
         TEMPLATES.put(type, c);
@@ -90,7 +95,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
      *
      * @param type the type of the {@link SiteTemplate} wanted.
      * @return the {@link SiteTemplate} with the given type if it exists or null
-     * otherwise.
+     *         otherwise.
      */
     public static SiteTemplate templateFor(String type) {
         try {
@@ -126,8 +131,8 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
 
-        this.setCanViewGroup(AnyoneGroup.get());
-        this.setCanPostGroup(UserGroup.of(Authenticate.getUser()));
+        this.setCanViewGroup(Group.anyone());
+        this.setCanPostGroup(Group.users(Authenticate.getUser()));
         this.setCanAdminGroup(DynamicGroup.get("managers"));
         this.setBennu(Bennu.getInstance());
 
@@ -204,7 +209,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
      *
      * @param slug the slug of the {@link Site} wanted.
      * @return the {@link Site} with the given slug if it exists, or null
-     * otherwise.
+     *         otherwise.
      */
     public static Site fromSlug(String slug) {
         if (slug == null) {
@@ -233,7 +238,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
      *
      * @param slug the slug of the {@link Page} wanted.
      * @return the {@link Page} with the given slug if it exists on this site,
-     * or null otherwise.
+     *         or null otherwise.
      */
     public Page pageForSlug(String slug) {
         return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElse(null);
@@ -244,7 +249,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
      *
      * @param slug the slug of the {@link Post} wanted.
      * @return the {@link Post} with the given slug if it exists on this site,
-     * or null otherwise.
+     *         or null otherwise.
      */
     public Post postForSlug(String slug) {
         return getPostSet().stream().filter(post -> slug.equals(post.getSlug())).findAny().orElse(null);
@@ -255,7 +260,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
      *
      * @param slug the slug of the {@link Category} wanted.
      * @return the {@link Category} with the given slug if it exists on this
-     * site, or null otherwise.
+     *         site, or null otherwise.
      */
     public Category categoryForSlug(String slug) {
         return getCategoriesSet().stream().filter(category -> slug.equals(category.getSlug())).findAny().orElse(null);
@@ -301,7 +306,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
      *
      * @param oid the slug of the {@link Menu} wanted.
      * @return the {@link Menu} with the given oid if it exists on this site, or
-     * null otherwise.
+     *         null otherwise.
      */
     public Menu menuForOid(String oid) {
         Menu menu = FenixFramework.getDomainObject(oid);
@@ -317,7 +322,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
      *
      * @param slug the slug of the {@link Menu} wanted.
      * @return the {@link Menu} with the given oid if it exists on this site, or
-     * null otherwise.
+     *         null otherwise.
      */
     public Menu menuForSlug(String slug) {
         return getMenusSet().stream().filter(x -> slug.equals(x.getSlug())).findAny().orElse(null);
@@ -344,13 +349,13 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         if (getFolder() == null) {
             MenuContainer parent =
                     getFunctionality() == null ? PortalConfiguration.getInstance().getMenu() : getFunctionality().getParent();
-                    if (getFunctionality() != null) {
-                        deleteMenuFunctionality();
-                    }
-                    this.setFunctionality(new MenuFunctionality(parent, getEmbedded(), getSlug(),
-                            getEmbedded() ? CMSEmbeddedBackend.BACKEND_KEY : CMSBackend.BACKEND_KEY, "anyone", this.getDescription(),
-                                    this.getName(), getSlug()));
-                    getFunctionality().setAccessGroup(SiteViewersGroup.get(this));
+            if (getFunctionality() != null) {
+                deleteMenuFunctionality();
+            }
+            this.setFunctionality(new MenuFunctionality(parent, getEmbedded(), getSlug(),
+                    getEmbedded() ? CMSEmbeddedBackend.BACKEND_KEY : CMSBackend.BACKEND_KEY, "anyone", this.getDescription(),
+                    this.getName(), getSlug()));
+            getFunctionality().setAccessGroup(SiteViewersGroup.get(this));
         }
     }
 
@@ -438,7 +443,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     /**
      * @return the {@link ViewPost} of this {@link Site} if it is defined, or
-     * null otherwise.
+     *         null otherwise.
      */
     public Page getViewPostPage() {
         for (Page page : getPagesSet()) {
@@ -453,7 +458,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     /**
      * @return true if a site is the default site, meaning if this site should
-     * respond to '/' requests
+     *         respond to '/' requests
      */
     public boolean isDefault() {
         return Bennu.getInstance().getDefaultSite() == this;
@@ -461,7 +466,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     /**
      * @return the {@link ListCategoryPosts} of this {@link Site} if it is
-     * defined, or null otherwise.
+     *         defined, or null otherwise.
      */
     public Page getViewCategoryPage() {
         for (Page page : getPagesSet()) {

@@ -14,6 +14,8 @@ import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.api.json.MenuItemAdapter;
 import org.fenixedu.cms.domain.MenuItem;
 
+import com.google.gson.JsonElement;
+
 @Path("/cms/menuItems")
 public class MenuItemResource extends BennuRestResource {
 
@@ -22,7 +24,7 @@ public class MenuItemResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String getMenuItem(@PathParam("oid") MenuItem menuItem) {
+    public JsonElement getMenuItem(@PathParam("oid") MenuItem menuItem) {
         return view(menuItem, MenuItemAdapter.class);
     }
 
@@ -38,11 +40,11 @@ public class MenuItemResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String updateMenuItem(@PathParam("oid") MenuItem menuItem, String json) {
+    public JsonElement updateMenuItem(@PathParam("oid") MenuItem menuItem, JsonElement json) {
         return updateMenuItemFromJson(menuItem, json);
     }
 
-    private String updateMenuItemFromJson(MenuItem menuItem, String json) {
+    private JsonElement updateMenuItemFromJson(MenuItem menuItem, JsonElement json) {
         return view(update(json, menuItem, MenuItemAdapter.class));
     }
 }

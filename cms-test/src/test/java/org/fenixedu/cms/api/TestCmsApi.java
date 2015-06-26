@@ -5,19 +5,12 @@ import java.util.stream.Stream;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Application;
 
-import org.fenixedu.bennu.core.groups.AnonymousGroup;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
-import org.fenixedu.bennu.core.groups.CustomGroupRegistry;
-import org.fenixedu.bennu.core.groups.CustomGroupRegistry.BooleanParser;
-import org.fenixedu.bennu.core.groups.CustomGroupRegistry.DateTimeParser;
-import org.fenixedu.bennu.core.groups.CustomGroupRegistry.StringParser;
-import org.fenixedu.bennu.core.groups.LoggedGroup;
-import org.fenixedu.bennu.core.groups.NobodyGroup;
-import org.fenixedu.bennu.core.groups.UserGroup;
+import org.fenixedu.bennu.core.groups.ManualGroupRegister;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.rest.DomainExceptionMapper;
 import org.fenixedu.bennu.core.rest.DomainObjectParamConverter;
 import org.fenixedu.bennu.core.rest.JsonAwareResource;
+import org.fenixedu.bennu.core.rest.JsonBodyReaderWriter;
 import org.fenixedu.cms.api.json.CategoryAdapter;
 import org.fenixedu.cms.api.json.MenuAdapter;
 import org.fenixedu.cms.api.json.MenuItemAdapter;
@@ -70,20 +63,11 @@ public class TestCmsApi extends JerseyTest {
     protected Application configure() {
         return new ResourceConfig(DomainObjectParamConverter.class, SiteResource.class, PostResource.class,
                 RevisionResource.class, PageResource.class, CategoryResource.class, MenuResource.class, MenuItemResource.class,
-                ThemeResource.class, DomainExceptionMapper.class);
+                ThemeResource.class, DomainExceptionMapper.class, JsonBodyReaderWriter.class);
     }
 
     public static void ensure() {
-        CustomGroupRegistry.registerCustomGroup(AnonymousGroup.class);
-        CustomGroupRegistry.registerCustomGroup(AnyoneGroup.class);
-        CustomGroupRegistry.registerCustomGroup(LoggedGroup.class);
-        CustomGroupRegistry.registerCustomGroup(NobodyGroup.class);
-        CustomGroupRegistry.registerCustomGroup(UserGroup.class);
-        CustomGroupRegistry.registerArgumentParser(UserGroup.UserArgumentParser.class);
-        CustomGroupRegistry.registerArgumentParser(BooleanParser.class);
-        CustomGroupRegistry.registerArgumentParser(StringParser.class);
-        CustomGroupRegistry.registerArgumentParser(DateTimeParser.class);
-
+        ManualGroupRegister.ensure();
         JsonAwareResource.setDefault(Site.class, SiteAdapter.class);
         JsonAwareResource.setDefault(Post.class, PostAdapter.class);
         JsonAwareResource.setDefault(PostContentRevision.class, PostRevisionAdapter.class);

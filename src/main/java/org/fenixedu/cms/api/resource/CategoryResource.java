@@ -14,6 +14,8 @@ import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.api.json.CategoryAdapter;
 import org.fenixedu.cms.domain.Category;
 
+import com.google.gson.JsonElement;
+
 @Path("/cms/categories")
 public class CategoryResource extends BennuRestResource {
 
@@ -22,7 +24,7 @@ public class CategoryResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String getCategory(@PathParam("oid") Category category) {
+    public JsonElement getCategory(@PathParam("oid") Category category) {
         return view(category, CategoryAdapter.class);
     }
 
@@ -30,11 +32,11 @@ public class CategoryResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String updateCategory(@PathParam("oid") Category category, String json) {
+    public JsonElement updateCategory(@PathParam("oid") Category category, JsonElement json) {
         return updateCategoryFromJson(category, json);
     }
 
-    private String updateCategoryFromJson(Category category, String json) {
+    private JsonElement updateCategoryFromJson(Category category, JsonElement json) {
         return view(update(json, category, CategoryAdapter.class));
     }
 

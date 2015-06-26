@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
@@ -76,7 +75,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         this.setCreationDate(now);
         this.setModificationDate(now);
         this.setActive(false);
-        this.setCanViewGroup(AnyoneGroup.get());
+        this.setCanViewGroup(Group.anyone());
         this.setSite(site);
 
         Signal.emit(Post.SIGNAL_CREATED, new DomainObjectEvent<Post>(this));

@@ -18,8 +18,14 @@
  */
 package org.fenixedu.cms.domain;
 
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
@@ -32,14 +38,8 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
+
 import pt.ist.fenixframework.Atomic;
-
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.fenixedu.commons.i18n.LocalizedString.*;
 
 /**
  * Model for a page on a given Site.
@@ -63,7 +63,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
             throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
-        this.setCanViewGroup(AnyoneGroup.get());
+        this.setCanViewGroup(Group.anyone());
         this.setSite(site);
         this.setPublished(false);
 
@@ -79,7 +79,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
             throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
-        this.setCanViewGroup(AnyoneGroup.get());
+        this.setCanViewGroup(Group.anyone());
         this.setSite(site);
         this.setPublished(false);
         this.setName(name);

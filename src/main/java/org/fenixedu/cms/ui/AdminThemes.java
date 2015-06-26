@@ -47,7 +47,7 @@ import javax.imageio.stream.ImageInputStream;
 import javax.servlet.http.HttpServletRequest;
 
 import org.fenixedu.bennu.core.domain.Bennu;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
@@ -471,7 +471,7 @@ public class AdminThemes {
     @RequestMapping(value = "{type}/editSettings", method = RequestMethod.POST)
     public RedirectView editThemeSettings(@PathVariable(value = "type") String type, @RequestParam String name,
             @RequestParam String description, @RequestParam(value = "extends") String ext, @RequestParam(value = "thumbnail",
-                    required = false) MultipartFile thumbnail,
+            required = false) MultipartFile thumbnail,
             @RequestParam(value = "defaultTemplate", required = false) String defaultTemplate) {
 
         CMSTheme theme = CMSTheme.forType(type);
@@ -507,7 +507,7 @@ public class AdminThemes {
             try {
                 newthumbnail =
                         new GroupBasedFile(thumbnail.getOriginalFilename(), thumbnail.getOriginalFilename(),
-                                thumbnail.getBytes(), AnyoneGroup.get());
+                                thumbnail.getBytes(), Group.anyone());
             } catch (IOException e) {
                 logger.error("Can't create thumbnail file", e);
             }

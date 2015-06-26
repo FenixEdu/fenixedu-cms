@@ -4,8 +4,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.domain.RegisterSiteTemplate;
@@ -21,39 +22,40 @@ public class TemplateResource extends BennuRestResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String listAllTemplates() {
+    public JsonArray listAllTemplates() {
 
         JsonArray array = new JsonArray();
 
         Site.getTemplates().entrySet().forEach(entry -> {
-            JsonObject json = jsonFromTemplate(entry.getValue());
+            RegisterSiteTemplate registerSiteTemplate = entry.getValue();
+            JsonObject json1 = new JsonObject();
+            
+            json1.addProperty("type", registerSiteTemplate.type());
+            json1.addProperty("name", registerSiteTemplate.name());
+            json1.addProperty("description", registerSiteTemplate.description());
+            JsonObject json = json1;
             array.add(json);
         });
 
-        return array.toString();
+        return array;
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{type}")
-    public Response listTemplate(@PathParam("type") String type) {
+    public JsonObject listTemplate(@PathParam("type") String type) {
         RegisterSiteTemplate registerSiteTemplate = Site.getTemplates().get(type);
 
         if (registerSiteTemplate == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("Template not found for type: " + type).build();
+            throw new WebApplicationException("Template not found for type: " + type, Status.NOT_FOUND);
+
         }
-        JsonObject json = jsonFromTemplate(registerSiteTemplate);
-
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
-    }
-
-    private JsonObject jsonFromTemplate(RegisterSiteTemplate registerSiteTemplate) {
         JsonObject json = new JsonObject();
-
+        
         json.addProperty("type", registerSiteTemplate.type());
         json.addProperty("name", registerSiteTemplate.name());
         json.addProperty("description", registerSiteTemplate.description());
-
+        
         return json;
     }
 }

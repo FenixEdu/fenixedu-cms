@@ -1,9 +1,11 @@
 package org.fenixedu.cms.domain;
 
-import org.fenixedu.bennu.core.groups.*;
+import org.fenixedu.bennu.core.groups.CustomGroup;
+import org.fenixedu.bennu.core.groups.CustomGroupRegistry;
 import org.fenixedu.bennu.core.groups.CustomGroupRegistry.BooleanParser;
 import org.fenixedu.bennu.core.groups.CustomGroupRegistry.DateTimeParser;
 import org.fenixedu.bennu.core.groups.CustomGroupRegistry.StringParser;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.cms.domain.component.*;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
@@ -19,12 +21,12 @@ public class TestCMS {
     protected static final int DATETIME_EPSILON = 1;
 
     public static void ensure() {
-        CustomGroupRegistry.registerCustomGroup(AnonymousGroup.class);
-        CustomGroupRegistry.registerCustomGroup(AnyoneGroup.class);
-        CustomGroupRegistry.registerCustomGroup(LoggedGroup.class);
-        CustomGroupRegistry.registerCustomGroup(NobodyGroup.class);
-        CustomGroupRegistry.registerCustomGroup(UserGroup.class);
-        CustomGroupRegistry.registerArgumentParser(UserGroup.UserArgumentParser.class);
+        CustomGroupRegistry.registerCustomGroup((Class<? extends CustomGroup>) Group.anonymous().getClass());
+        CustomGroupRegistry.registerCustomGroup((Class<? extends CustomGroup>) Group.anyone().getClass());
+        CustomGroupRegistry.registerCustomGroup((Class<? extends CustomGroup>) Group.logged().getClass());
+        CustomGroupRegistry.registerCustomGroup((Class<? extends CustomGroup>) Group.nobody().getClass());
+        CustomGroupRegistry.registerCustomGroup((Class<? extends CustomGroup>) Group.users().getClass());
+        //CustomGroupRegistry.registerArgumentParser(UserGroup.UserArgumentParser.class);
         CustomGroupRegistry.registerArgumentParser(BooleanParser.class);
         CustomGroupRegistry.registerArgumentParser(StringParser.class);
         CustomGroupRegistry.registerArgumentParser(DateTimeParser.class);

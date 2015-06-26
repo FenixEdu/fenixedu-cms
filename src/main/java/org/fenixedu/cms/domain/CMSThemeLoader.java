@@ -36,7 +36,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.fenixedu.bennu.core.domain.Bennu;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,7 +155,7 @@ public class CMSThemeLoader {
             CMSThemeFile thumbnail = theme.fileForPath(themeDef.get("thumbnail").getAsString());
 
             theme.setPreviewImage(new GroupBasedFile(thumbnail.getFileName(), thumbnail.getFullPath(), thumbnail.getContent(),
-                    AnyoneGroup.get()));
+                    Group.anyone()));
             theme.setPreviewImagePath(themeDef.get("thumbnail").getAsString());
         }
 

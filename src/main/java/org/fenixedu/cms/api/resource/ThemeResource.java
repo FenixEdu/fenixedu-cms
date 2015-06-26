@@ -11,6 +11,8 @@ import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.api.json.ThemeAdapter;
 import org.fenixedu.cms.domain.CMSTheme;
 
+import com.google.gson.JsonElement;
+
 @Path("/cms/themes")
 public class ThemeResource extends BennuRestResource {
 
@@ -18,14 +20,14 @@ public class ThemeResource extends BennuRestResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String listAllThemes() {
+    public JsonElement listAllThemes() {
         return view(Bennu.getInstance().getCMSThemesSet(), ThemeAdapter.class);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String listTheme(@PathParam("oid") CMSTheme theme) {
+    public JsonElement listTheme(@PathParam("oid") CMSTheme theme) {
         return view(theme, ThemeAdapter.class);
     }
 }

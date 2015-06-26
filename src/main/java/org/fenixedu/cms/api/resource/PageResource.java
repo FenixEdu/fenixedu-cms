@@ -14,6 +14,8 @@ import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.api.json.PageAdapter;
 import org.fenixedu.cms.domain.Page;
 
+import com.google.gson.JsonElement;
+
 @Path("/cms/pages")
 public class PageResource extends BennuRestResource {
 
@@ -22,7 +24,7 @@ public class PageResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String getPage(@PathParam("oid") Page page) {
+    public JsonElement getPage(@PathParam("oid") Page page) {
         return view(page, PageAdapter.class);
     }
 
@@ -30,11 +32,11 @@ public class PageResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String updatePage(@PathParam("oid") Page page, String json) {
+    public JsonElement updatePage(@PathParam("oid") Page page, JsonElement json) {
         return updatePageFromJson(page, json);
     }
 
-    private String updatePageFromJson(Page page, String json) {
+    private JsonElement updatePageFromJson(Page page, JsonElement json) {
         return view(update(json, page, PageAdapter.class));
     }
 

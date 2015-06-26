@@ -17,7 +17,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.fenixedu.bennu.core.groups.LoggedGroup;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.cms.api.json.PostAdapter;
@@ -30,6 +30,7 @@ import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
 import com.google.common.io.ByteStreams;
+import com.google.gson.JsonElement;
 
 @Path("/cms/posts")
 public class PostResource extends BennuRestResource {
@@ -39,7 +40,7 @@ public class PostResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String listLatestVersion(@PathParam("oid") Post post) {
+    public JsonElement listLatestVersion(@PathParam("oid") Post post) {
         return view(post, PostAdapter.class);
     }
 
@@ -48,32 +49,32 @@ public class PostResource extends BennuRestResource {
     @Path("/{oid}")
     public Response deletePost(@PathParam("oid") Post post) {
         post.delete();
-        return Response.ok().build();
+        return ok();
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String updatePost(@PathParam("oid") Post post, String json) {
+    public JsonElement updatePost(@PathParam("oid") Post post, JsonElement json) {
         return updatePostFromJson(post, json);
     }
 
-    private String updatePostFromJson(Post post, String json) {
+    private JsonElement updatePostFromJson(Post post, JsonElement json) {
         return view(update(json, post, PostAdapter.class));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/versions")
-    public String listPostVersions(@PathParam("oid") Post post) {
+    public JsonElement listPostVersions(@PathParam("oid") Post post) {
         return view(post.getRevisionsSet(), PostRevisionAdapter.class);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/files")
-    public String listPostFiles(@PathParam("oid") Post post) {
+    public JsonElement listPostFiles(@PathParam("oid") Post post) {
         return view(post.getFilesSet(), PostFileAdapter.class);
     }
 
@@ -81,8 +82,8 @@ public class PostResource extends BennuRestResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/files")
-    public String addPostFile(@PathParam("oid") Post post, @Context HttpServletRequest request) throws IOException,
-            ServletException {
+    public JsonElement addPostFile(@PathParam("oid") Post post, @Context HttpServletRequest request) throws IOException,
+    ServletException {
         Part part = request.getPart("file");
 
         createFileFromRequest(post, part);
@@ -93,8 +94,7 @@ public class PostResource extends BennuRestResource {
     @Atomic(mode = TxMode.WRITE)
     public void createFileFromRequest(Post post, Part part) throws IOException {
         GroupBasedFile groupBasedFile =
-                new GroupBasedFile(part.getName(), part.getName(), ByteStreams.toByteArray(part.getInputStream()),
-                        LoggedGroup.get());
+                new GroupBasedFile(part.getName(), part.getName(), ByteStreams.toByteArray(part.getInputStream()), Group.logged());
 
         PostFile postFile = new PostFile(post, groupBasedFile, false, 0);
         post.addFiles(postFile);

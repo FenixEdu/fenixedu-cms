@@ -18,13 +18,14 @@
  */
 package org.fenixedu.cms.ui;
 
+import static org.fenixedu.cms.domain.MenuItem.CREATION_DATE_COMPARATOR;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
@@ -56,8 +57,6 @@ import pt.ist.fenixframework.FenixFramework;
 import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
-import static org.fenixedu.cms.domain.MenuItem.CREATION_DATE_COMPARATOR;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/pages")
@@ -132,22 +131,22 @@ public class AdminPages {
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST)
-    public RedirectView edit(@PathVariable String slugSite, @PathVariable String slugPage,
-                             @RequestParam String newSlug, @RequestParam LocalizedString name,
-                             @RequestParam LocalizedString body, @RequestParam(required = false) String[] categories,
-                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) DateTime publicationStarts,
-                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) DateTime publicationEnds,
-                             @RequestParam(required = false, defaultValue = "false") boolean active, @RequestParam String viewGroup,
-                             @RequestParam(required = false) String menu, @RequestParam(required = false) String menuItem,
-                             @RequestParam(required = false) String menuItemParent, @RequestParam(required = false) Integer menuItemPosition) {
+    public RedirectView edit(@PathVariable String slugSite, @PathVariable String slugPage, @RequestParam String newSlug,
+            @RequestParam LocalizedString name, @RequestParam LocalizedString body,
+            @RequestParam(required = false) String[] categories, @RequestParam(required = false) @DateTimeFormat(
+                    iso = DateTimeFormat.ISO.DATE_TIME) DateTime publicationStarts,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) DateTime publicationEnds,
+            @RequestParam(required = false, defaultValue = "false") boolean active, @RequestParam String viewGroup,
+            @RequestParam(required = false) String menu, @RequestParam(required = false) String menuItem, @RequestParam(
+                    required = false) String menuItemParent, @RequestParam(required = false) Integer menuItemPosition) {
         Site site = Site.fromSlug(slugSite);
         Page page = site.pageForSlug(slugPage);
         Menu menuObj = getDomainObjectIfPresent(menu);
         MenuItem menuItemObj = getDomainObjectIfPresent(menuItem);
         MenuItem menuItemParentObj = getDomainObjectIfPresent(menuItemParent);
-        page.getStaticPost().ifPresent(post ->
-                editPageAndPost(page, post, name, body, newSlug, categories, publicationStarts, publicationEnds, active,
-                        Group.parse(viewGroup), menuObj, menuItemObj, menuItemParentObj, menuItemPosition));
+        page.getStaticPost().ifPresent(
+                post -> editPageAndPost(page, post, name, body, newSlug, categories, publicationStarts, publicationEnds, active,
+                Group.parse(viewGroup), menuObj, menuItemObj, menuItemParentObj, menuItemPosition));
         return pageRedirect(page);
     }
 
@@ -198,7 +197,7 @@ public class AdminPages {
         JsonObject obj = new JsonObject();
         page.getStaticPost().ifPresent(post -> FenixFramework.atomic(() -> {
             try {
-                GroupBasedFile f = new GroupBasedFile(name, name, attachment.getBytes(), AnyoneGroup.get());
+                GroupBasedFile f = new GroupBasedFile(name, name, attachment.getBytes(), Group.anyone());
                 post.addAttachment(f, 0);
                 obj.addProperty("displayname", f.getDisplayName());
                 obj.addProperty("filename", f.getFilename());
@@ -212,7 +211,7 @@ public class AdminPages {
 
     @Atomic
     private GroupBasedFile addAttachment(String name, MultipartFile attachment, Post p) throws IOException {
-        GroupBasedFile f = new GroupBasedFile(name, attachment.getOriginalFilename(), attachment.getBytes(), AnyoneGroup.get());
+        GroupBasedFile f = new GroupBasedFile(name, attachment.getOriginalFilename(), attachment.getBytes(), Group.anyone());
         p.addAttachment(f, 0);
         return f;
     }
@@ -249,7 +248,7 @@ public class AdminPages {
             FenixFramework.atomic(() -> {
                 String filename = multipartFile.getOriginalFilename();
                 try {
-                    GroupBasedFile f = new GroupBasedFile(filename, filename, multipartFile.getBytes(), AnyoneGroup.get());
+                    GroupBasedFile f = new GroupBasedFile(filename, filename, multipartFile.getBytes(), Group.anyone());
                     post.addEmbeddedFile(f, 0);
                     obj.addProperty("displayname", f.getDisplayName());
                     obj.addProperty("filename", f.getFilename());
@@ -278,15 +277,16 @@ public class AdminPages {
     }
 
     @Atomic
-    private void editPageAndPost(Page page, Post post, LocalizedString name, LocalizedString body, String newSlug, String[] categories,
-                                 DateTime publicationStarts, DateTime publicationEnds, boolean active, Group viewGroup, Menu menu, MenuItem menuItem, MenuItem menuItemParent, Integer menuItemPosition) {
+    private void editPageAndPost(Page page, Post post, LocalizedString name, LocalizedString body, String newSlug,
+            String[] categories, DateTime publicationStarts, DateTime publicationEnds, boolean active, Group viewGroup,
+            Menu menu, MenuItem menuItem, MenuItem menuItemParent, Integer menuItemPosition) {
         Site site = page.getSite();
         LocalizedString nameSanitized = Post.sanitize(name);
         LocalizedString bodySanitized = Post.sanitize(body);
 
         Optional.ofNullable(categories).ifPresent(
                 categoriesSlugs -> Stream.of(categoriesSlugs).map(site::categoryForSlug).filter(category -> category != null)
-                .forEach(post::addCategories));
+                        .forEach(post::addCategories));
 
         if (!post.getName().equals(nameSanitized)) {
             post.setName(nameSanitized);

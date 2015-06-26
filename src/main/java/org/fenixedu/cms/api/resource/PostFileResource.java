@@ -14,6 +14,8 @@ import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.api.json.PostFileAdapter;
 import org.fenixedu.cms.domain.PostFile;
 
+import com.google.gson.JsonElement;
+
 @Path("/cms/postFiles")
 public class PostFileResource extends BennuRestResource {
 
@@ -22,7 +24,7 @@ public class PostFileResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String getPostFile(@PathParam("oid") PostFile postFile) {
+    public JsonElement getPostFile(@PathParam("oid") PostFile postFile) {
         return view(postFile, PostFileAdapter.class);
     }
 
@@ -30,11 +32,11 @@ public class PostFileResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String updatePostFile(@PathParam("oid") PostFile postFile, String json) {
+    public JsonElement updatePostFile(@PathParam("oid") PostFile postFile, JsonElement json) {
         return updatePostFileFromJson(postFile, json);
     }
 
-    private String updatePostFileFromJson(PostFile postFile, String json) {
+    private JsonElement updatePostFileFromJson(PostFile postFile, JsonElement json) {
         return view(update(json, postFile, PostFileAdapter.class));
     }
 

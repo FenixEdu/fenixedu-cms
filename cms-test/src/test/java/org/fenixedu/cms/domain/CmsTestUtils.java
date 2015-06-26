@@ -3,7 +3,7 @@ package org.fenixedu.cms.domain;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.domain.UserProfile;
-import org.fenixedu.bennu.core.groups.UserGroup;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -35,7 +35,7 @@ public class CmsTestUtils {
 
         Site site = new Site(siteName, siteDescription);
 
-        site.setCanAdminGroup(UserGroup.of(user));
+        site.setCanAdminGroup(Group.users(user));
         return site;
     }
 
@@ -70,7 +70,7 @@ public class CmsTestUtils {
     public static Category createCategory(Site site, String methodName) {
         LocalizedString categoryName =
                 new LocalizedString(Locale.UK, "category name uk " + methodName)
-                        .with(Locale.US, "category name us " + methodName);
+        .with(Locale.US, "category name us " + methodName);
         Category category = new Category(site, categoryName);
 
         return category;
@@ -88,7 +88,7 @@ public class CmsTestUtils {
         MenuItem menuItem = new MenuItem(menu);
         LocalizedString menuItemName =
                 new LocalizedString(Locale.UK, "menuItem name uk " + methodName)
-                        .with(Locale.US, "menuItem name us " + methodName);
+        .with(Locale.US, "menuItem name us " + methodName);
         menuItem.setName(menuItemName);
 
         return menuItem;

@@ -21,8 +21,8 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 @Path("/cms/menus")
 public class MenuResource extends BennuRestResource {
@@ -32,7 +32,7 @@ public class MenuResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String getMenu(@PathParam("oid") Menu menu) {
+    public JsonElement getMenu(@PathParam("oid") Menu menu) {
         return view(menu, MenuAdapter.class);
     }
 
@@ -48,18 +48,18 @@ public class MenuResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String updateMenu(@PathParam("oid") Menu menu, String json) {
+    public JsonElement updateMenu(@PathParam("oid") Menu menu, JsonElement json) {
         return updateMenuFromJson(menu, json);
     }
 
-    private String updateMenuFromJson(Menu menu, String json) {
+    private JsonElement updateMenuFromJson(Menu menu, JsonElement json) {
         return view(update(json, menu, MenuAdapter.class));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/menuItems")
-    public String listMenuItems(@PathParam("oid") Menu menu) {
+    public JsonElement listMenuItems(@PathParam("oid") Menu menu) {
         return view(menu.getItemsSet(), MenuItemAdapter.class);
     }
 
@@ -67,13 +67,12 @@ public class MenuResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/menuItems")
-    public String createMenuItem(@PathParam("oid") Menu menu, String json) {
+    public JsonElement createMenuItem(@PathParam("oid") Menu menu, JsonObject json) {
         return view(createMenuItemFromJson(menu, json));
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private MenuItem createMenuItemFromJson(Menu menu, String json) {
-        JsonObject jObj = new JsonParser().parse(json).getAsJsonObject();
+    private MenuItem createMenuItemFromJson(Menu menu, JsonObject jObj) {
 
         MenuItem menuItem = new MenuItem(menu);
 
