@@ -33,7 +33,7 @@
     <a href="${pageContext.request.contextPath}/cms/sites/new" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>
     <a href="${pageContext.request.contextPath}/cms/folders" class="btn btn-default"><i class="glyphicon glyphicon-folder-close"></i> Folders</a>
     <a href="${pageContext.request.contextPath}/cms/themes" class="btn btn-default"><i class="icon icon-brush"></i> Themes</a>
-    <button type="button" data-target="#sites-settings" data-toggle="modal" class="btn btn-default">Settings</button>
+    <button type="button" data-target="#sites-settings" data-toggle="modal" class="btn btn-default"><i class="glyphicon glyphicon-cog"></i> Settings</button>
     <button type="button" class="btn btn-default" onclick="$('#import-button').click();"><i class="glyphicon-cloud-upload"></i> Import</button>
     <form id="import-form" method="post" action="${pageContext.request.contextPath}/cms/sites/import" enctype='multipart/form-data'>
       <input id="import-button" class="hidden" type="file" name="attachment" onchange="$('#import-form').submit();" />

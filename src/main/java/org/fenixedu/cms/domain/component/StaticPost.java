@@ -28,6 +28,7 @@ import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @ComponentType(name = "Static Post", description = "Static Post")
 public class StaticPost extends StaticPost_Base {
@@ -99,6 +100,7 @@ public class StaticPost extends StaticPost_Base {
         jsonObject.addProperty("type", getType());
         jsonObject.addProperty("post", getPost().getSlug());
         jsonObject.addProperty("site", getPost().getSite().getSlug());
+        jsonObject.addProperty("page", Optional.ofNullable(getPage()).map(Page::getSlug).orElse(null));
         return jsonObject;
     }
 }

@@ -1,7 +1,5 @@
 package org.fenixedu.cms.domain;
 
-import java.util.Locale;
-
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.domain.UserProfile;
@@ -9,6 +7,8 @@ import org.fenixedu.bennu.core.groups.UserGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
+
+import java.util.Locale;
 
 public class CmsTestUtils {
 
@@ -103,4 +103,5 @@ public class CmsTestUtils {
 
         return theme;
     }
+
 }

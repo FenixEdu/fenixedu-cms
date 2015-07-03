@@ -50,7 +50,6 @@ ${portal.toolkit()}
 		<input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.edit.label.name" />" value='<c:out value="${post.name.json()}"/>'>
 		<c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="post.edit.error.emptyName"/></p></c:if>
 	</div>
-<!--
 	<p>
 		<div>Permalink:
 			<samp>/${site.baseUrl}/${site.viewPostPage.slug}/</samp>
@@ -59,7 +58,6 @@ ${portal.toolkit()}
 			<a href="${post.address}" class="btn btn-default btn-xs">View Post</a>
 		</div>
 	</p>
--->
     <div class="form-group">
             <textarea id="htmlEditor" bennu-html-editor bennu-localized-string name="body" rows="3"><c:out value="${post.body.json()}"/></textarea>
     </div>

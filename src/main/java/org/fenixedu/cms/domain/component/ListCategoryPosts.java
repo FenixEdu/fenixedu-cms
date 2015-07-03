@@ -28,6 +28,7 @@ import pt.ist.fenixframework.Atomic.TxMode;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -90,6 +91,7 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
         jsonObject.addProperty("type", getType());
         jsonObject.addProperty("category", getCategory().getSlug());
         jsonObject.addProperty("site", getCategory().getSite().getSlug());
+        jsonObject.addProperty("page", Optional.ofNullable(getPage()).map(Page::getSlug).orElse(null));
         return jsonObject;
     }
 

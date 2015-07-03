@@ -52,12 +52,20 @@ public class SiteImporter {
         site.setCanViewGroup(Group.parse(siteJson.get("canViewGroup").getAsString()));
         site.setCanPostGroup(Group.parse(siteJson.get("canPostGroup").getAsString()));
         site.setCanAdminGroup(Group.parse(siteJson.get("canAdminGroup").getAsString()));
-        site.setThemeType(siteJson.get("themeType").getAsString());
+        if (siteJson.has("themeType") && !siteJson.get("themeType").isJsonNull()) {
+            site.setThemeType(siteJson.get("themeType").getAsString());
+        }
         site.setEmbedded(siteJson.get("embedded").getAsBoolean());
-        site.setAnalyticsCode(siteJson.get("analyticsCode").getAsString());
+        if (siteJson.has("analyticsCode") && !siteJson.get("analyticsCode").isJsonNull()) {
+            site.setAnalyticsCode(siteJson.get("analyticsCode").getAsString());
+        }
+
+        for (Map.Entry<String, JsonObject> entry : categoriesDir.entrySet()) {
+            importCategory(site, entry.getKey(), entry.getValue());
+        }
 
         for (Map.Entry<String, JsonObject> entry : postsDir.entrySet()) {
-            importPost(site, entry.getKey(), entry.getValue(), categoriesDir);
+            importPost(site, entry.getKey(), entry.getValue());
         }
 
         for (Map.Entry<String, JsonObject> entry : pagesDir.entrySet()) {
@@ -80,11 +88,12 @@ public class SiteImporter {
 
     private Page importPage(Site site, String pageSlug, JsonObject jsonObject) {
         return ofNullable(site.pageForSlug(pageSlug)).orElseGet(() -> {
-            Page page = new Page(site);
-            page.setName(fromJson(jsonObject.get("name")));
+            Page page = new Page(site, fromJson(jsonObject.get("name")));
             page.setSlug(jsonObject.get("slug").getAsString());
             page.setCanViewGroup(Group.parse(jsonObject.get("canViewGroup").getAsString()));
-            page.setTemplateType(jsonObject.get("templateType").getAsString());
+            if (jsonObject.has("templateType") && !jsonObject.get("templateType").isJsonNull()) {
+                page.setTemplateType(jsonObject.get("templateType").getAsString());
+            }
             page.setPublished(jsonObject.get("published").getAsBoolean());
             for (JsonElement el : jsonObject.get("components").getAsJsonArray()) {
                 Component component = importComponent(el.getAsJsonObject());
@@ -112,8 +121,7 @@ public class SiteImporter {
 
     private Menu importMenu(Site site, String menuSlug, JsonObject jsonObject) {
         return ofNullable(site.menuForSlug(menuSlug)).orElseGet(() -> {
-            Menu menu = new Menu(site);
-            menu.setName(fromJson(jsonObject.get("name")));
+            Menu menu = new Menu(site, fromJson(jsonObject.get("name")));
             menu.setSlug(jsonObject.get("slug").getAsString());
             for (JsonElement childrenEl : jsonObject.get("topLevelItems").getAsJsonArray()) {
                 importMenuItem(site, menu, null, childrenEl.getAsJsonObject());
@@ -142,7 +150,7 @@ public class SiteImporter {
         return menuItem;
     }
 
-    private Post importPost(Site site, String postSlug, JsonObject jsonObject, Map<String, JsonObject> categoriesDir) {
+    private Post importPost(Site site, String postSlug, JsonObject jsonObject) {
         return ofNullable(site.postForSlug(postSlug)).orElseGet(() -> {
 
             Post post = new Post(site);
@@ -163,9 +171,10 @@ public class SiteImporter {
             if (jsonObject.has("publicationEnd") && jsonObject.get("publicationEnd").isJsonPrimitive()) {
                 post.setPublicationEnd(DateTime.parse(jsonObject.get("publicationEnd").getAsString()));
             }
+
             if (jsonObject.has("categories") && jsonObject.get("categories").isJsonArray()) {
                 for (JsonElement catSlug : jsonObject.get("categories").getAsJsonArray()) {
-                    post.addCategories(importCategory(site, catSlug.getAsString(), categoriesDir.get(catSlug.getAsString())));
+                    post.addCategories(site.categoryForSlug(catSlug.getAsString()));
                 }
             }
 
@@ -201,18 +210,15 @@ public class SiteImporter {
     }
 
     private Category importCategory(Site site, String categorySlug, JsonObject jsonObject) {
-        return ofNullable(site.categoryForSlug(categorySlug)).orElseGet(() -> {
-            Category category = new Category(site);
-            category.setName(fromJson(jsonObject.get("name")));
-            category.setSlug(jsonObject.get("slug").getAsString());
-            for (JsonElement el : jsonObject.get("components").getAsJsonArray()) {
-                Component component = importComponent(el.getAsJsonObject());
-                if (component != null && ListCategoryPosts.class.isInstance(component)) {
-                    category.addComponents((ListCategoryPosts) component);
-                }
+        Category category = site.getOrCreateCategoryForSlug(categorySlug, fromJson(jsonObject.get("name")));
+        for (JsonElement el : jsonObject.get("components").getAsJsonArray()) {
+            Component component = importComponent(el.getAsJsonObject());
+            if (component != null && ListCategoryPosts.class.isInstance(component)) {
+                category.addComponents((ListCategoryPosts) component);
             }
-            return category;
-        });
+        }
+        System.out.println("importCategory - result: " + category);
+        return category;
     }
 
     private JsonObject getSiteJson() {

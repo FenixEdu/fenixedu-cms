@@ -80,7 +80,7 @@ public class SiteExporter {
         siteJson.addProperty("slug", site.getSlug());
         siteJson.add("name", site.getName().json());
         siteJson.add("description", site.getDescription().json());
-        siteJson.add("canViewGroup", export(site.getCanAdminGroup()));
+        siteJson.add("canViewGroup", export(site.getCanViewGroup()));
         siteJson.add("canAdminGroup", export(site.getCanAdminGroup()));
         siteJson.add("canPostGroup", export(site.getCanPostGroup()));
         siteJson.addProperty("themeType", site.getThemeType());

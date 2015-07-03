@@ -31,7 +31,7 @@ ${portal.toolkit()}
 	<div class="row">
 		<div class="col-sm-4">
 			<a href="#" data-toggle="modal" data-target="#create-page" class="btn btn-primary"><i class="icon icon-plus"></i> New</a>
-			<a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}" class="btn btn-default">Advanced</a>
+			<a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}" class="btn btn-default"><i class="glyphicon glyphicon-cog"></i> Advanced</a>
 		</div>
 		<div class="col-sm-3 pull-right">
 			<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">

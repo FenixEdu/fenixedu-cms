@@ -1,20 +1,17 @@
 package org.fenixedu.cms.domain;
 
-import org.fenixedu.bennu.core.groups.AnonymousGroup;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
-import org.fenixedu.bennu.core.groups.CustomGroupRegistry;
+import org.fenixedu.bennu.core.groups.*;
 import org.fenixedu.bennu.core.groups.CustomGroupRegistry.BooleanParser;
 import org.fenixedu.bennu.core.groups.CustomGroupRegistry.DateTimeParser;
 import org.fenixedu.bennu.core.groups.CustomGroupRegistry.StringParser;
-import org.fenixedu.bennu.core.groups.LoggedGroup;
-import org.fenixedu.bennu.core.groups.NobodyGroup;
-import org.fenixedu.bennu.core.groups.UserGroup;
+import org.fenixedu.cms.domain.component.*;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
 import org.junit.BeforeClass;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
+
+import java.util.stream.Stream;
 
 public class TestCMS {
 
@@ -31,6 +28,7 @@ public class TestCMS {
         CustomGroupRegistry.registerArgumentParser(BooleanParser.class);
         CustomGroupRegistry.registerArgumentParser(StringParser.class);
         CustomGroupRegistry.registerArgumentParser(DateTimeParser.class);
+        loadComponents();
     }
 
     @BeforeClass
@@ -44,7 +42,18 @@ public class TestCMS {
     }
 
     protected boolean equalDates(DateTime expected, DateTime result, int eps) {
+        if (expected == null && result == null) {
+            return true;
+        }
         int diff = Seconds.secondsBetween(expected, result).getSeconds();
         return Math.abs(diff) <= eps;
+    }
+
+    private static void loadComponents() {
+        Stream.of(StaticPost.class, ListCategoryPosts.class, ViewPost.class).forEach(type -> {
+            if (type.isAnnotationPresent(ComponentType.class)) {
+                Component.register(type);
+            }
+        });
     }
 }

@@ -47,7 +47,7 @@
 	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/menus/${site.slug}">Menus</a></li>
       	</ul>
       	</div>
-	    <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/edit" class="btn btn-default">Settings</a>
+	    <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/edit" class="btn btn-default"><i class="glyphicon glyphicon-cog"></i> Settings</a>
 		<c:if test="${site.published}">
 			<a href="${site.fullUrl}" target="_blank" class="btn btn-default"><spring:message code="action.link"/></a>
 		</c:if>

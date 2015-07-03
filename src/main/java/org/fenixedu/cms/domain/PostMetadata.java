@@ -133,4 +133,9 @@ public class PostMetadata implements Serializable, Wrappable {
     public PostMetadata clone() {
         return new PostMetadata(metadata);
     }
+
+    @Override
+    public boolean equals(Object object) {
+        return PostMetadata.class.isInstance(object) && ((PostMetadata) object).json().equals(json());
+    }
 }
