@@ -80,6 +80,7 @@
 
 <div class="modal fade" id="duplicateModal" tabindex="-1" role="dialog" aria-hidden="true">
     <form action="" class="form-horizontal" method="post">
+        ${csrf.field()}
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -143,52 +144,53 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <form class="form-horizontal" enctype="multipart/form-data" action="themes/new" method="post" role="form">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
-                <h3 class="modal-title">New Theme</h3>
-                <small>Make a new theme from scratch</small>
-            </div>
-            <div class="modal-body">
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.name"/></label>
-                        <div class="col-sm-10">
-                            <input type="text" name="name" class="form-control" placeholder="Name">
+                ${csrf.field()}
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
+                    <h3 class="modal-title">New Theme</h3>
+                    <small>Make a new theme from scratch</small>
+                </div>
+                <div class="modal-body">
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.name"/></label>
+                            <div class="col-sm-10">
+                                <input type="text" name="name" class="form-control" placeholder="Name">
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.type"/></label>
-                        <div class="col-sm-10">
-                            <input type="text" name="type" class="form-control" placeholder="Type">
-                            <p class="help-block">This code is used internally and is not shared with the users. Howerver it must be unique.</p>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.type"/></label>
+                            <div class="col-sm-10">
+                                <input type="text" name="type" class="form-control" placeholder="Type">
+                                <p class="help-block">This code is used internally and is not shared with the users. Howerver it must be unique.</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.description"/></label>
-                        <div class="col-sm-10">
-                            <textarea name="description" class="form-control" placeholder="Description"></textarea>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.description"/></label>
+                            <div class="col-sm-10">
+                                <textarea name="description" class="form-control" placeholder="Description"></textarea>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.extends"/></label>
-                        <div class="col-sm-10">
-                            <select class="form-control" name="extends" id="">
-                                <option value="">-</option>
-                                <c:forEach var="theme" items="${themes}">
-                                    <option value="${theme.type}">${theme.name}</option>
-                                </c:forEach>
-                            </select>
-                            <p class="help-block">If your new theme is going to be minor changes over another one, you may extend it and reuse most of its code.</p>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.extends"/></label>
+                            <div class="col-sm-10">
+                                <select class="form-control" name="extends" id="">
+                                    <option value="">-</option>
+                                    <c:forEach var="theme" items="${themes}">
+                                        <option value="${theme.type}">${theme.name}</option>
+                                    </c:forEach>
+                                </select>
+                                <p class="help-block">If your new theme is going to be minor changes over another one, you may extend it and reuse most of its code.</p>
+                            </div>
                         </div>
-                    </div>
-                
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="submit" class="btn btn-primary">Create</button>
-            </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
             </form>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

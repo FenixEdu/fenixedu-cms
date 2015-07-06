@@ -79,6 +79,7 @@
             </div>
             <div class="modal-footer">
                 <form id="deleteForm" method="POST">
+                    ${csrf.field()}
                     <button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
                     <a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
                 </form>

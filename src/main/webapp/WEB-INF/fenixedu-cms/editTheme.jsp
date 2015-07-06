@@ -460,6 +460,7 @@ angular.module('cmsFileViewer')
     <div class="modal-dialog">
         <div class="modal-content">
             <form class="form-horizontal" enctype="multipart/form-data" action="editSettings" method="post" role="form">
+            ${csrf.field()}
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
                 <h3 class="modal-title">Edit Theme</h3>
@@ -540,6 +541,7 @@ angular.module('cmsFileViewer')
     <div class="modal-dialog">
         <div class="modal-content">
         <form action="newFile" class="form-horizontal" method="post">
+            ${csrf.field()}
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
                 <h3 class="modal-title">New File</h3>

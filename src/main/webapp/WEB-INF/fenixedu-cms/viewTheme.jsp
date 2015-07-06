@@ -115,8 +115,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
         <button type="button" onclick="$('#deleteThemeForm').submit();" class="btn btn-danger">Yes</button>
-        <form action="delete" method="post" id="deleteThemeForm">
-        </form> 
+        <form action="delete" method="post" id="deleteThemeForm">${csrf.field()}</form> 
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

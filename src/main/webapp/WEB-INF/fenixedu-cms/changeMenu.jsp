@@ -32,7 +32,7 @@ ${portal.toolkit()}
         outline: none;
     }
 </style>
-<form id="deleteForm" method="post" action=""></form>
+<form id="deleteForm" method="post" action="">${csrf.field()}</form>
 
 <div class="container">
     <script src="${pageContext.request.contextPath}/bennu-admin/libs/fancytree/jquery-ui.min.js"></script>
@@ -45,6 +45,7 @@ ${portal.toolkit()}
         </div>
         <div id="options" class="col-md-6">
             <form action="changeItem" id="modal" method="post">
+                ${csrf.field()}
                 <input type="hidden" name="menuItemOid" value="null"/>
                 <input type="hidden" name="menuItemOidParent" value="null"/>
                 <input type="hidden" name="position" value=""/>
@@ -118,6 +119,7 @@ ${portal.toolkit()}
 
     <div class="modal fade">
         <form action="createItem" id="modal" method="post">
+            ${csrf.field()}
             <input type="hidden" name="menuItemOid" value="null"/>
 
             <div class="modal-dialog">

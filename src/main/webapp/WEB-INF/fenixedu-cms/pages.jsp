@@ -130,6 +130,7 @@ ${portal.toolkit()}
 			</div>
 			<div class="modal-footer">
 				<form id="deleteForm" method="POST">
+					${csrf.field()}
 					<button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
 					<a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
 				</form>
@@ -140,6 +141,7 @@ ${portal.toolkit()}
 
 <div class="modal fade" id="defaultModal" tabindex="-1" role="dialog" aria-hidden="true">
 	<form action="${site.slug}/defaultPage" class="form-horizontal" method="post">
+		${csrf.field()}
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -175,6 +177,7 @@ ${portal.toolkit()}
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<form class="form-horizontal" action="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" method="post" role="form">
+			  ${csrf.field()}
 		      <div class="modal-header">
 		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
 		        <h3 class="modal-title">New Page</h3>

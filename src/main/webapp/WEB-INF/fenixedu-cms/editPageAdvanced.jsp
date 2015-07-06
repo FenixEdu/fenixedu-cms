@@ -43,7 +43,7 @@
 
 <div ng-app="componentsApp" ng-controller="ComponentController">
     <form id="mainForm" class="form-horizontal" action="" method="post" role="form">
-
+        ${csrf.field()}
         <div class="${emptyName ? "form-group has-error" : "form-group"}">
             <label class="col-sm-2 control-label"><spring:message code="page.edit.label.slug"/></label>
             <div class="col-sm-10">
@@ -180,7 +180,7 @@
                                 </c:if>
                                 <form id="deleteComponentForm${m.externalId}"
                                       action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/deleteComponent/${m.getExternalId()}"
-                                      method="POST"></form>
+                                      method="POST">${csrf.field()}</form>
                             </div>
                         </td>
                     </tr>
@@ -193,6 +193,7 @@
     <div class="modal fade" id="componentModal" tabindex="-1" role="dialog" aria-labelledby="componentModal"
          aria-hidden="true">
         <form class="modal-dialog form-horizontal" ng-submit="createComponent()">
+            ${csrf.field()}
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>

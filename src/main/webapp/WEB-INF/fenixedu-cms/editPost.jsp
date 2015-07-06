@@ -28,6 +28,7 @@
 
 ${portal.toolkit()}
 <form class="form" action="" method="post" role="form" id="postForm">
+	${csrf.field()}
 	<div class="page-header">
 		<h1>${site.name.content}</h1>
 
@@ -214,6 +215,7 @@ ${portal.toolkit()}
 
 <div class="modal fade" id="addAttachment" tabindex="-1" role="dialog" aria-hidden="true">
 	<form action="addAttachment" enctype="multipart/form-data" class="form-horizontal" method="post">
+		${csrf.field()}
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -247,6 +249,7 @@ ${portal.toolkit()}
 
 <div class="modal fade" id="addCategory" tabindex="-1" role="dialog" aria-hidden="true">
 	<form class="form-horizontal" action="createCategory" method="post" role="form">
+		${csrf.field()}
 		<div class="modal-dialog">
 			<div class="modal-content">
 
@@ -290,6 +293,7 @@ ${portal.toolkit()}
 			</div>
 			<div class="modal-footer">
 				<form action="deleteAttachment" id="deleteAttachment" method="POST">
+					${csrf.field()}
 					<input type="hidden" name="file"/>
 					<button type="submit" class="btn btn-danger"><spring:message code="label.yes"/></button>
 					<button type="button" class="btn btn-default" data-dismiss="modal"><spring:message
@@ -337,6 +341,7 @@ ${portal.toolkit()}
 </style>
 
 <form action="moveAttachment" id="moveAttachment" class="hidden" method="post">
+	${csrf.field()}
 	<input type="hidden" name="origin" value="${loop.index}"/>
 	<input type="hidden" name="destiny" value="${loop.index + 1}"/>
 </form>

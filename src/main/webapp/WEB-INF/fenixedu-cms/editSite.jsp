@@ -30,6 +30,7 @@ ${portal.toolkit()}
 </div>
 
 <form class="form-horizontal" action="" method="post" role="form">
+    ${csrf.field()}
     <div role="tabpanel">
         <p>
             <ul class="nav nav-tabs" role="tablist">
@@ -364,10 +365,11 @@ ${portal.toolkit()}
     </div>
 
 </form>
-<form id="clone-form" method="post" action="clone"></form>
+<form id="clone-form" method="post" action="clone">${csrf.field()}</form>
 
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
     <form method="post" action="${pageContext.request.contextPath}/cms/sites/${site.slug}/delete">
+        ${csrf.field()}
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">

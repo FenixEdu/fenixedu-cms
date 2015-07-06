@@ -36,6 +36,7 @@
     <button type="button" data-target="#sites-settings" data-toggle="modal" class="btn btn-default"><i class="glyphicon glyphicon-cog"></i> Settings</button>
     <button type="button" class="btn btn-default" onclick="$('#import-button').click();"><i class="glyphicon-cloud-upload"></i> Import</button>
     <form id="import-form" method="post" action="${pageContext.request.contextPath}/cms/sites/import" enctype='multipart/form-data'>
+      ${csrf.field()}
       <input id="import-button" class="hidden" type="file" name="attachment" onchange="$('#import-form').submit();" />
     </form>
   </div>
@@ -103,6 +104,7 @@
 <div class="modal fade" id="sites-settings">
   <div class="modal-dialog">
   <form method="post" enctype="multipart/form-data" action="/cms/sites/cmsSettings">
+    ${csrf.field()}
     <div class="modal-content">
       <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>

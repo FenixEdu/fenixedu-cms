@@ -29,6 +29,7 @@
 ${portal.toolkit()}
 
 <form class="form-horizontal" action="" method="post" role="form">
+  ${csrf.field()}
   <div class="${emptyName ? "form-group has-error" : "form-group"}">
     <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="menu.create.label.name" /></label>
     <div class="col-sm-10">

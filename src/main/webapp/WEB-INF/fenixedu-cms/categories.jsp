@@ -64,7 +64,7 @@
               <td>
                   <a href="${category.editUrl}" class="btn btn-sm btn-default">Edit</a>
 	               <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteCategoryForm${category.externalId}').submit();" ${category.postsSet.size() > 0 ? 'disabled' : ''}><spring:message code="action.delete"/></button>
-					       <form id="deleteCategoryForm${category.externalId}" action="${pageContext.request.contextPath}/cms/categories/${category.site.slug}/${category.slug}/delete" method="POST"></form>
+					       <form id="deleteCategoryForm${category.externalId}" action="${pageContext.request.contextPath}/cms/categories/${category.site.slug}/${category.slug}/delete" method="POST">${csrf.field()}</form>
               </td>
             </tr>
           </c:forEach>

@@ -67,6 +67,7 @@
 
 <div class="modal fade" id="newFolderModal" tabindex="-1" role="dialog" aria-hidden="true">
     <form class="form-horizontal" method="post">
+        ${csrf.field()}
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -99,6 +100,7 @@
                 </div>
                 <div class="modal-footer">
                     <form action="deleteTemplate" id="templateDeleteForm" method="POST">
+                        ${csrf.field()}
                         <button type="submit" class="btn btn-primary"><spring:message code="action.create"/></button>
                     </form>
                 </div>

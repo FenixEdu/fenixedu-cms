@@ -182,6 +182,7 @@ ${portal.toolkit()}
 </script>
 
 <form action="revertTo" id="revertForm" method="post">
+    ${csrf.field()}
     <input type="hidden" name="revision" id="revisionToRevert">
 </form>
 
