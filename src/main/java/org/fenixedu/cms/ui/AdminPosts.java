@@ -36,6 +36,8 @@ import org.fenixedu.cms.domain.PostContentRevision;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,14 +55,6 @@ import com.google.gson.JsonObject;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
-
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.FenixFramework;
-
-import com.google.common.base.Strings;
-import com.google.common.math.IntMath;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/posts")

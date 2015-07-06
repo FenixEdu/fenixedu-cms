@@ -18,7 +18,26 @@
  */
 package org.fenixedu.cms.ui;
 
-import static org.fenixedu.cms.domain.MenuItem.CREATION_DATE_COMPARATOR;
+import com.google.common.base.Strings;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.io.domain.GroupBasedFile;
+import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
+import org.fenixedu.bennu.spring.portal.BennuSpringController;
+import org.fenixedu.cms.domain.*;
+import org.fenixedu.cms.domain.component.Component;
+import org.fenixedu.cms.domain.component.StaticPost;
+import org.fenixedu.commons.i18n.LocalizedString;
+import org.joda.time.DateTime;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.DomainObject;
+import pt.ist.fenixframework.FenixFramework;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -26,37 +45,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.io.domain.GroupBasedFile;
-import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
-import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.Category;
-import org.fenixedu.cms.domain.Menu;
-import org.fenixedu.cms.domain.MenuItem;
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.Post;
-import org.fenixedu.cms.domain.Site;
-import org.fenixedu.cms.domain.component.Component;
-import org.fenixedu.cms.domain.component.StaticPost;
-import org.fenixedu.commons.i18n.LocalizedString;
-import org.joda.time.DateTime;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.view.RedirectView;
-
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.DomainObject;
-import pt.ist.fenixframework.FenixFramework;
-
-import com.google.common.base.Strings;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import static org.fenixedu.cms.domain.MenuItem.CREATION_DATE_COMPARATOR;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/pages")

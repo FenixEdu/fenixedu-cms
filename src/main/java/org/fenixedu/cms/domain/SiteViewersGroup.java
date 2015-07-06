@@ -28,10 +28,9 @@ import org.fenixedu.bennu.core.groups.CustomGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.joda.time.DateTime;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Stream;
 
 @GroupOperator("siteViewers")
 public class SiteViewersGroup extends CustomGroup {
@@ -84,15 +83,15 @@ public class SiteViewersGroup extends CustomGroup {
     }
 
     @Override
-    public Set<User> getMembers() {
+    public Stream<User> getMembers() {
         if (!site.getPublished()) {
-            return Collections.emptySet();
+            return Stream.empty();
         }
         return site.getCanViewGroup().getMembers();
     }
 
     @Override
-    public Set<User> getMembers(DateTime when) {
+    public Stream<User> getMembers(DateTime when) {
         return getMembers();
     }
 

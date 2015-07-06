@@ -1,15 +1,14 @@
 package org.fenixedu.cms.api.json;
 
-import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
-import org.fenixedu.bennu.core.json.JsonAdapter;
-import org.fenixedu.bennu.core.json.JsonBuilder;
-import org.fenixedu.bennu.core.json.adapters.DateTimeViewer;
-import org.fenixedu.bennu.core.json.adapters.LocalizedStringViewer;
-import org.fenixedu.cms.domain.Category;
-import org.fenixedu.commons.i18n.LocalizedString;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
+import org.fenixedu.bennu.core.api.json.DateTimeViewer;
+import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
+import org.fenixedu.bennu.core.json.JsonAdapter;
+import org.fenixedu.bennu.core.json.JsonBuilder;
+import org.fenixedu.cms.domain.Category;
+import org.fenixedu.commons.i18n.LocalizedString;
 
 @DefaultJsonAdapter(Category.class)
 public class CategoryAdapter implements JsonAdapter<Category> {

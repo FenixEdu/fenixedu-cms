@@ -18,10 +18,10 @@
  */
 package org.fenixedu.cms.ui;
 
-import java.text.DecimalFormat;
-
 import org.fenixedu.bennu.io.domain.GenericFile;
-import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
+import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
+
+import java.text.DecimalFormat;
 
 public class CMSBean {
 

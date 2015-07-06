@@ -1,13 +1,12 @@
 package org.fenixedu.cms.api.json;
 
-import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
-import org.fenixedu.bennu.core.json.JsonAdapter;
-import org.fenixedu.bennu.core.json.JsonBuilder;
-import org.fenixedu.bennu.core.json.adapters.DateTimeViewer;
-import org.fenixedu.cms.domain.CMSTheme;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
+import org.fenixedu.bennu.core.api.json.DateTimeViewer;
+import org.fenixedu.bennu.core.json.JsonAdapter;
+import org.fenixedu.bennu.core.json.JsonBuilder;
+import org.fenixedu.cms.domain.CMSTheme;
 
 @DefaultJsonAdapter(CMSTheme.class)
 public class ThemeAdapter implements JsonAdapter<CMSTheme> {

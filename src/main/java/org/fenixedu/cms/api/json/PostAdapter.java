@@ -1,18 +1,17 @@
 package org.fenixedu.cms.api.json;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
+import org.fenixedu.bennu.core.api.json.DateTimeViewer;
+import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
 import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
-import org.fenixedu.bennu.core.json.adapters.DateTimeViewer;
-import org.fenixedu.bennu.core.json.adapters.LocalizedStringViewer;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 @DefaultJsonAdapter(Post.class)
 public class PostAdapter implements JsonAdapter<Post> {
