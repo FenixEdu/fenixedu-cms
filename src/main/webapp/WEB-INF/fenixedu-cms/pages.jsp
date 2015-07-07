@@ -29,11 +29,11 @@ ${portal.toolkit()}
 
 <p>
 	<div class="row">
-		<div class="col-sm-4">
+		<div class="col-sm-8">
 			<a href="#" data-toggle="modal" data-target="#create-page" class="btn btn-primary"><i class="icon icon-plus"></i> New</a>
 			<a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}" class="btn btn-default"><i class="glyphicon glyphicon-cog"></i> Advanced</a>
 		</div>
-		<div class="col-sm-3 pull-right">
+		<div class="col-sm-4 pull-right">
 			<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
 		</div>
 	</div>
@@ -114,6 +114,22 @@ ${portal.toolkit()}
 			</c:forEach>
 			</tbody>
 		</table>
+
+		<!-- Pagination -->
+        <c:if test="${partition.getNumPartitions() > 1}">
+          <nav class="text-center">
+            <ul class="pagination">
+              <li ${partition.isFirst() ? 'class="disabled"' : ''}>
+                <a href="#" onclick="goToPage(${partition.getNumber() - 1})">&laquo;</a>
+              </li>
+              <li class="disabled"><a>${partition.getNumber()} / ${partition.getNumPartitions()}</a></li>
+              <li ${partition.isLast() ? 'class="disabled"' : ''}>
+                <a href="#" onclick="goToPage(${partition.getNumber() + 1})">&raquo;</a>
+              </li>
+            </ul>
+          </nav>
+        </c:if>
+
 	</c:otherwise>
 </c:choose>
 
@@ -205,24 +221,34 @@ ${portal.toolkit()}
 </div>
 
 <script type="application/javascript">
-	(function () {
-		$("a[data-page]").on('click', function (el) {
-			var pageSlug = el.target.getAttribute('data-page');
-			$('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/pages/${site.slug}/' + pageSlug + '/delete');
-			$('#deleteModal').modal('show');
-		});
+  function getParameterByName(name) {
+      var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+      return match && decodeURIComponent(match[1].replace(/\+/g, ' ')) || "";
+  }
 
-		$('#search-query').keypress(function (e) {
-			if (e.which == 13) {
-				searchPosts($('#search-query').val());
-			}
-		});
+  function goToPage(pageNumber) {
+      searchPosts({currentPage: pageNumber});
+  }
 
-		function searchPosts(query) {
-			var searchQuery = "";
-			searchQuery += query ? "query=" + query : "";
-			window.location.search = searchQuery;
-		}
+  function searchPosts(options) {
+    var searchQueryObj = {
+        currentPage: options.currentPage || getParameterByName('currentPage'),
+        query: typeof(options.query) === "string" ? options.query : getParameterByName('query')
+    };
+    window.location.search = $.param(searchQueryObj);
+  }
 
-	})();
+  (function () {
+	$("a[data-page]").on('click', function (el) {
+		var pageSlug = el.target.getAttribute('data-page');
+		$('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/pages/${site.slug}/' + pageSlug + '/delete');
+		$('#deleteModal').modal('show');
+	});
+
+    $('#search-query').keypress(function (e) {
+      if (e.which == 13) {
+        searchPosts({ query: $('#search-query').val(), currentPage: 1});
+      }
+    });
+  })();
 </script>

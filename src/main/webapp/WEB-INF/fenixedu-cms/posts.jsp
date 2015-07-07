@@ -42,9 +42,9 @@ ${portal.toolkit()}
                     </button>
 
                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                        <li><a href="#" onclick="searchPosts(null)">All</a></li>
+                        <li><a href="#" class="category-item" data-category-slug="">All</a></li>
                         <c:forEach var="cat" items="${site.categories}">
-                            <li><a href="#" onclick='searchPosts("${cat.slug}")'>${cat.name.content}</a></li>
+                            <li><a href="#" class="category-item" data-category-slug="${cat.slug}">${cat.name.content}</a></li>
                         </c:forEach>
                     </ul>
                 </div>
@@ -57,34 +57,6 @@ ${portal.toolkit()}
 </div>
 
 <p></p>
-
-
-	<div class="col-sm-4 pull-right">
-		<div class="input-group">
-			<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
-		        <span class="input-group-btn">
-		            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-			            <c:if test="${category!=null}">
-				            ${category.name.content}
-			            </c:if>
-			            <c:if test="${category==null}">
-				            <spring:message code="page.edit.label.category"/>
-			            </c:if>
-			            <span class="caret"></span>
-		            </button>
-
-		            <ul class="dropdown-menu dropdown-menu-right" role="menu">
-			            <li><a class="category-item" href="#">None</a></li>
-			            <c:forEach var="cat" items="${site.categories}">
-				            <li><a class="category-item" href="#" data-category-slug="${cat.slug}">${cat.name.content}</a></li>
-			            </c:forEach>
-		            </ul>
-
-		        </span>
-		</div>
-	</div>
-</div>
-</p>
 
 <c:choose>
 	<c:when test="${posts.size() == 0}">
@@ -132,19 +104,21 @@ ${portal.toolkit()}
 			</c:forEach>
 			</tbody>
 		</table>
-		<c:if test="${pages > 1}">
-			<nav class="text-center">
-				<ul class="pagination">
-					<li ${currentPage == 1 ? 'class="disabled"' : ''}>
-						<a href="?page=${currentPage - 1}">&laquo;</a>
-					</li>
-					<li class="disabled"><a>${currentPage} / ${pages}</a></li>
-					<li ${currentPage == pages ? 'class="disabled"' : ''}>
-						<a href="?page=${currentPage + 1}">&raquo;</a>
-					</li>
-				</ul>
-			</nav>
-		</c:if>
+
+        <!-- Pagination -->
+        <c:if test="${partition.getNumPartitions() > 1}">
+          <nav class="text-center">
+            <ul class="pagination">
+              <li ${partition.isFirst() ? 'class="disabled"' : ''}>
+                <a href="#" onclick="goToPage(${partition.getNumber() - 1})">&laquo;</a>
+              </li>
+              <li class="disabled"><a>${partition.getNumber()} / ${partition.getNumPartitions()}</a></li>
+              <li ${partition.isLast() ? 'class="disabled"' : ''}>
+                <a href="#" onclick="goToPage(${partition.getNumber() + 1})">&raquo;</a>
+              </li>
+            </ul>
+          </nav>
+        </c:if>
 	</c:otherwise>
 </c:choose>
 
@@ -172,10 +146,28 @@ ${portal.toolkit()}
 </div>
 
 <script type="application/javascript">
+    function getParameterByName(name) {
+        var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+        return match && decodeURIComponent(match[1].replace(/\+/g, ' ')) || "";
+    }
+
+    function goToPage(pageNumber) {
+        searchPosts({page: pageNumber});
+    }
+
+    function searchPosts(options) {
+        var searchQueryObj = {
+            category: typeof(options.categorySlug) === "string" ? options.categorySlug : getParameterByName('category'),
+            page: options.page || getParameterByName('page'),
+            query: typeof(options.query) === "string" ? options.query : getParameterByName('query')
+        };
+        window.location.search = $.param(searchQueryObj);
+    }
+
 	(function () {
 		$('#search-query').keypress(function (e) {
 			if (e.which == 13) {
-				searchPosts($('#search-query').val());
+				searchPosts({ query: $('#search-query').val(), page: 1});
 			}
 		});
 
@@ -187,15 +179,9 @@ ${portal.toolkit()}
 
 		$('.category-item').on('click', function (e) {
 			e.preventDefault();
-			searchPosts($('#search-query').val(), $(e.target).data('category-slug'));
+			searchPosts({ categorySlug: $(e.target).data('category-slug') });
 		});
 
-		function searchPosts(query, categorySlug) {
-			var searchQuery = "";
-			searchQuery += categorySlug ? "category=" + categorySlug : "";
-			searchQuery += query ? "&query=" + query : "";
-			window.location.search = searchQuery;
-		}
 	})();
 </script>
 

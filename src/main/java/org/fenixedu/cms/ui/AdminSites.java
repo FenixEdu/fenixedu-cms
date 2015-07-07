@@ -27,7 +27,6 @@ import com.google.api.services.analytics.model.Accounts;
 import com.google.api.services.analytics.model.Webproperties;
 import com.google.api.services.analytics.model.Webproperty;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -41,12 +40,24 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
-import org.fenixedu.cms.domain.*;
+import org.fenixedu.cms.domain.CMSTheme;
+import org.fenixedu.cms.domain.CloneCache;
+import org.fenixedu.cms.domain.GoogleAPIConnection;
+import org.fenixedu.cms.domain.GoogleAPIService;
+import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.SiteActivity;
+import org.fenixedu.cms.domain.SiteExporter;
+import org.fenixedu.cms.domain.SiteImporter;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
@@ -57,7 +68,11 @@ import pt.ist.fenixframework.FenixFramework;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
@@ -67,12 +82,25 @@ import java.util.zip.ZipFile;
 @RequestMapping("/cms/sites")
 public class AdminSites {
 
-    private static final int ITEMS_PER_PAGE = 30;
+    private static final int ITEMS_PER_PAGE = 10;
     private static final String ZIP_MIME_TYPE = "application/zip";
 
     @RequestMapping
-    public String list(Model model, @RequestParam(required = false) String query) {
-        return list(0, model, query);
+    public String list(Model model, @RequestParam(required = false, defaultValue = "1") int page,
+                    @RequestParam(required = false) String query) {
+        List<Site> allSites = Strings.isNullOrEmpty(query) ? getSites() : SearchUtils.searchSites(getSites(), query);
+        SearchUtils.Partition<Site> partition = new SearchUtils.Partition<>(allSites, Site.NAME_COMPARATOR, ITEMS_PER_PAGE, page);
+        model.addAttribute("partition", partition);
+        model.addAttribute("sites", partition.getItems());
+        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(Authenticate.getUser()));
+        model.addAttribute("query", query);
+
+        String redirectUrl = CoreConfiguration.getConfiguration().applicationUrl() + "/cms/sites/google/oauth2callback";
+        model.addAttribute("googleAuthJSOrigin", CoreConfiguration.getConfiguration().applicationUrl());
+        model.addAttribute("googleRedirectUrl", redirectUrl);
+        model.addAttribute("google", Bennu.getInstance().getGoogleAPISerivce());
+
+        return "fenixedu-cms/manage";
     }
 
     @RequestMapping("/{slug}")
@@ -152,42 +180,12 @@ public class AdminSites {
         return site;
     }
 
-    @RequestMapping(value = "manage/{page}", method = RequestMethod.GET)
-    public String list(@PathVariable(value = "page") int page, Model model, @RequestParam(required = false) String query) {
-        List<Site> allSites = Strings.isNullOrEmpty(query) ? getSites() : SearchUtils.searchSites(getSites(), query);
-        List<List<Site>> pages = Lists.partition(allSites, ITEMS_PER_PAGE);
-        int currentPage = normalize(page, pages);
-        model.addAttribute("numberOfPages", pages.size());
-        model.addAttribute("currentPage", currentPage);
-        model.addAttribute("sites", pages.isEmpty() ? Collections.emptyList() : pages.get(currentPage));
-        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(Authenticate.getUser()));
-        model.addAttribute("query", query);
-
-        String redirectUrl = CoreConfiguration.getConfiguration().applicationUrl() + "/cms/sites/google/oauth2callback";
-        model.addAttribute("googleAuthJSOrigin", CoreConfiguration.getConfiguration().applicationUrl());
-        model.addAttribute("googleRedirectUrl", redirectUrl);
-
-        model.addAttribute("google", Bennu.getInstance().getGoogleAPISerivce());
-
-        return "fenixedu-cms/manage";
-    }
-
-    private int normalize(int page, List<List<Site>> pages) {
-        if (page < 0) {
-            return 0;
-        }
-        if (page >= pages.size()) {
-            return pages.size() - 1;
-        }
-        return page;
-    }
-
     private List<Site> getSites() {
         User user = Authenticate.getUser();
         Set<Site> allSites = Bennu.getInstance().getSitesSet();
         Predicate<Site> isAdminMember = site -> site.getCanAdminGroup().isMember(user);
         Predicate<Site> isPostsMember = site -> site.getCanPostGroup().isMember(user);
-        return allSites.stream().filter(isAdminMember.or(isPostsMember)).collect(Collectors.toList());
+        return allSites.stream().filter(isAdminMember.or(isPostsMember)).sorted(Site.NAME_COMPARATOR).collect(Collectors.toList());
     }
 
     public static void canEdit(Site site) {

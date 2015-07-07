@@ -91,7 +91,8 @@
   <pre id="editor"><c:out value="${content}"/></pre>
 </div>
 <script>
-    editor = ace.edit("editor");
+    $.ajaxSetup({headers: {'${csrf.headerName}': '${csrf.token}'}});
+    var editor = ace.edit("editor");
 
     var submit = function() {
       $("#saveBtn").attr('disabled', true);

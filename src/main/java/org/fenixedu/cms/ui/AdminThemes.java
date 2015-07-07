@@ -173,8 +173,8 @@ public class AdminThemes {
     }
 
     @RequestMapping(value = "create", method = RequestMethod.GET)
-    public String addTheme(Model model) {
-        return "fenixedu-cms/addTheme";
+    public String importTheme(Model model) {
+        return "fenixedu-cms/importTheme";
     }
 
     @RequestMapping(value = "create", method = RequestMethod.POST)

@@ -21,6 +21,7 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+<script src="${pageContext.request.contextPath}/static/js/moment.js" type="text/javascript" charset="utf-8"></script>
 <script src="${pageContext.request.contextPath}/static/js/jsdiff.js" type="text/javascript" charset="utf-8"></script>
 
 ${portal.toolkit()}
@@ -95,6 +96,7 @@ ${portal.toolkit()}
 </style>
 
 <script>
+    $.ajaxSetup({headers: {'${csrf.headerName}': '${csrf.token}'}});
 
     function loadRevision(id){
         if (!id) {

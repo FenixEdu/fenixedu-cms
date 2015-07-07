@@ -32,14 +32,18 @@
         </small>
     </h2>
 
-    <div class="row">
-        <div class="col-sm-12">
-            <c:if test="${page.site.published && page.published}">
-                <a href="${page.address}" target="_blank" class="btn btn-default">Link</a>
-            </c:if>
-        </div>
-    </div>
 </div>
+
+<p>
+    <button type="submit" onclick="$('#mainForm').submit()" class="btn btn-default btn-primary">
+        <spring:message code="action.save"/>
+    </button>
+
+    <c:if test="${page.site.published && page.published}">
+        <a href="${page.address}" target="_blank" class="btn btn-default">Link</a>
+    </c:if>
+</p>
+    
 
 <div ng-app="componentsApp" ng-controller="ComponentController">
     <form id="mainForm" class="form-horizontal" action="" method="post" role="form">
@@ -89,14 +93,6 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" onclick="$('#mainForm').submit()" class="btn btn-default btn-primary">
-                    <spring:message code="action.save"/>
-                </button>
-            </div>
-        </div>
-    
     </form>
     
     <hr>
@@ -133,44 +129,44 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach var="m" items="${page.componentsSet}">
+                <c:forEach var="component" items="${page.componentsSet}">
                     <tr>
                         <td>
-                            <h5>${m.name}</h5>
+                            <h5>${component.name}</h5>
 
                             <div>
-                                <small>${m.description}</code></small>
+                                <small>${component.description}</code></small>
                             </div>
                         </td>
-                        <td>${m.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
-                            <small>- ${m.createdBy.name}</small>
+                        <td>${component.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
+                            <small>- ${component.createdBy.name}</small>
                         </td>
                         <td>
                             <div class="btn-group" role="group">
                                 <a href="#" class="btn btn-danger btn-sm"
-                                   onclick="document.getElementById('deleteComponentForm${m.externalId}').submit();"><spring:message
+                                   onclick="document.getElementById('deleteComponentForm${component.externalId}').submit();"><spring:message
                                         code="action.delete"/></a>
 
 
-                                <c:if test="${m.getClass().simpleName.equals('StaticPost')}">
-                                    <a href="${m.post.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
+                                <c:if test="${component.getClass().simpleName.equals('StaticPost')}">
+                                    <a href="${component.post.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
                                     <spring:message code="action.edit"></spring:message>
                                     </a>
                                 </c:if>
-                                <c:if test="${m.getClass().simpleName.equals('ListCategoryPosts')}">
-                                    <a href="${m.category.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
+                                <c:if test="${component.getClass().simpleName.equals('ListCategoryPosts')}">
+                                    <a href="${component.category.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
                                     <spring:message code="action.edit"></spring:message>
                                     </a>
                                 </c:if>
-                                <c:if test="${m.getClass().simpleName.equals('StrategyBasedComponent')}">
-                                    <c:if test="${m.componentType().simpleName.equals('ListPosts')}">
+                                <c:if test="${component.getClass().simpleName.equals('StrategyBasedComponent')}">
+                                    <c:if test="${component.componentType().simpleName.equals('ListPosts')}">
                                         <a href="${pageContext.request.contextPath}/cms/posts/${page.site.slug}"
                                            role="button"
                                            class="btn btn-default btn-sm"/>
                                         <spring:message code="action.edit"></spring:message>
                                         </a>
                                     </c:if>
-                                    <c:if test="${m.componentType().simpleName.equals('ListOfCategories')}">
+                                    <c:if test="${component.componentType().simpleName.equals('ListOfCategories')}">
                                         <a href="${pageContext.request.contextPath}/cms/categories/${page.site.slug}"
                                            role="button"
                                            class="btn btn-default btn-sm"/>
@@ -178,8 +174,8 @@
                                         </a>
                                     </c:if>
                                 </c:if>
-                                <form id="deleteComponentForm${m.externalId}"
-                                      action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/deleteComponent/${m.getExternalId()}"
+                                <form id="deleteComponentForm${component.externalId}"
+                                      action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/${component.getExternalId()}/delete"
                                       method="POST">${csrf.field()}</form>
                             </div>
                         </td>
@@ -235,10 +231,11 @@ ${portal.toolkit()}
 <script src="${pageContext.request.contextPath}/bennu-core/js/angular.min.js"></script>
 
 <script type="text/javascript">
+
     angular.module('componentsApp', []).controller('ComponentController', ['$scope', '$http', function ($scope, $http) {
         $scope.components = ${availableComponents};
         $scope.installStateless = function (component) {
-            $http.post('${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent', {type: component.type}).
+            $http.post('${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/create', {type: component.type}).
                     success(function () {
                         location.reload();
                     });
@@ -253,7 +250,7 @@ ${portal.toolkit()}
                     });
         };
         $scope.createComponent = function () {
-            $http.post('${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/createComponent',
+            $http.post('${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/create',
                     {type: $scope.component.type, parameters: $scope.selected}).success(function () {
                         location.reload();
                     });
@@ -261,5 +258,10 @@ ${portal.toolkit()}
         $scope.isSelect = function (item) {
             return item.type == 'DOMAIN_OBJECT' || item.type == 'ENUM' || item.values.length > 0;
         }
+    }]);
+
+    angular.module('componentsApp').config(['$httpProvider', function($httpProvider) {
+        $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
+        $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
     }]);
 </script>

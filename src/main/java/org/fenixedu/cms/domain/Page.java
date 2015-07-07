@@ -18,13 +18,6 @@
  */
 package org.fenixedu.cms.domain;
 
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
-
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -38,8 +31,14 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-
 import pt.ist.fenixframework.Atomic;
+
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * Model for a page on a given Site.
@@ -47,8 +46,8 @@ import pt.ist.fenixframework.Atomic;
 public class Page extends Page_Base implements Sluggable, Cloneable {
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.page.created";
-
-    public static Comparator<Page> PAGE_NAME_COMPARATOR = (p1, p2) -> p1.getName().compareTo(p2.getName());
+    public static final Comparator<Page> CREATION_DATE_COMPARATOR = Comparator.comparing(Page::getCreationDate).reversed();
+    public static Comparator<Page> PAGE_NAME_COMPARATOR = Comparator.comparing(Page::getName);
 
     /**
      * the logged {@link User} creates a new Page.

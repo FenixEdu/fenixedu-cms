@@ -23,6 +23,8 @@
 
 ${portal.angularToolkit()}
 <script type="text/javascript" src="${pageContext.request.contextPath}/bennu-portal/js/angular-route.min.js"></script>
+
+<script src="${pageContext.request.contextPath}/static/js/moment.js" type="text/javascript" charset="utf-8"></script>
 <script src="${pageContext.request.contextPath}/static/js/ng-context-menu.js" type="text/javascript" charset="utf-8"></script>
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload-shim.js" type="text/javascript" charset="utf-8"></script>
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload.js" type="text/javascript" charset="utf-8"></script>
@@ -158,7 +160,7 @@ function chdir(rootNode, path){
     return pivot;
 }
 
-var app = angular.module('cmsFileViewer', ['ngRoute','ng-context-menu','ngFileUpload']);
+var app = angular.module('cmsFileViewer', ['ngRoute','ng-context-menu','ngFileUpload', 'bennuToolkit']);
 
 app.config(['$routeProvider','$locationProvider', function($routeProvider, $locationProvider) {
     $routeProvider.when("/:resourceUrl*?", {
@@ -169,7 +171,7 @@ app.config(['$routeProvider','$locationProvider', function($routeProvider, $loca
         controller:'viewerCtrl'
     });
 }]).run(function($http,$rootScope,$location){
-    $http.get("/cms/themes/${theme.type}/listFiles").success(function(e){ 
+    $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){ 
         $rootScope.root = generateTree(e);
         $rootScope.theme = "${theme.name}"
         
@@ -177,7 +179,7 @@ app.config(['$routeProvider','$locationProvider', function($routeProvider, $loca
                 $location.path($location.path());
             }
     });
-    $http.get("/cms/themes/${theme.type}/templates").success(function(e){ 
+    $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/templates").success(function(e){ 
         genTemplates(e);
     });
 });
@@ -215,11 +217,11 @@ function genTemplates(json){
 
     $("button", dom).on("click",function(e){
         var target = window.deleteFile;
-        $.post("/cms/themes/${theme.type}/deleteTemplate",{
+        $.post(Bennu.contextPath + "/cms/themes/${theme.type}/deleteTemplate",{
             type:target
         }).success(function(){
             $("#templates-modal").modal("hide");
-            $.get("/cms/themes/${theme.type}/templates").success(function(e){
+            $.get(Bennu.contextPath + "/cms/themes/${theme.type}/templates").success(function(e){
                 genTemplates(e);
             })
         })
@@ -237,7 +239,7 @@ function genTemplates(json){
             });
         });
     $('.editBtn').on("click",function(e){
-        window.location = "/cms/themes/${theme.type}/editFile/" + $(e.target).closest("a").data("file");
+        window.location = Bennu.contextPath + "/cms/themes/${theme.type}/editFile/" + $(e.target).closest("a").data("file");
     })
 }
 
@@ -265,7 +267,7 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
                     //console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
                 }).success(function (data, status, headers, config) {
                     //console.log('file ' + config.file.name + 'uploaded. Response: ');
-                    $http.get("/cms/themes/${theme.type}/listFiles").success(function(e){ 
+                    $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){ 
                         $rootScope.root = generateTree(e);
                         $rootScope.theme = "${theme.name}"
                         $scope.node = chdir($rootScope.root,$routeParams.resourceUrl);
@@ -304,10 +306,10 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
         $(".confirm", modal).off("click");
         $(".confirm", modal).on("click",function(){
             modal.modal("hide");
-            $.post(Bennu.contextPath + "/cms/themes/${theme.type}/deleteFile", {
+            $.post(Bennu.contextPath + Bennu.contextPath + "/cms/themes/${theme.type}/deleteFile", {
                 path : $scope.contextFile.path
             }, function() {
-                $http.get("/cms/themes/${theme.type}/listFiles").success(function(e){ 
+                $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){ 
                     $rootScope.root = generateTree(e);
                     $rootScope.theme = "${theme.name}"
                     $scope.node = chdir($rootScope.root,$routeParams.resourceUrl);
@@ -331,7 +333,7 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
             $.post(Bennu.contextPath + "/cms/themes/${theme.type}/deleteDir", {
                 path : $scope.contextFile.path.substr(1)
             }, function() {
-                $http.get("/cms/themes/${theme.type}/listFiles").success(function(e){ 
+                $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){ 
                     $rootScope.root = generateTree(e);
                     $rootScope.theme = "${theme.name}"
                     $scope.node = chdir($rootScope.root,$routeParams.resourceUrl);
@@ -430,10 +432,19 @@ angular.module('cmsFileViewer')
 angular.module('cmsFileViewer')
     .filter('fuzzy', function () {
         return function (date) {
-            moment.locale(Bennu.locale.tag);
-            return moment(date).fromNow();
+            if(date) {
+                moment.locale(Bennu.locale.tag);
+                return moment(date).fromNow();   
+            } else {
+                return "-";
+            }
         }; 
     });
+    
+app.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
+    $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
+}]);
 </script>
 
 <div class="modal fade" id="templates-modal">
@@ -457,7 +468,7 @@ angular.module('cmsFileViewer')
 </div><!-- /.modal -->
 
 <div class="modal fade" id="settings-modal">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form class="form-horizontal" enctype="multipart/form-data" action="editSettings" method="post" role="form">
             ${csrf.field()}
@@ -637,12 +648,14 @@ angular.module('cmsFileViewer')
 </div><!-- /.modal -->
 
 <script type="text/javascript">
+$.ajaxSetup({headers: {'${csrf.headerName}': '${csrf.token}'}});
+
 function makeTemplate(){
     var filename = $("#make-template-modal input[name='filename']").val();
     var name = $("#make-template-modal input[name='name']").val();
     var type = $("#make-template-modal input[name='type']").val();
     var description = $("#make-template-modal textarea[name='description']").val();
-    $.post("/cms/themes/${theme.type}/newTemplate",{
+    $.post(Bennu.contextPath + "/cms/themes/${theme.type}/newTemplate",{
         type:type,
         name:name,
         description:description,
@@ -654,7 +667,7 @@ function makeTemplate(){
         $("#make-template-modal input[name='type']").val("");
         $("#make-template-modal textarea[name='description']").val("");
 
-        $.get("/cms/themes/${theme.type}/templates").success(function(e){
+        $.get(Bennu.contextPath + "/cms/themes/${theme.type}/templates").success(function(e){
             genTemplates(e);
         })
     })

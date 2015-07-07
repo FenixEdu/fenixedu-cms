@@ -87,17 +87,21 @@
         </li>
       </c:forEach>
     </ul>
-    <c:if test="${numberOfPages != 1}">
-      <div class="row">
-          <div class="col-md-2 col-md-offset-5">
-              <ul class="pagination">
-                  <li class="${currentPage <= 0 ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page - 1}">«</a></li>
-                  <li class="disabled"><a href="#">${currentPage + 1} / ${numberOfPages}</a></li>
-                  <li class="${currentPage + 1 >= numberOfPages ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page + 1}">»</a></li>
-              </ul>
-          </div>
-      </div>
+
+    <c:if test="${partition.getNumPartitions() > 1}">
+      <nav class="text-center">
+        <ul class="pagination">
+          <li ${partition.isFirst() ? 'class="disabled"' : ''}>
+            <a href="#" onclick="goToPage(${partition.getNumber() - 1})">&laquo;</a>
+          </li>
+          <li class="disabled"><a>${partition.getNumber()} / ${partition.getNumPartitions()}</a></li>
+          <li ${partition.isLast() ? 'class="disabled"' : ''}>
+            <a href="#" onclick="goToPage(${partition.getNumber() + 1})">&raquo;</a>
+          </li>
+        </ul>
+      </nav>
     </c:if>
+
   </c:otherwise>
 </c:choose>
 
@@ -192,14 +196,28 @@
 
 
 <script type="application/javascript">
-	(function () {
-		$('#search-query').keypress(function (e) {
-			if (e.which == 13) {
-				searchPosts($('#search-query').val());
-			}
-		});
-		function searchPosts(query) {
-			window.location.search = query ? "query=" + query : "";
-		}
-	})();
+  function getParameterByName(name) {
+      var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+      return match && decodeURIComponent(match[1].replace(/\+/g, ' ')) || "";
+  }
+
+  function goToPage(pageNumber) {
+      searchPosts({page: pageNumber});
+  }
+
+  function searchPosts(options) {
+    var searchQueryObj = {
+        page: options.page || getParameterByName('page'),
+        query: typeof(options.query) === "string" ? options.query : getParameterByName('query')
+    };
+    window.location.search = $.param(searchQueryObj);
+  }
+
+  (function () {
+    $('#search-query').keypress(function (e) {
+      if (e.which == 13) {
+        searchPosts({ query: $('#search-query').val(), page: 1});
+      }
+    });
+  })();
 </script>

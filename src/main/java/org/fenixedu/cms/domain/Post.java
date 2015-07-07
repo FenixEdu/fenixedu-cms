@@ -18,18 +18,7 @@
  */
 package org.fenixedu.cms.domain;
 
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.collect.ImmutableList;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -40,6 +29,7 @@ import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.component.Component;
+import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.cms.domain.wraps.UserWrap;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
@@ -47,10 +37,20 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-
 import pt.ist.fenixframework.Atomic;
 
-import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * A post models a given content to be presented to the user.
@@ -59,8 +59,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.post.created";
 
-    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate)
-            .reversed();
+    public static final Comparator<Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate).reversed();
 
     /**
      * The logged {@link User} creates a new Post.
@@ -190,8 +189,13 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
      */
     @Atomic
     public void setCanViewGroup(Group group) {
-        setViewGroup(group.toPersistentGroup());
+        super.setViewGroup(group.toPersistentGroup());
+        Set<User> groupMembers = group.getMembers().collect(Collectors.toSet());
         getEmbeddedFilesSorted().forEach(postFile -> postFile.getFiles().setAccessGroup(group));
+        //if the new group is more restricted then the attachment group is updated
+        getAttachmentFilesSorted().map(PostFile::getFiles)
+                        .filter(file -> !file.getAccessGroup().getMembers().allMatch(groupMembers::contains))
+                        .forEach(file -> file.setAccessGroup(group));
     }
 
     public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category,
@@ -365,6 +369,15 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
     public String getCategoriesString() {
         return this.getCategoriesSet().stream().map(x -> x.getName().getContent()).reduce((x, y) -> x + "," + y).orElse("");
+    }
+
+    public Optional<Page> getStaticPage() {
+        return getComponentSet().stream().filter(component -> StaticPost.class.isInstance(component))
+                        .map(component -> ((StaticPost) component).getPage()).findFirst();
+    }
+
+    public boolean isStaticPost() {
+        return getComponentSet().stream().filter(component -> StaticPost.class.isInstance(component)).findAny().isPresent();
     }
 
     public class PostWrap extends Wrap {

@@ -32,7 +32,11 @@
 
 <c:choose>
       <c:when test="${categories.size() == 0}">
-      <i><spring:message code="categories.manage.emptyCategories"/></i>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <i><spring:message code="categories.manage.emptyCategories"/></i>
+          </div>
+        </div>
       </c:when>
 
       <c:otherwise>

@@ -128,18 +128,18 @@ ${portal.angularToolkit()}
     </div>
 </div>
 
-<script>
-function getReadableFileSizeString(fileSizeInBytes) {
+<script type="application/javascript">
+    function getReadableFileSizeString(fileSizeInBytes) {
+        var i = -1;
+        var byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB'];
+        do {
+            fileSizeInBytes = fileSizeInBytes / 1024;
+            i++;
+        } while (fileSizeInBytes > 1024);
 
-    var i = -1;
-    var byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB'];
-    do {
-        fileSizeInBytes = fileSizeInBytes / 1024;
-        i++;
-    } while (fileSizeInBytes > 1024);
+        return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i];
+    }
 
-    return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i];
-};
     var app = angular.module('uploadTheme', ['ngFileUpload','file-model']);
 
     app.controller('upload', function($scope,Upload) {
@@ -157,18 +157,17 @@ function getReadableFileSizeString(fileSizeInBytes) {
         });
 
         $scope.upload = function (file) {
-            
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var zip = new JSZip(e.target.result);
-                    a = zip;
-                    
-                    $scope.theme = JSON.parse(zip.file("theme.json").asText());
-                    $scope.theme.files = Object.keys(zip.files)
-                    $scope.$apply();
-                    $(".interfaceUpload").show();
-                }
-                reader.readAsArrayBuffer(file);
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var zip = new JSZip(e.target.result);
+                a = zip;
+                
+                $scope.theme = JSON.parse(zip.file("theme.json").asText());
+                $scope.theme.files = Object.keys(zip.files)
+                $scope.$apply();
+                $(".interfaceUpload").show();
+            }
+            reader.readAsArrayBuffer(file);
         };
 
         $scope.uploadData = function(){
@@ -176,10 +175,9 @@ function getReadableFileSizeString(fileSizeInBytes) {
                 url: 'create',
                 fields: { },
                 fileFormDataName: 'uploadedFile',
-                file: $scope.files[0]
+                file: $scope.file
             }).progress(function (evt) {
-                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-                //console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);å
+
             }).success(function (data, status, headers, config) {
                 window.location = Bennu.contextPath + "/cms/themes/" + $scope.theme.type + "/see"
             });
@@ -208,6 +206,11 @@ function getReadableFileSizeString(fileSizeInBytes) {
             return (bytes / Math.pow(1024, Math.floor(number))).toFixed(precision) + ' ' + units[number];
         };
     });
+
+    app.config(['$httpProvider', function($httpProvider) {
+        $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
+        $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
+    }]);
 </script>
 
 <style>

@@ -34,21 +34,19 @@
 
 <div class="row">
     <div class="col-sm-8">
-              <c:choose>
-                  <c:when test="${theme.previewImage == null}">
-                     <div class="hidden-xs thumbnail" style="min-height:500px; background:#efefef;">
-                          <h5 style="display:table;margin: 0 auto; margin-top:220px;">No thumbnail avaible</h5>
-                     </div>
-                  </c:when>
-                  <c:otherwise>
-                      <div class="hidden-xs thumbnail ">
-                      <img src="${cms.downloadUrl(theme.previewImage)}">
-                      </div>
-                  </c:otherwise>
-              </c:choose>
+        <c:choose>
+            <c:when test="${theme.previewImage == null}">
+               <div class="hidden-xs thumbnail" style="min-height:500px; background:#efefef;">
+                    <h5 style="display:table;margin: 0 auto; margin-top:220px;">No thumbnail avaible</h5>
+               </div>
+            </c:when>
+            <c:otherwise>
+                <div class="hidden-xs thumbnail ">
+                <img src="${cms.downloadUrl(theme.previewImage)}">
+                </div>
+            </c:otherwise>
+        </c:choose>
         
-
-
         <p>
             <c:out value="${theme.description}"/>
         </p>
@@ -63,8 +61,7 @@
                 <dd><samp><c:out value="${theme.type}" /></samp></dd>
                 <c:if test="${theme.extended != null}">
                 <dt>Extends</dt>
-                <dd><a
-        href="../${theme.extended.type}/see">${theme.extended.name}</a></dd>
+                <dd><a href="../${theme.extended.type}/see">${theme.extended.name}</a></dd>
                 </c:if>
                 <dt>Size</dt>
                 <dd>${cms.prettySize(theme.files.totalSize)}</dd>
@@ -98,6 +95,7 @@
             </div>
     </div>
 </div>
+
 <p>
     <a href="" class="btn btn-xs btn-default">View all</a>
 </p>

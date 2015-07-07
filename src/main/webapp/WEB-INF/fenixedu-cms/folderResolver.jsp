@@ -30,8 +30,7 @@
 	<button class="btn btn-success" id="saveBtn"><spring:message code="action.save" /></button>
 </p>
 
-<p class="alert alert-danger" id="error" style="display: none">
-</p>
+<p class="alert alert-danger" id="error" style="display: none"></p>
 
 <p>
     <pre id="editor"><c:out value="${folder.resolver.code}"></c:out></pre>
@@ -46,6 +45,7 @@
 </style>
 
 <script>
+    $.ajaxSetup({headers: {'${csrf.headerName}': '${csrf.token}'}});
     var editor = ace.edit("editor");
 
     var submit = function() {
@@ -56,7 +56,7 @@
              { data: editor.getValue(), type: 'PUT' }).always(function () {
                 $("#saveBtn").attr('disabled', false); $("#saveBtn").html('<spring:message code="action.save" />');
              }).error(function (data) {
-				$("#error").show(); $("#error").html(data.responseText);
+				$("#error").show(); $("#error").text(data.responseText);
              });
     };
 

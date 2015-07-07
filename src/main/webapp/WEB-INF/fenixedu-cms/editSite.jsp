@@ -216,6 +216,8 @@ ${portal.toolkit()}
                     </div>
                         
                     <script type="text/javascript">
+                        $.ajaxSetup({headers: {'${csrf.headerName}': '${csrf.token}'}});
+
                         var accounts = ${accounts};
                         var accountDir = {}
                         accounts.map(function(e){ accountDir[e.accountId] = e});

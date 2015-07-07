@@ -130,13 +130,13 @@ ${portal.toolkit()}
                 <c:when test="${post.filesSorted.size() > 0}">
                     <table class="table table-striped table-bordered">
                         <thead>
-                        <tr>
-                            <th class="center">#</th>
-                            <th class="col-md-6"><spring:message code="theme.view.label.name"/></th>
-                            <th>Presentation</th>
-                            <th><spring:message code="theme.view.label.type"/></th>
-                            <th>&nbsp;</th>
-                        </tr>
+                            <tr>
+                                <th class="col-md-1 center">#</th>
+                                <th class="col-md-4"><spring:message code="theme.view.label.name"/></th>
+                                <th class="col-md-1">Presentation</th>
+                                <th class="col-md-3"><spring:message code="theme.view.label.type"/></th>
+                                <th class="col-md-3">&nbsp;</th>
+                            </tr>
                         </thead>
 
                         <tbody>
@@ -148,7 +148,7 @@ ${portal.toolkit()}
                                 </td>
 
                                 <td>
-                                    <a href="${cms.downloadUrl(file)}" target="_blank"><h5>${file.displayName}</h5></a>
+                                    <a href="${postFile.editUrl}"><h5>${file.displayName}</h5></a>
                                 </td>
 
                                 <td>
@@ -158,7 +158,7 @@ ${portal.toolkit()}
                                                 Embedded
                                             </c:when>
                                             <c:otherwise>
-                                                Attachment
+                                                Listed
                                             </c:otherwise>
                                         </c:choose>
                                     </center>
@@ -167,13 +167,7 @@ ${portal.toolkit()}
                                 <td><code>${file.contentType}</code></td>
 
                                 <td>
-                                    <button class="btn btn-danger btn-sm" data-toggle="modal"
-                                            data-target="#attachmentDeleteModal"
-                                            type="button" data-file="${file.displayName}"
-                                            data-file-index="${loop.index}">
-                                        <span class="glyphicon glyphicon-trash"></span>
-                                    </button>
-                                    <a href="${cms.downloadUrl(file)}" target="_blank" class="btn btn-default btn-sm">Link</a>
+                                    <a href="${postFile.editUrl}" class="btn btn-default btn-sm">Edit</a>
 
                                     <div class="btn-group">
 
@@ -268,7 +262,6 @@ ${portal.toolkit()}
                     </div>
                     <div class="form-group">
                         <label class="col-sm-2 control-label"><spring:message code="theme.add.label.file"/>:</label>
-
                         <div class="col-sm-10"><input type="file" name="attachment" class="form-control"></div>
                     </div>
 
@@ -313,31 +306,6 @@ ${portal.toolkit()}
     </form>
 </div>
 
-<div class="modal fade" id="attachmentDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-                </button>
-                <h4><spring:message code="action.delete"/></h4>
-            </div>
-            <div class="modal-body">
-                <spring:message code="theme.view.label.delete.confirmation"/> <b id="fileName"></b>?
-            </div>
-            <div class="modal-footer">
-                <form action="deleteAttachment" id="deleteAttachment" method="POST">
-                    ${csrf.field()}
-                    <input type="hidden" name="file"/>
-                    <button type="submit" class="btn btn-danger"><spring:message code="label.yes"/></button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message
-                            code="label.no"/></button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="modal fade" id="viewMetadata" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -364,6 +332,7 @@ ${portal.toolkit()}
 </div>
 
 <script type="text/javascript">
+    $.ajaxSetup({headers: {'${csrf.headerName}': '${csrf.token}'}});
     var originalMenu = $('#menu').val();
     var originalMenuItem = $('#menuItem').val() || "new_menu_it";
     var originalMenuItemParent = $('#menuItemParent').val();
@@ -427,7 +396,6 @@ ${portal.toolkit()}
                             if(!node || !node.parent || node.parent.isRoot()) {
                                 return false;
                             } else  {
-                                debugger;
                                 if (data.hitMode === "before") {
                                     updateMenuItemInfo(menuOid, data.otherNode.key, node.parent.key, node.data.position)
                                 } if(data.hitMode === "after") {
@@ -503,7 +471,6 @@ ${portal.toolkit()}
         });
 
         $("[data-origin]").on("click", function (e) {
-            debugger;
             var form = $("#moveAttachment")[0];
             $(form.origin).val($(e.currentTarget).data("origin"));
             $(form.destiny).val($(e.currentTarget).data("destiny"));

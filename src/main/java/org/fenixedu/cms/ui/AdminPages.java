@@ -25,14 +25,23 @@ import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.*;
+import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.Menu;
+import org.fenixedu.cms.domain.MenuItem;
+import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
@@ -42,27 +51,31 @@ import pt.ist.fenixframework.FenixFramework;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static org.fenixedu.cms.domain.MenuItem.CREATION_DATE_COMPARATOR;
+import static org.fenixedu.cms.ui.SearchUtils.searchPages;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/pages")
 public class AdminPages {
 
-    @RequestMapping(value = "{slug}", method = RequestMethod.GET)
-    public String pages(Model model, @PathVariable(value = "slug") String slug, @RequestParam(required = false) String query) {
-        Site site = Site.fromSlug(slug);
+    private static final int PER_PAGE = 10;
 
+    @RequestMapping(value = "{slug}", method = RequestMethod.GET)
+    public String pages(Model model, @PathVariable(value = "slug") String slug, @RequestParam(required = false) String query,
+                    @RequestParam(required = false, defaultValue = "1") int currentPage) {
+        Site site = Site.fromSlug(slug);
         AdminSites.canEdit(site);
-        model.addAttribute("query", query);
-        Collection<Page> pages = getStaticPages(site);
-        if (!Strings.isNullOrEmpty(query)) {
-            pages = SearchUtils.searchPages(pages, query);
-        }
+        Collection<Page> allPages = Strings.isNullOrEmpty(query) ? getStaticPages(site) : searchPages(getStaticPages(site), query);
+        SearchUtils.Partition<Page> partition =
+                        new SearchUtils.Partition<>(allPages, Page.CREATION_DATE_COMPARATOR, PER_PAGE, currentPage);
+
         model.addAttribute("site", site);
-        model.addAttribute("pages", pages);
+        model.addAttribute("query", query);
+        model.addAttribute("partition", partition);
+        model.addAttribute("pages", partition.getItems());
         return "fenixedu-cms/pages";
     }
 
@@ -254,7 +267,7 @@ public class AdminPages {
 
     private Collection<Page> getStaticPages(Site site) {
         return site.getPagesSet().stream().filter(Page::isStaticPage).sorted(Page.PAGE_NAME_COMPARATOR)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     public RedirectView allPagesRedirect(Site site) {

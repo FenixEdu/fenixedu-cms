@@ -116,7 +116,7 @@ ${portal.toolkit()}
 		</div>
 	</c:if>
 
-	<div class="panel panel-default">
+	<div class="panel panel-default" id="attachments">
 		<div class="panel-heading">Files</div>
 		<div class="panel-body">
 
@@ -125,51 +125,40 @@ ${portal.toolkit()}
 			<c:choose>
 				<c:when test="${post.filesSorted.size() > 0}">
 					<table class="table table-striped table-bordered">
-						<thead>
-						<tr>
-							<th class="center">#</th>
-							<th class="col-md-6"><spring:message code="theme.view.label.name"/></th>
-							<th>Presentation</th>
-							<th><spring:message code="theme.view.label.type"/></th>
-							<th>&nbsp;</th>
-						</tr>
-						</thead>
+                        <thead>
+                            <tr>
+                                <th class="col-md-1">#</th>
+                                <th class="col-md-6"><spring:message code="theme.view.label.name"/></th>
+                                <th class="col-md-2"><spring:message code="theme.view.label.type"/></th>
+                                <th class="col-md-3">&nbsp;</th>
+                            </tr>
+                        </thead>
 
 						<tbody>
 						<c:forEach var="postFile" items="${post.filesSorted}" varStatus="loop">
 							<c:set var="file" value="${postFile.files}"></c:set>
 							<tr>
-								<td class="center">
-									<h5>${loop.index + 1}</h5>
-								</td>
+								<td><h5>${loop.index + 1}</h5></td>
 
 								<td>
-									<a href="${cms.downloadUrl(file)}" target="_blank"><h5>${file.displayName}</h5></a>
-								</td>
-
-								<td>
-									<center>
+									<h5>
+										<a href="${postFile.editUrl}">${file.displayName}&nbsp;</a>
 										<c:choose>
 											<c:when test="${postFile.isEmbedded}">
-												Embedded
+												<span class="label label-info">Embedded</span>
 											</c:when>
 											<c:otherwise>
-												Attachment
+												<span class="label label-success" 
+													alt="This file is shown as an attachment of the post and is listed at the end of the post content">Attachment</span>
 											</c:otherwise>
 										</c:choose>
-									</center>
+									</h5>
 								</td>
 
 								<td><code>${file.contentType}</code></td>
 
 								<td>
-									<button class="btn btn-danger btn-sm" data-toggle="modal"
-									        data-target="#attachmentDeleteModal"
-									        type="button" data-file="${file.displayName}"
-									        data-file-index="${loop.index}">
-										<span class="glyphicon glyphicon-trash"></span>
-									</button>
-									<a href="${cms.downloadUrl(file)}" target="_blank" class="btn btn-default btn-sm">Link</a>
+									<a href="${postFile.editUrl}" class="btn btn-default btn-sm">Edit</a>
 
 									<div class="btn-group">
 
@@ -279,31 +268,6 @@ ${portal.toolkit()}
 	</form>
 </div>
 
-<div class="modal fade" id="attachmentDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal">
-					<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-				</button>
-				<h4><spring:message code="action.delete"/></h4>
-			</div>
-			<div class="modal-body">
-				<spring:message code="theme.view.label.delete.confirmation"/> <b id="fileName"></b>?
-			</div>
-			<div class="modal-footer">
-				<form action="deleteAttachment" id="deleteAttachment" method="POST">
-					${csrf.field()}
-					<input type="hidden" name="file"/>
-					<button type="submit" class="btn btn-danger"><spring:message code="label.yes"/></button>
-					<button type="button" class="btn btn-default" data-dismiss="modal"><spring:message
-							code="label.no"/></button>
-				</form>
-			</div>
-		</div>
-	</div>
-</div>
-
 <div class="modal fade" id="viewMetadata" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -347,6 +311,8 @@ ${portal.toolkit()}
 </form>
 
 <script type="application/javascript">
+    $.ajaxSetup({headers: {'${csrf.headerName}': '${csrf.token}'}});
+
 	(function(){	
 		<c:choose>
 			<c:when test="${post.metadata != null}">
@@ -365,7 +331,6 @@ ${portal.toolkit()}
 		});
 
 		$("[data-origin]").on("click", function (e) {
-			debugger;
 			var form = $("#moveAttachment")[0];
 			$(form.origin).val($(e.currentTarget).data("origin"));
 			$(form.destiny).val($(e.currentTarget).data("destiny"));
@@ -376,34 +341,28 @@ ${portal.toolkit()}
 	})();
 
 	function submitFiles(files, cb) {
-		
-		function transferComplete(event) {
-			var objs = JSON.parse(event.currentTarget.response);
-			cb(objs.map(function (x) {
-				return x.url
-			}));
-		}
-
-		function updateProgress(event) {
-			if (event.lengthComputable) {
-				var complete = (event.loaded / event.total * 100 | 0);
-				//progress.value = progress.innerHTML = complete;
-				console.log(complete);
-			}
-		}
-
-		var formData = new FormData();
-		
-		for (var i = 0; i < files.length; i++) {
-			formData.append('attachment', files[i]);
-		}
-
-		var xhr = new XMLHttpRequest();
-		xhr.open('POST', 'addFile.json');
-		xhr.addEventListener("progress", updateProgress, false);
-		xhr.addEventListener("load", transferComplete, false);
-
-		xhr.send(formData);
+	    var url = '${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/addFile.json';
+	    for(var i=0; i < files.length; ++i) {
+	    	var formData = new FormData();
+    		formData.append('attachment', files[i]);
+			$.ajax({dataType : 'json',
+			    url : url,
+			    data : formData,
+			    type : "POST",
+			    enctype: 'multipart/form-data',
+			    processData: false, 
+			    contentType:false,
+			    success : function(result) {
+			    	if(result && result.url) { 
+			    		console.log('file added', result);
+			    		cb([result.url]);
+			    	}
+			    },
+			    error : function(result){
+			    	console.error(result);
+			    }
+			});
+	    }
 	}
 </script>
 

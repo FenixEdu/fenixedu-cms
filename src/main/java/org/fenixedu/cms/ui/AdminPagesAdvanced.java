@@ -41,23 +41,26 @@ import java.util.Collection;
 import java.util.Objects;
 
 import static java.util.Optional.ofNullable;
+import static org.fenixedu.cms.ui.SearchUtils.searchPages;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/pages/advanced")
 public class AdminPagesAdvanced {
+    private static final int PER_PAGE = 10;
 
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
-    public String pages(Model model, @PathVariable(value = "slug") String slug, @RequestParam(required = false) String query) {
+    public String pages(Model model, @PathVariable(value = "slug") String slug, @RequestParam(required = false) String query,
+                    @RequestParam(required = false, defaultValue = "1") int currentPage) {
         Site site = Site.fromSlug(slug);
-
         AdminSites.canEdit(site);
-        model.addAttribute("query", query);
-        Collection<Page> pages = site.getPagesSet();
-        if (!Strings.isNullOrEmpty(query)) {
-            pages = SearchUtils.searchPages(pages, query);
-        }
+        Collection<Page> allPages = Strings.isNullOrEmpty(query) ? site.getPagesSet() : searchPages(site.getPagesSet(), query);
+        SearchUtils.Partition<Page> partition =
+                        new SearchUtils.Partition<>(allPages, Page.CREATION_DATE_COMPARATOR, PER_PAGE, currentPage);
+
         model.addAttribute("site", site);
-        model.addAttribute("pages", pages);
+        model.addAttribute("query", query);
+        model.addAttribute("partition", partition);
+        model.addAttribute("pages", partition.getItems());
         return "fenixedu-cms/pagesAdvanced";
     }
 

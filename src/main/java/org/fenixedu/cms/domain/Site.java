@@ -71,7 +71,8 @@ import com.google.common.base.Strings;
 public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.site.created";
-
+    public static final Comparator<Site> NAME_COMPARATOR = Comparator.comparing(Site::getName);
+    public static final Comparator<Site> CREATION_DATE_COMPARATOR = Comparator.comparing(Site::getCreationDate);
     /**
      * maps the registered template types on the tempate classes
      */

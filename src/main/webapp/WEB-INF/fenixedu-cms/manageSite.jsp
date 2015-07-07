@@ -45,6 +45,7 @@
 	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/pages/${site.slug}">Pages</a></li>
 	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/categories/${site.slug}">Categories</a></li>
 	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/menus/${site.slug}">Menus</a></li>
+	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/media/${site.slug}">Media</a></li>
       	</ul>
       	</div>
 	    <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/edit" class="btn btn-default"><i class="glyphicon glyphicon-cog"></i> Settings</a>

@@ -18,14 +18,21 @@
  */
 package org.fenixedu.cms.domain;
 
+import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
 
+import java.util.Comparator;
+
 public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wrappable, Cloneable {
 
+    public static final Comparator<PostFile> NAME_COMPARATOR =
+            Comparator.comparing(postFile->postFile.getFiles().getDisplayName());
+
     public PostFile(Post post, GroupBasedFile file, boolean isEmbedded, int index) {
+        setSite(post.getSite());
         setPost(post);
         setFiles(file);
         setIsEmbedded(isEmbedded);
@@ -55,9 +62,15 @@ public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wra
     }
 
     public void delete() {
-        setFiles(null);
+        setSite(null);
         setPost(null);
+        setFiles(null);
         deleteDomainObject();
+    }
+
+    public String getEditUrl() {
+        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/media/" + getSite().getSlug() + "/"
+                        + getExternalId() + "/edit";
     }
 
     @Override

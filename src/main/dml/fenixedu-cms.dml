@@ -265,6 +265,16 @@ relation CMSThemeCMSTheme{
   }
 }
 
+relation FileHasPostFiles{
+  Site playsRole site {
+    multiplicity 1..1;
+  }
+
+  PostFile playsRole files{
+    multiplicity 0..*;
+  }
+}
+
 relation PostHasPostFiles{
   Post playsRole post{
     multiplicity 1..1;
