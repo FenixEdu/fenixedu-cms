@@ -20,80 +20,96 @@ package org.fenixedu.cms.ui;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
-import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.Atomic;
-
-import com.google.common.base.Strings;
+import pt.ist.fenixframework.FenixFramework;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/categories")
 public class AdminCategory {
+
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
     public String categories(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
-
         AdminSites.canEdit(site);
-
         model.addAttribute("site", site);
         model.addAttribute("categories", site.getCategoriesSet());
         return "fenixedu-cms/categories";
     }
 
-    @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
-    public String createCategory(Model model, @PathVariable(value = "slug") String slug) {
-        Site s = Site.fromSlug(slug);
-
-        AdminSites.canEdit(s);
-
-        model.addAttribute("site", s);
-        return "fenixedu-cms/createCategory";
-    }
-
-    @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
-    public RedirectView createCategory(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
-            RedirectAttributes redirectAttributes) {
-        if (Strings.isNullOrEmpty(name)) {
-            redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/categories/" + slug + "/create", true);
-        }
-        Site s = Site.fromSlug(slug);
-
-        AdminSites.canEdit(s);
-
-        createCategory(s, name);
-        return new RedirectView("/cms/categories/" + s.getSlug() + "", true);
-    }
-
-    @Atomic
-    private void createCategory(Site site, String name) {
-        Category p = new Category(site, new LocalizedString(I18N.getLocale(), name));
-    }
-
-    @RequestMapping(value = "{slugSite}/{slugCategories}/delete", method = RequestMethod.POST)
-    public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
-            value = "slugCategories") String slugCategories) {
+    @RequestMapping(value = "{slugSite}/create", method = RequestMethod.POST)
+    public RedirectView createCategory(@PathVariable String slugSite, @RequestParam LocalizedString name) {
         Site s = Site.fromSlug(slugSite);
-
         AdminSites.canEdit(s);
-
-        s.categoryForSlug(slugCategories).delete();
-        return new RedirectView("/cms/categories/" + s.getSlug() + "", true);
+        Category c = createCategory(s, name);
+        return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);
     }
 
-    @RequestMapping(value = "{slugSite}/{slugCategories}", method = RequestMethod.GET)
-    public RedirectView viewCategory(@PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugCategories") String slugCategories) {
-        return new RedirectView("/cms/posts/" + slugSite + "?category=" + slugCategories, true);
+    @RequestMapping(value = "{slugSite}/{slugCategory}/delete", method = RequestMethod.POST)
+    public RedirectView delete(@PathVariable(value = "slugSite") String slugSite, @PathVariable String slugCategory) {
+        Site s = Site.fromSlug(slugSite);
+        FenixFramework.atomic(() -> {
+            AdminSites.canEdit(s);
+            s.categoryForSlug(slugCategory).delete();
+        });
+        return new RedirectView("/cms/categories/" + s.getSlug(), true);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugCategory}/createCategoryPost", method = RequestMethod.POST)
+    public RedirectView  createCategoryPost(@PathVariable(value = "slugSite") String slugSite,
+                                               @PathVariable String slugCategory, @RequestParam LocalizedString name) {
+        Site s = Site.fromSlug(slugSite);
+        AdminSites.canEdit(s);
+        Category c = s.categoryForSlug(slugCategory);
+        createPost(s, c, name);
+        return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugCategory}", method = RequestMethod.GET)
+    public String viewCategory(Model model, @PathVariable String slugSite, @PathVariable String slugCategory) {
+        Site s = Site.fromSlug(slugSite);
+        AdminSites.canEdit(s);
+        model.addAttribute("site", s);
+        model.addAttribute("category", s.categoryForSlug(slugCategory));
+        return "fenixedu-cms/editCategory";
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugCategory}", method = RequestMethod.POST)
+    public RedirectView editCategory(@PathVariable String slugSite, @PathVariable String slugCategory,
+                                     @RequestParam LocalizedString name) {
+        Site s = Site.fromSlug(slugSite);
+        AdminSites.canEdit(s);
+        Category c = s.categoryForSlug(slugCategory);
+        FenixFramework.atomic(()->{
+            AdminSites.canEdit(s);
+            c.setName(name);
+        });
+        return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);
+    }
+
+    @Atomic(mode = Atomic.TxMode.WRITE)
+    private Category createCategory(Site site, LocalizedString name) {
+        return new Category(site, name);
+    }
+
+    @Atomic(mode = Atomic.TxMode.WRITE)
+    private Post createPost(Site site, Category category, LocalizedString name) {
+        AdminSites.canEdit(site);
+        Post p = new Post(site);
+        p.setName(Post.sanitize(name));
+        p.setBody(new LocalizedString());
+        p.setCanViewGroup(site.getCanViewGroup());
+        p.setActive(false);
+        p.addCategories(category);
+        return p;
     }
 
 }

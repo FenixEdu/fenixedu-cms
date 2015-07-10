@@ -20,13 +20,14 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+${portal.toolkit()}
 
 <div class="page-header">
     <h1><spring:message code="categories.manage.title" /></h1>
     <h2><small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small></h2>
 </div>
 
-<a href="${pageContext.request.contextPath}/cms/categories/${site.slug}/create" class="btn btn-default btn-primary">
+<a href="#" data-toggle="modal" data-target="#create-category" class="btn btn-default btn-primary">
 	<span class="glyphicon glyphicon-plus"></span>&nbsp;New</a>
 </p>
 
@@ -40,39 +41,83 @@
       </c:when>
 
       <c:otherwise>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th><spring:message code="categories.manage.label.name"/></th>
-              <th><spring:message code="categories.manage.label.creationDate"/></th>
-              <th><spring:message code="site.dashboard.label.posts"/></th>
-              <th><spring:message code="categories.manage.label.operations"/></th>
-            </tr>
-          </thead>
-          <tbody>
-          <c:forEach var="category" items="${categories}">
-            <tr>
-              <td>
-                <h5>
-                  <c:if test="${category.address != null}">
-                    <a href="${category.address}" target="_blank">${category.name.content}</a>
-                  </c:if>
-                  <c:if test="${category.address == null}">
-                    ${category.name.content}
-                  </c:if>
-                </h5>
-                <div><small><spring:message code="categories.manage.label.url"/>:<code>${category.getSlug()}</code></small></div>
-              </td>
-              <td>${category.creationDate.toString('dd MMMM yyyy, HH:mm', locale)} <small>- ${category.createdBy.name}</small></td>
-              <td>${category.postsSet.size()}</td>
-              <td>
-                  <a href="${category.editUrl}" class="btn btn-sm btn-default">Edit</a>
-	               <button class="btn btn-danger btn-sm" onclick="document.getElementById('deleteCategoryForm${category.externalId}').submit();" ${category.postsSet.size() > 0 ? 'disabled' : ''}><spring:message code="action.delete"/></button>
-					       <form id="deleteCategoryForm${category.externalId}" action="${pageContext.request.contextPath}/cms/categories/${category.site.slug}/${category.slug}/delete" method="POST">${csrf.field()}</form>
-              </td>
-            </tr>
-          </c:forEach>
-          </tbody>
-        </table>
+
+      <ul class="list-group">
+        <c:forEach var="category" items="${categories}">
+            <li class="list-group-item">
+                <h3><a href="${category.getEditUrl()}">${category.name.content}</a></h3>
+                
+                <div><small><code>${category.getSlug()}</code></small></div>
+
+                <span class="label label-primary">${category.postsSet.size()} Posts</span>
+
+                <div class="btn-group pull-right">
+                    <a href="${category.getEditUrl()}" class="btn btn-icon btn-primary pull-right">
+                        <i class="glyphicon glyphicon-cog"></i>
+                    </a>
+                </div>
+            </li>
+        </c:forEach>
+      </ul>
+
       </c:otherwise>
 </c:choose>
+
+<div class="modal fade" id="create-category" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/categories/${site.slug}/create" method="post" role="form">
+            ${csrf.field()}
+            
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
+                <h3 class="modal-title">New Category</h3>
+                <small>Please specify the name for the new category</small>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><spring:message code="categories.create.label.name"/></label>
+                    <div class="col-sm-10">
+                        <input bennu-localized-string required-any name="name" placeholder="<spring:message code="categories.create.label.name"/>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Slug</label>
+
+                    <div class="col-sm-10">
+                        <input name="type" class="form-control" type="text" id="category-slug" readonly="true">
+                        <p class="help-block">This code is used internally and is not shared with the users. However it must be unique.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="Submit" class="btn btn-primary"><spring:message code="action.create"/></button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+function slugify(text) {
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-')           // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+    .replace(/^-+/, '')             // Trim - from start of text
+    .replace(/-+$/, '');            // Trim - from end of text
+}
+
+$("#create-category [name='name']").change(function(e) {
+  var nameJson = $(e.target).val();
+  var name = Bennu.localizedString.getContent(JSON.parse(nameJson));
+  var slug = slugify(name);
+  $("#create-category [name='type']").val(slug);
+});
+
+</script>
+
