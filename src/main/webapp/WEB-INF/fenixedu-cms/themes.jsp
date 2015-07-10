@@ -48,26 +48,35 @@
 				<div class="col-sm-6 col-md-4">
 
                 <div class="thumbnail">
-                    <c:if test="${i.previewImage != null}">
-                        <img src="${cms.downloadUrl(i.previewImage)}" style="max-width:100%" data-holder-rendered="true" />
-                    </c:if>
-                    <c:if test="${i.previewImage == null}">
-                        <div style="max-width:100%; height:250px; background:#efefef;" >
-                            <div style="font-size:60px; color:#999; display:table; margin: 0 auto; padding-top:110px;">
-                                <h5>No thumbnail avaible</h5>
-                            </div>
-                        </div>
-                    </c:if>
-                  <div class="caption">
-                    <h3><a href="${pageContext.request.contextPath}/cms/themes/${i.type}/see">${i.getName()}</a></h3>
-                    <p>${i.getDescription()}</p>
+                    <a href="${pageContext.request.contextPath}/cms/themes/${i.type}/see">
+                        <c:choose>
+                            <c:when test="${i.previewImage != null}">
+                                <img src="${cms.downloadUrl(i.previewImage)}" style="max-width:100%" data-holder-rendered="true" />
+                            </c:when>
+                            <c:otherwise>
+                                <div style="max-width:100%; height:220px; background:#efefef;" >
+                                    <div style="font-size:60px; color:#999; display:table; margin: 0 auto; padding-top:100px;">
+                                        <h5>No thumbnail avaible</h5>
+                                    </div>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
+                    </a>
+
+                    <div class="caption">
+                        <h3><a href="${pageContext.request.contextPath}/cms/themes/${i.type}/see">${i.getName()}</a></h3>
+                        <div>${i.getDescription()}</div>
                         <c:if test="${i.isDefault()}">
                             <span class="label label-success"><spring:message code="site.manage.label.default" /></span>
                         </c:if>
-                    <div class="btn-group pull-right">
-                        <a class="btn btn-icon btn-default" href="${pageContext.request.contextPath}/cms/themes/${i.type}/see"><i class="glyphicon glyphicon-cog"></i></a>
+                        <c:if test="${not i.isDefault()}">
+                            <span class="label label"><spring:message code="site.manage.label.default" /></span>
+                        </c:if>
+                        <div class="btn-group pull-right">
+                            <a class="btn btn-icon btn-primary" href="${pageContext.request.contextPath}/cms/themes/${i.type}/see"><i class="glyphicon glyphicon-cog"></i></a>
+                        </div>
                     </div>
-				    </div>
+
                 </div>
                 </div>
 				</c:forEach>

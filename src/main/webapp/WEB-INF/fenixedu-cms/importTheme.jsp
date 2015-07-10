@@ -59,10 +59,9 @@ ${portal.angularToolkit()}
     })();
 </script>
 
-
 <div class="page-header">
-  <h1>Sites</h1>
-  <h2><small>Import Theme</small></h2>
+  <h1>Themes</h1>
+  <h2><a href="."><small>Import Theme</small></a></h2>
 </div>
 
 <div ng-app="uploadTheme">

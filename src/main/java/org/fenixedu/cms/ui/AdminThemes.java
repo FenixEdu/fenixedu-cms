@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -50,11 +51,7 @@ import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.CMSTemplate;
-import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.CMSThemeFile;
-import org.fenixedu.cms.domain.CMSThemeFiles;
-import org.fenixedu.cms.domain.CMSThemeLoader;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.cms.routing.CMSURLHandler;
 import org.fenixedu.commons.stream.StreamUtils;
@@ -86,10 +83,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import static java.util.stream.Collectors.*;
+
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/themes")
 public class AdminThemes {
 
+    private static final long NUM_TOP_SITES = 4;
     private final Map<String, String> supportedContentTypes;
     private final Map<String, String> supportedImagesContentTypes;
     private final CMSURLHandler urlHandler;
@@ -156,7 +156,10 @@ public class AdminThemes {
 
     @RequestMapping(value = "{type}/see", method = RequestMethod.GET)
     public String viewTheme(Model model, @PathVariable(value = "type") String type) {
-        model.addAttribute("theme", CMSTheme.forType(type));
+        CMSTheme theme = CMSTheme.forType(type);
+        model.addAttribute("theme", theme);
+        model.addAttribute("sites", theme.getAllSitesStream()
+                .sorted(Site.NAME_COMPARATOR).limit(NUM_TOP_SITES).collect(toList()));
         return "fenixedu-cms/viewTheme";
     }
 

@@ -22,53 +22,74 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <div class="page-header">
-  <h1>Sites</h1>
-  <h2><small><c:out value="${theme.name}" /></small></h2>
+  <h1>Themes</h1>
+  <h2><a href="${pageContext.request.contextPath}/cms/themes"><small><c:out value="${theme.name}" /></small></a></h2>
 </div>
 
 <p>
     <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/edit" class="btn btn-primary"><i class="glyphicon glyphicon-edit"></i> Edit</a>
 
-    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/export" target="_blank" class="btn btn-default"><i class="glyphicon glyphicon-cloud-download"></i> Export</a>
+    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/export" target="_blank" download="${theme.type}.zip" class="btn btn-default"><i class="glyphicon glyphicon-cloud-download"></i> Export</a>
 </p>
 
 <div class="row">
-    <div class="col-sm-8">
+    <div class="col-md-8 col-sm-12">
         <c:choose>
             <c:when test="${theme.previewImage == null}">
-               <div class="hidden-xs thumbnail" style="min-height:500px; background:#efefef;">
-                    <h5 style="display:table;margin: 0 auto; margin-top:220px;">No thumbnail avaible</h5>
+               <div class="thumbnail" style="min-height:500px; background:#efefef;">
+                    <h5 style="display:table;margin: 0 auto; margin-top:220px;">No thumbnail available</h5>
                </div>
             </c:when>
             <c:otherwise>
-                <div class="hidden-xs thumbnail ">
-                <img src="${cms.downloadUrl(theme.previewImage)}">
+                <div class="thumbnail ">
+                    <img src="${cms.downloadUrl(theme.previewImage)}">
                 </div>
             </c:otherwise>
         </c:choose>
-        
-        <p>
-            <c:out value="${theme.description}"/>
-        </p>
-        
+
+        <c:if test="${not empty sites}">
+          <h4>Some sites using this theme</h4>
+          <div class="row">
+              <c:forEach var="site" items="${sites}">
+                <div class="col-sm-6 col-md-6">
+                  <div class="thumbnail">
+                    <div class="caption">
+                      <h5><a href="${site.editUrl}">${site.name.content}</a></h3>
+                      <p>${site.description.content}</p>
+                    </div>
+                  </div>
+                </div>
+              </c:forEach>
+          </div>
+          <p>
+              <a href="${pageContext.request.contextPath}/cms/sites" class="btn btn-xs btn-default">View all</a>
+          </p>
+        </c:if>
     </div>
-    <div class="col-sm-4">
+    <div class="col-md-4 col-sm-12">
         <div class="panel panel-primary">
           <div class="panel-heading">Details</div>
           <div class="panel-body">
             <dl class="dl-horizontal">
                 <dt>Type</dt>
                 <dd><samp><c:out value="${theme.type}" /></samp></dd>
+                
+                <dt>Description</dt>
+                <dd><samp><c:out value="${theme.description}" /></samp></dd>
+
                 <c:if test="${theme.extended != null}">
-                <dt>Extends</dt>
-                <dd><a href="../${theme.extended.type}/see">${theme.extended.name}</a></dd>
+                  <dt>Extends</dt>
+                  <dd><a href="../${theme.extended.type}/see">${theme.extended.name}</a></dd>
                 </c:if>
+                
                 <dt>Size</dt>
                 <dd>${cms.prettySize(theme.files.totalSize)}</dd>
+
                 <c:if test="${theme.isDefault()}">
-                <dt>Default</dt>
-                <dd><span class="label label-success">Yes</span></dd>
+                  <dt>Default</dt>
+                  <dd><span class="label label-success">Yes</span></dd>
                 </c:if>
+
             </dl>
           </div>
         </div>
@@ -83,22 +104,6 @@
         </c:if>
     </div>
 </div>
-
-<h4>Some sites using this theme</h4>
-<div class="row">
-    <div class="col-sm-6 col-md-4">
-            <div class="thumbnail">
-              <div class="caption">
-                <h5><a href="${pageContext.request.contextPath}/cms/themes/${i.type}/see">Teste</a></h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Rerum dolorem maxime cupiditate illum! Labore recusandae consequatur eveniet quasi repudiandae commodi nam, incidunt cum maiores magni totam voluptas aperiam eligendi quisquam.</p>
-                </div>
-            </div>
-    </div>
-</div>
-
-<p>
-    <a href="" class="btn btn-xs btn-default">View all</a>
-</p>
 
 <div class="modal fade" id="deleteModal">
   <div class="modal-dialog">

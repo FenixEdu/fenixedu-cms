@@ -22,8 +22,8 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <div class="page-header">
-    <h1><spring:message code="site.create.title"/></h1>
-    <h2><small><a href="${pageContext.request.contextPath}/cms">CMS</a></small></h2>
+    <h1>Sites</h1>
+    <h2><a href="${pageContext.request.contextPath}/cms"><small>Create a new site</small></a></h2>
 </div>
 
 <form class="form-horizontal" action="" method="post" role="form">

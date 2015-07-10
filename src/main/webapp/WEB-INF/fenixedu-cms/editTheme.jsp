@@ -30,8 +30,8 @@ ${portal.angularToolkit()}
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload.js" type="text/javascript" charset="utf-8"></script>
 
 <div class="page-header">
-  <h1>Sites</h1>
-  <h2><small>${theme.name}</small></h2>
+  <h1>Themes</h1>
+  <h2><a href="see"><small>${theme.name}</small></a></h2>
 </div>
 <div ng-app="cmsFileViewer">
 <div ng-view class="fileViwer">

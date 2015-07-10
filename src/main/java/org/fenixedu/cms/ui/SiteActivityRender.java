@@ -33,6 +33,8 @@ public class SiteActivityRender {
     public static void init() {
         attachRenderer("siteCreated", SiteActivityRender::siteCreated);
         attachRenderer("postCreated", SiteActivityRender::postCreated);
+        attachRenderer("siteImported", SiteActivityRender::siteImported);
+        attachRenderer("siteCloned", SiteActivityRender::siteCloned);
     }
 
     private static void siteImported(SiteActivity activity, Writer writer) {
