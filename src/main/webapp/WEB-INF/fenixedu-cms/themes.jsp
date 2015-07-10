@@ -22,8 +22,8 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <div class="page-header">
-  <h1>Sites</h1>
-  <h2><small>Themes</small></h2>
+    <h1>Sites</h1>
+    <h2><a href="sites"><small>Themes</small></a></h2>
 </div>
 <p>
   <a data-toggle="modal" href='#createNewThemeModal' class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>

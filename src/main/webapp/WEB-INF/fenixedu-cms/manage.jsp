@@ -106,7 +106,7 @@
 </c:choose>
 
 <div class="modal fade" id="sites-settings">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
   <form method="post" enctype="multipart/form-data" action="/cms/sites/cmsSettings">
     ${csrf.field()}
     <div class="modal-content">
@@ -129,7 +129,7 @@
   <div class="tab-content">
     <div role="tabpanel" class="tab-pane active form-horizontal" id="general">
       <div class="form-group">
-          <label for="inputEmail3" class="col-sm-3 control-label">Default Site</label>
+          <label class="col-sm-3 control-label">Default Site</label>
 
           <div class="col-sm-9">
               <select class="form-control" name="slug">

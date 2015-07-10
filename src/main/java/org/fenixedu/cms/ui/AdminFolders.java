@@ -94,7 +94,7 @@ public class AdminFolders {
         return e;
     }
 
-    @RequestMapping("/delete/{folder}")
+    @RequestMapping(value = "/delete/{folder}", method = RequestMethod.POST)
     public RedirectView deleteFolder(@PathVariable CMSFolder folder) {
         atomic(() -> folder.delete());
         return new RedirectView("/cms/folders", true);

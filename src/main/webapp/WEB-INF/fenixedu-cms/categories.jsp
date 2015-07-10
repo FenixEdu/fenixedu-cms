@@ -27,7 +27,7 @@
 </div>
 
 <a href="${pageContext.request.contextPath}/cms/categories/${site.slug}/create" class="btn btn-default btn-primary">
-	<span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="categories.manage.createCategories"/></a>
+	<span class="glyphicon glyphicon-plus"></span>&nbsp;New</a>
 </p>
 
 <c:choose>
