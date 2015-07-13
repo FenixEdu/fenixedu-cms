@@ -20,6 +20,7 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+${portal.toolkit()}
 
 <div class="page-header">
     <h1><spring:message code="menu.manage.title" /></h1>
@@ -27,51 +28,53 @@
 </div>
 
 <p>
-    <a href="${pageContext.request.contextPath}/cms/menus/${site.slug}/create" class="btn btn-default btn-primary">
-        <span class="glyphicon glyphicon-plus"></span>&nbsp;<spring:message code="menu.manage.label.createMenu" />
+    <a href="#create-post" class="btn btn-default btn-primary" data-toggle="modal" data-target="#create-menu" >
+        <span class="glyphicon glyphicon-plus"></span>&nbsp;New
     </a>
 </p>
 
 <c:choose>
       <c:when test="${menus.size() == 0}">
-      <i><spring:message code="menu.manage.title.label.emptyMenus" /></i>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <i><spring:message code="menu.manage.title.label.emptyMenus" /></i>
+          </div>
+        </div>
       </c:when>
 
       <c:otherwise>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th><spring:message code="menu.manage.label.name" /></th>
-              <th><spring:message code="menu.manage.label.creationDate" /></th>
-              <th><spring:message code="menu.manage.label.operations" /></th>
-            </tr>
-          </thead>
-          <tbody>
+        <ul class="list-group">
           <c:forEach var="menu" items="${menus}">
-            <tr>
-              <td>
-                <h5><a href="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.oid}/change">${menu.name.content}</a></h5>
-              </td>
-              <td>${menu.creationDate.toString('dd MMMM yyyy, HH:mm', locale)} <small>- ${menu.createdBy.name}</small></td>
-              <td>
-              	<div class="btn-group">
-	                <a href="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.oid}/change" class="btn btn-sm btn-default"><spring:message code="action.manage" /></a>
-	                <a href="#" class="btn btn-danger btn-sm" data-menu="${menu.oid}"><spring:message code="action.delete" /></a>
-				        </div>
-              </td>
-            </tr>
+              <c:set var="menuEditUrl" value="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.slug}/change"></c:set>
+              <li class="list-group-item">
+                  <h3><a href="${menuEditUrl}">${menu.name.content}</a></h3>
+                  
+                  <div><small><code>${menu.getSlug()}</code></small></div>
+
+                  <span class="label label-primary">${menu.getItemsSet().size()} Menu Items</span>
+
+                  <div class="btn-group pull-right">
+                      <a href="${menuEditUrl}" class="btn btn-icon btn-primary">
+                          <i class="glyphicon glyphicon-cog"></i>
+                      </a>
+                      <a href="#deleteModal" data-toggle="modal" data-target ="#deleteModal" class="btn btn-icon btn-default">
+                          <i class="glyphicon glyphicon-trash"></i>
+                      </a>
+                  </div>
+              </li>
           </c:forEach>
-          </tbody>
-        </table>
+        </ul>
       </c:otherwise>
+
 </c:choose>
 
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                        class="sr-only">Close</span></button>
+                <button type="button" class="close" data-dismiss="modal">
+                  <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
                 <h4><spring:message code="menu.manage.label.delete.menu"/></h4>
             </div>
             <div class="modal-body">
@@ -87,6 +90,35 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="create-menu" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/menus/${site.slug}/create" method="post" role="form">
+            ${csrf.field()}
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
+                <h3 class="modal-title">New Menu</h3>
+                <small>This could be the start of something great!</small>
+            </div>
+            <div class="modal-body">
+                <div class="${emptyName ? "form-group has-error" : "form-group"}">
+                    <label class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
+
+                    <div class="col-sm-10">
+                        <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.create.label.name" />">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="Submit" class="btn btn-primary">Make</button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+
 
 <script>
 (function () {

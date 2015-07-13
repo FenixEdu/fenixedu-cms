@@ -121,7 +121,6 @@ public class BlogTemplate implements SiteTemplate {
         Page page = new Page(site, new LocalizedString(I18N.getLocale(), "Homepage"));
         page.addComponents(Component.forType(ListPosts.class));
         page.setTemplate(site.getTheme().templateForType("posts"));
-        page.setSlug("");
         return page;
     }
 

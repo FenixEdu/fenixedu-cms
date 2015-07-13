@@ -20,226 +20,79 @@ package org.fenixedu.cms.ui;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonParser;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
-import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
-import pt.ist.fenixframework.Atomic;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import pt.ist.fenixframework.FenixFramework;
-
-import java.util.Optional;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/menus")
 public class AdminMenuItem {
 
-    @RequestMapping(value = "{slugSite}/{oidMenu}/change", method = RequestMethod.GET)
-    public String change(Model model, @PathVariable(value = "slugSite") String slugSite,
-                         @PathVariable(value = "oidMenu") String oidMenu) {
-        Site s = Site.fromSlug(slugSite);
+    @Autowired
+    AdminMenusService service;
 
-        AdminSites.canEdit(s);
+    private static final String JSON = "application/json;charset=utf-8";
+    private static final JsonParser JSON_PARSER = new JsonParser();
 
-        model.addAttribute("site", s);
-        model.addAttribute("menu", s.menuForOid(oidMenu));
-        return "fenixedu-cms/changeMenu";
+    @RequestMapping(value = "{slugSite}/{slugMenu}/change", method = RequestMethod.GET)
+    public String viewEditMenu(Model model, @PathVariable String slugSite, @PathVariable String slugMenu) {
+        Site site = Site.fromSlug(slugSite);
+        AdminSites.canEdit(site);
+        model.addAttribute("site", site);
+        model.addAttribute("menu", site.menuForSlug(slugMenu));
+        return "fenixedu-cms/editMenu";
     }
 
-    private JsonObject serialize(MenuItem item) {
-        JsonObject root = new JsonObject();
-
-        root.add("title", new JsonPrimitive(item.getName().isEmpty() ? "---" : item.getName().getContent()));
-        root.add("name", item.getName().json());
-
-        root.add("key", new JsonPrimitive(item.getExternalId()));
-        root.add("url", item.getUrl() == null ? null : new JsonPrimitive(item.getUrl()));
-        root.add("page", item.getPage() == null ? null : new JsonPrimitive(item.getPage().getSlug()));
-        root.add("position", new JsonPrimitive(item.getPosition()));
-        root.add("isFolder", new JsonPrimitive(Optional.ofNullable(item.getFolder()).orElse(false)));
-        root.add("pageUrl", item.getPage() == null ? null : new JsonPrimitive(item.getPage().getAddress()));
-        root.add("pageEditUrl", item.getPage() == null ? null : new JsonPrimitive(item.getPage().getEditUrl()));
-
-        if (item.getChildrenSet().size() > 0) {
-            root.add("folder", new JsonPrimitive(true));
-            JsonArray child = new JsonArray();
-
-            for (MenuItem subitem : item.getChildrenSorted()) {
-                child.add(serialize(subitem));
-            }
-            root.add("children", child);
-        }
-        return root;
+    @RequestMapping(value = "{slugSite}/{slugMenu}/data", method = RequestMethod.GET, produces = JSON)
+    public @ResponseBody String menuData(@PathVariable String slugSite, @PathVariable String slugMenu) {
+        Site site = Site.fromSlug(slugSite);
+        AdminSites.canEdit(site);
+        Menu menu = site.menuForSlug(slugMenu);
+        JsonObject data = new JsonObject();
+        JsonObject pages = new JsonObject();
+        site.getSortedPages().forEach(page-> pages.add(page.getSlug(), service.serializePage(page)));
+        data.add("menu", service.serializeMenu(menu));
+        data.add("pages", pages);
+        return data.toString();
     }
 
-    @RequestMapping(value = "{slugSite}/{oidMenu}/data", method = RequestMethod.GET, produces = "application/json;charset=utf-8")
-    public
-    @ResponseBody
-    String data(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
-            value = "oidMenu") String oidMenu) {
-        Site s = Site.fromSlug(slugSite);
+    @RequestMapping(value = "{slugSite}/{slugMenu}/edit", method = RequestMethod.POST, consumes = JSON, produces = JSON)
+    public @ResponseBody String editMenu(@PathVariable String slugSite, @PathVariable String slugMenu, HttpEntity<String> httpEntity) {
+        Site site = Site.fromSlug(slugSite);
+        AdminSites.canEdit(site);
+        Menu menu = site.menuForSlug(slugMenu);
+        JsonObject menuRoot = JSON_PARSER.parse(httpEntity.getBody()).getAsJsonObject();
 
-        AdminSites.canEdit(s);
+        FenixFramework.atomic(()->{
 
-        Menu m = s.menuForOid(oidMenu);
-
-        JsonObject root = new JsonObject();
-
-        root.add("title", new JsonPrimitive(m.getName().isEmpty() ? "---" : m.getName().getContent()));
-        root.add("name", m.getName().json());
-        root.add("key", new JsonPrimitive("null"));
-        root.add("root", new JsonPrimitive(true));
-        root.add("folder", new JsonPrimitive(true));
-
-        JsonArray child = new JsonArray();
-
-        m.getToplevelItemsSorted().map(this::serialize).forEach(json -> child.add(json));
-
-        root.add("children", child);
-
-        JsonArray top = new JsonArray();
-
-        top.add(root);
-        return top.toString();
-    }
-
-    @RequestMapping(value = "{slugSite}/{oidMenu}/createItem", method = RequestMethod.POST)
-    public RedirectView create(Model model, @PathVariable(value = "slugSite") String slugSite,
-                               @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid,
-                               @RequestParam LocalizedString name, @RequestParam String use,
-                               @RequestParam(required = false) String url,
-                               @RequestParam(required = false) String slugPage) {
-        Site s = Site.fromSlug(slugSite);
-
-        AdminSites.canEdit(s);
-
-        Menu m = s.menuForOid(oidMenu);
-
-        createMenuItem(menuItemOid, name, use, url, slugPage, s, m);
-        return new RedirectView("/cms/menus/" + slugSite + "/" + oidMenu + "/change", true);
-    }
-
-    @Atomic
-    private void createMenuItem(String menuItemOid, LocalizedString name, String use, String url, String slugPage, Site s, Menu m) {
-        MenuItem mi = new MenuItem(m);
-        mi.setName(name);
-
-        if (!menuItemOid.equals("null")) {
-            MenuItem parent = FenixFramework.getDomainObject(menuItemOid);
-            if (parent.getMenu() != m) {
-                throw new RuntimeException("Wrong Parents");
-            }
-            parent.add(mi);
-        } else {
-            m.add(mi);
-        }
-
-        if (use.equals("url")) {
-            mi.setUrl(url);
-        } else if (use.equals("folder")) {
-            mi.setFolder(true);
-        } else {
-            Page p = s.pageForSlug(slugPage);
-            if (p == null) {
-                throw new RuntimeException("Page not found");
-            }
-            mi.setPage(p);
-        }
-    }
-
-    @RequestMapping(value = "{slugSite}/{oidMenu}/changeItem", method = RequestMethod.POST)
-    public RedirectView change(Model model, @PathVariable(value = "slugSite") String slugSite,
-                               @PathVariable(value = "oidMenu") String oidMenu, @RequestParam String menuItemOid,
-                               @RequestParam String menuItemOidParent, @RequestParam LocalizedString name, @RequestParam String use,
-                               @RequestParam String url, @RequestParam String slugPage, @RequestParam Integer position) {
-
-        Site s = Site.fromSlug(slugSite);
-
-        AdminSites.canEdit(s);
-
-        Menu m = s.menuForOid(oidMenu);
-
-        if (menuItemOid.equals("null") && menuItemOidParent.equals("null")) {
-            changeMenu(m, name);
-        } else {
-
-            MenuItem mi = FenixFramework.getDomainObject(menuItemOid);
-
-            if (mi.getMenu() != m) {
-                throw new RuntimeException("Wrong Parents");
+            LocalizedString newName = LocalizedString.fromJson(menuRoot.get("name"));
+            if(!menu.getName().equals(newName)) {
+                menu.setName(newName);
             }
 
-            changeMenuItem(mi, menuItemOidParent, name, use, url, slugPage, s, m, position);
-        }
-        return new RedirectView("/cms/menus/" + slugSite + "/" + oidMenu + "/change", true);
-    }
+            service.allDeletedItems(menu, menuRoot).forEach(MenuItem::delete);
 
-    @Atomic
-    private void changeMenu(Menu m, LocalizedString name) {
-        m.setName(name);
-    }
-
-    @Atomic
-    private void changeMenuItem(MenuItem mi, String menuItemOid, LocalizedString name, String use, String url, String slugPage,
-                                Site s, Menu m, Integer position) {
-
-        mi.setName(name);
-
-        if (!menuItemOid.equals("null")) {
-            if ((mi.getParent() == null && !menuItemOid.equals("null"))
-                    || (mi.getParent() != null && !mi.getParent().getOid().equals(menuItemOid))) {
-                MenuItem mip = FenixFramework.getDomainObject(menuItemOid);
-
-                if (mip.getMenu() != m) {
-                    throw new RuntimeException("Wrong Parents");
+            if(menuRoot.get("children")!=null && menuRoot.get("children").isJsonArray()) {
+                JsonArray children = menuRoot.get("children").getAsJsonArray();
+                for (int newPosition = 0; newPosition < children.size(); ++newPosition) {
+                    service.processMenuItemChanges(menu, null, children.get(newPosition).getAsJsonObject(), newPosition);
                 }
-                mip.putAt(mi, position);
-                mi.setTop(null);
-            }
-        } else {
-            m.putAt(mi, position);
-            mi.setParent(null);
-        }
-
-        if (use.equals("folder")) {
-            mi.setFolder(true);
-            mi.setUrl(null);
-            mi.setPage(null);
-        } else if (use.equals("url")) {
-            mi.setFolder(false);
-            mi.setUrl(url);
-            mi.setPage(null);
-        } else if (use.equals("page")) {
-            mi.setFolder(false);
-            mi.setUrl(null);
-            Page p = s.pageForSlug(slugPage);
-
-            if (p == null) {
-                throw new RuntimeException("Page not found");
             }
 
-            mi.setPage(p);
-        }
+        });
+
+        return menuData(slugSite, slugMenu);
     }
 
-    @RequestMapping(value = "{slugSite}/{oidMenu}/delete/{oidMenuItem}", method = RequestMethod.POST)
-    public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
-                               @PathVariable(value = "oidMenu") String oidMenu, @PathVariable(value = "oidMenuItem") String oidMenuItem) {
-        Site s = Site.fromSlug(slugSite);
-
-        AdminSites.canEdit(s);
-
-        Menu m = s.menuForOid(oidMenu);
-        MenuItem item = FenixFramework.getDomainObject(oidMenuItem);
-        if (item.getMenu() != m && item.getTop() != m) {
-            throw new RuntimeException("Wrong Parents");
-        }
-        item.delete();
-        return new RedirectView("/cms/menus/" + slugSite + "/" + oidMenu + "/change", true);
-    }
 }

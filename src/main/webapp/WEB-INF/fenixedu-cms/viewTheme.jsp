@@ -41,8 +41,10 @@
                </div>
             </c:when>
             <c:otherwise>
-                <div class="thumbnail ">
-                    <img src="${cms.downloadUrl(theme.previewImage)}">
+                <div class="thumbnail">
+                    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/edit">
+                        <img src="${cms.downloadUrl(theme.previewImage)}">
+                    </a>
                 </div>
             </c:otherwise>
         </c:choose>

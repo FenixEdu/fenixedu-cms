@@ -27,58 +27,48 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.FenixFramework;
+
+import java.util.Comparator;
+
+import static java.util.stream.Collectors.toList;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/menus")
 public class AdminMenu {
-    @RequestMapping(value = "{slug}", method = RequestMethod.GET)
-    public String posts(Model model, @PathVariable(value = "slug") String slug) {
-        Site site = Site.fromSlug(slug);
 
+    @RequestMapping(value = "{siteSlug}", method = RequestMethod.GET)
+    public String menus(Model model, @PathVariable String siteSlug) {
+        Site site = Site.fromSlug(siteSlug);
         AdminSites.canEdit(site);
-
         model.addAttribute("site", site);
-        model.addAttribute("menus", site.getMenusSet());
+        model.addAttribute("menus", site.getMenusSet().stream().sorted(Comparator.comparing(Menu::getName)).collect(toList()));
         return "fenixedu-cms/menus";
     }
 
-    @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
-    public String createMenu(Model model, @PathVariable(value = "slug") String slug) {
+    @RequestMapping(value = "{siteSlug}/create", method = RequestMethod.POST)
+    public RedirectView createMenu(@PathVariable(value = "siteSlug") String slug, @RequestParam LocalizedString name) {
         Site s = Site.fromSlug(slug);
-
-        AdminSites.canEdit(s);
-
-        model.addAttribute("site", s);
-        return "fenixedu-cms/createMenu";
+        Menu menu = createMenu(s, name);
+        return new RedirectView("/cms/menus/" + s.getSlug() + "/" + menu.getSlug() + "/change", true);
     }
 
-    @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
-    public RedirectView createMenu(Model model, @PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
-            RedirectAttributes redirectAttributes) {
-        if (name.isEmpty()) {
-            redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/menus/" + slug + "/create", true);
-        } else {
-            Site s = Site.fromSlug(slug);
-            createMenu(s, name);
-            return new RedirectView("/cms/menus/" + s.getSlug() + "", true);
-        }
+    @RequestMapping(value = "{slugSite}/{slugMenu}/delete", method = RequestMethod.POST)
+    public RedirectView delete(@PathVariable String slugSite, @PathVariable String slugMenu) {
+        Site s = Site.fromSlug(slugSite);
+        FenixFramework.atomic(() -> {
+            AdminSites.canEdit(s);
+            s.menuForSlug(slugMenu).delete();
+        });
+        return new RedirectView("/cms/menus/" + s.getSlug(), true);
     }
 
     @Atomic
-    private void createMenu(Site site, LocalizedString name) {
-        new Menu(site, name);
+    private Menu createMenu(Site site, LocalizedString name) {
+        AdminSites.canEdit(site);
+        return new Menu(site, name);
     }
 
-    @RequestMapping(value = "{slugSite}/{oidMenu}/delete", method = RequestMethod.POST)
-    public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "oidMenu") String oidMenu) {
-        Site s = Site.fromSlug(slugSite);
-        s.menuForOid(oidMenu).delete();
-        return new RedirectView("/cms/menus/" + s.getSlug() + "", true);
-    }
 }

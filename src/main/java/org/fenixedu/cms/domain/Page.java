@@ -238,8 +238,11 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     }
 
     public String getEditUrl() {
-        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/" + getSite().getSlug() + "/" + getSlug()
-                + (isStaticPage() ? "/edit" : "/advanced/edit");
+        if(isStaticPage()) {
+            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/advanced/" + getSite().getSlug() + "/" + getSlug() + "/edit";
+        } else {
+            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/" + getSite().getSlug() + "/" + getSlug() + "/edit"; 
+        }
     }
 
     @Override

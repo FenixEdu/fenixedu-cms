@@ -174,10 +174,9 @@ app.config(['$routeProvider','$locationProvider', function($routeProvider, $loca
     $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){ 
         $rootScope.root = generateTree(e);
         $rootScope.theme = "${theme.name}"
-        
-            if ($location.path()){
-                $location.path($location.path());
-            }
+        if ($location.path()){
+            $location.path($location.path());
+        }
     });
     $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/templates").success(function(e){ 
         genTemplates(e);

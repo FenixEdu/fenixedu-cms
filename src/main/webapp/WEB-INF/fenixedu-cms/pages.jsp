@@ -41,7 +41,11 @@ ${portal.toolkit()}
 
 <c:choose>
 	<c:when test="${pages.size() == 0}">
-		<i><spring:message code="page.manage.label.emptyPages"/></i>
+        <div class="panel panel-default">
+          <div class="panel-body">
+			<i><spring:message code="site.manage.label.emptySites"/></i>
+          </div>
+        </div>
 	</c:when>
 
 	<c:otherwise>
@@ -57,7 +61,7 @@ ${portal.toolkit()}
 			<c:forEach var="page" items="${pages}">
 				<tr>
 					<td>
-						<h5><a target="_blank" href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit">${page.name.content}</a>
+						<h5><a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit">${page.name.content}</a>
 							<c:if test="${page.site.initialPage == page}">
 								<span class="label label-success"><spring:message code="site.manage.label.default"/></span>
 							</c:if>

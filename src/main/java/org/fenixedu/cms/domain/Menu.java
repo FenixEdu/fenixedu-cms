@@ -29,6 +29,7 @@ import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.FenixFramework;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -239,5 +240,13 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
 
     public Wrap makeWrap(Page page) {
         return new MenuWrap(page);
+    }
+
+    public MenuItem menuItemForOid(String menuItemOid) {
+        MenuItem menuItem = FenixFramework.getDomainObject(menuItemOid);
+        if(menuItem != null && FenixFramework.isDomainObjectValid(menuItem) && menuItem.getMenu() == this) {
+            return menuItem;
+        }
+        return null;
     }
 }

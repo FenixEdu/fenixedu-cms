@@ -36,12 +36,12 @@
 
 <p>
     <button type="submit" onclick="$('#mainForm').submit()" class="btn btn-default btn-primary">
-        <spring:message code="action.save"/>
+        <span class="glyphicon glyphicon-floppy-disk"></span> Update
     </button>
 
-    <c:if test="${page.site.published && page.published}">
-        <a href="${page.address}" target="_blank" class="btn btn-default">Link</a>
-    </c:if>
+    <a href="${page.address}" target="_blank" class="btn btn-default ${page.site.published && page.published ? '' : 'disabled'}">
+        <span class="glyphicon glyphicon-link"></span> Link
+    </a>
 </p>
     
 

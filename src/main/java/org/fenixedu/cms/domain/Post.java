@@ -25,9 +25,6 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
-import org.fenixedu.bennu.io.domain.GroupBasedFile;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.cms.domain.wraps.UserWrap;
@@ -121,14 +118,11 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
      * @return the URL link to the slug's page.
      */
     public String getAddress() {
-        Page page = this.getSite().getViewPostPage();
-        if (page == null && !this.getComponentSet().isEmpty()) {
-            page = this.getComponentSet().iterator().next().getPage();
+        if(isStaticPost()) {
+            return getStaticPage().get().getAddress();
+        } else {
+            return Optional.ofNullable(getSite().getViewPostPage()).map(page->page.getAddress() + "/" + getSlug()).orElse(null);
         }
-        if (page != null) {
-            return page.getAddress() + "/" + this.getSlug();
-        }
-        return null;
     }
 
     @Atomic
@@ -216,22 +210,13 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     }
 
     public String getEditUrl() {
-        return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/posts/" + getSite().getSlug() + "/" + getSlug()
-                + "/edit";
+        return getStaticPage().map(Page::getEditUrl).orElse(CoreConfiguration.getConfiguration().applicationUrl() + "/cms/posts/" + getSite().getSlug() + "/" + getSlug() + "/edit");
     }
 
-    private void fixOrder(List<PostFile> sortedItems) {
+    public void fixOrder(List<PostFile> sortedItems) {
         for (int i = 0; i < sortedItems.size(); ++i) {
             sortedItems.get(i).setIndex(i);
         }
-    }
-
-    public void addEmbeddedFile(GroupBasedFile groupBasedFile, int position) {
-        new PostFile(this, groupBasedFile, true, position);
-    }
-
-    public void addAttachment(GroupBasedFile groupBasedFile, int position) {
-        new PostFile(this, groupBasedFile, false, position);
     }
 
     @Override
@@ -274,13 +259,6 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         return getFilesSet().stream().sorted().collect(Collectors.toList());
     }
 
-    public void moveFile(int origIndex, int newIndex) {
-        List<PostFile> filesCopy = getFilesSorted();
-        PostFile postFile = filesCopy.remove(origIndex);
-        filesCopy.add(newIndex, postFile);
-        fixOrder(filesCopy);
-    }
-
     @Override
     public void addFiles(PostFile postFile) {
         List<PostFile> list = getFilesSorted();
@@ -295,10 +273,6 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         list.remove(files);
         fixOrder(list);
         super.removeFiles(files);
-    }
-
-    public Optional<PostFile> getPostFile(GroupBasedFile groupBasedFile) {
-        return getFilesSet().stream().filter(postFile -> postFile.getFiles() == groupBasedFile).findFirst();
     }
 
     @Override
@@ -439,12 +413,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
             return Post.this.getCategoriesSet().stream().map(Wrap::make).collect(Collectors.toList());
         }
 
-        public List<Wrap> getAttachments() {
+        public List<Wrap> getAttachements() {
             return Post.this.getAttachmentFilesSorted().map(PostFile::makeWrap).collect(Collectors.toList());
-        }
-
-        public List<Wrap> getEmbeddedFiles() {
-            return Post.this.getEmbeddedFilesSorted().map(PostFile::makeWrap).collect(Collectors.toList());
         }
 
     }

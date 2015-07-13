@@ -34,6 +34,7 @@ import org.joda.time.DateTime;
 import pt.ist.fenixframework.Atomic;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,6 +47,7 @@ import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 public class Category extends Category_Base implements Wrappable, Sluggable, Cloneable {
     private static final long NUM_RECENT = 10;
     public static final String SIGNAL_CREATED = "fenixedu.cms.category.created";
+    public static final Comparator<? super Category> CATEGORY_NAME_COMPARATOR = Comparator.comparing(Category::getName);
 
     /**
      * The logged {@link User} creates a new instance of a {@link Category}
