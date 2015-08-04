@@ -18,17 +18,21 @@
  */
 package org.fenixedu.cms.ui;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
-import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
 import java.util.Comparator;
@@ -38,6 +42,12 @@ import static java.util.stream.Collectors.toList;
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/menus")
 public class AdminMenu {
+
+    @Autowired
+    AdminMenusService service;
+
+    private static final String JSON = "application/json;charset=utf-8";
+    private static final JsonParser JSON_PARSER = new JsonParser();
 
     @RequestMapping(value = "{siteSlug}", method = RequestMethod.GET)
     public String menus(Model model, @PathVariable String siteSlug) {
@@ -50,25 +60,49 @@ public class AdminMenu {
 
     @RequestMapping(value = "{siteSlug}/create", method = RequestMethod.POST)
     public RedirectView createMenu(@PathVariable(value = "siteSlug") String slug, @RequestParam LocalizedString name) {
-        Site s = Site.fromSlug(slug);
-        Menu menu = createMenu(s, name);
-        return new RedirectView("/cms/menus/" + s.getSlug() + "/" + menu.getSlug() + "/change", true);
+        Site site = Site.fromSlug(slug);
+        Menu menu = service.createMenu(site, name);
+        return new RedirectView("/cms/menus/" + site.getSlug() + "/" + menu.getSlug() + "/edit", true);
     }
 
     @RequestMapping(value = "{slugSite}/{slugMenu}/delete", method = RequestMethod.POST)
     public RedirectView delete(@PathVariable String slugSite, @PathVariable String slugMenu) {
-        Site s = Site.fromSlug(slugSite);
+        Site site = Site.fromSlug(slugSite);
         FenixFramework.atomic(() -> {
-            AdminSites.canEdit(s);
-            s.menuForSlug(slugMenu).delete();
+            AdminSites.canEdit(site);
+            site.menuForSlug(slugMenu).delete();
         });
-        return new RedirectView("/cms/menus/" + s.getSlug(), true);
+        return new RedirectView("/cms/menus/" + site.getSlug(), true);
     }
 
-    @Atomic
-    private Menu createMenu(Site site, LocalizedString name) {
+    @RequestMapping(value = "{slugSite}/{slugMenu}/edit", method = RequestMethod.GET)
+    public String viewEditMenu(Model model, @PathVariable String slugSite, @PathVariable String slugMenu) {
+        Site site = Site.fromSlug(slugSite);
         AdminSites.canEdit(site);
-        return new Menu(site, name);
+        model.addAttribute("site", site);
+        model.addAttribute("menu", site.menuForSlug(slugMenu));
+        return "fenixedu-cms/editMenu";
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugMenu}/data", method = RequestMethod.GET, produces = JSON)
+    public @ResponseBody String menuData(@PathVariable String slugSite, @PathVariable String slugMenu) {
+        Site site = Site.fromSlug(slugSite);
+        AdminSites.canEdit(site);
+        Menu menu = site.menuForSlug(slugMenu);
+        JsonObject data = new JsonObject();
+        JsonObject pages = new JsonObject();
+        site.getSortedPages().forEach(page-> pages.add(page.getSlug(), service.serializePage(page)));
+        data.add("menu", service.serializeMenu(menu));
+        data.add("pages", pages);
+        return data.toString();
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugMenu}/edit", method = RequestMethod.POST, consumes = JSON, produces = JSON)
+    public @ResponseBody String editMenu(@PathVariable String slugSite, @PathVariable String slugMenu, HttpEntity<String> http) {
+        Site site = Site.fromSlug(slugSite);
+        AdminSites.canEdit(site);
+        service.processMenuChanges(site.menuForSlug(slugMenu), JSON_PARSER.parse(http.getBody()).getAsJsonObject());
+        return menuData(slugSite, slugMenu);
     }
 
 }

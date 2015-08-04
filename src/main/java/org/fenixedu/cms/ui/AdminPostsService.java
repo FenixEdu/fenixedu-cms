@@ -1,9 +1,10 @@
 package org.fenixedu.cms.ui;
 
-import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.fenixedu.bennu.core.api.UserResource;
+import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
@@ -20,6 +21,8 @@ import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import static java.util.Optional.ofNullable;
 
@@ -55,26 +58,32 @@ public class AdminPostsService {
     public void processPostChanges(Site site, Post post, JsonObject postJson) {
 	AdminSites.canEdit(site);
 
-	LocalizedString name = LocalizedString.fromJson(postJson.get("name"));
-	LocalizedString body = LocalizedString.fromJson(postJson.get("body"));
+	LocalizedString name = Post.sanitize(LocalizedString.fromJson(postJson.get("name")));
+	LocalizedString body = Post.sanitize(LocalizedString.fromJson(postJson.get("body")));
 	boolean active = ofNullable(postJson.get("active")).map(JsonElement::getAsBoolean).orElse(false);
-	DateTime publicationStarts = ofNullable(postJson.get("publicationBegin"))
+	DateTime publicationBegin = ofNullable(postJson.get("publicationBegin"))
 			.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString).map(DateTime::parse).orElse(null);
 	DateTime publicationEnds = ofNullable(postJson.get("publicationEnd"))
 			.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString).map(DateTime::parse).orElse(null);
 	Group canViewGroup = ofNullable(postJson.get("canViewGroup"))
 			.map(JsonElement::getAsString).map(Group::parse).orElse(post.getCanViewGroup());
 	String slug = ofNullable(postJson.get("slug")).map(JsonElement::getAsString).orElse(post.getSlug());
-
+	User createdBy = ofNullable(postJson.get("createdBy")).map(JsonElement::getAsJsonObject)
+			.map(json -> json.get("username").getAsString()).map(User::findByUsername).orElse(post.getCreatedBy());
 	if(postJson.get("categories") != null && postJson.get("categories").isJsonArray()) {
-	    post.getCategoriesSet().clear();
+	    Set<Category> newCategories = new HashSet<>();
 	    for (JsonElement categoryJsonEl : postJson.get("categories").getAsJsonArray()) {
 		JsonObject categoryJson = categoryJsonEl.getAsJsonObject();
 		if(ofNullable(categoryJson.get("use")).map(JsonElement::getAsBoolean).orElse(false)) {
 		    String categorySlug = categoryJson.get("slug").getAsString();
-		    LocalizedString categoryName = LocalizedString.fromJson(categoryJson.get("name"));
-		    post.addCategories(site.getOrCreateCategoryForSlug(categorySlug, categoryName));
+		    LocalizedString categoryName = Post.sanitize(LocalizedString.fromJson(categoryJson.get("name")));
+		    newCategories.add(site.getOrCreateCategoryForSlug(categorySlug, categoryName));
 		}
+	    }
+
+	    if(!newCategories.containsAll(post.getCategoriesSet()) || !post.getCategoriesSet().containsAll(newCategories)) {
+		post.getCategoriesSet().clear();
+		newCategories.stream().forEach(post::addCategories);
 	    }
 	}
 
@@ -82,21 +91,49 @@ public class AdminPostsService {
 	    for (JsonElement fileJsonEl : postJson.get("files").getAsJsonArray()) {
 		JsonObject fileJson = fileJsonEl.getAsJsonObject();
 		PostFile postFile = FenixFramework.getDomainObject(fileJson.get("id").getAsString());
-		Preconditions.checkArgument(postFile.getPost() == post);
-		postFile.setIndex(fileJson.get("index").getAsInt());
-		postFile.setIsEmbedded(fileJson.get("isEmbedded").getAsBoolean());
+		if(postFile.getPost() == post) {
+		    int index = fileJson.get("index").getAsInt();
+		    boolean isEmbedded = fileJson.get("isEmbedded").getAsBoolean();
+		    if(postFile.getIndex()!= index) {
+			postFile.setIndex(index);
+		    }
+		    if(postFile.getIsEmbedded()!=isEmbedded) {
+			postFile.setIsEmbedded(isEmbedded);
+		    }
+		}
 	    }
 	}
 
-	post.setName(Post.sanitize(name));
-	post.setBody(Post.sanitize(body));
+	if(!post.getName().equals(name)) {
+	    post.setName(name);
+	}
+	if(!post.getBody().equals(body)) {
+	    post.setBody(body);
+	}
+	if(!post.getSlug().equals(slug)) {
+	    post.setSlug(slug);
+	}
+	if(!equalDates(post.getPublicationBegin(), publicationBegin)) {
+	    post.setPublicationBegin(publicationBegin);
+	}
+	if(!equalDates(post.getPublicationEnd(), publicationEnds)) {
+	    post.setPublicationEnd(publicationEnds);
+	}
+	if(!post.getCanViewGroup().equals(canViewGroup)) {
+	    post.setCanViewGroup(canViewGroup);
+	}
+	if(post.getActive() != active) {
+	    post.setActive(active);
+	}
+	if(!post.getCreatedBy().equals(createdBy)) {
+	    post.setCreatedBy(createdBy);
+	}
 	post.fixOrder(post.getFilesSorted());
-	post.setPublicationBegin(publicationStarts);
-	post.setPublicationEnd(publicationEnds);
-	post.setCanViewGroup(canViewGroup);
-	post.setActive(active);
-	post.setSlug(slug);
 
+    }
+
+    private boolean equalDates(DateTime time1,DateTime time2) {
+	return ofNullable(time1).map(DateTime::toString).orElse("").equals(ofNullable(time2).map(DateTime::toString).orElse(""));
     }
 
     public JsonObject serializePost(Post post) {
@@ -115,7 +152,7 @@ public class AdminPostsService {
 	postJson.add("files", filesJson);
 	postJson.addProperty("active", post.getActive());
 	postJson.addProperty("address", post.getAddress());
-	postJson.addProperty("createdBy", post.getCreatedBy().getUsername());
+	postJson.add("createdBy", UserResource.getBuilder().view(post.getCreatedBy()));
 	postJson.addProperty("publicationBegin", ofNullable(post.getPublicationBegin()).map(DateTime::toString).orElse(null));
 	postJson.addProperty("publicationEnd", ofNullable(post.getPublicationEnd()).map(DateTime::toString).orElse(null));
 	return postJson;

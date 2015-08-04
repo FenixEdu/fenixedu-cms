@@ -11,6 +11,7 @@ import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.stereotype.Service;
+import pt.ist.fenixframework.Atomic;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -24,6 +25,12 @@ import static java.util.Optional.ofNullable;
  */
 @Service
 public class AdminMenusService {
+
+    @Atomic
+    public Menu createMenu(Site site, LocalizedString name) {
+	AdminSites.canEdit(site);
+	return new Menu(site, name);
+    }
 
     public JsonObject serializeMenu(Menu menu) {
 

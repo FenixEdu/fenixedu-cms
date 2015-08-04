@@ -129,7 +129,7 @@ public class AdminPosts {
         Site site = Site.fromSlug(slugSite);
         Post post = site.postForSlug(slugPost);
         service.processPostChanges(site, post, postJson);
-        return data(slugSite, slugPost);
+        return data(site.getSlug(), post.getSlug());
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/delete", method = RequestMethod.POST)

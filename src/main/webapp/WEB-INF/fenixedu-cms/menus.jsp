@@ -45,7 +45,7 @@ ${portal.toolkit()}
       <c:otherwise>
         <ul class="list-group">
           <c:forEach var="menu" items="${menus}">
-              <c:set var="menuEditUrl" value="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.slug}/change"></c:set>
+              <c:set var="menuEditUrl" value="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.slug}/edit"></c:set>
               <li class="list-group-item">
                   <h3><a href="${menuEditUrl}">${menu.name.content}</a></h3>
                   

@@ -109,9 +109,9 @@ public class AdminPages {
     public @ResponseBody String edit(@PathVariable String slugSite, @PathVariable String slugPage, HttpEntity<String> httpEntity) {
         JsonObject editData = JSON_PARSER.parse(httpEntity.getBody()).getAsJsonObject();
         Site site = Site.fromSlug(slugSite);
-        Page post = site.pageForSlug(slugPage);
-        service.processChanges(site, post, editData);
-        return data(slugSite, slugPage);
+        Page page = site.pageForSlug(slugPage);
+        service.processChanges(site, page, editData);
+        return data(site.getSlug(), page.getSlug());
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)

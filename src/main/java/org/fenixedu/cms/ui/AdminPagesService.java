@@ -31,7 +31,7 @@ public class AdminPagesService {
 	Page page = new Page(site, Post.sanitize(name));
 	page.addComponents(new StaticPost(post));
 	page.setTemplateType("view");
-	page.setPublished(false);
+	page.setPublished(true);
 	page.setCanViewGroup(site.getCanViewGroup());
 	return page;
     }
@@ -43,10 +43,18 @@ public class AdminPagesService {
 
 	Post post = page.getStaticPost().get();
 	postsService.processPostChanges(site, page.getStaticPost().get(), pageJson);
-	page.setName(Post.sanitize(post.getName()));
-	page.setCanViewGroup(post.getCanViewGroup());
-	page.setPublished(post.getActive());
-	page.setSlug(post.getSlug());
+	if(!page.getName().equals(post.getName())) {
+	    page.setName(post.getName());
+	}
+	if(!page.getSlug().equals(post.getSlug())) {
+	    page.setSlug(post.getSlug());
+	}
+	if(!page.getCanViewGroup().equals(post.getCanViewGroup())) {
+	    page.setCanViewGroup(post.getCanViewGroup());
+	}
+	if(!page.getPublished() && post.getActive()) {
+	    page.setPublished(true);
+	}
 	menusJson.forEach(jsonElement -> {
 	    JsonObject menuJson = jsonElement.getAsJsonObject();
 	    menusService.processMenuChanges(site.menuForSlug(menuJson.get("key").getAsString()), menuJson.getAsJsonObject());

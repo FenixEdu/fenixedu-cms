@@ -60,6 +60,7 @@ ${portal.angularToolkit()}
 	</div>
 
 	<fieldset>
+
 		<!-- NAME -->
 		<div class="form-group">
 			<input bennu-localized-string="post.name" required-any placeholder="<spring:message code="post.edit.label.name" />">
@@ -84,7 +85,7 @@ ${portal.angularToolkit()}
 	                <dd><input type="text" class="form-control" bennu-date-time="post.publicationEnd"></dd>
 	                <dt>Author</dt>
 	                <dd><input type="text" class="form-control" bennu-user-autocomplete="post.createdBy" /></dd>
-	                <dt>Access Control</dt>
+     	            <dt>Access Control</dt>
 	                <dd><input type="text" class="form-control" bennu-group="post.canViewGroup" allow="public,users,managers" /></dd>
 	            </dl>
 	        </div>
