@@ -162,32 +162,19 @@ ${portal.toolkit()}
             </div>
         </div>
         <div role="tabpanel" class="tab-pane form-horizontal" id="permissions">
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label">Can View</label>
-
-                        <div class="col-sm-10">
-                            <input bennu-group allow="public,users,managers,custom" name="viewGroup" type="text"
-                                   value="${ site.canViewGroup.expression }"/>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label">Can Post</label>
-
-                        <div class="col-sm-10">
-                            <input bennu-group allow="managers,custom" name="postGroup" type="text"
-                                   value="${ site.canPostGroup.expression }"/>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label">Can Admin</label>
-
-                        <div class="col-sm-10">
-                            <input bennu-group allow="managers,custom" name="adminGroup" type="text"
-                                   value="${ site.canAdminGroup.expression }"/>
-                        </div>
-                    </div>
+            <ul class="list-group">
+                <c:forEach var="role" items="${site.roles}">
+                    <li class="list-group-item">
+                        <h3><a href="${pageContext.request.contextPath}/cms/permissions/${role.roleTemplate.externalId}/${role.externalId}/edit" target="_blank">${role.name.content}</a></h3>
+                        <c:if test="${not role.name.equals(role.roleTemplate.description)}">
+                            <p><small>${role.roleTemplate.description.content}</small></p>
+                        </c:if>
+                        <p><span class="label label-primary">${role.group.toGroup().members.count()} Users</span></p>
+                        <a href='${pageContext.request.contextPath}/cms/permissions/${role.roleTemplate.externalId}/${role.externalId}/edit' target="_blank" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-edit"></span>&nbsp;Edit</a>
+                    </li>
+                </c:forEach>
+                
+            </ul>
         </div>
 
         <div role="tabpanel" class="tab-pane form-horizontal" id="external">
@@ -369,7 +356,7 @@ ${portal.toolkit()}
 </form>
 <form id="clone-form" method="post" action="clone">${csrf.field()}</form>
 
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="confirmDeleteModal" role="dialog" aria-hidden="true">
     <form method="post" action="${pageContext.request.contextPath}/cms/sites/${site.slug}/delete">
         ${csrf.field()}
         <div class="modal-dialog">
