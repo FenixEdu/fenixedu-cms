@@ -20,6 +20,8 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="perms" %>
+
 
 <c:set var="locale" value="<%= org.fenixedu.commons.i18n.I18N.getLocale() %>"/>
 <script type="text/javascript">
@@ -41,9 +43,11 @@
         	<span class="caret"></span>
       	</button>
       	<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuDivider">
-	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/posts/${site.slug}">Posts</a></li>
+			<li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/posts/${site.slug}">Posts</a></li>
 	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/pages/${site.slug}">Pages</a></li>
-	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/categories/${site.slug}">Categories</a></li>
+			<c:if test="${perms:canDoThis(site, 'LIST_CATEGORIES')}" >
+				<li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/categories/${site.slug}">Categories</a></li>
+			</c:if>
 	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/menus/${site.slug}">Menus</a></li>
 	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/media/${site.slug}">Media</a></li>
       	</ul>

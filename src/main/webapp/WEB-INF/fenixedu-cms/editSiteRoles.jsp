@@ -114,9 +114,9 @@ ${portal.toolkit()}
   </div>
 </div>
 
-<script>			
-$('[data-role-id]').click(function(e){
-	e = $(e.target);
-	$('#delete-modal form').attr('action', '${pageContext.request.contextPath}/cms/permissions/site/${site.slug}/' + e.data('role-id') + "/delete");
-});
+<script type="application/javascript">			
+	$('[data-role-id]').click(function(e){
+		var action = '${pageContext.request.contextPath}/cms/permissions/site/${site.slug}/' + $(this).data('role-id') + '/delete';
+		$('#delete-modal form').attr('action', action);
+	});
 </script>
