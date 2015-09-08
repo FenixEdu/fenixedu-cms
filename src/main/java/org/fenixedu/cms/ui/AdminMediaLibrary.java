@@ -18,7 +18,7 @@
  */
 package org.fenixedu.cms.ui;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.PostFile;

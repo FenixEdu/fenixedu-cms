@@ -3,11 +3,7 @@ package org.fenixedu.cms.ui;
 import com.google.common.base.Strings;
 import com.google.common.math.IntMath;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.cms.domain.Category;
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.Post;
-import org.fenixedu.cms.domain.PostFile;
-import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.commons.i18n.LocalizedString;
 
 import java.math.RoundingMode;

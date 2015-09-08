@@ -81,8 +81,6 @@ public class SiteExporter {
         siteJson.add("name", site.getName().json());
         siteJson.add("description", site.getDescription().json());
         siteJson.add("canViewGroup", export(site.getCanViewGroup()));
-        siteJson.add("canAdminGroup", export(site.getCanAdminGroup()));
-        siteJson.add("canPostGroup", export(site.getCanPostGroup()));
         siteJson.addProperty("themeType", site.getThemeType());
         siteJson.addProperty("embedded", site.getEmbedded());
         siteJson.addProperty("analyticsCode", site.getAnalyticsCode());

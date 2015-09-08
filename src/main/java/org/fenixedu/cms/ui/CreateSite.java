@@ -18,14 +18,12 @@
  */
 package org.fenixedu.cms.ui;
 
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.common.base.Strings;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.SiteActivity;
-import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,11 +31,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
-import com.google.common.base.Strings;
+import javax.servlet.http.HttpServletRequest;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/sites/new")

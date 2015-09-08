@@ -18,21 +18,11 @@
  */
 package org.fenixedu.cms.domain;
 
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
-
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
@@ -58,15 +48,17 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
-import com.google.api.client.util.Lists;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
@@ -133,8 +125,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         this.setCreationDate(new DateTime());
 
         this.setCanViewGroup(Group.anyone());
-        this.setCanPostGroup(Group.users(Authenticate.getUser()));
-        this.setCanAdminGroup(DynamicGroup.get("managers"));
+        // TODO: Set Default Permissions
         this.setBennu(Bennu.getInstance());
 
         new PersistentSiteViewersGroup(this);
@@ -165,44 +156,6 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     @Atomic
     public void setCanViewGroup(Group group) {
         setViewGroup(group.toPersistentGroup());
-    }
-
-    /**
-     * returns the group of people who can post this site.
-     *
-     * @return the access group for this site
-     */
-    public Group getCanPostGroup() {
-        return getPostGroup().toGroup();
-    }
-
-    /**
-     * sets the access group of people who can post in this site
-     *
-     * @param group the group of people who can view this site
-     */
-    @Atomic
-    public void setCanPostGroup(Group group) {
-        setPostGroup(group.toPersistentGroup());
-    }
-
-    /**
-     * returns the group of people who can post this site.
-     *
-     * @return the access group for this site
-     */
-    public Group getCanAdminGroup() {
-        return getAdminGroup().toGroup();
-    }
-
-    /**
-     * sets the access group of people who can post in this site
-     *
-     * @param group the group of people who can view this site
-     */
-    @Atomic
-    public void setCanAdminGroup(Group group) {
-        setAdminGroup(group.toPersistentGroup());
     }
 
     /**
@@ -372,15 +325,13 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
             Site clone = new Site(name, description);
             cloneCache.setClone(Site.this, clone);
             clone.setCanViewGroup(getCanViewGroup());
-            clone.setCanAdminGroup(getCanAdminGroup());
-            clone.setCanPostGroup(getCanPostGroup());
+            // TODO: Set Default Permissions
             clone.setThemeType(getThemeType());
             clone.setTheme(getTheme());
             clone.setEmbedded(getEmbedded());
             clone.setFolder(getFolder());
             clone.setAlternativeSite(getAlternativeSite());
             clone.setAnalyticsCode(getAnalyticsCode());
-            clone.setGoogleAPIConnection(getGoogleAPIConnection());
             clone.setStyle(getStyle());
             clone.setPrimaryBennu(getPrimaryBennu());
             clone.setBennu(getBennu());
@@ -423,15 +374,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
         getViewerGroup().delete();
         this.setViewGroup(null);
-        this.setPostGroup(null);
-        this.setAdminGroup(null);
         this.setTheme(null);
         this.setCreatedBy(null);
         this.setBennu(null);
-
-        if (getGoogleAPIConnection() != null) {
-            getGoogleAPIConnection().delete();
-        }
 
         getActivityLinesSet().stream().forEach(org.fenixedu.cms.domain.SiteActivity::delete);
         getPostSet().stream().forEach(Post::delete);
@@ -545,11 +490,11 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     public class SiteWrap extends Wrap {
 
         public boolean isAdmin() {
-            return Site.this.getCanAdminGroup().isMember(Authenticate.getUser());
+            return PermissionEvaluation.canAccess(Authenticate.getUser(), Site.this);
         }
 
         public boolean canPost() {
-            return Site.this.getCanAdminGroup().isMember(Authenticate.getUser()) || isAdmin();
+            return true; // TODO: Verify using can post permissions
         }
 
         public LocalizedString getName() {

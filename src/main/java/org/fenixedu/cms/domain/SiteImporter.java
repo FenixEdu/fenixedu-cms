@@ -1,6 +1,6 @@
 package org.fenixedu.cms.domain;
 
-import com.google.api.client.util.Maps;
+import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -50,8 +50,7 @@ public class SiteImporter {
         Site site = new Site(fromJson(siteJson.get("name")), fromJson(siteJson.get("description")));
         site.setSlug(siteJson.get("slug").getAsString());
         site.setCanViewGroup(Group.parse(siteJson.get("canViewGroup").getAsString()));
-        site.setCanPostGroup(Group.parse(siteJson.get("canPostGroup").getAsString()));
-        site.setCanAdminGroup(Group.parse(siteJson.get("canAdminGroup").getAsString()));
+
         if (siteJson.has("themeType") && !siteJson.get("themeType").isJsonNull()) {
             site.setThemeType(siteJson.get("themeType").getAsString());
         }

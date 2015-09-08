@@ -1,7 +1,7 @@
 package org.fenixedu.cms.domain;
 
-import com.google.api.client.repackaged.com.google.common.base.Preconditions;
-import com.google.api.client.util.Maps;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import pt.ist.fenixframework.DomainObject;
 
 import java.util.HashMap;

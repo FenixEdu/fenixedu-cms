@@ -18,10 +18,7 @@ x * Copyright © 2014 Instituto Superior Técnico
  */
 package org.fenixedu.cms.ui;
 
-import static pt.ist.fenixframework.FenixFramework.atomic;
-
-import javax.script.ScriptException;
-
+import com.google.common.base.Strings;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.NashornStrategy;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
@@ -32,14 +29,12 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
-import com.google.common.base.Strings;
+import javax.script.ScriptException;
+
+import static pt.ist.fenixframework.FenixFramework.atomic;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/folders")
