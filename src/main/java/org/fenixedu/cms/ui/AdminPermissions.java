@@ -18,7 +18,6 @@
  */
 package org.fenixedu.cms.ui;
 
-import com.google.api.client.json.Json;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import org.fenixedu.bennu.core.domain.Bennu;
@@ -40,9 +39,11 @@ import pt.ist.fenixframework.FenixFramework;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/permissions")
@@ -50,9 +51,7 @@ public class AdminPermissions {
 
     @RequestMapping(method = RequestMethod.GET)
     public String permissions(Model model) {
-        Collection<RoleTemplate> templates = Bennu.getInstance().getRoleTemplatesSet();
-        templates = templates.stream().sorted(Comparator.comparingLong(RoleTemplate::getNumSites)).collect(toList());
-        model.addAttribute("templates", templates);
+        model.addAttribute("templates", allTemplates());
         model.addAttribute("allPermissions", PermissionsArray.all());
         return "fenixedu-cms/permissions";
     }
@@ -70,21 +69,44 @@ public class AdminPermissions {
         return "fenixedu-cms/editRoleTemplate";
     }
 
+    @RequestMapping(value="/site/{slugSite}", method = RequestMethod.GET)
+    public String viewSiteRoles(@PathVariable String slugSite, Model model) {
+        Site site = Site.fromSlug(slugSite);
+        Set<RoleTemplate> siteTemplates = site.getRolesSet().stream().map(Role::getRoleTemplate).collect(Collectors.toSet());
+        model.addAttribute("site", site);
+        model.addAttribute("templates", allTemplates().stream().filter(template->!siteTemplates.contains(template)).collect(Collectors.toList()));
+        model.addAttribute("roles", site.getRolesSet().stream().sorted(Comparator.comparing(Role::getName)).collect(Collectors.toList()));
+        return "fenixedu-cms/editSiteRoles";
+    }
+
+    @RequestMapping(value="/site/{slugSite}/addRole", method = RequestMethod.POST)
+    public RedirectView createSiteRole(@PathVariable String slugSite, @RequestParam String roleTemplateId) {
+        FenixFramework.atomic(()->{
+            Site site = Site.fromSlug(slugSite);
+            RoleTemplate template = FenixFramework.getDomainObject(roleTemplateId);
+            if(!template.getRolesSet().stream().map(Role::getSite).filter(roleSite->roleSite.equals(site)).findAny().isPresent()) {
+                new Role(template, site);
+            }
+        });
+        return new RedirectView("/cms/permissions/site/" + slugSite, true);
+    }
+
     @RequestMapping(value = "/{roleTemplateId}/addSite", method = RequestMethod.POST)
-    public RedirectView createRole(@PathVariable String roleTemplateId,
-                                   @RequestParam LocalizedString name, @RequestParam String siteSlug) {
+    public RedirectView createRole(@PathVariable String roleTemplateId, @RequestParam String siteSlug) {
         FenixFramework.atomic(()->{
             RoleTemplate template = FenixFramework.getDomainObject(roleTemplateId);
             Site site = Site.fromSlug(siteSlug);
-            new Role(name, template, site);
+            if(!template.getRolesSet().stream().map(Role::getSite).filter(roleSite->roleSite.equals(site)).findAny().isPresent()) {
+                new Role(template, site);
+            }
         });
-        return new RedirectView("/cms/permissions/" + roleTemplateId + "/edit", true);
+        return new RedirectView("/cms/permissions/site/" + siteSlug, true);
     }
 
-    @RequestMapping(value = "/{roleTemplateId}/{roleId}/delete", method = RequestMethod.POST)
-    public RedirectView removeRole(@PathVariable String roleTemplateId, @PathVariable String roleId) {
+    @RequestMapping(value = "site/{slugSite}/{roleId}/delete", method = RequestMethod.POST)
+    public RedirectView removeRole(@PathVariable String slugSite, @PathVariable String roleId) {
         FenixFramework.atomic(() -> ((Role) FenixFramework.getDomainObject(roleId)).delete());
-        return new RedirectView("/cms/permissions/" + roleTemplateId + "/edit", true);
+        return new RedirectView("/cms/permissions/site/" + slugSite, true);
     }
 
     @RequestMapping(value = "/{roleTemplateId}/{roleId}/edit", method = RequestMethod.GET)
@@ -95,10 +117,9 @@ public class AdminPermissions {
 
     @RequestMapping(value = "/{roleTemplateId}/{roleId}/edit", method = RequestMethod.POST)
     public RedirectView editRole(@PathVariable String roleTemplateId, @PathVariable String roleId,
-                                    @RequestParam LocalizedString name, @RequestParam String group) {
+                                 @RequestParam String group) {
         FenixFramework.atomic(()->{
             Role role = FenixFramework.getDomainObject(roleId);
-            role.setName(name);
             role.setGroup(Group.parse(group).toPersistentGroup());
         });
         return new RedirectView("/cms/permissions/" + roleTemplateId + "/" + roleId +"/edit", true);
@@ -126,4 +147,8 @@ public class AdminPermissions {
         return new JsonParser().parse(json).getAsJsonArray();
     }
 
+    private List<RoleTemplate> allTemplates() {
+        Collection<RoleTemplate> templates = Bennu.getInstance().getRoleTemplatesSet();
+        return templates.stream().sorted(Comparator.comparingLong(RoleTemplate::getNumSites)).collect(toList());
+    }
 }

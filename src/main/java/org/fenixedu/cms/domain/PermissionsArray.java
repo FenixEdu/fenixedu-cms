@@ -4,13 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.fenixedu.commons.i18n.LocalizedString;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Created by borgez-dsi on 03-09-2015.
@@ -56,52 +54,60 @@ public class PermissionsArray implements Serializable {
 
     public enum Permission {
 
-        DELETE_POSTS,
-        DELETE_POSTS_PUBLISHED,
-        EDIT_POSTS,
-        EDIT_POSTS_PUBLISHED,
-        PUBLISH_POSTS,
-        EDIT_PRIVATE_POSTS,
-        SEE_PRIVATE_POSTS,
-        DELETE_PRIVATE_POSTS,
-        SEE_METADATA,
-        EDIT_METADATA,
-        DELETE_OTHERS_POSTS,
-        EDIT_OTHERS_POSTS,
-        CHANGE_OWNERSHIP_POST,
-        SEE_PAGES,
-        CREATE_PAGE,
-        EDIT_PAGE,
-        DELETE_PAGE,
-        PUBLISH_PAGES,
-        CHANGE_PATH_PAGES,
-        CHANGE_VISIBILITY_PAGES,
-        SEE_PAGE_COMPONENTS,
-        EDIT_PAGE_COMPONENTS,
-        DELETE_PAGE_COMPONENTS,
-        LIST_CATEGORIES,
-        CREATE_CATEGORY,
-        EDIT_CATEGORY,
-        DELETE_CATEGORY,
-        LIST_MENUS,
-        CREATE_MENU,
-        EDIT_MENU,
-        DELETE_MENU,
-        CREATE_MENU_ITEM,
-        EDIT_MENU_ITEM,
-        DELETE_MENU_ITEM,
-        CHOOSE_DEFAULT_PAGE,
-        CHOOSE_PATH_AND_FOLDER,
-        EDIT_SITE_INFORMATION,
-        CHANGE_THEME,
-        PUBLISH_SITE,
-        HIDE_SITE,
-        MANAGE_ROLES,
-        ATTACH_USERS_TO_ROLES,
-        MANAGE_ANALYTICS;
+        DELETE_POSTS(1),
+        DELETE_POSTS_PUBLISHED(1),
+        EDIT_POSTS(1),
+        EDIT_POSTS_PUBLISHED(1),
+        PUBLISH_POSTS(1),
+        EDIT_PRIVATE_POSTS(1),
+        SEE_PRIVATE_POSTS(1),
+        DELETE_PRIVATE_POSTS(1),
+        SEE_METADATA(1),
+        EDIT_METADATA(1),
+        DELETE_OTHERS_POSTS(1),
+        EDIT_OTHERS_POSTS(1),
+        CHANGE_OWNERSHIP_POST(1),
+        SEE_PAGES(1),
+        CREATE_PAGE(1),
+        EDIT_PAGE(1),
+        DELETE_PAGE(1),
+        PUBLISH_PAGES(1),
+        CHANGE_PATH_PAGES(1),
+        CHANGE_VISIBILITY_PAGES(1),
+        SEE_PAGE_COMPONENTS(1),
+        EDIT_PAGE_COMPONENTS(1),
+        DELETE_PAGE_COMPONENTS(1),
+        LIST_CATEGORIES(1),
+        CREATE_CATEGORY(1),
+        EDIT_CATEGORY(1),
+        DELETE_CATEGORY(1),
+        LIST_MENUS(1),
+        CREATE_MENU(1),
+        EDIT_MENU(1),
+        DELETE_MENU(1),
+        CREATE_MENU_ITEM(1),
+        EDIT_MENU_ITEM(1),
+        DELETE_MENU_ITEM(1),
+        CHOOSE_DEFAULT_PAGE(1),
+        CHOOSE_PATH_AND_FOLDER(1),
+        EDIT_SITE_INFORMATION(1),
+        CHANGE_THEME(1),
+        PUBLISH_SITE(1),
+        MANAGE_ROLES(1),
+        ATTACH_USERS_TO_ROLES(1),
+        MANAGE_ANALYTICS(1);
+        int order = 0;
+
+        Permission(int order){
+            this.order = order;
+        }
 
         public LocalizedString getLocalizedName() {
-            return new LocalizedString(Locale.getDefault(), name());
+            return BundleUtil.getLocalizedString("CmsPermissionResources", "label.permission.name." + name());
+        }
+
+        public LocalizedString getLocalizedDescription() {
+            return BundleUtil.getLocalizedString("CmsPermissionResources", "label.permission.description." + name());
         }
     }
 }

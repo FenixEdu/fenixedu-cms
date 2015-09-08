@@ -1,12 +1,11 @@
 package org.fenixedu.cms.domain;
 
 import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.commons.i18n.LocalizedString;
 
 public class Role extends Role_Base {
     
-    public Role(LocalizedString name, RoleTemplate template, Site site) {
-        setName(name);
+    public Role(RoleTemplate template, Site site) {
+        setName(template.getDescription());
         setRoleTemplate(template);
         setSite(site);
         setGroup(Group.nobody().toPersistentGroup());

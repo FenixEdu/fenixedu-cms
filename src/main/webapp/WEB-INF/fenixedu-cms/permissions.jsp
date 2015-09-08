@@ -24,7 +24,7 @@ ${portal.toolkit()}
 
 <div class="page-header">
     <h1>Permissions</h1>
-    <h2><a href="${pageContext.request.contextPath}/cms"><small>Manage global permissions</small></a></h2>
+    <h2><a href="${pageContext.request.contextPath}/cms"><small>Manage Roles</small></a></h2>
 </div>
 
 <p>
@@ -37,27 +37,39 @@ ${portal.toolkit()}
     <c:when test="${templates.size() == 0}">
         <div class="panel panel-default">
             <div class="panel-body">
-                <i>There are no templates for roles.</i>
+                <i>There are no roles.</i>
             </div>
         </div>
     </c:when>
 
     <c:otherwise>
-        <ul class="list-group">
+        <table class="table">
+            <thead>
+            <tr>
+                <th><spring:message code="page.manage.label.name"/></th>
+                <th>Sites</th>
+                <th><spring:message code="page.manage.label.operations"/></th>
+            </tr>
+            </thead>
+            <tbody>
             <c:forEach var="template" items="${templates}">
-                <li class="list-group-item">
-                    <h3><a href="${pageContext.request.contextPath}/cms/permissions/${template.externalId}/edit">${template.description.content}</a></h3>
-
-                    <span class="label label-primary">${template.numSites} Sites</span>
-
-                    <div class="btn-group pull-right">
-                        <a href="${pageContext.request.contextPath}/cms/permissions/${template.externalId}/edit" class="btn btn-icon btn-primary">
-                            <i class="glyphicon glyphicon-cog"></i>
-                        </a>
-                    </div>
-                </li>
+                <tr>
+                    <td>
+                        <h5><a href="${pageContext.request.contextPath}/cms/permissions/${template.externalId}/edit">${template.description.content}</a></h5>
+                    </td>
+                    <td>${template.numSites}</td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="${pageContext.request.contextPath}/cms/permissions/${template.externalId}/edit"
+                               class="btn btn-icon btn-default">
+                               <i class="glyphicon glyphicon-edit"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
             </c:forEach>
-        </ul>
+            </tbody>
+        </table>
     </c:otherwise>
 </c:choose>
 
@@ -69,29 +81,31 @@ ${portal.toolkit()}
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><spanclass="sr-only"></span></button>
                     <h4>Create</h4>
-                    <small>Create a new Role template that can be used by other sites</small>
+                    <small>Create a new Role that can be used by other sites</small>
                 </div>  
 
 
                 <div class="modal-body">
+
                     <div class="form-group" id="role-description">
                         <label class="col-sm-2 control-label">Description</label>
                         <div class="col-sm-10">
                             <input bennu-localized-string required-any name="description" placeholder="Enter a description for this role template.">
                         </div>
                     </div>
+                    <input type="text" name="permissions" id="permissions-json" class="hidden">
 
                     <c:forEach var="permission" items="${allPermissions}">
                         <div class="form-group permissions-inputs">
-                            <label class="col-sm-8 control-label">${permission.localizedName.content}</label>
-                            <div class="col-sm-4">
+                            <div class="col-sm-12">
                                 <div class="checkbox">
-                                    <input type="checkbox" data-permission-name="${permission.name()}"></div>
+                                    <input type="checkbox" data-permission-name="${permission.name()}" />
+                                    <label class="control-label">${permission.localizedName.content}</label>
                                 </div>
                             </div>
+                            <p class="help-block">${permission.localizedDescription.content}</p>
+                        </div>
                     </c:forEach>
-
-                    <input type="text" name="permissions" id="permissions-json" class="hidden">
 
                 </div>
 

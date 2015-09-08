@@ -9,29 +9,31 @@ ${portal.toolkit()}
 
 <p>
     <button type="button" data-toggle="modal" data-target="#edit-modal" class="btn btn-primary">
-        <i class="glyphicon glyphicon-edit"></i> Edit
+        <i class="glyphicon glyphicon-edit"></i> Associate Users
     </button>
 </p>
 
 <div class="row">
 	<div class="col-sm-8">
 		<c:choose>
-			<c:when test="${role.group.members.count() == 0}">
+			<c:when test="${roleTemplate.permissions.get().size() == 0}">
 			    <div class="panel panel-default">
 			        <div class="panel-body">
-			            <i>There are no users with this role.</i>
+			            <i>There are no permissions.</i>
 			        </div>
 			    </div>
 			</c:when>
 
-			<c:otherwise>
-			    <c:forEach var="user" items="${role.group.members.toArray()}">
-			        <li class="list-group-item">
-			            <h3>${user.name}</h3>
-			            <span class="label label-primary"> user</span>
-			        </li>
-			    </c:forEach>
-			</c:otherwise>
+      <c:otherwise>
+        <ul class="list-group">
+          <c:forEach var="permission" items="${role.roleTemplate.permissions.get()}">
+            <li class="list-group-item">
+              <h3>${permission.localizedName.content}</h3>
+              <p class="help-block">${permission.localizedDescription.content}</p>
+            </li>
+          </c:forEach>
+        </ul>
+      </c:otherwise>
 		</c:choose>
 	</div>
 
@@ -44,13 +46,6 @@ ${portal.toolkit()}
           <dt>Name</dt>
           <dd><span>${role.name.content}</span></dd>
 
-          <dt>Template</dt>
-          <dd>
-          	<a href="${pageContext.request.contextPath}/cms/permissions/${role.roleTemplate.externalId}/edit">
-          		${role.roleTemplate.description.content}
-        		</a>
-    		  </dd>
-
           <dt>Site</dt>
           <dd><a href="${role.site.editUrl}">${role.site.name.content}</a></dd>
       		
@@ -59,29 +54,7 @@ ${portal.toolkit()}
         </dl>
         </div>
     </div>
-
-    <div class="panel panel-primary">
-      <div class="panel-heading">Permissions</div>
-      <div class="panel-body">
-        <dl class="dl-horizontal">
-          <dt>Number of Permissions</dt>
-          <dd><c:out value="${role.roleTemplate.permissions.get().size()}"></c:out></dd>
-          <c:forEach var="permission" items="${role.roleTemplate.permissions.get()}">
-            <dt>${permission.localizedName.content}</dt>
-          </c:forEach>
-        </dl>
-      </div>
-    </div>
 	  
-    <div class="panel panel-danger">
-        <div class="panel-heading">Danger Zone</div>
-        <div class="panel-body">
-          <p class="help-block">Once you delete a role, there is no going back. Please be certain.</p>
-          <button data-toggle="modal" data-target="#delete-modal" class="btn btn-danger">Delete this role</button>
-        </div>
-      </div>
-
-	</div>
 </div>
 
 
@@ -96,14 +69,7 @@ ${portal.toolkit()}
                 <small>Change information about role '${role.name.content}'</small>
             </div>
             <div class="modal-body">
-               ${csrf.field()}
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">Name</label>
-                    <div class="col-sm-10">
-                        <input type="text" name="name" bennu-localized-string placeholder="Name of this role" value='${role.name.json()}'>
-                    </div>
-                </div>
-            
+               ${csrf.field()}           
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Members</label>
                     <div class="col-sm-10">
@@ -119,24 +85,5 @@ ${portal.toolkit()}
 
         </form>
 
-  </div>
-</div>
-
-<div class="modal fade" id="delete-modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Are you sure?</h4>
-      </div>
-      <div class="modal-body">
-        <p>You are about to delete the role '<c:out value="${role.name.content}" />'. There is no way to rollback this operation. Are you sure? </p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
-        <button type="button" onclick="$('#deleteForm').submit();" class="btn btn-danger">Yes</button>
-        <form action="${pageContext.request.contextPath}/cms/permissions/${roleTemplate.externalId}/${role.externalId}/delete" method="post" id="deleteForm">${csrf.field()}</form> 
-      </div>
-    </div>
   </div>
 </div>

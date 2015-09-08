@@ -41,7 +41,7 @@
     </form>
   </div>
   <div class="col-sm-4">
-      <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
+      <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}" autofocus>
   </div>
 </div>
 </p>
@@ -82,6 +82,7 @@
           <div class="btn-group pull-right">
             <a href="${i.fullUrl}" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-link"></i></a>
             <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-eye-close"></i></a>
+            <a href="${pageContext.request.contextPath}/cms/permissions/site/${i.slug}" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-eye-close"></i></a>
             <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-icon btn-primary"><i class="glyphicon glyphicon-cog"></i></a>
           </div>
         </li>
