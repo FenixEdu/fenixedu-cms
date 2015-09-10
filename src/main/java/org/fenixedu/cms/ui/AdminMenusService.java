@@ -5,18 +5,20 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.stereotype.Service;
-import pt.ist.fenixframework.Atomic;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import pt.ist.fenixframework.Atomic;
 
 import static java.util.Optional.ofNullable;
 
@@ -36,7 +38,8 @@ public class AdminMenusService {
 
 	JsonObject menuJson = new JsonObject();
 
-	menuJson.addProperty("title", Optional.ofNullable(menu.getName()).map(LocalizedString::getContent).orElse("---"));
+	menuJson.addProperty("title", Optional.ofNullable(menu.getName())
+            .map(LocalizedString::getContent).orElse(menu.getSite().getName().getContent()));
 	menuJson.add("name", menu.getName().json());
 	menuJson.addProperty("key", menu.getSlug());
 	menuJson.addProperty("root", true);
@@ -120,13 +123,13 @@ public class AdminMenusService {
 	}
 
 	switch (menuItemJson.get("use").getAsString()) {
-	case "page":
+	  case "page":
 	    setMenuItemPage(menuItem, menuItemJson);
 	    break;
-	case "url":
+	  case "url":
 	    setMenuItemUrl(menuItem, menuItemJson);
 	    break;
-	default:
+	  default:
 	    setMenuItemFolder(menuItem, menuItemJson);
 	    break;
 	}
@@ -148,7 +151,8 @@ public class AdminMenusService {
     }
 
     private void setMenuItemUrl(MenuItem menuItem, JsonObject menuItemJson) {
-	String newUrl = menuItemJson.get("url").getAsString();
+	String newUrl = Optional.ofNullable(menuItemJson.get("url"))
+	    .map(JsonElement::getAsString).orElse("#");
 	if(!newUrl.equals(menuItem.getUrl())) {
 	    menuItem.setFolder(false);
 	    menuItem.setPage(null);

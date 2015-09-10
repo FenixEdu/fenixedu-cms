@@ -37,6 +37,7 @@ class Site{
   boolean published;
   boolean embedded;
   public String analyticsCode;
+  public String analyticsAccountId;
   public String themeType;
 }
 

@@ -101,7 +101,7 @@ angular.module('fancyTreeDirective', []).directive('fancyTree', function($timeou
                     node.setActive(true);                    
                 }
             } else {
-                if(tree.getRootNode() && tree.getRootNode().children && tree.getRootNode().children.length) {
+                if(tree && typeof(tree.getRootNode)=="function" && tree.getRootNode() && tree.getRootNode().children && tree.getRootNode().children.length) {
                     var node = tree.getRootNode().children[0];
                     node.setActive(true);
                 }

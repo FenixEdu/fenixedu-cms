@@ -20,6 +20,7 @@ package org.fenixedu.cms.ui;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Site;
@@ -27,11 +28,16 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
-import pt.ist.fenixframework.FenixFramework;
 
 import java.util.Comparator;
+
+import pt.ist.fenixframework.FenixFramework;
 
 import static java.util.stream.Collectors.toList;
 
@@ -96,8 +102,10 @@ public class AdminMenu {
     @RequestMapping(value = "{slugSite}/{slugMenu}/edit", method = RequestMethod.POST, consumes = JSON, produces = JSON)
     public @ResponseBody String editMenu(@PathVariable String slugSite, @PathVariable String slugMenu, HttpEntity<String> http) {
         Site site = Site.fromSlug(slugSite);
-        AdminSites.canEdit(site);
-        service.processMenuChanges(site.menuForSlug(slugMenu), JSON_PARSER.parse(http.getBody()).getAsJsonObject());
+        FenixFramework.atomic(() -> {
+            service.processMenuChanges(site.menuForSlug(slugMenu), JSON_PARSER.parse(http.getBody()).getAsJsonObject());
+            AdminSites.canEdit(site);
+        });
         return menuData(slugSite, slugMenu);
     }
 

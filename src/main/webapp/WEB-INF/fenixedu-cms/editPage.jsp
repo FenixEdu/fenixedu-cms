@@ -28,11 +28,9 @@
 ${portal.angularToolkit()}
 
 <script src="${pageContext.request.contextPath}/bennu-admin/libs/fancytree/jquery-ui.min.js"></script>
-<link href="${pageContext.request.contextPath}/webjars/fenixedu-canvas/fancytree/skin-fenixedu/ui.fancytree.css" rel="stylesheet" type="text/css">
-<script src="${pageContext.request.contextPath}/webjars/fenixedu-canvas/fancytree/js/jquery.fancytree-all.js" type="text/javascript"></script>
+<link href="${pageContext.request.contextPath}/static/css/skin-awesome/ui.fancytree.css" rel="stylesheet" type="text/css">
+<script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/jquery.js" type="text/javascript"></script>
-<script src="${pageContext.request.contextPath}/static/js/fancytree-directive.js" type="text/javascript"></script>
-
 <script src="${pageContext.request.contextPath}/static/js/fancytree-directive.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload-shim.js" type="text/javascript" charset="utf-8"></script>
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload.js" type="text/javascript" charset="utf-8"></script>
@@ -70,7 +68,7 @@ ${portal.angularToolkit()}
         
         <!-- BODY -->
         <div class="form-group">
-            <textarea bennu-html-editor="post.body" bennu-localized-html-editor on-image-added="onImageAdded"></textarea>
+            <textarea bennu-localized-html-editor="post.body" on-image-added="onImageAdded"></textarea>
         </div>
 
         <!-- PUBLISHED -->
@@ -327,7 +325,7 @@ ${portal.angularToolkit()}
         }])
         .controller('PostCtrl', ['$scope', '$http','Upload', function($scope, $http, Upload){
             function init(data) {
-                var treeFind = function(item, filter) {
+                function treeFind(item, filter) {
                     if(filter(item)) {
                         return item;
                     } else if(item.children && item.children.length) {
@@ -337,27 +335,36 @@ ${portal.angularToolkit()}
                         }
                     }
                 }
-                var initMenus = function() {
-                    for(var i=0; i<$scope.menus.length; ++i) {
-                        var isMenuItemPage = function(menuItem){ return menuItem && menuItem.page && menuItem.page == $scope.post.slug; };
-                        var found = treeFind($scope.menus[i], isMenuItemPage);
-                        if(found) { 
-                            $scope.selectedMenuItem = found;
-                            $scope.selectedMenuItem.extraClasses = "pageItem";
+                function initMenus() {
+                    function addClassToSelectedMenuItem() {
+                        for(var i=0; i<$scope.menus.length; ++i) {
+                            var isMenuItemPage = function(menuItem){ return menuItem && menuItem.page && menuItem.page == $scope.post.slug; };
+                            var found = treeFind($scope.menus[i], isMenuItemPage);
+                            if(found) { 
+                                $scope.selectedMenuItem = found;
+                                $scope.selectedMenuItem.extraClasses = "pageItem";
+                            }
                         }
                     }
-
-                    if(!$scope.selectedMenuItem && $scope.menus && $scope.menus.length && $scope.menus[0].children) {
-                        if(!$scope.menus[0].children[0].children) {
-                            $scope.menus[0].children[0].children = [];
+                    function createNewMenuItem() {
+                        var firstMenu = $scope.menus[0];
+                        if(!firstMenu.children) {
+                            firstMenu.children = [];
                         }
-                        $scope.menus[0].children[0].children.push({
+                        firstMenu.children.push({
                             name: $scope.post.name,
                             title: Bennu.localizedString.getContent($scope.post.name),
+                            use: 'page',
                             page: $scope.post.slug,
                             extraClasses: "pageItem"
                         });
                     }
+
+                    addClassToSelectedMenuItem();
+                    if(!$scope.selectedMenuItem && $scope.menus && $scope.menus.length) {
+                        createNewMenuItem();
+                    }
+
                 };
                 $scope.menus = data.menus;
                 $scope.post = data.post;

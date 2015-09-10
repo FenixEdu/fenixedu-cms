@@ -28,8 +28,9 @@
 ${portal.angularToolkit()}
 
 <script src="${pageContext.request.contextPath}/bennu-admin/libs/fancytree/jquery-ui.min.js"></script>
-<link href="${pageContext.request.contextPath}/webjars/fenixedu-canvas/fancytree/skin-fenixedu/ui.fancytree.css" rel="stylesheet" type="text/css">
-<script src="${pageContext.request.contextPath}/webjars/fenixedu-canvas/fancytree/js/jquery.fancytree-all.js" type="text/javascript"></script>
+<link href="${pageContext.request.contextPath}/static/css/skin-awesome/ui.fancytree.css" rel="stylesheet" type="text/css">
+<script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.js" type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/static/jquery.js" type="text/javascript"></script>
 
 <script src="${pageContext.request.contextPath}/static/js/fancytree-directive.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload-shim.js" type="text/javascript" charset="utf-8"></script>
@@ -69,7 +70,7 @@ ${portal.angularToolkit()}
 		
 		<!-- BODY -->
 	    <div class="form-group">
-    		<textarea bennu-html-editor="post.body" bennu-localized-html-editor on-image-added="onImageAdded"></textarea>
+    		<textarea bennu-localized-html-editor="post.body" on-image-added="onImageAdded"></textarea>
 	    </div>
 
 		<!-- PUBLISHED -->

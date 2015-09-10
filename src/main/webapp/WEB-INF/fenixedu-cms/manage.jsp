@@ -80,10 +80,9 @@
           </c:if>
 
           <div class="btn-group pull-right">
-            <a href="${i.fullUrl}" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-link"></i></a>
-            <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-eye-close"></i></a>
+            <a href="${i.fullUrl}" class="btn btn-icon btn-default ${i.published ? '' : 'disabled'}"><i class="glyphicon glyphicon-link"></i></a>
             <a href="${pageContext.request.contextPath}/cms/permissions/site/${i.slug}" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-eye-close"></i></a>
-            <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-icon btn-primary"><i class="glyphicon glyphicon-cog"></i></a>
+            <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/edit" class="btn btn-icon btn-primary"><i class="glyphicon glyphicon-cog"></i></a>
           </div>
         </li>
       </c:forEach>
@@ -108,92 +107,41 @@
 
 <div class="modal fade" id="sites-settings">
   <div class="modal-dialog modal-lg">
-  <form method="post" enctype="multipart/form-data" action="/cms/sites/cmsSettings">
-    ${csrf.field()}
-    <div class="modal-content">
-      <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
-          <h3 class="modal-title">CMS Settings</h3>
-          <small>Global Settings for your sites</small>
-      </div>
-      <div class="modal-body">
-        <div role="tabpanel">
+    <form method="post" action="${pageContext.request.contextPath}/cms/sites/cmsSettings">
+      ${csrf.field()}
+      <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
+            <h3 class="modal-title">CMS Settings</h3>
+            <small>Global Settings for your sites</small>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+              <label class="col-sm-3 control-label">Default Site</label>
 
-  <!-- Nav tabs -->
-  <p>
-    <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" class="active"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
-      <li role="presentation"><a href="#external" aria-controls="external" role="tab" data-toggle="tab">External Applications</a></li>
-    </ul>
-  </p>
-  <!-- Tab panes -->
-  <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active form-horizontal" id="general">
-      <div class="form-group">
-          <label class="col-sm-3 control-label">Default Site</label>
-
-          <div class="col-sm-9">
-              <select class="form-control" name="slug">
-                  <option value="**null**">-</option>
-                  <c:forEach var="i" items="${sites}">
-                      <c:if test="${defaultSite == i}">
-                        <option selected="selected=" value="${i.slug}">${i.name.content}</option>
-                      </c:if>
-
-                      <c:if test="${defaultSite != i}">
-                        <option value="${i.slug}">${i.name.content}</option>
-                      </c:if>
-                  </c:forEach>
-              </select>
-              <p class="help-block">The Default Site is the site that is used when you visit the root of the server.</p>
+              <div class="col-sm-9">
+                  <select class="form-control" name="slug">
+                      <option value="**null**">-</option>
+                      <c:forEach var="i" items="${sites}">
+                          <c:if test="${i.isDefault()}">
+                            <option ${i.isDefault() ? 'selected' : ''}  value="${i.slug}">${i.name.content}</option>
+                          </c:if>
+                      </c:forEach>
+                  </select>
+                  <p class="help-block">The Default Site is the site that is used when you visit the root of the server.</p>
+              </div>
           </div>
-      </div>
-    </div>
-    <div role="tabpanel" class="tab-pane form-horizontal" id="external">
-    <h4>Google</h4>
-    <p class="help-block">To use <a href="http://www.google.com/analytics/">Analytics</a>, <a href="https://plus.google.com">Plus</a>, <a href="http://maps.google.com">Maps</a> and other integrationss from Google you need to supply Google API Credentials. To create and manage api credentials from google, use the <a href="https://console.developers.google.com">Google Developer Console</a>. Use this settings to create a new project:</p>
-
-      <div class="form-group">
-        <label class="col-sm-3 control-label" for="">Authorized JavaScript origins</label>
-         <div class="col-sm-9">
-            ${googleAuthJSOrigin}
         </div>
-      </div>
-
-      <div class="form-group">
-        <label class="col-sm-3 control-label" for="">Authorized redirect URIs</label>
-         <div class="col-sm-9">
-            ${googleRedirectUrl}
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
         </div>
-      </div>
-    
-      <div class="form-group">
-        <label class="col-sm-3 control-label" for="">Client Id</label>
-         <div class="col-sm-9">
-            <input type="text" class="form-control" id="" name="googleClientId" placeholder="Client Id..." value="${google.clientId}">
-        </div>
-      </div>
-    
-      <div class="form-group">
-        <label class="col-sm-3 control-label" for="">Client Secret</label>
-         <div class="col-sm-9">
-            <input type="password" class="form-control" id="" name="googleClientSecret" placeholder="Client Secret..." value="${google.clientSecret}">
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Save changes</button>
-      </div>
       </form>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+
+    </div>
+
+  </div>
+</div>
 
 
 <script type="application/javascript">
