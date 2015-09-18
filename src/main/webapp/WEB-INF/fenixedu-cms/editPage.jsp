@@ -46,7 +46,7 @@ ${portal.angularToolkit()}
                 <button ng-class="{disabled: !post.name}" type="button" class="btn btn-primary" ng-click="update()">
                     <span class="glyphicon glyphicon-floppy-disk"></span> Update
                 </button>
-                <a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/${page.slug}/versions" class="btn btn-default">
+                <a href="${pageContext.request.contextPath}/cms/versions/${site.slug}/${post.slug}" class="btn btn-default">
                     <span class="glyphicon glyphicon-time"></span> Versions
                 </a>
                 <button ng-class="{disabled: !post.metadata}" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">

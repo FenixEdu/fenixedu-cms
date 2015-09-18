@@ -23,20 +23,27 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.*;
+import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.PostFile;
+import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
-import pt.ist.fenixframework.FenixFramework;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
+import pt.ist.fenixframework.FenixFramework;
+
 import static org.fenixedu.cms.ui.SearchUtils.searchPosts;
 
 @BennuSpringController(AdminSites.class)
@@ -144,77 +151,5 @@ public class AdminPosts {
         PostFile postFile = service.createFile(p, name, embedded, p.getCanViewGroup(), file);
         return service.serializePostFile(postFile).toString();
     }
-
-    @RequestMapping(value = "{slugSite}/{slugPost}/versions", method = RequestMethod.GET)
-    public String versions(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPost") String slugPost) {
-        Site s = Site.fromSlug(slugSite);
-
-        AdminSites.canEdit(s);
-
-        Post p = s.postForSlug(slugPost);
-        model.addAttribute("post", p);
-        model.addAttribute("site", s);
-        return "fenixedu-cms/versions";
-    }
-
-    @RequestMapping(value = "{slugSite}/{slugPost}/versionData", method = RequestMethod.POST, produces = "application/json")
-    @ResponseBody
-    public String versionData(@PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPost") String slugPost, @RequestParam(required = false) PostContentRevision revision) {
-        Site s = Site.fromSlug(slugSite);
-
-        AdminSites.canEdit(s);
-
-        Post p = s.postForSlug(slugPost);
-
-        if (revision == null) {
-            revision = p.getLatestRevision();
-        }
-
-        if (revision.getPost() != p) {
-            throw new RuntimeException("Invalid Revision");
-        }
-
-        JsonObject json = new JsonObject();
-
-        json.add("content", revision.getBody().json());
-        json.addProperty("modifiedAt", revision.getRevisionDate().toString());
-        json.addProperty("user", revision.getCreatedBy().getUsername());
-        json.addProperty("userName", revision.getCreatedBy().getProfile().getDisplayName());
-        json.addProperty("id", revision.getExternalId());
-        json.addProperty("next", ofNullable(revision.getNext()).map(x -> x.getExternalId()).orElse(null));
-        json.addProperty("previous", ofNullable(revision.getPrevious()).map(x -> x.getExternalId()).orElse(null));
-
-        if (revision.getPrevious() != null) {
-            json.add("previousContent", revision.getPrevious().getBody().json());
-        }
-
-        return json.toString();
-    }
-
-    @RequestMapping(value = "{slugSite}/{slugPost}/revertTo", method = RequestMethod.POST)
-    public RedirectView revertTo(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPost") String slugPost, @RequestParam PostContentRevision revision) {
-        Site s = Site.fromSlug(slugSite);
-
-        AdminSites.canEdit(s);
-
-        Post p = s.postForSlug(slugPost);
-
-        if (revision.getPost() != p) {
-            throw new RuntimeException("Invalid Revision");
-        }
-
-        FenixFramework.atomic(()-> {
-            p.setBody(revision.getBody());
-        });
-
-        // SiteActivity.revertedToRevision
-
-        return new RedirectView("/cms/posts/" + s.getSlug() + "/" + p.getSlug() + "/edit", true);
-    }
-
-
 
 }

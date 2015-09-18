@@ -26,9 +26,27 @@
 
 ${portal.toolkit()}
 
+<c:set var="isPageVersion" value="${page != null}" />
+<c:set var="backUrl" value="${page != null ? page.getEditUrl() : post != null ? post.getEditUrl() : ''}" />
+
 <div class="page-header">
-    <h1>Sites</h1>
-    <h2><small>${site.name.content}</small></h2>
+    <h1>${site.name.content}</h1>
+
+    <h2><small><a href="${backUrl}">Edit - ${post.name.content}</small></a></h2>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <a href="${backUrl}" class="btn btn-default">
+                <span class="glyphicon glyphicon-edit"></span> Edit
+            </a>
+            <a href="#" class="btn btn-default disabled">
+                <span class="glyphicon glyphicon-time"></span> Versions
+            </a>
+            <a ng-class="{disabled: !post.active || !post.address}" target="_blank" href="{{ post.address }}" class="btn btn-default">
+                <span class="glyphicon glyphicon-link"></span> Link
+            </a>
+        </div>
+    </div>
 </div>
 
 <div class="row">
@@ -55,10 +73,8 @@ ${portal.toolkit()}
     <div class="col-sm-6">
         <div class="pull-right">
             <button class="btn btn-default sidebyside">Side by Side</button>
-            <button class="btn btn-default revisionToRevert">Revert this revision</button>
+            <button class="btn btn-default revisionToRevert">Revert to this revision</button>
         </div>
-    </div>
-    </div>
     </div>
 </div>
 
@@ -83,6 +99,35 @@ ${portal.toolkit()}
     </div>
 </div>
 
+<div class="modal fade" id="revert-modal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form action="${pageContext.request.contextPath}/cms/versions/${site.slug}/${post.slug}/revertTo" id="revertForm" method="post">
+                ${csrf.field()}
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h3 class="modal-title">Revert Content</h3>
+                    <small>Revert to previous version of '${post.name.content}'</small>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="revision" id="revisionToRevert">
+                    <div class="form-group">
+                        <p>Are you sure you want to revert the content of this post ?</p>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="reset" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Revert</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
 <style>
     .diff-removed{
         background-color: #F7CBCC;
@@ -104,12 +149,14 @@ ${portal.toolkit()}
         }else{
             var params = {revision:id}
         }
-        
-        $.post(Bennu.contextPath + "/cms/posts/${site.slug}/${post.slug}/versionData",params).done(function(e){
-            
-            var content = e.content['en-GB'];
-            var previousContent = e.previousContent['en-GB'];
-   
+
+        $.post(Bennu.contextPath + "/cms/versions/${site.slug}/${post.slug}/data", params).done(function(e){
+            var content = Bennu.localizedString.getContent(e.content);
+            var previousContent = "";;
+            if (e.previousContent){
+              var previousContent =  Bennu.localizedString.getContent(e.previousContent);
+            }
+
             var diff = JsDiff.diffWordsWithSpace(previousContent, content);
             var x = ""
             var before = "";
@@ -117,21 +164,23 @@ ${portal.toolkit()}
             diff.forEach(function(part){
                 // green for additions, red for deletions
                 // grey for common parts
-                var val = part.value.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
-                    return '&#'+i.charCodeAt(0)+';';
-                }).replace(/\n/gim,function(i){
+                if(part && part.value) {
+                    var val = part.value.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
+                        return '&#'+i.charCodeAt(0)+';';
+                    }).replace(/\n/gim,function(i){
 
-                });
-                if (part.added){
-                    x += "<span class='diff-added'>" + val + "</span>"
-                    after += "<span class='diff-added'>" + val + "</span>";
-                }else if(part.removed){
-                    x += "<span class='diff-removed'>" + val + "</span>"
-                    before += "<span class='diff-removed'>" + val + "</span>";
-                }else{
-                    x += val;
-                    after += val
-                    before += val
+                    });
+                    if (part.added){
+                        x += "<span class='diff-added'>" + val + "</span>"
+                        after += "<span class='diff-added'>" + val + "</span>";
+                    }else if(part.removed){
+                        x += "<span class='diff-removed'>" + val + "</span>"
+                        before += "<span class='diff-removed'>" + val + "</span>";
+                    }else{
+                        x += val;
+                        after += val
+                        before += val
+                    }
                 }
             });
 
@@ -178,13 +227,10 @@ ${portal.toolkit()}
     $(".revisionToRevert").on("click",function(){
         var form = $("#revertForm");
         $("#revisionToRevert", form).val($("#revDate").data("current"));
-        form.submit();
+        $('#revert-modal').modal();
     });
     loadRevision();
-</script>
 
-<form action="revertTo" id="revertForm" method="post">
-    ${csrf.field()}
-    <input type="hidden" name="revision" id="revisionToRevert">
-</form>
+    $(".sidebyside").trigger("click");
+</script>
 

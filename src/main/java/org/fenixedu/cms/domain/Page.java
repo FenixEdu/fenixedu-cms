@@ -31,12 +31,13 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-import pt.ist.fenixframework.Atomic;
 
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import pt.ist.fenixframework.Atomic;
 
 import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
@@ -239,9 +240,9 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
 
     public String getEditUrl() {
         if(isStaticPage()) {
-            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/advanced/" + getSite().getSlug() + "/" + getSlug() + "/edit";
+            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/" + getSite().getSlug() + "/" + getSlug() + "/edit";
         } else {
-            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/" + getSite().getSlug() + "/" + getSlug() + "/edit"; 
+            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/advanced/" + getSite().getSlug() + "/" + getSlug() + "/edit";
         }
     }
 
