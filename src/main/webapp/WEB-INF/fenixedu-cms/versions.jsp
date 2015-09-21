@@ -27,7 +27,8 @@
 ${portal.toolkit()}
 
 <c:set var="isPageVersion" value="${page != null}" />
-<c:set var="backUrl" value="${page != null ? page.getEditUrl() : post != null ? post.getEditUrl() : ''}" />
+<c:set var="backUrl" value="${page != null ? page.getEditUrl() : post != null ? post.getEditUrl() : '#'}" />
+<c:set var="previewUrl" value="${page != null ? page.getAddress() : post != null ? post.getAddress() : '#'}" />
 
 <div class="page-header">
     <h1>${site.name.content}</h1>
@@ -36,13 +37,19 @@ ${portal.toolkit()}
 
     <div class="row">
         <div class="col-sm-12">
+            <button class="btn btn-primary revisionToRevert">
+                <span class="glyphicon glyphicon-floppy-disk"></span> Revert
+            </button>
             <a href="${backUrl}" class="btn btn-default">
                 <span class="glyphicon glyphicon-edit"></span> Edit
             </a>
             <a href="#" class="btn btn-default disabled">
                 <span class="glyphicon glyphicon-time"></span> Versions
             </a>
-            <a ng-class="{disabled: !post.active || !post.address}" target="_blank" href="{{ post.address }}" class="btn btn-default">
+            <button type="button" class="btn btn-default disabled">
+                <span class="glyphicon glyphicon-cog"></span> Metadata
+            </button>
+            <a target="_blank" href="${previewUrl}" class="btn btn-default disabled">
                 <span class="glyphicon glyphicon-link"></span> Link
             </a>
         </div>
@@ -73,7 +80,6 @@ ${portal.toolkit()}
     <div class="col-sm-6">
         <div class="pull-right">
             <button class="btn btn-default sidebyside">Side by Side</button>
-            <button class="btn btn-default revisionToRevert">Revert to this revision</button>
         </div>
     </div>
 </div>

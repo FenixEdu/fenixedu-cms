@@ -1,5 +1,19 @@
 package org.fenixedu.cms.api.resource;
 
+import com.google.common.io.ByteStreams;
+import com.google.gson.JsonElement;
+
+import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.core.rest.BennuRestResource;
+import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.io.domain.GroupBasedFile;
+import org.fenixedu.cms.api.json.PostAdapter;
+import org.fenixedu.cms.api.json.PostFileAdapter;
+import org.fenixedu.cms.api.json.PostRevisionAdapter;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
+import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.PostFile;
+
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -17,20 +31,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.core.rest.BennuRestResource;
-import org.fenixedu.bennu.io.domain.GroupBasedFile;
-import org.fenixedu.cms.api.json.PostAdapter;
-import org.fenixedu.cms.api.json.PostFileAdapter;
-import org.fenixedu.cms.api.json.PostRevisionAdapter;
-import org.fenixedu.cms.domain.Post;
-import org.fenixedu.cms.domain.PostFile;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-import com.google.common.io.ByteStreams;
-import com.google.gson.JsonElement;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 @Path("/cms/posts")
 public class PostResource extends BennuRestResource {
@@ -48,6 +52,13 @@ public class PostResource extends BennuRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
     public Response deletePost(@PathParam("oid") Post post) {
+        ensureCanDoThis(post.getSite(), Permission.DELETE_POSTS);
+        if(post.isVisible()) {
+            ensureCanDoThis(post.getSite(), Permission.DELETE_POSTS_PUBLISHED);
+        }
+        if(!Authenticate.getUser().equals(post.getCreatedBy())) {
+            ensureCanDoThis(post.getSite(), Permission.DELETE_OTHERS_POSTS);
+        }
         post.delete();
         return ok();
     }

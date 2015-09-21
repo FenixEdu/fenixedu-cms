@@ -83,13 +83,16 @@ public class BlogTemplate implements SiteTemplate {
 
     private void makePosts(Site site) {
         Post post = new Post(site);
+        post.setActive(true);
         post.addCategories(site.categoryForSlug("welcome-posts"));
         post.setName(new LocalizedString(I18N.getLocale(), "Welcome to FenixEdu CMS"));
-        post.setBody(new LocalizedString(I18N.getLocale(), "This is a simple blog that was generated for you, so "
-                + "you can start understanding how the CMS works. Access to admin space to alter "
-                + "stuff around or to create new posts."));
+        post.setBody(new LocalizedString(I18N.getLocale(),
+                                         "This is a simple blog that was generated for you, so "
+                                         + "you can start understanding how the CMS works. Access to admin space to alter "
+                                         + "stuff around or to create new posts."));
         SiteActivity.createdPost(post, Authenticate.getUser());
         post = new Post(site);
+        post.setActive(true);
         post.addCategories(site.categoryForSlug("random-text"));
         post.setName(new LocalizedString(I18N.getLocale(), "This is a post"));
         post.setBody(new LocalizedString(I18N.getLocale(), "Lorem ipsum dolor sit amet, consectetur adipiscing "
@@ -100,6 +103,7 @@ public class BlogTemplate implements SiteTemplate {
                 + "lacus nisl. Aliquam erat volutpat."));
         SiteActivity.createdPost(post, Authenticate.getUser());
         post = new Post(site);
+        post.setActive(true);
         post.addCategories(site.categoryForSlug("random-text"));
         post.setName(new LocalizedString(I18N.getLocale(), "This is a another post"));
         post.setBody(new LocalizedString(I18N.getLocale(), "Curabitur quis erat gravida, rhoncus leo a, vehicula mi."
@@ -112,6 +116,7 @@ public class BlogTemplate implements SiteTemplate {
                 + "accumsan auctor pulvinar."));
         SiteActivity.createdPost(post, Authenticate.getUser());
         about = new Post(site);
+        post.setActive(true);
         about.setName(new LocalizedString(I18N.getLocale(), "About " + site.getCreatedBy().getUsername()));
         about.setBody(new LocalizedString(I18N.getLocale(), "This is a simple page show how to create a page about you."));
         SiteActivity.createdPost(post, Authenticate.getUser());
@@ -119,6 +124,7 @@ public class BlogTemplate implements SiteTemplate {
 
     private Page makeHomepage(Site site) {
         Page page = new Page(site, new LocalizedString(I18N.getLocale(), "Homepage"));
+        page.setPublished(true);
         page.addComponents(Component.forType(ListPosts.class));
         page.setTemplate(site.getTheme().templateForType("posts"));
         return page;
@@ -126,6 +132,7 @@ public class BlogTemplate implements SiteTemplate {
 
     private Page makeAboutPage(Site site) {
         Page page = new Page(site, new LocalizedString(I18N.getLocale(), "About"));
+        page.setPublished(true);
         StaticPost components = new StaticPost(about);
         page.addComponents(components);
         page.setTemplate(site.getTheme().templateForType("view"));
@@ -134,6 +141,7 @@ public class BlogTemplate implements SiteTemplate {
 
     private Page makePostPage(Site site) {
         Page page = new Page(site, new LocalizedString(I18N.getLocale(), "View"));
+        page.setPublished(true);
         page.addComponents(Component.forType(ViewPost.class));
         page.setTemplate(site.getTheme().templateForType("view"));
         return page;
@@ -141,6 +149,7 @@ public class BlogTemplate implements SiteTemplate {
 
     private Page makeCategories(Site site) {
         Page page = new Page(site, new LocalizedString(I18N.getLocale(), "Categories"));
+        page.setPublished(true);
         page.addComponents(Component.forType(ListOfCategories.class));
         page.setTemplate(site.getTheme().templateForType("categories"));
         return page;
@@ -148,6 +157,7 @@ public class BlogTemplate implements SiteTemplate {
 
     private Page makeCategoryPage(Site site) {
         Page page = new Page(site, new LocalizedString(I18N.getLocale(), "Category"));
+        page.setPublished(true);
         page.addComponents(new ListCategoryPosts(site.categoryForSlug("random-text")));
         page.setTemplate(site.getTheme().templateForType("category"));
         return page;

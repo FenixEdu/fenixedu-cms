@@ -334,7 +334,7 @@ public class AdminSites {
 
 
         Optional<GoogleUser> googleUser = GoogleAPI.getInstance().getAuthenticatedUser(Authenticate.getUser());
-        if(Strings.isNullOrEmpty(analyticsCode) || Strings.isNullOrEmpty(accountId) && googleUser.isPresent()) {
+        if((Strings.isNullOrEmpty(analyticsCode) || Strings.isNullOrEmpty(accountId)) && googleUser.isPresent()) {
             googleUser.get().delete();
         }
 

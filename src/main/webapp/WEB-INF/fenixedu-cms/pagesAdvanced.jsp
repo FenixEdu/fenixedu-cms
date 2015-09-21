@@ -57,7 +57,7 @@ ${portal.toolkit()}
 			<c:forEach var="page" items="${pages}">
 				<tr>
 					<td>
-						<h5><a target="_blank" href="${pageContext.request.contextPath}/cms/pages/advanced/${page.site.slug}/${page.slug}/edit">${page.name.content}</a>
+						<h5><a href="${pageContext.request.contextPath}/cms/pages/advanced/${page.site.slug}/${page.slug}/edit">${page.name.content}</a>
 							<c:if test="${page.site.initialPage == page}">
 								<span class="label label-success"><spring:message code="site.manage.label.default"/></span>
 							</c:if>

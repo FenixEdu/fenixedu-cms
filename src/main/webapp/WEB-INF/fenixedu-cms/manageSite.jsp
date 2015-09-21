@@ -20,8 +20,7 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="perms" %>
-
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissons" %>
 
 <c:set var="locale" value="<%= org.fenixedu.commons.i18n.I18N.getLocale() %>"/>
 

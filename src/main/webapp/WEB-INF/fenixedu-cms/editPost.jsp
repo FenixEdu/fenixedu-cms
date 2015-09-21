@@ -47,6 +47,9 @@ ${portal.angularToolkit()}
 				<button ng-class="{disabled: !post.name}" type="button" class="btn btn-primary" ng-click="update()">
 					<span class="glyphicon glyphicon-floppy-disk"></span> Update
 				</button>
+	            <button type="button" class="btn btn-default disabled">
+            		<span class="glyphicon glyphicon-edit"></span> Edit
+			    </button>
 				<a href="${pageContext.request.contextPath}/cms/versions/${site.slug}/${post.slug}" class="btn btn-default">
 					<span class="glyphicon glyphicon-time"></span> Versions
 				</a>
@@ -280,7 +283,13 @@ ${portal.angularToolkit()}
 					<div class="clearfix">
 						<div class="form-group">
 							<div class="col-sm-12">
-								<div json-data="post.metadata"></div>
+								<p>
+									<a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/metadata" class="btn btn-default">
+	                					<span class="glyphicon glyphicon-edit"></span> Edit
+	            					</a>
+            					</p>
+								<pre ng-show="{{Object.keys(post.metadata).length}}">{{ post.metadata }}</pre>
+								<p ng-hide="{{Object.keys(post.metadata).length}}">There is no metadata for this post.</p>
 							</div>
 						</div>
 					</div>

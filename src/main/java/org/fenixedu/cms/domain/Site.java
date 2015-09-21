@@ -383,7 +383,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         getCategoriesSet().stream().forEach(Category::delete);
         getMenusSet().stream().forEach(org.fenixedu.cms.domain.Menu::delete);
         getPagesSet().stream().forEach(org.fenixedu.cms.domain.Page::delete);
-
+        getRolesSet().stream().forEach(Role::delete);
         this.deleteDomainObject();
     }
 

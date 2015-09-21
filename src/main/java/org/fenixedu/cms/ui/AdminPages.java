@@ -20,23 +20,32 @@ package org.fenixedu.cms.ui;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.PostMetadata;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
-import pt.ist.fenixframework.FenixFramework;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Optional;
+
+import pt.ist.fenixframework.FenixFramework;
 
 import static java.util.stream.Collectors.toList;
 import static org.fenixedu.cms.ui.SearchUtils.searchPages;
@@ -120,6 +129,34 @@ public class AdminPages {
             page.delete();
         });
         return allPagesRedirect(s);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPage}/metadata", method = RequestMethod.GET)
+    public String viewEditMetadata(Model model, @PathVariable String slugSite, @PathVariable String slugPage) {
+        Site s = Site.fromSlug(slugSite);
+        AdminSites.canEdit(s);
+        Page page  = s.pageForSlug(slugPage);
+        Post post = page.getStaticPost().get();
+        model.addAttribute("site", s);
+        model.addAttribute("page", page);
+        model.addAttribute("post", post);
+        model.addAttribute("metadata", Optional.ofNullable(post.getMetadata()).map(PostMetadata::json).map(
+            JsonElement::toString).orElseGet(()->new JsonObject().toString()));
+        return "fenixedu-cms/editMetadata";
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPage}/metadata", method = RequestMethod.POST)
+    public RedirectView editMetadata(@PathVariable String slugSite,
+                                         @PathVariable String slugPage,
+                                         @RequestParam String metadata) {
+        Site s = Site.fromSlug(slugSite);
+        Page page = s.pageForSlug(slugPage);
+        FenixFramework.atomic(()-> {
+            AdminSites.canEdit(s);
+            page.getStaticPost().ifPresent(
+                post -> post.setMetadata(PostMetadata.internalize(metadata)));
+        });
+        return new RedirectView("/cms/pages/" + s.getSlug() + "/" + page.getSlug() + "/metadata", true);
     }
 
     private Collection<Page> getStaticPages(Site site) {

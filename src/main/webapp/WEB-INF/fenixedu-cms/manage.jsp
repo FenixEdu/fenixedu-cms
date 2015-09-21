@@ -123,9 +123,7 @@
                   <select class="form-control" name="slug">
                       <option value="**null**">-</option>
                       <c:forEach var="i" items="${sites}">
-                          <c:if test="${i.isDefault()}">
-                            <option ${i.isDefault() ? 'selected' : ''}  value="${i.slug}">${i.name.content}</option>
-                          </c:if>
+                         <option ${i.isDefault() ? 'selected' : ''}  value="${i.slug}">${i.name.content}</option>
                       </c:forEach>
                   </select>
                   <p class="help-block">The Default Site is the site that is used when you visit the root of the server.</p>
