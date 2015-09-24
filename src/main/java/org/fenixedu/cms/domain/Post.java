@@ -26,6 +26,7 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.cms.domain.wraps.UserWrap;
@@ -445,5 +446,17 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
     public Iterable<PostContentRevision> getRevisions() {
         return () -> getRevisionsIterator();
+    }
+
+    public boolean canDelete() {
+        Set<Permission> required = new HashSet<>();
+        required.add(Permission.DELETE_POSTS);
+        if(!Authenticate.getUser().equals(getCreatedBy())) {
+            required.add(Permission.DELETE_POSTS);
+        }
+        if(isVisible()) {
+            required.add(Permission.DELETE_POSTS_PUBLISHED);
+        }
+        return PermissionEvaluation.canDoThis(getSite(), required.toArray(new Permission[]{}));
     }
 }

@@ -121,14 +121,9 @@ ${portal.toolkit()}
 
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                                     <li><a href="#"><i class="glyphicon glyphicon-bullhorn"></i> Unpublish</a></li>
-                                    <c:choose>
-                                        <c:when test="${!post.isVisible() && permissions:canDoThis(site, 'DELETE_POSTS')}">
-                                            <li><a href="#" data-post="${post.slug}"><i class="glyphicon    glyphicon-trash"></i> Delete</a></li>
-                                        </c:when>
-                                        <c:when test="${post.isVisible() && permissions:canDoThis(site, 'DELETE_POSTS_PUBLISHED')}">
-                                            <li><a href="#" data-post="${post.slug}"><i class="glyphicon glyphicon-trash"></i> Delete</a></li>
-                                        </c:when>
-                                    </c:choose>
+                                    <c:if test="${post.canDelete()}">
+                                        <li><a href="#" data-post="${post.slug}"><i class="glyphicon glyphicon-trash"></i> Delete</a></li>
+                                    </c:if>
                                 </ul>
                             </div>
                         </div>
@@ -156,29 +151,38 @@ ${portal.toolkit()}
 	</c:otherwise>
 </c:choose>
 
-
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-						class="sr-only">Close</span></button>
-				<h4><spring:message code="post.manage.label.delete.post"/></h4>
-			</div>
-			<div class="modal-body">
-				<p><spring:message code="post.manage.label.delete.post.message"/></p>
-			</div>
-			<div class="modal-footer">
-				<form id="deleteForm" method="POST">
-                    ${csrf.field()}
-					<button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
-					<a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
-				</form>
-			</div>
-		</div>
-	</div>
-</div>
-
+<c:if test="${permissions:canDoThis(site, 'DELETE_POSTS')}">
+    <div class="modal fade" id="delete-post" tabindex="-1" role="dialog" aria-hidden="true">
+    	<div class="modal-dialog">
+    		<div class="modal-content">
+    			<div class="modal-header">
+    				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+    						class="sr-only">Close</span></button>
+    				<h4><spring:message code="post.manage.label.delete.post"/></h4>
+    			</div>
+    			<div class="modal-body">
+    				<p><spring:message code="post.manage.label.delete.post.message"/></p>
+    			</div>
+    			<div class="modal-footer">
+    				<form id="delete-form" method="POST">
+                        ${csrf.field()}
+    					<button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
+    					<a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
+    				</form>
+    			</div>
+    		</div>
+    	</div>
+    </div>
+    <script type="application/javascript">
+        $(document).ready(function(){
+            $("a[data-post]").on('click', function (el) {
+                var postSlug = el.target.getAttribute('data-post');
+                $('#delete-form').attr('action', '${pageContext.request.contextPath}/cms/posts/${site.slug}/' + postSlug + '/delete');
+                $('#delete-post').modal('show');
+            });    
+        })
+    </script>
+</c:if>
 <script type="application/javascript">
     function getParameterByName(name) {
         var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
@@ -198,25 +202,18 @@ ${portal.toolkit()}
         window.location.search = $.param(searchQueryObj);
     }
 
-	(function () {
+    $(document).ready(function(){
 		$('#search-query').keypress(function (e) {
 			if (e.which == 13) {
 				searchPosts({ query: $('#search-query').val(), page: 1});
 			}
 		});
 
-		$("a[data-post]").on('click', function (el) {
-			var postSlug = el.target.getAttribute('data-post');
-			$('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/posts/${site.slug}/' + postSlug + '/delete');
-			$('#deleteModal').modal('show');
-		});
-
 		$('.category-item').on('click', function (e) {
 			e.preventDefault();
 			searchPosts({ categorySlug: $(e.target).data('category-slug') });
 		});
-
-	})();
+	});
 </script>
 
 <c:if test="${permissions:canDoThis(site, 'CREATE_POST')}">
