@@ -53,19 +53,6 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
     /**
      * The logged {@link User} creates a new instance of a {@link Category}
      */
-    @Deprecated
-    public Category(Site site) {
-        super();
-        if (Authenticate.getUser() == null) {
-            throw CmsDomainException.forbiden();
-        }
-        this.setCreatedBy(Authenticate.getUser());
-        this.setCreationDate(new DateTime());
-        this.setSite(site);
-
-        Signal.emit(Category.SIGNAL_CREATED, new DomainObjectEvent<Category>(this));
-    }
-
     public Category(Site site, LocalizedString name) {
         super();
         if (Authenticate.getUser() == null) {
@@ -138,9 +125,9 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
         return cloneCache.getOrClone(this, obj -> {
             Collection<Post> posts = new HashSet<>(getPostsSet());
             HashSet<Component> components = new HashSet<>(getComponentsSet());
-            Category clone = new Category(getSite());
+            LocalizedString name = getName() != null ? fromJson(getName().json()) : null;
+            Category clone = new Category(getSite(), name);
             cloneCache.setClone(Category.this, clone);
-            clone.setName(getName() != null ? fromJson(getName().json()) : null);
             posts.stream().map(post -> post.clone(cloneCache)).forEach(clone::addPosts);
             components.stream().filter(ListCategoryPosts.class::isInstance)
                     .map(ListCategoryPosts.class::cast)

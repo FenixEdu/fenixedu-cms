@@ -184,17 +184,15 @@ public class SiteResource extends BennuRestResource {
     @Atomic(mode = TxMode.WRITE)
     private Category createCategoryFromJson(Site site, JsonObject jObj) {
 
-        Category category = new Category(site);
-
         if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
-            category.setName(LocalizedString.fromJson(jObj.get("name")));
+            Category category = new Category(site, LocalizedString.fromJson(jObj.get("name")));
+            if (jObj.has("slug") && !jObj.get("slug").isJsonNull()) {
+                category.setSlug(jObj.get("slug").getAsString());
+            }
+            return category;
         }
 
-        if (jObj.has("slug") && !jObj.get("slug").isJsonNull()) {
-            category.setSlug(jObj.get("slug").getAsString());
-        }
-
-        return category;
+        return null;
     }
 
     @GET
@@ -214,22 +212,21 @@ public class SiteResource extends BennuRestResource {
 
     @Atomic(mode = TxMode.WRITE)
     private Menu createMenuFromJson(Site site, JsonObject jObj) {
-
-        Menu menu = new Menu(site);
-
         if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
-            menu.setName(LocalizedString.fromJson(jObj.get("name")));
+            Menu menu = new Menu(site, LocalizedString.fromJson(jObj.get("name")));
+
+            if (jObj.has("slug") && !jObj.get("slug").isJsonNull()) {
+                menu.setSlug(jObj.get("slug").getAsString());
+            }
+
+            if (jObj.has("topMenu") && !jObj.get("topMenu").isJsonNull()) {
+                menu.setTopMenu(jObj.get("topMenu").getAsBoolean());
+            }
+            return menu;
+
         }
 
-        if (jObj.has("slug") && !jObj.get("slug").isJsonNull()) {
-            menu.setSlug(jObj.get("slug").getAsString());
-        }
-
-        if (jObj.has("topMenu") && !jObj.get("topMenu").isJsonNull()) {
-            menu.setTopMenu(jObj.get("topMenu").getAsBoolean());
-        }
-
-        return menu;
+        return null;
     }
 
     @GET
