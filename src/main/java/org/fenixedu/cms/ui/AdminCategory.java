@@ -21,7 +21,7 @@ package org.fenixedu.cms.ui;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.PermissionEvaluation;
-import org.fenixedu.cms.domain.PermissionsArray;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
@@ -99,12 +100,13 @@ public class AdminCategory {
 
     @Atomic(mode = Atomic.TxMode.WRITE)
     private Category createCategory(Site site, LocalizedString name) {
+        PermissionEvaluation.ensureCanDoThis(site, Permission.CREATE_CATEGORY);
         return new Category(site, name);
     }
 
     @Atomic(mode = Atomic.TxMode.WRITE)
     private Post createPost(Site site, Category category, LocalizedString name) {
-        PermissionEvaluation.ensureCanDoThis(site, PermissionsArray.Permission.CREATE_POST);
+        PermissionEvaluation.ensureCanDoThis(site, Permission.CREATE_POST);
         Post p = new Post(site);
         p.setName(Post.sanitize(name));
         p.setBody(new LocalizedString());

@@ -185,6 +185,7 @@ public class SiteResource extends BennuRestResource {
     private Category createCategoryFromJson(Site site, JsonObject jObj) {
 
         if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
+            PermissionEvaluation.ensureCanDoThis(site, Permission.CREATE_CATEGORY);
             Category category = new Category(site, LocalizedString.fromJson(jObj.get("name")));
             if (jObj.has("slug") && !jObj.get("slug").isJsonNull()) {
                 category.setSlug(jObj.get("slug").getAsString());

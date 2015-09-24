@@ -10,6 +10,8 @@ import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
 import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostFile;
 import org.fenixedu.cms.domain.PostMetadata;
@@ -71,39 +73,10 @@ public class AdminPostsService {
 	String slug = ofNullable(postJson.get("slug")).map(JsonElement::getAsString).orElse(post.getSlug());
 	User createdBy = ofNullable(postJson.get("createdBy")).map(JsonElement::getAsJsonObject)
 			.map(json -> json.get("username").getAsString()).map(User::findByUsername).orElse(post.getCreatedBy());
-	if(postJson.get("categories") != null && postJson.get("categories").isJsonArray()) {
-	    Set<Category> newCategories = new HashSet<>();
-	    for (JsonElement categoryJsonEl : postJson.get("categories").getAsJsonArray()) {
-		JsonObject categoryJson = categoryJsonEl.getAsJsonObject();
-		if(ofNullable(categoryJson.get("use")).map(JsonElement::getAsBoolean).orElse(false)) {
-		    String categorySlug = categoryJson.get("slug").getAsString();
-		    LocalizedString categoryName = Post.sanitize(LocalizedString.fromJson(categoryJson.get("name")));
-		    newCategories.add(site.getOrCreateCategoryForSlug(categorySlug, categoryName));
-		}
-	    }
 
-	    if(!newCategories.containsAll(post.getCategoriesSet()) || !post.getCategoriesSet().containsAll(newCategories)) {
-		post.getCategoriesSet().clear();
-		newCategories.stream().forEach(post::addCategories);
-	    }
-	}
+      	processCategoryChanges(site, post, postJson);
 
-	if(postJson.get("files")!=null && postJson.get("files").isJsonArray()) {
-	    for (JsonElement fileJsonEl : postJson.get("files").getAsJsonArray()) {
-		JsonObject fileJson = fileJsonEl.getAsJsonObject();
-		PostFile postFile = FenixFramework.getDomainObject(fileJson.get("id").getAsString());
-		if(postFile.getPost() == post) {
-		    int index = fileJson.get("index").getAsInt();
-		    boolean isEmbedded = fileJson.get("isEmbedded").getAsBoolean();
-		    if(postFile.getIndex()!= index) {
-			postFile.setIndex(index);
-		    }
-		    if(postFile.getIsEmbedded()!=isEmbedded) {
-			postFile.setIsEmbedded(isEmbedded);
-		    }
-		}
-	    }
-	}
+	processFileChanges(site, post, postJson);
 
 	if(!post.getName().equals(name)) {
 	    post.setName(name);
@@ -132,6 +105,8 @@ public class AdminPostsService {
 	post.fixOrder(post.getFilesSorted());
 
     }
+
+
 
     private boolean equalDates(DateTime time1,DateTime time2) {
 	return ofNullable(time1).map(DateTime::toString).orElse("").equals(ofNullable(time2).map(DateTime::toString).orElse(""));
@@ -181,5 +156,49 @@ public class AdminPostsService {
 	return fileJson;
     }
 
+    private void processCategoryChanges(Site site, Post post, JsonObject postJson) {
+      if (postJson.get("categories") != null && postJson.get("categories").isJsonArray()) {
+	Set<Category> newCategories = new HashSet<>();
+	for (JsonElement categoryJsonEl : postJson.get("categories").getAsJsonArray()) {
+	  JsonObject categoryJson = categoryJsonEl.getAsJsonObject();
+	  if (ofNullable(categoryJson.get("use")).map(JsonElement::getAsBoolean).orElse(false)) {
+	    String categorySlug = categoryJson.get("slug").getAsString();
+	    LocalizedString categoryName = Post.sanitize(LocalizedString.fromJson(categoryJson.get("name")));
+	    Category category = site.categoryForSlug(categorySlug);
+	    if(category==null) {
+	      PermissionEvaluation
+		  .ensureCanDoThis(site, PermissionsArray.Permission.CREATE_CATEGORY);
+	      category = new Category(site, categoryName);
+	    }
+	    newCategories.add(category);
+	  }
+	}
+
+	if (!newCategories.containsAll(post.getCategoriesSet()) || !post.getCategoriesSet()
+	    .containsAll(newCategories)) {
+	  post.getCategoriesSet().clear();
+	  newCategories.stream().forEach(post::addCategories);
+	}
+      }
+    }
+
+    private void processFileChanges(Site site, Post post, JsonObject postJson) {
+      if(postJson.get("files")!=null && postJson.get("files").isJsonArray()) {
+	for (JsonElement fileJsonEl : postJson.get("files").getAsJsonArray()) {
+	  JsonObject fileJson = fileJsonEl.getAsJsonObject();
+	  PostFile postFile = FenixFramework.getDomainObject(fileJson.get("id").getAsString());
+	  if(postFile.getPost() == post) {
+	    int index = fileJson.get("index").getAsInt();
+	    boolean isEmbedded = fileJson.get("isEmbedded").getAsBoolean();
+	    if(postFile.getIndex()!= index) {
+	      postFile.setIndex(index);
+	    }
+	    if(postFile.getIsEmbedded()!=isEmbedded) {
+	      postFile.setIsEmbedded(isEmbedded);
+	    }
+	  }
+	}
+      }
+    }
 
 }

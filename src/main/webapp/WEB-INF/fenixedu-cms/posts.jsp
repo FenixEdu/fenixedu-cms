@@ -33,10 +33,10 @@ ${portal.toolkit()}
     <div class="col-sm-5">
         <c:choose>
             <c:when test="${permissions:canDoThis(site, 'CREATE_POST')}">
-                <button type="button" data-toggle="modal" data-target="#create-post" class="btn btn-primary"><i class="icon icon-plus"></i> New</a>
+                <button type="button" data-toggle="modal" data-target="#create-post" class="btn btn-primary"><i class="icon icon-plus"></i> New</button>
             </c:when>
             <c:otherwise>
-                <button type="button" class="btn btn-primary disabled"><i class="icon icon-plus"></i> New</a>
+                <button type="button" class="btn btn-primary disabled"><i class="icon icon-plus"></i> New</button>
             </c:otherwise>
         </c:choose>
     </div>

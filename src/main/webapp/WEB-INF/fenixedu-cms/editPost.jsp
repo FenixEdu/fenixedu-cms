@@ -20,6 +20,7 @@
 --%>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/jquery.jsonview.css"/>
@@ -100,11 +101,20 @@ ${portal.angularToolkit()}
 			<div class="panel-heading"><spring:message code="site.manage.label.categories"/></div>
 			<div class="panel-body">
 		
-				<p>
-					<a class="btn btn-default btn-xs" data-toggle="modal" data-target="#addCategory">
-						<span class="glyphicon glyphicon-plus"></span> Create Category
-					</a>
-				</p>
+                <p>
+                    <c:choose>
+                        <c:when test="${permissions:canDoThis(site, 'CREATE_CATEGORY')}">
+                            <button type="button" data-toggle="modal" data-target="#addCategory" class="btn btn-default btn-xs">
+                                <i class="icon icon-plus"></i> Create Category
+                            </button>
+                        </c:when>
+                        <c:otherwise>
+                            <button type="button" class="btn btn-default btn-xs disabled">
+                                <i class="icon icon-plus"></i> Create Category
+                            </button>
+                        </c:otherwise>
+                    </c:choose>
+                </p>
 
 				<div ng-show="post.categories && post.categories.length">
 					<div class="checkbox" class="col-sm-4" ng-repeat="category in post.categories">
@@ -228,46 +238,48 @@ ${portal.angularToolkit()}
 		</fieldset>
 	</div>
 
-	<!-- CREATE CATEGORY MODAL -->
-	<div class="modal fade" id="addCategory" tabindex="-1" role="dialog" aria-hidden="true">
-		<div class="modal-dialog modal-lg">
-			<div class="modal-content">
-	            <div class="modal-header">
-	                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
-	                <h3 class="modal-title">New Category</h3>
-	                <small>Please specify the name for the new category</small>
-	            </div>
-					
-					<div class="modal-body">
-						<div class="form-group">
-							<label class="col-sm-2 control-label"><spring:message code="categories.create.label.name"/></label>
-							<div class="col-sm-10">
-								<input bennu-localized-string="newCategory.name" required-any />
-								<p ng-show="!newCategory.name" class="text-danger"><spring:message code="categories.create.error.emptyName"/></p>
+    <c:if test="${permissions:canDoThis(site, 'CREATE_CATEGORY')}">
+		<!-- CREATE CATEGORY MODAL -->
+		<div class="modal fade" id="addCategory" tabindex="-1" role="dialog" aria-hidden="true">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+		            <div class="modal-header">
+		                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
+		                <h3 class="modal-title">New Category</h3>
+		                <small>Please specify the name for the new category</small>
+		            </div>
+						
+						<div class="modal-body">
+							<div class="form-group">
+								<label class="col-sm-2 control-label"><spring:message code="categories.create.label.name"/></label>
+								<div class="col-sm-10">
+									<input bennu-localized-string="newCategory.name" required-any />
+									<p ng-show="!newCategory.name" class="text-danger"><spring:message code="categories.create.error.emptyName"/></p>
+								</div>
 							</div>
+			                <div class="form-group">
+			                    <label class="col-sm-2 control-label">Slug</label>
+
+			                    <div class="col-sm-10">
+			                        <input name="type" class="form-control" type="text" id="category-slug" readonly="true" value="{{ newCategory.slug }}">
+			                        <p class="help-block">This code is used internally and is not shared with the users. However it must be unique.</p>
+			                    </div>
+			                </div>
 						</div>
-		                <div class="form-group">
-		                    <label class="col-sm-2 control-label">Slug</label>
 
-		                    <div class="col-sm-10">
-		                        <input name="type" class="form-control" type="text" id="category-slug" readonly="true" value="{{ newCategory.slug }}">
-		                        <p class="help-block">This code is used internally and is not shared with the users. However it must be unique.</p>
-		                    </div>
-		                </div>
-					</div>
-
-					<div class="modal-footer">
-						<button type="reset" class="btn btn-default" data-dismiss="modal">
-							Cancel
-						</button>
-						<button type="button" class="btn btn-primary" ng-click="createCategory()" data-dismiss="modal">
-							<spring:message code="label.make"/>
-						</button>
-					</div>
+						<div class="modal-footer">
+							<button type="reset" class="btn btn-default" data-dismiss="modal">
+								Cancel
+							</button>
+							<button type="button" class="btn btn-primary" ng-click="createCategory()" data-dismiss="modal">
+								<spring:message code="label.make"/>
+							</button>
+						</div>
+				</div>
 			</div>
 		</div>
-	</div>
-
+	</c:if>
+	
 	<div class="modal fade" id="viewMetadata" tabindex="-1" role="dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
