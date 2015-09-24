@@ -28,7 +28,7 @@ import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionEvaluation;
-import org.fenixedu.cms.domain.PermissionsArray;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostMetadata;
 import org.fenixedu.cms.domain.Site;
@@ -108,7 +108,7 @@ public class AdminPages {
     public RedirectView createPage(@PathVariable String slug, @RequestParam LocalizedString name) {
         Site site = Site.fromSlug(slug);
         AdminSites.canEdit(site);
-        PermissionEvaluation.ensureCanDoThis(site, PermissionsArray.Permission.CREATE_PAGE);
+        PermissionEvaluation.ensureCanDoThis(site, Permission.CREATE_PAGE);
         Page page = service.createPageAndPost(name, site);
         return pageRedirect(page);
     }
@@ -128,6 +128,7 @@ public class AdminPages {
         AdminSites.canEdit(s);
         Page page = s.pageForSlug(slugPage);
         FenixFramework.atomic(() -> {
+            PermissionEvaluation.ensureCanDoThis(page.getSite(), Permission.DELETE_PAGE);
             page.getStaticPost().ifPresent(Post::delete);
             page.delete();
         });

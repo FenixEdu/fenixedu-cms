@@ -118,7 +118,9 @@ ${portal.toolkit()}
 
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                                     <li><a href="#"><i class="glyphicon glyphicon-bullhorn">&nbsp;Unpublish</i></a></li>
-                                    <li><a href="#" data-page="${page.slug}"><i class="glyphicon glyphicon-trash">&nbsp;Delete</i></a></li>
+									<c:if test="${permissions:canDoThis(site, 'DELETE_PAGE')}">
+                                    	<li><a href="#" data-page="${page.slug}"><i class="glyphicon glyphicon-trash">&nbsp;Delete</i></a></li>
+                                    </c:if>
                                 </ul>
                             </div>
 						</div>
@@ -145,27 +147,29 @@ ${portal.toolkit()}
 	</c:otherwise>
 </c:choose>
 
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-						class="sr-only">Close</span></button>
-				<h4><spring:message code="page.manage.label.delete.page"/></h4>
-			</div>
-			<div class="modal-body">
-				<p><spring:message code="page.manage.label.delete.page.message"/></p>
-			</div>
-			<div class="modal-footer">
-				<form id="deleteForm" method="POST">
-					${csrf.field()}
-					<button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
-					<a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
-				</form>
+<c:if test="${permissions:canDoThis(site, 'DELETE_PAGE')}">
+	<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+							class="sr-only">Close</span></button>
+					<h4><spring:message code="page.manage.label.delete.page"/></h4>
+				</div>
+				<div class="modal-body">
+					<p><spring:message code="page.manage.label.delete.page.message"/></p>
+				</div>
+				<div class="modal-footer">
+					<form id="deleteForm" method="POST">
+						${csrf.field()}
+						<button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
+						<a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
+					</form>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
+</c:if>
 
 <div class="modal fade" id="create-page" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
 	<div class="modal-dialog">
@@ -217,11 +221,11 @@ ${portal.toolkit()}
   }
 
   (function () {
-		$("a[data-page]").on('click', function (el) {
-			var pageSlug = el.target.getAttribute('data-page');
-			$('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}/' + pageSlug + '/delete');
-			$('#deleteModal').modal('show');
-		});
+  	$("a[data-page]").on('click', function (el) {
+		var pageSlug = el.target.getAttribute('data-page');
+		$('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}/' + pageSlug + '/delete');
+		$('#deleteModal').modal('show');
+	});
 
     $('#search-query').keypress(function (e) {
       if (e.which == 13) {

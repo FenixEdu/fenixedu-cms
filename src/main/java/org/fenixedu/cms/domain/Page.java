@@ -128,9 +128,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
             component.delete();
         }
 
-        for (MenuItem mi : getMenuItemsSet()) {
-            mi.delete();
-        }
+        getMenuItemsSet().stream().forEach(MenuItem::delete);
 
         this.setTemplate(null);
         this.setSite(null);
