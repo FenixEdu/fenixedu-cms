@@ -20,6 +20,8 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
+
 ${portal.toolkit()}
 
 <div class="page-header">
@@ -30,8 +32,19 @@ ${portal.toolkit()}
 <p>
 	<div class="row">
 		<div class="col-sm-8">
-			<a href="#" data-toggle="modal" data-target="#create-page" class="btn btn-primary"><i class="icon icon-plus"></i> New</a>
-			<a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}" class="btn btn-default"><i class="glyphicon glyphicon-cog"></i> Advanced</a>
+	        <c:choose>
+            	<c:when test="${permissions:canDoThis(site, 'CREATE_PAGE')}">
+					<button type="button" data-toggle="modal" data-target="#create-page" class="btn btn-primary">
+						<i class="icon icon-plus"></i> New
+					</button>
+				</c:when>
+				<c:otherwise>
+					<button type="button" class="btn btn-primary disabled"><i class="icon icon-plus"></i> New</button>
+				</c:otherwise>
+			</c:choose>
+			<a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}" class="btn btn-default">
+				<i class="glyphicon glyphicon-cog"></i> Advanced
+			</a>
 		</div>
 		<div class="col-sm-4 pull-right">
 			<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
@@ -193,36 +206,38 @@ ${portal.toolkit()}
 	</form>
 </div>
 
-<div class="modal fade" id="create-page" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<form class="form-horizontal" action="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" method="post" role="form">
-			  ${csrf.field()}
-		      <div class="modal-header">
-		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
-		        <h3 class="modal-title">New Page</h3>
-		        <small>This could be the start of something great!</small>
-		      </div>
+<c:if test="${permissions:canDoThis(site, 'CREATE_PAGE')}">
+	<div class="modal fade" id="create-page" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form class="form-horizontal" action="${pageContext.request.contextPath}/cms/pages/${site.slug}/create" method="post" role="form">
+				  ${csrf.field()}
+			      <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
+			        <h3 class="modal-title">New Page</h3>
+			        <small>This could be the start of something great!</small>
+			      </div>
 
-		      <div class="modal-body">
-		        <div class="${emptyName ? "form-group has-error" : "form-group"}">
-		            <label class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
-		            <div class="col-sm-10">
-		                <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.create.label.name" />">
-		                <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="post.create.error.emptyName"/></p>
-		                </c:if>
-		            </div>
-		        </div>
-		      </div>
+			      <div class="modal-body">
+			        <div class="${emptyName ? "form-group has-error" : "form-group"}">
+			            <label class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
+			            <div class="col-sm-10">
+			                <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.create.label.name" />">
+			                <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="post.create.error.emptyName"/></p>
+			                </c:if>
+			            </div>
+			        </div>
+			      </div>
 
-		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-		        <button type="Submit" class="btn btn-primary">Make</button>
-		      </div>
-			</form>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			        <button type="Submit" class="btn btn-primary">Make</button>
+			      </div>
+				</form>
+			</div>
 		</div>
 	</div>
-</div>
+</c:if>
 
 <script type="application/javascript">
   function getParameterByName(name) {

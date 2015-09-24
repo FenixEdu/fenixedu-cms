@@ -3,22 +3,28 @@ package org.fenixedu.cms.ui;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import org.fenixedu.bennu.core.api.UserResource;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
-import org.fenixedu.cms.domain.*;
+import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.PostFile;
+import org.fenixedu.cms.domain.PostMetadata;
+import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.FenixFramework;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.FenixFramework;
 
 import static java.util.Optional.ofNullable;
 
@@ -30,7 +36,6 @@ public class AdminPostsService {
 
     @Atomic(mode = Atomic.TxMode.WRITE)
     public Post createPost(Site site, LocalizedString name) {
-	AdminSites.canEdit(site);
 	Post post = new Post(site);
 	post.setName(Post.sanitize(name));
 	post.setBody(new LocalizedString());

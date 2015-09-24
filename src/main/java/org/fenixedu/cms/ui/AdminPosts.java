@@ -26,6 +26,8 @@ import com.google.gson.JsonParser;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostFile;
@@ -113,6 +115,7 @@ public class AdminPosts {
     public RedirectView createPost(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name) {
         Site s = Site.fromSlug(slug);
         AdminSites.canEdit(s);
+        PermissionEvaluation.ensureCanDoThis(s, PermissionsArray.Permission.CREATE_POST);
         Post post = service.createPost(s, name);
         return new RedirectView("/cms/posts/" + s.getSlug() + "/" + post.getSlug() + "/edit", true);
     }

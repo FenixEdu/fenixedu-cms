@@ -19,11 +19,14 @@
 package org.fenixedu.cms.ui;
 
 import com.google.common.base.Strings;
+
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
 import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -34,11 +37,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
 
 import java.util.Collection;
 import java.util.Objects;
+
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.Atomic.TxMode;
 
 import static java.util.Optional.ofNullable;
 import static org.fenixedu.cms.ui.SearchUtils.searchPages;
@@ -64,7 +68,7 @@ public class AdminPagesAdvanced {
         return "fenixedu-cms/pagesAdvanced";
     }
 
-    @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
+    /*@RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
     public String createPage(Model model, @PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
 
@@ -72,7 +76,7 @@ public class AdminPagesAdvanced {
 
         model.addAttribute("site", s);
         return "fenixedu-cms/createPage";
-    }
+    }*/
 
     @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
     public RedirectView createPage(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name) {
@@ -84,6 +88,7 @@ public class AdminPagesAdvanced {
 
     @Atomic
     private Page createPage(LocalizedString name, Site s) {
+        PermissionEvaluation.ensureCanDoThis(s, Permission.CREATE_PAGE);
         Page p = new Page(s, name);
         return p;
     }

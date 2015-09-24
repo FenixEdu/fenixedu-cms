@@ -20,6 +20,8 @@ package org.fenixedu.cms.ui;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -102,7 +104,7 @@ public class AdminCategory {
 
     @Atomic(mode = Atomic.TxMode.WRITE)
     private Post createPost(Site site, Category category, LocalizedString name) {
-        AdminSites.canEdit(site);
+        PermissionEvaluation.ensureCanDoThis(site, PermissionsArray.Permission.CREATE_POST);
         Post p = new Post(site);
         p.setName(Post.sanitize(name));
         p.setBody(new LocalizedString());

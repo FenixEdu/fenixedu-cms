@@ -53,23 +53,6 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     /**
      * the logged {@link User} creates a new Page.
      */
-    @Deprecated
-    public Page(Site site) {
-        super();
-        DateTime now = new DateTime();
-        this.setCreationDate(now);
-        this.setModificationDate(now);
-        if (Authenticate.getUser() == null) {
-            throw CmsDomainException.forbiden();
-        }
-        this.setCreatedBy(Authenticate.getUser());
-        this.setCanViewGroup(Group.anyone());
-        this.setSite(site);
-        this.setPublished(false);
-
-        Signal.emit(Page.SIGNAL_CREATED, new DomainObjectEvent<Page>(this));
-    }
-
     public Page(Site site, LocalizedString name) {
         super();
         DateTime now = new DateTime();
@@ -290,9 +273,9 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     public Page clone(CloneCache cloneCache) {
         return cloneCache.getOrClone(this, obj -> {
             Set<Component> components = new HashSet<>(getComponentsSet());
-            Page clone = new Page(getSite());
+            LocalizedString name = getName() != null ? fromJson(getName().json()) : null;
+            Page clone = new Page(getSite(), name);
             cloneCache.setClone(Page.this, clone);
-            clone.setName(getName() != null ? fromJson(getName().json()) : null);
             clone.setCanViewGroup(getCanViewGroup());
             clone.setPublished(getPublished());
             clone.setCreatedBy(getCreatedBy());

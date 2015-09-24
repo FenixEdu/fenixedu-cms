@@ -2,14 +2,18 @@ package org.fenixedu.cms.ui;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import pt.ist.fenixframework.Atomic;
 
 /**
@@ -26,8 +30,8 @@ public class AdminPagesService {
 
     @Atomic(mode = Atomic.TxMode.WRITE)
     public Page createPageAndPost(LocalizedString name, Site site) {
-	AdminSites.canEdit(site);
-	Post post = postsService.createPost(site, name);
+      	AdminSites.canEdit(site);
+      	Post post = postsService.createPost(site, name);
 	Page page = new Page(site, Post.sanitize(name));
 	page.addComponents(new StaticPost(post));
 	page.setTemplateType("view");

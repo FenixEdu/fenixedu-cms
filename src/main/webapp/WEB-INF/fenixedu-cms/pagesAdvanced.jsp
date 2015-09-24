@@ -20,6 +20,8 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
+
 ${portal.toolkit()}
 
 <div class="page-header">
@@ -30,8 +32,19 @@ ${portal.toolkit()}
 <p>
 	<div class="row">
 		<div class="col-sm-8">
-			<a href="#" data-toggle="modal" data-target="#create-page" class="btn btn-primary"><i class="icon icon-plus"></i> New</a>
-			<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}" class="btn btn-default"><i class="glyphicon glyphicon-cog"></i> Simplified</a>
+	        <c:choose>
+            	<c:when test="${permissions:canDoThis(site, 'CREATE_PAGE')}">
+					<button type="button" data-toggle="modal" data-target="#create-page" class="btn btn-primary">
+						<i class="icon icon-plus"></i> New
+					</button>
+				</c:when>
+				<c:otherwise>
+					<button type="button" class="btn btn-primary disabled"><i class="icon icon-plus"></i> New</button>
+				</c:otherwise>
+			</c:choose>
+			<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}" class="btn btn-default">
+				<i class="glyphicon glyphicon-cog"></i> Simplified
+			</a>
 		</div>
 		<div class="col-sm-4 pull-right">
 			<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">

@@ -20,6 +20,8 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
+
 ${portal.toolkit()}
 
 <div class="page-header">
@@ -31,9 +33,19 @@ ${portal.toolkit()}
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateModal">
         <i class="glyphicon glyphicon-edit"></i> Edit
     </button>
-    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#createCategoryPostModal">
-        <i class="glyphicon glyphicon-plus"></i> Post
-    </button>
+
+    <c:choose>
+        <c:when test="${permissions:canDoThis(site, 'CREATE_POST')}">
+            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#createCategoryPostModal">
+                <i class="glyphicon glyphicon-plus"></i> Post
+            </button>        
+        </c:when>
+        <c:otherwise>
+            <button type="button" class="btn btn-default disabled">
+                <i class="glyphicon glyphicon-plus"></i> Post
+            </button>  
+        </c:otherwise>
+    </c:choose>
 </p>
 
 
@@ -42,9 +54,9 @@ ${portal.toolkit()}
         <div class="latest">
             <h4>Latest posts using this category</h4>
             <c:choose>
-                <c:when test="${not empty category.getPostsSet()}">
+                <c:when test="${category.getPostsSet().size() > 0}">
                     <div class="row">
-                        <c:forEach var="post" items="${category.getLatestPosts()}" end="4">
+                        <c:forEach var="post" items="${category.getLatestPosts()}" end="9">
                             <div class="col-sm-12 col-md-6">
                                 <div class="thumbnail">
                                     <div class="caption">
@@ -77,42 +89,6 @@ ${portal.toolkit()}
                 </c:otherwise>
             </c:choose>
         </div>
-
-        <div class="latest">
-            <h4>Latest pages using this category</h4>
-            <c:choose>
-                <c:when test="${not empty category.getLatestPages()}">
-                  <div class="row">
-                      <c:forEach var="page" items="${category.getLatestPages()}" end="4">
-                        <div class="col-sm-12 col-md-6">
-                          <div class="thumbnail">
-                            <div class="caption">
-                                <h5><a href="${page.getEditUrl()}">${page.name.content}</a></h3>
-                                <p>${page.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}</p>
-                                <span class="label label-default">${page.createdBy.name}</small>
-                                <div class="btn-group pull-right">
-                                    <a href="${page.getEditUrl()}" class="btn btn-icon btn-primary pull-right">
-                                        <i class="glyphicon glyphicon-cog"></i>
-                                    </a>
-                                </div>
-                            </div>
-                          </div>
-                        </div>
-                      </c:forEach>
-                  </div>
-                  <p>
-                      <a href="${pageContext.request.contextPath}/cms/pages/${category.site.slug}?category=${category.slug}" class="btn btn-xs btn-default">View all</a>
-                  </p>
-                </c:when>
-                <c:otherwise>
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <i>There are no pages using this category.</i>
-                        </div>
-                    </div>
-                </c:otherwise>
-            </c:choose>
-        </div>
     </div>
     
     <div class="col-sm-4">
@@ -126,11 +102,9 @@ ${portal.toolkit()}
                 <dt>Slug</dt>
                 <dd>${category.slug}</dd>
 
-                <dt>Number of Posts</dt>
+                <dt>Usages</dt>
                 <dd>${category.getPostsSet().size()}</dd>
 
-                <dt>Number of Pages</dt>
-                <dd>${category.getLatestPages().size()}</dd>
             </dl>
           </div>
         </div>
@@ -195,36 +169,38 @@ ${portal.toolkit()}
     </div>
 </div>
 
-<div class="modal fade" id="createCategoryPostModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form method="post" class="form-horizontal" role="form" action="${pageContext.request.contextPath}/cms/categories/${site.slug}/${category.slug}/createCategoryPost">
+<c:if test="${permissions:canDoThis(site, 'CREATE_POST')}">
+    <div class="modal fade" id="createCategoryPostModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form method="post" class="form-horizontal" role="form" action="${pageContext.request.contextPath}/cms/categories/${site.slug}/${category.slug}/createCategoryPost">
 
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h3 class="modal-title">Create Post</h3>
-                    <small>Creating a post with category '${category.name.content}'</small>
-                </div>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h3 class="modal-title">Create Post</h3>
+                        <small>Creating a post with category '${category.name.content}'</small>
+                    </div>
 
-                <div class="modal-body">
-                   ${csrf.field()}
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">Name</label>
-                        <div class="col-sm-10">
-                            <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.edit.label.name" />" />
+                    <div class="modal-body">
+                       ${csrf.field()}
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Name</label>
+                            <div class="col-sm-10">
+                                <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.edit.label.name" />" />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="modal-footer">
-                    <button type="reset" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
 
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+</c:if>
 
 <style type="text/css">
     .latest {

@@ -27,6 +27,8 @@ import com.google.gson.JsonParser;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostMetadata;
 import org.fenixedu.cms.domain.Site;
@@ -106,6 +108,7 @@ public class AdminPages {
     public RedirectView createPage(@PathVariable String slug, @RequestParam LocalizedString name) {
         Site site = Site.fromSlug(slug);
         AdminSites.canEdit(site);
+        PermissionEvaluation.ensureCanDoThis(site, PermissionsArray.Permission.CREATE_PAGE);
         Page page = service.createPageAndPost(name, site);
         return pageRedirect(page);
     }

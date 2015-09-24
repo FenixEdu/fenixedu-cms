@@ -30,7 +30,16 @@ ${portal.toolkit()}
 </div>
 
 <div class="row">
-    <div class="col-sm-5"><a href="#" data-toggle="modal" data-target="#create-post" class="btn btn-primary"><i class="icon icon-plus"></i> New</a></div>
+    <div class="col-sm-5">
+        <c:choose>
+            <c:when test="${permissions:canDoThis(site, 'CREATE_POST')}">
+                <button type="button" data-toggle="modal" data-target="#create-post" class="btn btn-primary"><i class="icon icon-plus"></i> New</a>
+            </c:when>
+            <c:otherwise>
+                <button type="button" class="btn btn-primary disabled"><i class="icon icon-plus"></i> New</a>
+            </c:otherwise>
+        </c:choose>
+    </div>
     <div class="col-sm-7">
         <div class="pull-right">
             <div class="form-inline">
@@ -210,33 +219,32 @@ ${portal.toolkit()}
 	})();
 </script>
 
-<div class="modal fade" id="create-post" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-        <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/posts/${site.slug}/create" method="post" role="form">
-            ${csrf.field()}
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
-                <h3 class="modal-title">New Post</h3>
-                <small>This could be the start of something great!</small>
-            </div>
-            <div class="modal-body">
-                <div class="${emptyName ? "form-group has-error" : "form-group"}">
-                    <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
+<c:if test="${permissions:canDoThis(site, 'CREATE_POST')}">
+    <div class="modal fade" id="create-post" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/posts/${site.slug}/create" method="post" role="form">
+                ${csrf.field()}
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
+                    <h3 class="modal-title">New Post</h3>
+                    <small>This could be the start of something great!</small>
+                </div>
+                <div class="modal-body">
+                    <div class="${emptyName ? "form-group has-error" : "form-group"}">
+                        <label class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
 
-                    <div class="col-sm-10">
-                        <input bennu-localized-string required-any name="name" id="inputEmail3"
-                               placeholder="<spring:message code="post.create.label.name" />">
-                        <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="post.create.error.emptyName"/></p>
-                        </c:if>
+                        <div class="col-sm-10">
+                            <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.create.label.name" />">
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="Submit" class="btn btn-primary">Make</button>
-            </div>
-        </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="Submit" class="btn btn-primary">Make</button>
+                </div>
+            </form>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+</c:if>

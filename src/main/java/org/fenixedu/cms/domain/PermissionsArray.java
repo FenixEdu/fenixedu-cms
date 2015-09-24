@@ -54,6 +54,7 @@ public class PermissionsArray implements Serializable {
 
     public enum Permission {
 
+        CREATE_POST(1),
         DELETE_POSTS(1),
         DELETE_POSTS_PUBLISHED(1),
         EDIT_POSTS(1),

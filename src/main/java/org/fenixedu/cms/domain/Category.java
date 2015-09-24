@@ -31,14 +31,15 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-import pt.ist.fenixframework.Atomic;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import pt.ist.fenixframework.Atomic;
+
+import static java.util.stream.Collectors.toList;
 import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
@@ -181,14 +182,7 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
         return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/categories/" + getSite().getSlug() + "/" + getSlug();
     }
 
-    public List<Page> getLatestPages(){
-        return getComponentsSet().stream().filter(ListCategoryPosts.class::isInstance)
-                .map(component->((ListCategoryPosts) component).getPage()).distinct()
-                .sorted(Page.CREATION_DATE_COMPARATOR).limit(NUM_RECENT).collect(Collectors.toList());
-    }
-
     public List<Post> getLatestPosts() {
-        return getPostsSet().stream().filter(p->!p.isStaticPost())
-                .sorted(Post.CREATION_DATE_COMPARATOR).limit(NUM_RECENT).collect(Collectors.toList());
+        return getPostsSet().stream().sorted(Post.CREATION_DATE_COMPARATOR).collect(toList());
     }
 }
