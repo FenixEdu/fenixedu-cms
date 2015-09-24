@@ -109,14 +109,10 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
 
     @Atomic
     public void delete() {
-        for (Component c : this.getComponentsSet()) {
-            c.delete();
-        }
         this.setCreatedBy(null);
         this.setSite(null);
-        for (Post post : this.getPostsSet()) {
-            post.removeCategories(this);
-        }
+        this.getComponentsSet().stream().forEach(Component::delete);
+        this.getPostsSet().stream().forEach(post->post.removeCategories(this));
         this.deleteDomainObject();
     }
 

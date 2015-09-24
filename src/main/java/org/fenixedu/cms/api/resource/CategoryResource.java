@@ -1,5 +1,13 @@
 package org.fenixedu.cms.api.resource;
 
+import com.google.gson.JsonElement;
+
+import org.fenixedu.bennu.core.rest.BennuRestResource;
+import org.fenixedu.cms.api.json.CategoryAdapter;
+import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -9,12 +17,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.fenixedu.bennu.core.rest.BennuRestResource;
-import org.fenixedu.cms.api.json.CategoryAdapter;
-import org.fenixedu.cms.domain.Category;
-
-import com.google.gson.JsonElement;
 
 @Path("/cms/categories")
 public class CategoryResource extends BennuRestResource {
@@ -44,6 +46,7 @@ public class CategoryResource extends BennuRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
     public Response deleteCategory(@PathParam("oid") Category category) {
+        PermissionEvaluation.ensureCanDoThis(category.getSite(), Permission.DELETE_CATEGORY);
         category.delete();
         return Response.ok().build();
     }

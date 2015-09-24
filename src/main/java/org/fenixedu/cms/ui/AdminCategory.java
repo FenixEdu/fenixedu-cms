@@ -57,18 +57,20 @@ public class AdminCategory {
     }
 
     @RequestMapping(value = "{slugSite}/{slugCategory}/delete", method = RequestMethod.POST)
-    public RedirectView delete(@PathVariable(value = "slugSite") String slugSite, @PathVariable String slugCategory) {
-        Site s = Site.fromSlug(slugSite);
+    public RedirectView delete(@PathVariable String slugSite, @PathVariable String slugCategory) {
         FenixFramework.atomic(() -> {
+            Site s = Site.fromSlug(slugSite);
             AdminSites.canEdit(s);
+            PermissionEvaluation.ensureCanDoThis(s, Permission.DELETE_CATEGORY);
             s.categoryForSlug(slugCategory).delete();
         });
-        return new RedirectView("/cms/categories/" + s.getSlug(), true);
+        return new RedirectView("/cms/categories/" + slugSite, true);
     }
 
     @RequestMapping(value = "{slugSite}/{slugCategory}/createCategoryPost", method = RequestMethod.POST)
-    public RedirectView  createCategoryPost(@PathVariable(value = "slugSite") String slugSite,
-                                               @PathVariable String slugCategory, @RequestParam LocalizedString name) {
+    public RedirectView  createCategoryPost(@PathVariable String slugSite,
+                                            @PathVariable String slugCategory,
+                                            @RequestParam LocalizedString name) {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         Category c = s.categoryForSlug(slugCategory);

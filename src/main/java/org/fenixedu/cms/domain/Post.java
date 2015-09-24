@@ -19,6 +19,7 @@
 package org.fenixedu.cms.domain;
 
 import com.google.common.collect.ImmutableList;
+
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -34,7 +35,6 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-import pt.ist.fenixframework.Atomic;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,6 +46,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import pt.ist.fenixframework.Atomic;
 
 import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
@@ -134,23 +136,10 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         setLatestRevision(null);
 
         getComponentSet().stream().forEach(Component::delete);
-        getCategoriesSet().stream().forEach(Category::delete);
+        getCategoriesSet().stream().forEach(category->category.removePosts(this));
         getRevisionsSet().stream().forEach(PostContentRevision::delete);
 
         this.deleteDomainObject();
-    }
-
-    public void removeCategories() {
-        DateTime now = new DateTime();
-        new HashSet<>(getCategoriesSet()).forEach(c -> {
-            removeCategories(c);
-            c.getComponentsSet().forEach(component -> {
-                if (component.getPage() != null) {
-                    component.getPage().setModificationDate(now);
-                }
-            });
-        });
-        setModificationDate(now);
     }
 
     public boolean hasPublicationPeriod() {
