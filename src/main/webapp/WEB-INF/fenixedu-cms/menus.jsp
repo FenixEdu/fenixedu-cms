@@ -68,9 +68,9 @@ ${portal.toolkit()}
                       <a href="${menuEditUrl}" class="btn btn-icon btn-primary">
                           <i class="glyphicon glyphicon-cog"></i>
                       </a>
-                      <a href="#deleteModal" data-toggle="modal" data-target ="#deleteModal" data-menu="${menu.slug}" class="btn btn-icon btn-danger">
+                      <button type="button" data-menu="${menu.slug}" class="btn btn-icon btn-danger ${permissions:canDoThis(site, 'DELETE_MENU') ? '' : 'disabled'}">
                           <i class="glyphicon glyphicon-trash"></i>
-                      </a>
+                      </button>
                   </div>
               </li>
           </c:forEach>
@@ -79,28 +79,40 @@ ${portal.toolkit()}
 
 </c:choose>
 
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">
-                  <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-                </button>
-                <h4><spring:message code="menu.manage.label.delete.menu"/></h4>
-            </div>
-            <div class="modal-body">
-                <p><spring:message code="menu.manage.label.delete.menu.message"/></p>
-            </div>
-            <div class="modal-footer">
-                <form id="deleteForm" method="POST">
-                    ${csrf.field()}
-                    <button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
-                    <a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<c:if test="${permissions:canDoThis(site, 'DELETE_MENU')}">
+  <div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                  </button>
+                  <h4><spring:message code="menu.manage.label.delete.menu"/></h4>
+              </div>
+              <div class="modal-body">
+                  <p><spring:message code="menu.manage.label.delete.menu.message"/></p>
+              </div>
+              <div class="modal-footer">
+                  <form id="delete-form" method="POST">
+                      ${csrf.field()}
+                      <button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
+                      <a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
+                  </form>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <script type="application/javascript">
+    $(document).ready(function () {
+        $("button[data-menu]").on('click', function(el) {
+            var menuSlug = $(this).data('menu');
+            $('#delete-form').attr('action', '${pageContext.request.contextPath}/cms/menus/${site.slug}/' + menuSlug + '/delete');
+            $('#delete-modal').modal('show');
+        });
+    });
+  </script>
+</c:if>
 
 <c:if test="${permissions:canDoThis(site, 'CREATE_MENU')}">
   <div class="modal fade" id="create-menu" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
@@ -130,15 +142,4 @@ ${portal.toolkit()}
       </div>
     </div>
   </div>
-
-
-  <script type="application/javascript">
-    $(document).ready(function () {
-        $("a[data-menu]").on('click', function(el) {
-            var menu = el.target.getAttribute('data-menu');
-            $('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/menus/${site.slug}/' + menu + '/delete');
-            $('#deleteModal').modal('show');
-        });
-    });
-  </script>
 </c:if>

@@ -72,12 +72,13 @@ public class AdminMenu {
 
     @RequestMapping(value = "{slugSite}/{slugMenu}/delete", method = RequestMethod.POST)
     public RedirectView delete(@PathVariable String slugSite, @PathVariable String slugMenu) {
-        Site site = Site.fromSlug(slugSite);
         FenixFramework.atomic(() -> {
+            Site site = Site.fromSlug(slugSite);
             AdminSites.canEdit(site);
+            PermissionEvaluation.ensureCanDoThis(site, Permission.DELETE_MENU);
             site.menuForSlug(slugMenu).delete();
         });
-        return new RedirectView("/cms/menus/" + site.getSlug(), true);
+        return new RedirectView("/cms/menus/" + slugSite, true);
     }
 
     @RequestMapping(value = "{slugSite}/{slugMenu}/edit", method = RequestMethod.GET)
