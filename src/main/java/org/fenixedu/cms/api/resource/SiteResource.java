@@ -214,6 +214,7 @@ public class SiteResource extends BennuRestResource {
     @Atomic(mode = TxMode.WRITE)
     private Menu createMenuFromJson(Site site, JsonObject jObj) {
         if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
+            PermissionEvaluation.ensureCanDoThis(site, Permission.CREATE_MENU);
             Menu menu = new Menu(site, LocalizedString.fromJson(jObj.get("name")));
 
             if (jObj.has("slug") && !jObj.get("slug").isJsonNull()) {

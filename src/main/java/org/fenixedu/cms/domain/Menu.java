@@ -19,6 +19,7 @@
 package org.fenixedu.cms.domain;
 
 import com.google.common.collect.Sets;
+
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
@@ -28,14 +29,15 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.FenixFramework;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.FenixFramework;
 
 import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
@@ -46,23 +48,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.menu.created";
 
-    @Deprecated
-    public Menu(Site site) {
-        super();
-        if (Authenticate.getUser() == null) {
-            throw CmsDomainException.forbiden();
-        }
-        this.setCreatedBy(Authenticate.getUser());
-        this.setCreationDate(new DateTime());
-
-        setSite(site);
-        setTopMenu(false);
-
-        Signal.emit(Menu.SIGNAL_CREATED, new DomainObjectEvent<Menu>(this));
-    }
-
     public Menu(Site site, LocalizedString name) {
-        super();
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
         }
@@ -187,10 +173,11 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
     public Menu clone(CloneCache cloneCache) {
         return cloneCache.getOrClone(this, obj -> {
             Collection<MenuItem> menuItems = new HashSet<>(getItemsSet());
+            LocalizedString name = getName() != null ? fromJson(getName().json()) : null;
 
-            Menu clone = new Menu(getSite());
+            Menu clone = new Menu(getSite(), name);
             cloneCache.setClone(Menu.this, clone);
-            clone.setName(getName() != null ? fromJson(getName().json()) : null);
+            clone.setName(name);
 
             for (MenuItem menuItem : menuItems) {
                 menuItem.clone(cloneCache).setMenu(clone);

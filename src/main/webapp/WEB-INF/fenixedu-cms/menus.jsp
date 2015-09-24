@@ -20,6 +20,8 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
+
 ${portal.toolkit()}
 
 <div class="page-header">
@@ -28,9 +30,18 @@ ${portal.toolkit()}
 </div>
 
 <p>
-    <a href="#create-post" class="btn btn-default btn-primary" data-toggle="modal" data-target="#create-menu" >
-        <span class="glyphicon glyphicon-plus"></span>&nbsp;New
-    </a>
+    <c:choose>
+        <c:when test="${permissions:canDoThis(site, 'CREATE_MENU')}">
+            <button type="button" data-toggle="modal" data-target="#create-menu" class="btn btn-primary">
+                <i class="icon icon-plus"></i> New
+            </button>
+        </c:when>
+        <c:otherwise>
+            <button type="button" class="btn btn-primary disabled">
+                <i class="icon icon-plus"></i> New
+            </button>
+        </c:otherwise>
+    </c:choose>
 </p>
 
 <c:choose>
@@ -57,7 +68,7 @@ ${portal.toolkit()}
                       <a href="${menuEditUrl}" class="btn btn-icon btn-primary">
                           <i class="glyphicon glyphicon-cog"></i>
                       </a>
-                      <a href="#deleteModal" data-toggle="modal" data-target ="#deleteModal" class="btn btn-icon btn-default">
+                      <a href="#deleteModal" data-toggle="modal" data-target ="#deleteModal" data-menu="${menu.slug}" class="btn btn-icon btn-danger">
                           <i class="glyphicon glyphicon-trash"></i>
                       </a>
                   </div>
@@ -91,41 +102,43 @@ ${portal.toolkit()}
     </div>
 </div>
 
-<div class="modal fade" id="create-menu" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-        <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/menus/${site.slug}/create" method="post" role="form">
-            ${csrf.field()}
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
-                <h3 class="modal-title">New Menu</h3>
-                <small>This could be the start of something great!</small>
-            </div>
-            <div class="modal-body">
-                <div class="${emptyName ? "form-group has-error" : "form-group"}">
-                    <label class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
+<c:if test="${permissions:canDoThis(site, 'CREATE_MENU')}">
+  <div class="modal fade" id="create-menu" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+          <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/menus/${site.slug}/create" method="post" role="form">
+              ${csrf.field()}
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
+                  <h3 class="modal-title">New Menu</h3>
+                  <small>This could be the start of something great!</small>
+              </div>
+              <div class="modal-body">
+                  <div class="${emptyName ? "form-group has-error" : "form-group"}">
+                      <label class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
 
-                    <div class="col-sm-10">
-                        <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.create.label.name" />">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="Submit" class="btn btn-primary">Make</button>
-            </div>
-        </form>
+                      <div class="col-sm-10">
+                          <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.create.label.name" />">
+                      </div>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  <button type="Submit" class="btn btn-primary">Make</button>
+              </div>
+          </form>
+      </div>
     </div>
   </div>
-</div>
 
 
-<script>
-(function () {
-    $("a[data-menu]").on('click', function(el) {
-        var menu = el.target.getAttribute('data-menu');
-        $('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/menus/${site.slug}/' + menu + '/delete');
-        $('#deleteModal').modal('show');
+  <script type="application/javascript">
+    $(document).ready(function () {
+        $("a[data-menu]").on('click', function(el) {
+            var menu = el.target.getAttribute('data-menu');
+            $('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/menus/${site.slug}/' + menu + '/delete');
+            $('#deleteModal').modal('show');
+        });
     });
-})();
-</script>
+  </script>
+</c:if>

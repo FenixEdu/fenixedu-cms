@@ -23,6 +23,8 @@ import com.google.gson.JsonParser;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
+import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +65,7 @@ public class AdminMenu {
     @RequestMapping(value = "{siteSlug}/create", method = RequestMethod.POST)
     public RedirectView createMenu(@PathVariable(value = "siteSlug") String slug, @RequestParam LocalizedString name) {
         Site site = Site.fromSlug(slug);
+        PermissionEvaluation.ensureCanDoThis(site, Permission.CREATE_MENU);
         Menu menu = service.createMenu(site, name);
         return new RedirectView("/cms/menus/" + site.getSlug() + "/" + menu.getSlug() + "/edit", true);
     }
