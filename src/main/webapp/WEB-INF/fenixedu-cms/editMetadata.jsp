@@ -68,48 +68,58 @@ ${portal.toolkit()}
 
     <script type="application/javascript">
         var initialMetadataJson = '${metadata}'
-        $(document).ready(function() {
+
+        function updateMetadataAsync() {
             setTimeout(function(){
                 var handler = $('#metadata').data('handler');
-                handler.set(JSON.stringify(JSON.parse(initialMetadataJson), null, 2));
+                if(handler) {
+                    updateMetadataSync(handler);
+                } else {
+                    updateMetadataAsync();
+                }
+            }, 500);
+        }
 
-                function isValidJson() {
-                    try {
-                        JSON.parse(handler.get());
-                        return true;
-                    } catch(e) {
-                        return false;
+        function updateMetadataSync(handler) {
+            handler.set(JSON.stringify(JSON.parse(initialMetadataJson), null, 2));
+
+            function isValidJson() {
+                try {
+                    JSON.parse(handler.get());
+                    return true;
+                } catch(e) {
+                    return false;
+                }
+            }
+
+            $('#update-btn').click(function(){
+                $('#update-metadata-form').submit();
+            });
+
+            $(window).bind('keydown', function(event) {
+                if (isValidJson() && event.ctrlKey || event.metaKey) {
+                    switch (String.fromCharCode(event.which).toLowerCase()) {
+                    case 's':
+                        event.preventDefault();
+                        $('#update-metadata-form').submit();
+                        break;
                     }
                 }
+            });
 
-                $('#update-btn').click(function(){
-                    $('#update-metadata-form').submit();
-                });
+            setInterval(function(){
+                if(isValidJson()) {
+                    $('#update-btn').removeClass('disabled');
+                    $('#update-metadata-form [name="metadata"]').val(handler.get());
+                } else {
+                    $('#update-btn').addClass('disabled');
+                }
+            }, 200);
+        }
 
-                $(window).bind('keydown', function(event) {
-                    if (isValidJson() && event.ctrlKey || event.metaKey) {
-                        switch (String.fromCharCode(event.which).toLowerCase()) {
-                        case 's':
-                            event.preventDefault();
-                            $('#update-metadata-form').submit();
-                            break;
-                        }
-                    }
-                });
-
-                setInterval(function(){
-                    if(isValidJson()) {
-                        $('#update-btn').removeClass('disabled');
-                        $('#update-metadata-form [name="metadata"]').val(handler.get());
-                    } else {
-                        $('#update-btn').addClass('disabled');
-                    }
-                }, 200);
-            }, 500);
+        $(document).ready(function(){
+            updateMetadataAsync();
         });
-
-
-
     </script>
 
 </div>
