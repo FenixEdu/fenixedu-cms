@@ -31,7 +31,7 @@ ${portal.toolkit()}
 
 <p>
     <c:choose>
-        <c:when test="${permissions:canDoThis(site, 'CREATE_CATEGORY')}">
+        <c:when test="${permissions:canDoThis(site, 'EDIT_CATEGORY,CREATE_CATEGORY')}">
             <button type="button" data-toggle="modal" data-target="#create-category" class="btn btn-primary">
                 <i class="icon icon-plus"></i> New
             </button>
@@ -45,35 +45,43 @@ ${portal.toolkit()}
 </p>
 
 <c:choose>
-      <c:when test="${categories.size() == 0}">
+    <c:when test="${categories.size() == 0}">
         <div class="panel panel-default">
           <div class="panel-body">
             <i><spring:message code="categories.manage.emptyCategories"/></i>
           </div>
         </div>
-      </c:when>
+    </c:when>
 
-      <c:otherwise>
+    <c:otherwise>
 
-      <ul class="list-group">
-        <c:forEach var="category" items="${categories}">
-            <li class="list-group-item">
-                <h3><a href="${category.getEditUrl()}">${category.name.content}</a></h3>
-                
-                <div><small><code>${category.getSlug()}</code></small></div>
+        <ul class="list-group">
+            <c:forEach var="category" items="${categories}">
+                <li class="list-group-item">
 
-                <span class="label label-primary">${category.postsSet.size()} Posts</span>
+                    <c:choose>
+                        <c:when test="${permissions:canDoThis(site, 'EDIT_CATEGORY')}">
+                            <h3><a href="${category.getEditUrl()}">${category.name.content}</a></h3>
+                        </c:when>
+                        <c:otherwise>
+                            <h3>${category.name.content}</h3>
+                        </c:otherwise>
+                    </c:choose>
+                    
+                    <div><small><code>${category.getSlug()}</code></small></div>
 
-                <div class="btn-group pull-right">
-                    <a href="${category.getEditUrl()}" class="btn btn-icon btn-primary pull-right">
-                        <i class="glyphicon glyphicon-cog"></i>
-                    </a>
-                </div>
-            </li>
-        </c:forEach>
-      </ul>
+                    <span class="label label-primary">${category.postsSet.size()} Posts</span>
 
-      </c:otherwise>
+                    <div class="btn-group pull-right">
+                        <a href="${category.getEditUrl()}" class="btn btn-icon btn-primary pull-right ${permissions:canDoThis(site, 'EDIT_CATEGORY') ? '' : 'disabled'}">
+                            <i class="glyphicon glyphicon-cog"></i>
+                        </a>
+                    </div>
+                </li>
+            </c:forEach>
+        </ul>
+
+    </c:otherwise>
 </c:choose>
 
 <c:if test="${permissions:canDoThis(site, 'CREATE_CATEGORY')}">

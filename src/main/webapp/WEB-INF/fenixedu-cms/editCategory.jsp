@@ -113,30 +113,32 @@ ${portal.toolkit()}
           <div class="panel-heading">Danger Zone</div>
           <div class="panel-body">
             <p class="help-block">Once you delete a category, there is no going back. Please be certain.</p>
-            <button data-toggle="modal" data-target="#deleteModal" class="btn btn-danger">Delete this Category</button>
+            <button data-toggle="modal" data-target="#deleteModal" class="btn btn-danger ${permissions:canDoThis(site, 'DELETE_CATEGORY') ? '' : 'disabled'}">Delete this Category</button>
           </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="deleteModal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Are you sure?</h4>
-      </div>
-      <div class="modal-body">
-        <p>You are about to delete the category '<c:out value="${category.name.content}" />'. There is no way to rollback this operation. Are you sure? </p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
-        <button type="button" onclick="$('#deleteForm').submit();" class="btn btn-danger">Yes</button>
-        <form action="${pageContext.request.contextPath}/cms/categories/${site.slug}/${category.slug}/delete" method="post" id="deleteForm">${csrf.field()}</form> 
+<c:if test="${permissions:canDoThis(site, 'DELETE_CATEGORY')}">
+    <div class="modal fade" id="deleteModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Are you sure?</h4>
+          </div>
+          <div class="modal-body">
+            <p>You are about to delete the category '<c:out value="${category.name.content}" />'. There is no way to rollback this operation. Are you sure? </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+            <button type="button" onclick="$('#deleteForm').submit();" class="btn btn-danger">Yes</button>
+            <form action="${pageContext.request.contextPath}/cms/categories/${site.slug}/${category.slug}/delete" method="post" id="deleteForm">${csrf.field()}</form> 
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+</c:if>
 
 <div class="modal fade" id="updateModal">
     <div class="modal-dialog modal-lg">

@@ -11,7 +11,7 @@ import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.PermissionEvaluation;
-import org.fenixedu.cms.domain.PermissionsArray;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostFile;
 import org.fenixedu.cms.domain.PostMetadata;
@@ -29,6 +29,7 @@ import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
 import static java.util.Optional.ofNullable;
+import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
 
 /**
  * Created by borgez on 30-07-2015.
@@ -116,8 +117,10 @@ public class AdminPostsService {
 	JsonObject postJson = new JsonObject();
 	JsonArray categoriesJson = new JsonArray();
 	JsonArray filesJson = new JsonArray();
-	post.getSite().getCategoriesSet().stream().sorted(Category.CATEGORY_NAME_COMPARATOR)
-			.map(category -> serializeCategory(category, post)).forEach(categoriesJson::add);
+      	if(canDoThis(post.getSite(), Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY)) {
+	  post.getSite().getCategoriesSet().stream().sorted(Category.CATEGORY_NAME_COMPARATOR)
+	      .map(category -> serializeCategory(category, post)).forEach(categoriesJson::add);
+	}
 	post.getFilesSorted().stream().map(this::serializePostFile).forEach(filesJson::add);
 	postJson.addProperty("slug", post.getSlug());
 	postJson.add("name", ofNullable(post.getName()).map(LocalizedString::json).orElseGet(JsonObject::new));
@@ -157,27 +160,31 @@ public class AdminPostsService {
     }
 
     private void processCategoryChanges(Site site, Post post, JsonObject postJson) {
-      if (postJson.get("categories") != null && postJson.get("categories").isJsonArray()) {
-	Set<Category> newCategories = new HashSet<>();
-	for (JsonElement categoryJsonEl : postJson.get("categories").getAsJsonArray()) {
-	  JsonObject categoryJson = categoryJsonEl.getAsJsonObject();
-	  if (ofNullable(categoryJson.get("use")).map(JsonElement::getAsBoolean).orElse(false)) {
-	    String categorySlug = categoryJson.get("slug").getAsString();
-	    LocalizedString categoryName = Post.sanitize(LocalizedString.fromJson(categoryJson.get("name")));
-	    Category category = site.categoryForSlug(categorySlug);
-	    if(category==null) {
-	      PermissionEvaluation
-		  .ensureCanDoThis(site, PermissionsArray.Permission.CREATE_CATEGORY);
-	      category = new Category(site, categoryName);
+      if(canDoThis(post.getSite(), Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY)) {
+	if (postJson.get("categories") != null && postJson.get("categories").isJsonArray()) {
+	  Set<Category> newCategories = new HashSet<>();
+	  for (JsonElement categoryJsonEl : postJson.get("categories").getAsJsonArray()) {
+	    JsonObject categoryJson = categoryJsonEl.getAsJsonObject();
+	    if (ofNullable(categoryJson.get("use")).map(JsonElement::getAsBoolean).orElse(false)) {
+	      String categorySlug = categoryJson.get("slug").getAsString();
+	      LocalizedString
+		  categoryName =
+		  Post.sanitize(LocalizedString.fromJson(categoryJson.get("name")));
+	      Category category = site.categoryForSlug(categorySlug);
+	      if (category == null) {
+		PermissionEvaluation
+		    .ensureCanDoThis(site, Permission.CREATE_CATEGORY);
+		category = new Category(site, categoryName);
+	      }
+	      newCategories.add(category);
 	    }
-	    newCategories.add(category);
 	  }
-	}
 
-	if (!newCategories.containsAll(post.getCategoriesSet()) || !post.getCategoriesSet()
-	    .containsAll(newCategories)) {
-	  post.getCategoriesSet().clear();
-	  newCategories.stream().forEach(post::addCategories);
+	  if (!newCategories.containsAll(post.getCategoriesSet()) || !post.getCategoriesSet()
+	      .containsAll(newCategories)) {
+	    post.getCategoriesSet().clear();
+	    newCategories.stream().forEach(post::addCategories);
+	  }
 	}
       }
     }

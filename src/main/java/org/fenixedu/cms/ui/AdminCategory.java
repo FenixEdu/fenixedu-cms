@@ -20,7 +20,6 @@ package org.fenixedu.cms.ui;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
-import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
@@ -35,6 +34,8 @@ import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/categories")
 public class AdminCategory {
@@ -43,6 +44,7 @@ public class AdminCategory {
     public String categories(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
         AdminSites.canEdit(site);
+        ensureCanDoThis(site, Permission.LIST_CATEGORIES);
         model.addAttribute("site", site);
         model.addAttribute("categories", site.getCategoriesSet());
         return "fenixedu-cms/categories";
@@ -61,7 +63,7 @@ public class AdminCategory {
         FenixFramework.atomic(() -> {
             Site s = Site.fromSlug(slugSite);
             AdminSites.canEdit(s);
-            PermissionEvaluation.ensureCanDoThis(s, Permission.DELETE_CATEGORY);
+            ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY, Permission.DELETE_CATEGORY);
             s.categoryForSlug(slugCategory).delete();
         });
         return new RedirectView("/cms/categories/" + slugSite, true);
@@ -82,6 +84,7 @@ public class AdminCategory {
     public String viewCategory(Model model, @PathVariable String slugSite, @PathVariable String slugCategory) {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
+        ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY);
         model.addAttribute("site", s);
         model.addAttribute("category", s.categoryForSlug(slugCategory));
         return "fenixedu-cms/editCategory";
@@ -95,6 +98,7 @@ public class AdminCategory {
         Category c = s.categoryForSlug(slugCategory);
         FenixFramework.atomic(()->{
             AdminSites.canEdit(s);
+            ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY);
             c.setName(name);
         });
         return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);
@@ -102,13 +106,13 @@ public class AdminCategory {
 
     @Atomic(mode = Atomic.TxMode.WRITE)
     private Category createCategory(Site site, LocalizedString name) {
-        PermissionEvaluation.ensureCanDoThis(site, Permission.CREATE_CATEGORY);
+        ensureCanDoThis(site, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY, Permission.CREATE_CATEGORY);
         return new Category(site, name);
     }
 
     @Atomic(mode = Atomic.TxMode.WRITE)
     private Post createPost(Site site, Category category, LocalizedString name) {
-        PermissionEvaluation.ensureCanDoThis(site, Permission.CREATE_POST);
+        ensureCanDoThis(site, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY, Permission.CREATE_POST);
         Post p = new Post(site);
         p.setName(Post.sanitize(name));
         p.setBody(new LocalizedString());

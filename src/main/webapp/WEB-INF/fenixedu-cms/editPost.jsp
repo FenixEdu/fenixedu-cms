@@ -97,37 +97,38 @@ ${portal.angularToolkit()}
 	    </div>
 
 		<!-- CATEGORIES -->
-		<div class="panel panel-default">
-			<div class="panel-heading"><spring:message code="site.manage.label.categories"/></div>
-			<div class="panel-body">
-		
-                <p>
-                    <c:choose>
-                        <c:when test="${permissions:canDoThis(site, 'CREATE_CATEGORY')}">
-                            <button type="button" data-toggle="modal" data-target="#addCategory" class="btn btn-default btn-xs">
-                                <i class="icon icon-plus"></i> Create Category
-                            </button>
-                        </c:when>
-                        <c:otherwise>
-                            <button type="button" class="btn btn-default btn-xs disabled">
-                                <i class="icon icon-plus"></i> Create Category
-                            </button>
-                        </c:otherwise>
-                    </c:choose>
-                </p>
+        <c:if test="${permissions:canDoThis(site, 'LIST_CATEGORIES,EDIT_CATEGORY')}">
+			<div class="panel panel-default">
+				<div class="panel-heading"><spring:message code="site.manage.label.categories"/></div>
+				<div class="panel-body">
+			
+	                <p>
+	                    <c:choose>
+	                        <c:when test="${permissions:canDoThis(site, 'CREATE_CATEGORY')}">
+	                            <button type="button" data-toggle="modal" data-target="#addCategory" class="btn btn-default btn-xs">
+	                                <i class="icon icon-plus"></i> Create Category
+	                            </button>
+	                        </c:when>
+	                        <c:otherwise>
+	                            <button type="button" class="btn btn-default btn-xs disabled">
+	                                <i class="icon icon-plus"></i> Create Category
+	                            </button>
+	                        </c:otherwise>
+	                    </c:choose>
+	                </p>
 
-				<div ng-show="post.categories && post.categories.length">
-					<div class="checkbox" class="col-sm-4" ng-repeat="category in post.categories">
-						<label><input type="checkbox" ng-model="category.use" /> {{category.name | i18n }}</label>
+					<div ng-show="post.categories && post.categories.length">
+						<div class="checkbox" class="col-sm-4" ng-repeat="category in post.categories">
+							<label><input type="checkbox" ng-model="category.use" /> {{category.name | i18n }}</label>
+						</div>
+					</div>
+
+					<div ng-hide="post.categories && post.categories.length">
+						<i>Post has no categories.</i>
 					</div>
 				</div>
-
-				<div ng-hide="post.categories && post.categories.length">
-					<i>Post has no categories.</i>
-				</div>
 			</div>
-
-		</div>
+		</c:if>
 
 		<!-- FILES -->
 		<div class="panel panel-default">
