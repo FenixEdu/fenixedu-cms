@@ -20,6 +20,7 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
 
 <div class="page-header">
     <h1>${site.name.content}</h1>
@@ -96,133 +97,143 @@
     </form>
     
     <hr>
+    
+    <c:if test="${permissions:canDoThis(site, 'SEE_PAGE_COMPONENTS')}">
 
-    <h3><spring:message code="page.edit.label.pageComponents"/>:</h3>
+        <h3><spring:message code="page.edit.label.pageComponents"/>:</h3>
 
-    <p>
-        <div class="btn-group">
-            <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
-                <spring:message code="page.edit.label.addComponent"/>
-                <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu">
-                <li ng-repeat="component in components">
-                    <a href="#" ng-if="component.stateless" ng-click="installStateless(component)">{{component.name}}</a>
-                    <a href="#" ng-if="!component.stateless" ng-click="openModal(component)">{{component.name}}</a>
-                </li>
-            </ul>
-        </div>
-    </p>
-
-    <c:choose>
-        <c:when test="${page.componentsSet.size() == 0}">
-            <p><spring:message code="page.edit.label.emtpySiteMenus"/></p>
-        </c:when>
-
-        <c:otherwise>
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th><spring:message code="page.edit.label.name"/></th>
-                    <th><spring:message code="page.edit.label.creationDate"/></th>
-                    <th><spring:message code="page.edit.label.operations"/></th>
-                </tr>
-                </thead>
-                <tbody>
-                <c:forEach var="component" items="${page.componentsSet}">
-                    <tr>
-                        <td>
-                            <h5>${component.name}</h5>
-
-                            <div>
-                                <small>${component.description}</code></small>
-                            </div>
-                        </td>
-                        <td>${component.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
-                            <small>- ${component.createdBy.name}</small>
-                        </td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <a href="#" class="btn btn-danger btn-sm"
-                                   onclick="document.getElementById('deleteComponentForm${component.externalId}').submit();"><spring:message
-                                        code="action.delete"/></a>
-
-
-                                <c:if test="${component.getClass().simpleName.equals('StaticPost')}">
-                                    <a href="${component.post.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
-                                    <spring:message code="action.edit"></spring:message>
-                                    </a>
-                                </c:if>
-                                <c:if test="${component.getClass().simpleName.equals('ListCategoryPosts')}">
-                                    <a href="${component.category.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
-                                    <spring:message code="action.edit"></spring:message>
-                                    </a>
-                                </c:if>
-                                <c:if test="${component.getClass().simpleName.equals('StrategyBasedComponent')}">
-                                    <c:if test="${component.componentType().simpleName.equals('ListPosts')}">
-                                        <a href="${pageContext.request.contextPath}/cms/posts/${page.site.slug}"
-                                           role="button"
-                                           class="btn btn-default btn-sm"/>
-                                        <spring:message code="action.edit"></spring:message>
-                                        </a>
-                                    </c:if>
-                                    <c:if test="${component.componentType().simpleName.equals('ListOfCategories')}">
-                                        <a href="${pageContext.request.contextPath}/cms/categories/${page.site.slug}"
-                                           role="button"
-                                           class="btn btn-default btn-sm"/>
-                                        <spring:message code="action.edit"></spring:message>
-                                        </a>
-                                    </c:if>
-                                </c:if>
-                                <form id="deleteComponentForm${component.externalId}"
-                                      action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/${component.getExternalId()}/delete"
-                                      method="POST">${csrf.field()}</form>
-                            </div>
-                        </td>
-                    </tr>
-                </c:forEach>
-                </tbody>
-            </table>
-        </c:otherwise>
-    </c:choose>
-
-    <div class="modal fade" id="componentModal" tabindex="-1" role="dialog" aria-labelledby="componentModal"
-         aria-hidden="true">
-        <form class="modal-dialog form-horizontal" ng-submit="createComponent()">
-            ${csrf.field()}
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title">{{component.name}}</h4>
+        <c:if test="${permissions:canDoThis(site, 'EDIT_PAGE_COMPONENTS')}">
+            <p>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle btn-sm" data-toggle="dropdown">
+                        <spring:message code="page.edit.label.addComponent"/>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li ng-repeat="component in components">
+                            <a href="#" ng-if="component.stateless" ng-click="installStateless(component)">{{component.name}}</a>
+                            <a href="#" ng-if="!component.stateless" ng-click="openModal(component)">{{component.name}}</a>
+                        </li>
+                    </ul>
                 </div>
-                <div class="modal-body">
-                    <div class="form-group" ng-repeat="item in data">
-                        <label for="{{item.key}}" class="col-sm-2 control-label">{{item.title}} <span style="color: red"
-                                                                                                      ng-if="item.required">*</span></label>
+            </p>
+        </c:if>
 
-                        <div class="col-sm-10" ng-if="isSelect(item)">
-                            <select class="form-control" ng-model="selected[item.key]" ng-required="item.required"
-                                    ng-options="value.value as value.label for value in item.values">
-                                <option value="">-- Pick One --</option>
-                            </select>
-                        </div>
-                        <div class="col-sm-10" ng-if="!isSelect(item) && item.type != 'BOOLEAN'">
-                            <input type="{{item.type}}" ng-model="selected[item.key]" class="form-control"
-                                   ng-required="item.required"/>
-                        </div>
-                        <div class="col-sm-10" ng-if="item.type == 'BOOLEAN'">
-                            <input type="checkbox" ng-model="selected[item.key]"/>
+        <c:choose>
+            <c:when test="${page.componentsSet.size() == 0}">
+                <p><spring:message code="page.edit.label.emtpySiteMenus"/></p>
+            </c:when>
+
+            <c:otherwise>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th><spring:message code="page.edit.label.name"/></th>
+                        <th><spring:message code="page.edit.label.creationDate"/></th>
+                        <th><spring:message code="page.edit.label.operations"/></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="component" items="${page.componentsSet}">
+                        <tr>
+                            <td>
+                                <h5>${component.name}</h5>
+
+                                <div>
+                                    <small>${component.description}</code></small>
+                                </div>
+                            </td>
+
+                            <td>${component.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
+                                <small>- ${component.createdBy.name}</small>
+                            </td>
+                            
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <c:if test="${permissions:canDoThis(site, 'EDIT_PAGE_COMPONENTS')}">
+                                        <c:if test="${permissions:canDoThis(site, 'DELETE_PAGE_COMPONENTS')}">
+                                            <button type="button" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteComponentForm${component.externalId}').submit();"><spring:message code="action.delete"/></button>
+
+                                            <form id="deleteComponentForm${component.externalId}"
+                                              action="${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/${component.getExternalId()}/delete"
+                                              method="POST">${csrf.field()}</form>
+
+                                        </c:if>
+                                    </c:if>
+
+                                    <c:if test="${component.getClass().simpleName.equals('StaticPost')}">
+                                        <a href="${component.post.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
+                                        <spring:message code="action.edit"></spring:message>
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${component.getClass().simpleName.equals('ListCategoryPosts')}">
+                                        <a href="${component.category.getEditUrl()}" class="btn btn-default btn-sm" role="button"/>
+                                        <spring:message code="action.edit"></spring:message>
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${component.getClass().simpleName.equals('StrategyBasedComponent')}">
+                                        <c:if test="${component.componentType().simpleName.equals('ListPosts')}">
+                                            <a href="${pageContext.request.contextPath}/cms/posts/${page.site.slug}"
+                                               role="button"
+                                               class="btn btn-default btn-sm"/>
+                                            <spring:message code="action.edit"></spring:message>
+                                            </a>
+                                        </c:if>
+                                        <c:if test="${component.componentType().simpleName.equals('ListOfCategories')}">
+                                            <a href="${pageContext.request.contextPath}/cms/categories/${page.site.slug}"
+                                               role="button"
+                                               class="btn btn-default btn-sm"/>
+                                            <spring:message code="action.edit"></spring:message>
+                                            </a>
+                                        </c:if>
+                                    </c:if>
+                                </div>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+            </c:otherwise>
+        </c:choose>
+
+        <div class="modal fade" id="componentModal" tabindex="-1" role="dialog" aria-labelledby="componentModal"
+             aria-hidden="true">
+            <form class="modal-dialog form-horizontal" ng-submit="createComponent()">
+                ${csrf.field()}
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">{{component.name}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group" ng-repeat="item in data">
+                            <label for="{{item.key}}" class="col-sm-2 control-label">{{item.title}} <span style="color: red"
+                                                                                                          ng-if="item.required">*</span></label>
+
+                            <div class="col-sm-10" ng-if="isSelect(item)">
+                                <select class="form-control" ng-model="selected[item.key]" ng-required="item.required"
+                                        ng-options="value.value as value.label for value in item.values">
+                                    <option value="">-- Pick One --</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-10" ng-if="!isSelect(item) && item.type != 'BOOLEAN'">
+                                <input type="{{item.type}}" ng-model="selected[item.key]" class="form-control"
+                                       ng-required="item.required"/>
+                            </div>
+                            <div class="col-sm-10" ng-if="item.type == 'BOOLEAN'">
+                                <input type="checkbox" ng-model="selected[item.key]"/>
+                            </div>
                         </div>
                     </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message
+                                code="action.close"/></button>
+                        <button type="submit" class="btn btn-primary"><spring:message code="action.create"/></button>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message
-                            code="action.close"/></button>
-                    <button type="submit" class="btn btn-primary"><spring:message code="action.create"/></button>
-                </div>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
+    </c:if>
 </div>
 
 

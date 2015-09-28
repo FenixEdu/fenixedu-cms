@@ -20,41 +20,52 @@ package org.fenixedu.cms.ui;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.CMSComponent;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ComponentDescriptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 import static pt.ist.fenixframework.FenixFramework.atomic;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/components")
 public class AdminComponents {
 
-    @RequestMapping(value = "{slugSite}/{slugPage}/create", method = RequestMethod.POST, consumes = "application/json")
-    public ResponseEntity<String> createComponent(@PathVariable(value = "slugSite") String slugSite, @PathVariable(
-            value = "slugPage") String slugPage, @RequestBody String json) throws JsonSyntaxException, Exception {
+    @RequestMapping(value = "{slugSite}/{slugPage}/create",
+        method = RequestMethod.POST, consumes = "application/json")
+    public ResponseEntity<String> createComponent(@PathVariable String slugSite,
+                                                  @PathVariable String slugPage,
+                                                  @RequestBody String json) throws Exception {
         Site site = Site.fromSlug(slugSite);
         AdminSites.canEdit(site);
 
         Page page = site.pageForSlug(slugPage);
 
-        createComponent(site, page, new JsonParser().parse(json).getAsJsonObject());
+        createComponent(page, new JsonParser().parse(json).getAsJsonObject());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private void createComponent(Site site, Page page, JsonObject json) throws Exception {
+    private void createComponent(Page page, JsonObject json) throws Exception {
+        ensureCanDoThis(page.getSite(), Permission.EDIT_PAGE_COMPONENTS);
         String componentType = json.get("type").getAsString();
         ComponentDescriptor descriptor = Component.forType(componentType);
         if (descriptor == null) {
@@ -72,7 +83,8 @@ public class AdminComponents {
 
     @ResponseBody
     @RequestMapping(value = "/componentArguments/{page}", produces = "application/json;charset=UTF-8")
-    public String getComponentArguments(@PathVariable("page") Page page, @RequestParam("type") String type) {
+    public String getComponentArguments(@PathVariable Page page, @RequestParam String type) {
+        ensureCanDoThis(page.getSite(), Permission.SEE_PAGE_COMPONENTS);
         AdminSites.canEdit(page.getSite());
         ComponentDescriptor descriptor = Component.forType(type);
         if (descriptor == null) {
@@ -92,6 +104,7 @@ public class AdminComponents {
 
         if(component!=null) {
             atomic(() -> {
+                ensureCanDoThis(s, Permission.EDIT_PAGE_COMPONENTS, Permission.DELETE_PAGE_COMPONENTS);
                 component.removeInstalledPage(p);
                 if(component.getInstalledPageSet().isEmpty()) {
                     component.delete();
