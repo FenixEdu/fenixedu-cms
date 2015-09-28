@@ -64,20 +64,8 @@ public class AdminPostsService {
 
 	LocalizedString name = Post.sanitize(LocalizedString.fromJson(postJson.get("name")));
 	LocalizedString body = Post.sanitize(LocalizedString.fromJson(postJson.get("body")));
-	boolean active = ofNullable(postJson.get("active")).map(JsonElement::getAsBoolean).orElse(false);
-	DateTime publicationBegin = ofNullable(postJson.get("publicationBegin"))
-			.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString).map(DateTime::parse).orElse(null);
-	DateTime publicationEnds = ofNullable(postJson.get("publicationEnd"))
-			.filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString).map(DateTime::parse).orElse(null);
-	Group canViewGroup = ofNullable(postJson.get("canViewGroup"))
-			.map(JsonElement::getAsString).map(Group::parse).orElse(post.getCanViewGroup());
-	String slug = ofNullable(postJson.get("slug")).map(JsonElement::getAsString).orElse(post.getSlug());
-	User createdBy = ofNullable(postJson.get("createdBy")).map(JsonElement::getAsJsonObject)
-			.map(json -> json.get("username").getAsString()).map(User::findByUsername).orElse(post.getCreatedBy());
-
-      	processCategoryChanges(site, post, postJson);
-
-	processFileChanges(site, post, postJson);
+      	String slug = ofNullable(postJson.get("slug"))
+	    .map(JsonElement::getAsString).orElse(post.getSlug());
 
 	if(!post.getName().equals(name)) {
 	    post.setName(name);
@@ -88,23 +76,11 @@ public class AdminPostsService {
 	if(!post.getSlug().equals(slug)) {
 	    post.setSlug(slug);
 	}
-	if(!equalDates(post.getPublicationBegin(), publicationBegin)) {
-	    post.setPublicationBegin(publicationBegin);
-	}
-	if(!equalDates(post.getPublicationEnd(), publicationEnds)) {
-	    post.setPublicationEnd(publicationEnds);
-	}
-	if(!post.getCanViewGroup().equals(canViewGroup)) {
-	    post.setCanViewGroup(canViewGroup);
-	}
-	if(post.getActive() != active) {
-	    post.setActive(active);
-	}
-	if(!post.getCreatedBy().equals(createdBy)) {
-	    post.setCreatedBy(createdBy);
-	}
-	post.fixOrder(post.getFilesSorted());
 
+	processCategoryChanges(site, post, postJson);
+	processFileChanges(site, post, postJson);
+	processPublicationChanges(site, post, postJson);
+	post.fixOrder(post.getFilesSorted());
     }
 
 
@@ -123,18 +99,25 @@ public class AdminPostsService {
 	}
 	post.getFilesSorted().stream().map(this::serializePostFile).forEach(filesJson::add);
 	postJson.addProperty("slug", post.getSlug());
-	postJson.add("name", ofNullable(post.getName()).map(LocalizedString::json).orElseGet(JsonObject::new));
+	postJson.add("name", ofNullable(post.getName()).map(LocalizedString::json)
+	    .orElseGet(JsonObject::new));
 	postJson.add("body", ofNullable(post.getBody()).map(LocalizedString::json).orElseGet(JsonObject::new));
 	postJson.add("metadata", ofNullable(post.getMetadata()).map(PostMetadata::json).orElseGet(JsonObject::new));
-	postJson.addProperty("canViewGroup", post.getCanViewGroup().getExpression());
 	postJson.add("categories", categoriesJson);
 	postJson.add("files", filesJson);
-	postJson.addProperty("active", post.getActive());
 	postJson.addProperty("address", post.getAddress());
-	postJson.add("createdBy", UserResource.getBuilder().view(post.getCreatedBy()));
-	postJson.addProperty("publicationBegin", ofNullable(post.getPublicationBegin()).map(DateTime::toString).orElse(null));
-	postJson.addProperty("publicationEnd", ofNullable(post.getPublicationEnd()).map(DateTime::toString).orElse(null));
-	return postJson;
+
+	if(canPublish(post)) {
+	  postJson.addProperty("active", post.getActive());
+	  postJson.addProperty("canViewGroup", post.getCanViewGroup().getExpression());
+	  postJson.add("createdBy", UserResource.getBuilder().view(post.getCreatedBy()));
+	  postJson.addProperty("publicationBegin", ofNullable(post.getPublicationBegin())
+	      .map(DateTime::toString).orElse(null));
+	  postJson.addProperty("publicationEnd", ofNullable(post.getPublicationEnd())
+	      .map(DateTime::toString).orElse(null));
+	}
+
+      return postJson;
     }
 
     private JsonObject serializeCategory(Category category, Post post) {
@@ -157,6 +140,54 @@ public class AdminPostsService {
 	fileJson.addProperty("canViewGroup", postFile.getFiles().getAccessGroup().getExpression());
 	fileJson.addProperty("url", FileDownloadServlet.getDownloadUrl(postFile.getFiles()));
 	return fileJson;
+    }
+
+    private void processPublicationChanges(Site site, Post post, JsonObject postJson) {
+	if(canPublish(post)) {
+
+	    boolean active = ofNullable(postJson.get("active"))
+		  .map(JsonElement::getAsBoolean)
+		  .orElse(false);
+
+	      DateTime publicationBegin = ofNullable(postJson.get("publicationBegin"))
+		  .filter(JsonElement::isJsonPrimitive)
+		    .map(JsonElement::getAsString)
+		    .map(DateTime::parse)
+		    .orElse(null);
+
+	    DateTime publicationEnds = ofNullable(postJson.get("publicationEnd"))
+		.filter(JsonElement::isJsonPrimitive)
+		    .map(JsonElement::getAsString)
+		    .map(DateTime::parse)
+		    .orElse(null);
+
+	    Group canViewGroup = ofNullable(postJson.get("canViewGroup"))
+		.map(JsonElement::getAsString)
+		    .map(Group::parse)
+		    .orElse(post.getCanViewGroup());
+
+	    User createdBy = ofNullable(postJson.get("createdBy"))
+	      .map(JsonElement::getAsJsonObject)
+	      .map(json -> json.get("username").getAsString())
+		  .map(User::findByUsername)
+		  .orElse(post.getCreatedBy());
+
+	      if(!equalDates(post.getPublicationBegin(), publicationBegin)) {
+		post.setPublicationBegin(publicationBegin);
+	      }
+	      if(!equalDates(post.getPublicationEnd(), publicationEnds)) {
+		post.setPublicationEnd(publicationEnds);
+	      }
+	      if(!post.getCanViewGroup().equals(canViewGroup)) {
+		post.setCanViewGroup(canViewGroup);
+	      }
+	      if(post.getActive() != active) {
+		post.setActive(active);
+	      }
+	      if(!post.getCreatedBy().equals(createdBy)) {
+		post.setCreatedBy(createdBy);
+	      }
+      	}
     }
 
     private void processCategoryChanges(Site site, Post post, JsonObject postJson) {
@@ -208,4 +239,9 @@ public class AdminPostsService {
       }
     }
 
+
+    private boolean canPublish(Post post) {
+      	return (post.isStaticPost() && canDoThis(post.getSite(), Permission.PUBLISH_PAGES)) ||
+	       (!post.isStaticPost() && canDoThis(post.getSite(), Permission.PUBLISH_POSTS));
+    }
 }

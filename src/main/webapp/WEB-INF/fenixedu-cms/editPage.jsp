@@ -76,24 +76,26 @@ ${portal.angularToolkit()}
         </div>
 
         <!-- PUBLISHED -->
-        <div class="panel panel-default">
-            <div class="panel-heading">Publish</div>
-            <div class="panel-body">
-                <dl class="dl-horizontal">
-                    <dt>Published</dt>
-                    <dd><input type="checkbox" class="form-control" ng-model="post.active"></dd>
-                    <dt>Publication Begin</dt>
-                    <dd><input type="text" class="form-control" bennu-date-time="post.publicationBegin"></dd>
-                    <dt>Publication End</dt>
-                    <dd><input type="text" class="form-control" bennu-date-time="post.publicationEnd"></dd>
-                    <dt>Author</dt>
-                    <dd><input type="text" class="form-control" bennu-user-autocomplete="post.createdBy" /></dd>
-                    <dt>Access Control</dt>
-                    <dd><input type="text" class="form-control" bennu-group="post.canViewGroup" allow="public,users,managers" /></dd>
-                </dl>
+        <c:if test="${permissions:canDoThis(site, 'PUBLISH_PAGES')}">
+            <div class="panel panel-default">
+                <div class="panel-heading">Publish</div>
+                <div class="panel-body">
+                    <dl class="dl-horizontal">
+                        <dt>Published</dt>
+                        <dd><input type="checkbox" class="form-control" ng-model="post.active"></dd>
+                        <dt>Publication Begin</dt>
+                        <dd><input type="text" class="form-control" bennu-date-time="post.publicationBegin"></dd>
+                        <dt>Publication End</dt>
+                        <dd><input type="text" class="form-control" bennu-date-time="post.publicationEnd"></dd>
+                        <dt>Author</dt>
+                        <dd><input type="text" class="form-control" bennu-user-autocomplete="post.createdBy" /></dd>
+                        <dt>Access Control</dt>
+                        <dd><input type="text" class="form-control" bennu-group="post.canViewGroup" allow="public,users,managers" /></dd>
+                    </dl>
+                </div>
             </div>
-        </div>
-
+        </c:if>
+        
         <!-- CATEGORIES -->
         <c:if test="${permissions:canDoThis(site, 'LIST_CATEGORIES,EDIT_CATEGORY')}">
             <div class="panel panel-default">
