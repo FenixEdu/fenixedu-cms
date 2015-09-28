@@ -9,6 +9,8 @@ import com.google.gson.JsonPrimitive;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.stereotype.Service;
@@ -111,15 +113,19 @@ public class AdminMenusService {
 
     void processMenuItemChanges(Menu menu, MenuItem parent, JsonObject menuItemJson, int newPosition) {
 	LocalizedString newName = LocalizedString.fromJson(menuItemJson.get("name"));
-	MenuItem menuItem = menuItemForOid(menu.getSite(), menuItemJson.get("key").getAsString()).orElseGet(
-			() -> new MenuItem(menu));
+      	String key = menuItemJson.get("key").getAsString();
+
+	MenuItem menuItem = menuItemForOid(menu.getSite(), key).orElseGet(()-> {
+	  PermissionEvaluation.ensureCanDoThis(menu.getSite(), Permission.CREATE_MENU_ITEM);
+	  return new MenuItem(menu);
+	});
 
 	menuItem.setName(newName);
 
-	if(parent != null) {
-	    parent.putAt(menuItem, newPosition);
+	if (parent != null) {
+	  parent.putAt(menuItem, newPosition);
 	} else {
-	    menu.putAt(menuItem, newPosition);
+	  menu.putAt(menuItem, newPosition);
 	}
 
 	switch (menuItemJson.get("use").getAsString()) {
@@ -134,11 +140,14 @@ public class AdminMenusService {
 	    break;
 	}
 
-	if(menuItemJson.get("children")!=null && menuItemJson.get("children").isJsonArray()) {
-	    JsonArray children = menuItemJson.get("children").getAsJsonArray();
-	    for (int newChildrenPosition = 0; newChildrenPosition < children.size(); ++newChildrenPosition) {
-		processMenuItemChanges(menu, menuItem, children.get(newChildrenPosition).getAsJsonObject(), newChildrenPosition);
-	    }
+	if (menuItemJson.get("children") != null && menuItemJson.get("children").isJsonArray()) {
+	  JsonArray children = menuItemJson.get("children").getAsJsonArray();
+	  for (int newChildrenPosition = 0; newChildrenPosition < children.size();
+	       ++newChildrenPosition) {
+	    processMenuItemChanges(menu, menuItem,
+				   children.get(newChildrenPosition).getAsJsonObject(),
+				   newChildrenPosition);
+	  }
 	}
     }
 

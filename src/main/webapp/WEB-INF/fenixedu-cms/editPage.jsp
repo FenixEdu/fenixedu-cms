@@ -133,7 +133,7 @@ ${portal.angularToolkit()}
             <div class="panel-body">
 
                 <p>
-                    <a class="btn btn-default" ngf-select ngf-change="upload($files)">
+                    <a class="btn btn-default btn-xs" ngf-select ngf-change="upload($files)">
                         <span class="glyphicon glyphicon-plus"></span> Add File
                     </a>
                 </p>
@@ -192,9 +192,18 @@ ${portal.angularToolkit()}
         <div class="panel panel-default">
             <div class="panel-heading">Menu</div>
             <div class="panel-body">
+
+                <c:if test="${permissions:canDoThis(site, 'CREATE_MENU_ITEM')}">
+                    <div class="switch switch-success">
+                          <input type="checkbox" checked name="toggle" id="success" ng-model="useMenu">
+                          <label for="success">Show on menu</label>
+                    </div>
+                </c:if>
+
                 <a href="${pageContext.request.contextPath}/cms/menus/${site.slug}" target="_blank" class="btn btn-default pull-right"><span class="glyphicon glyphicon-cog"></span> Manage Menus</a>
-                <div ng-show="menus"><fancy-tree items="menus" selected="selected"></fancy-tree></div>
-                <p ng-hide="menus" class="text-info"><i>Currently your site has no menus.</i></p>
+                <p ng-hide="useMenu" class="text-info"><i>This page will not be shown on the menu.</i></p>
+                <p ng-show="useMenu" class="text-info"><i>Use drag and drop to change the position of this page on the menu.</i></p>
+                <div ng-show="useMenu"><fancy-tree items="menus" selected="selected"></fancy-tree></div>
             </div>
         </div>
 
@@ -345,52 +354,96 @@ ${portal.angularToolkit()}
             $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
         }])
         .controller('PostCtrl', ['$scope', '$http','Upload', function($scope, $http, Upload){
+            
             function init(data) {
-                function treeFind(item, filter) {
-                    if(filter(item)) {
-                        return item;
-                    } else if(item.children && item.children.length) {
-                        for(var i = 0; i < item.children.length; ++ i) {
-                            var found = treeFind(item.children[i], filter);
+                function treeFind(node, predicate) {
+                    if(predicate(node)) {
+                        return node;
+                    } else if(node.children && node.children.length) {
+                        for(var i = 0; i < node.children.length; ++ i) {
+                            var found = treeFind(node.children[i],predicate);
                             if(found) return found;
                         }
                     }
                 }
-                function initMenus() {
-                    function addClassToSelectedMenuItem() {
-                        for(var i=0; i<$scope.menus.length; ++i) {
-                            var isMenuItemPage = function(menuItem){ return menuItem && menuItem.page && menuItem.page == $scope.post.slug; };
-                            var found = treeFind($scope.menus[i], isMenuItemPage);
-                            if(found) { 
-                                $scope.selectedMenuItem = found;
-                                $scope.selectedMenuItem.extraClasses = "pageItem";
-                            }
-                        }
+
+                function findMenus(menus, predicate) {
+                    for(var i = 0; i < menus.length; ++i) {
+                        var found = treeFind(menus[i], predicate);
+                        if(found) return found;
                     }
-                    function createNewMenuItem() {
-                        var firstMenu = $scope.menus[0];
-                        if(!firstMenu.children) {
-                            firstMenu.children = [];
+                }
+
+                function initMenus() {
+                    
+                    $scope.menus = data.menus;
+                    $scope.post = data.post;
+                    $scope.newCategory = {};
+                    $scope.newFile = {};
+                    addClassToSelectedMenuItem();
+                    $scope.useMenu = findMenuItem() !== undefined;
+                    setTimeout(function(){
+                        $scope.$watch('useMenu', function(useMenu) {
+                            if(useMenu) {
+                                createNewMenuItem();
+                            } else {
+                                removeMenuItem();
+                            }
+                        });    
+                    });
+                    
+
+                    function findMenuItem() {
+                        function isMenuItemPagePredicate(menuItem) {
+                            return menuItem && menuItem.page && menuItem.page == $scope.post.slug;
                         }
-                        firstMenu.children.push({
-                            name: $scope.post.name,
-                            title: Bennu.localizedString.getContent($scope.post.name),
-                            use: 'page',
-                            page: $scope.post.slug,
-                            extraClasses: "pageItem"
-                        });
+                        return findMenus($scope.menus, isMenuItemPagePredicate);
                     }
 
-                    addClassToSelectedMenuItem();
-                    if(!$scope.selectedMenuItem && $scope.menus && $scope.menus.length) {
-                        createNewMenuItem();
+                    function findMenuItemParent(mi) {
+                        function isMenuItemPageParentPredicate(menuItem) {
+                            return menuItem && menuItem.children && menuItem.children.length && menuItem.children.indexOf(mi) !== -1;
+                        }
+                        return findMenus($scope.menus, isMenuItemPageParentPredicate);
+                    }
+
+                    function addClassToSelectedMenuItem() {
+                        var menuItem = findMenuItem();
+                        if(menuItem) {
+                            $scope.selectedMenuItem = menuItem;
+                            $scope.selectedMenuItem.extraClasses = "page-item";
+                        }
+                    }
+
+                    function createNewMenuItem() {
+                        if(findMenuItem() === undefined) {
+                            var firstMenu = $scope.menus[0];
+                            if(!firstMenu.children) {
+                                firstMenu.children = [];
+                            }
+                            firstMenu.children.push({
+                                name: $scope.post.name,
+                                title: Bennu.localizedString.getContent($scope.post.name),
+                                use: 'page',
+                                page: $scope.post.slug,
+                                extraClasses: "page-item"
+                            });
+                        }
+                    }
+
+                    function removeMenuItem() {
+                        var menuItem = findMenuItem();
+                        var menuItemParent = findMenuItemParent(menuItem);
+                        if(menuItem && menuItemParent && menuItemParent.children) {
+                            menuItemParent.children.splice(menuItemParent.children.indexOf(menuItem));
+                            menuItemParent.children = menuItemParent.children.concat(menuItem.children || []);
+                            $scope.useMenu = findMenuItem() !== undefined;
+                        }
                     }
 
                 };
-                $scope.menus = data.menus;
-                $scope.post = data.post;
-                $scope.newCategory = {};
-                $scope.newFile = {};
+
+
                 initMenus();
             }
 
@@ -481,24 +534,7 @@ ${portal.angularToolkit()}
                 };
 
             }); 
-            }]).directive('jsonData', function() {
-                return {
-                    restrict: 'A',
-                    scope: {
-                        model: '=jsonData',
-                    },
-                    link: function(scope, el, attr) {
-                        scope.$watch('model', function(value) {
-                            $(el).JSONView(value || {}, {collapsed: true});
-                        });
-                        $(el).change(function () {
-                            $timeout(function () {
-                                scope.model = $(el).val();
-                            });
-                        });
-                    }
-                };
-            });
+        }]);
 
 </script>
 
@@ -507,7 +543,7 @@ ${portal.angularToolkit()}
     outline: none;
     min-height: 300px !important;
 }
-.pageItem {
+.page-item {
     font-weight: bold;
 }
 </style>

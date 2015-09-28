@@ -28,6 +28,7 @@ ${portal.angularToolkit()}
 <script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/jquery.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/js/fancytree-directive.js" type="text/javascript"></script>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
 
 <div class="page-header">
     <h1><spring:message code="menu.edit.title" /> ${menu.name.content}</h1>
@@ -43,7 +44,7 @@ ${portal.angularToolkit()}
         <div class="col-md-8 col-sm-12">
             <div class="btn-group">
                 <button class="btn btn-primary btn-sm" ng-click="save()"><span class="glyphicon glyphicon-floppy-disk"></span> <spring:message code="label.save"/></button>
-                <button class="btn btn-default btn-sm" ng-click="create()"><span class="glyphicon glyphicon-plus"></span> <spring:message code="action.create"/></button>
+                <button class="btn btn-default btn-sm" ng-show="canCreateMenuItem" ng-click="create()"><span class="glyphicon glyphicon-plus"></span> <spring:message code="action.create"/></button>
                 <button ng-class="{disabled: selectedItem.root}" class="btn btn-danger btn-sm" ng-click="delete()"><span class="glyphicon glyphicon-trash"></span> <spring:message code="action.delete"/></button>
             </div>
 
@@ -123,11 +124,13 @@ ${portal.angularToolkit()}
         .controller('MenuCtrl', ['$scope', '$http', function($scope, $http){
             var self = this;
             $http.get(menuDataUrl).success(function(data) {
+                $scope.error = undefined;
                 var menu = data.menu;
                 $scope.selectedItem = menu;
                 $scope.menuItems = [menu]
                 $scope.menu = menu;
                 $scope.pages = data.pages;
+                $scope.canCreateMenuItem = ${permissions:canDoThis(site, 'CREATE_MENU_ITEM')};
 
                 $scope.$watch('selectedItem.page', function(value) {
                     if($scope.selectedItem.page && (!$scope.selectedItem.name || !Object.keys($scope.selectedItem.name).length)) {
@@ -201,6 +204,9 @@ ${portal.angularToolkit()}
                         }
                     }
                 });
+            })
+            .error(function(){
+                $scope.error = "An error occurred while trying to save the menu."
             });
 
         }])

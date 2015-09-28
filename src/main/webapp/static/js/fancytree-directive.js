@@ -30,6 +30,18 @@ angular.module('fancyTreeDirective', []).directive('fancyTree', function($timeou
                     node[prop] = node.data[prop];
                 }
                 delete node.data;
+
+                node.find = function(predicate) {
+                    if(predicate(node)) {
+                        return node;
+                    } else if(node.children && node.children.length) {
+                        for(var i = 0; i < node.children.length; ++ i) {
+                            var found = node.children[i].find(predicate);
+                            if(found) return found;
+                        }
+                    }
+                };
+
             });
         };
         var onSelect = function(event, data) {
