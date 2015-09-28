@@ -189,23 +189,28 @@ ${portal.angularToolkit()}
         </div>
 
         <!-- MENUS -->
-        <div class="panel panel-default">
-            <div class="panel-heading">Menu</div>
-            <div class="panel-body">
+        <c:if test="${permissions:canDoThis(site, 'LIST_MENUS,EDIT_MENU')}">
+            <div class="panel panel-default">
+                <div class="panel-heading">Menu</div>
+                <div class="panel-body">
 
-                <c:if test="${permissions:canDoThis(site, 'CREATE_MENU_ITEM')}">
-                    <div class="switch switch-success">
-                          <input type="checkbox" checked name="toggle" id="success" ng-model="useMenu">
-                          <label for="success">Show on menu</label>
-                    </div>
-                </c:if>
+                    <c:if test="${permissions:canDoThis(site, 'CREATE_MENU_ITEM')}">
+                        <div class="switch switch-success" ng-show="menus && menus.length">
+                              <input type="checkbox" checked name="toggle" id="success" ng-model="useMenu">
+                              <label for="success">Show on menu</label>
+                        </div>
+                    </c:if>
 
-                <a href="${pageContext.request.contextPath}/cms/menus/${site.slug}" target="_blank" class="btn btn-default pull-right"><span class="glyphicon glyphicon-cog"></span> Manage Menus</a>
-                <p ng-hide="useMenu" class="text-info"><i>This page will not be shown on the menu.</i></p>
-                <p ng-show="useMenu" class="text-info"><i>Use drag and drop to change the position of this page on the menu.</i></p>
-                <div ng-show="useMenu"><fancy-tree items="menus" selected="selected"></fancy-tree></div>
+                    <a href="${pageContext.request.contextPath}/cms/menus/${site.slug}" target="_blank" class="btn btn-default pull-right">
+                        <span class="glyphicon glyphicon-cog"></span> Manage Menus
+                    </a>
+
+                    <p ng-hide="useMenu" class="text-info"><i>This page will not be shown on the menu.</i></p>
+                    <p ng-show="useMenu" class="text-info"><i>Use drag and drop to change the position of this page on the menu.</i></p>
+                    <div ng-show="useMenu"><fancy-tree items="menus" selected="selected"></fancy-tree></div>
+                </div>
             </div>
-        </div>
+        </c:if>
 
     </fieldset>
 

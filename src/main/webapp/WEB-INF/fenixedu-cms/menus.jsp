@@ -31,7 +31,7 @@ ${portal.toolkit()}
 
 <p>
     <c:choose>
-        <c:when test="${permissions:canDoThis(site, 'CREATE_MENU')}">
+        <c:when test="${permissions:canDoThis(site, 'EDIT_MENU') && permissions:canDoThis(site, 'CREATE_MENU')}">
             <button type="button" data-toggle="modal" data-target="#create-menu" class="btn btn-primary">
                 <i class="icon icon-plus"></i> New
             </button>
@@ -58,14 +58,22 @@ ${portal.toolkit()}
           <c:forEach var="menu" items="${menus}">
               <c:set var="menuEditUrl" value="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.slug}/edit"></c:set>
               <li class="list-group-item">
-                  <h3><a href="${menuEditUrl}">${menu.name.content}</a></h3>
                   
+                  <c:choose>
+                      <c:when test="${permissions:canDoThis(site, 'EDIT_MENU')}">
+                          <h3><a href="${menuEditUrl}">${menu.name.content}</a></h3>
+                      </c:when>
+                      <c:otherwise>
+                          <h3>${menu.name.content}</h3>
+                      </c:otherwise>
+                  </c:choose>
+
                   <div><small><code>${menu.getSlug()}</code></small></div>
 
                   <span class="label label-primary">${menu.getItemsSet().size()} Menu Items</span>
 
                   <div class="btn-group pull-right">
-                      <a href="${menuEditUrl}" class="btn btn-icon btn-primary">
+                      <a href="${menuEditUrl}" class="btn btn-icon btn-primary ${permissions:canDoThis(site, 'EDIT_MENU') ? '' : 'disabled'}">
                           <i class="glyphicon glyphicon-cog"></i>
                       </a>
                       <button type="button" data-menu="${menu.slug}" class="btn btn-icon btn-danger ${permissions:canDoThis(site, 'DELETE_MENU') ? '' : 'disabled'}">

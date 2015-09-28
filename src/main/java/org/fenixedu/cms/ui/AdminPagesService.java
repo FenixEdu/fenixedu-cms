@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionEvaluation;
-import org.fenixedu.cms.domain.PermissionsArray;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.StaticPost;
@@ -59,10 +59,13 @@ public class AdminPagesService {
 	if(!page.getPublished() && post.getActive()) {
 	    page.setPublished(true);
 	}
-	menusJson.forEach(jsonElement -> {
+	if(PermissionEvaluation.canDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU)) {
+	  menusJson.forEach(jsonElement -> {
 	    JsonObject menuJson = jsonElement.getAsJsonObject();
-	    menusService.processMenuChanges(site.menuForSlug(menuJson.get("key").getAsString()), menuJson.getAsJsonObject());
-	});
+	    menusService.processMenuChanges(site.menuForSlug(menuJson.get("key").getAsString()),
+					    menuJson.getAsJsonObject());
+	  });
+	}
     }
 
     public JsonObject serializePage(Page page) {

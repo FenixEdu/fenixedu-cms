@@ -57,15 +57,17 @@ public class AdminMenu {
     public String menus(Model model, @PathVariable String siteSlug) {
         Site site = Site.fromSlug(siteSlug);
         AdminSites.canEdit(site);
+        PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS);
         model.addAttribute("site", site);
-        model.addAttribute("menus", site.getMenusSet().stream().sorted(Comparator.comparing(Menu::getName)).collect(toList()));
+        model.addAttribute("menus", site.getMenusSet().stream()
+            .sorted(Comparator.comparing(Menu::getName)).collect(toList()));
         return "fenixedu-cms/menus";
     }
 
-    @RequestMapping(value = "{siteSlug}/create", method = RequestMethod.POST)
-    public RedirectView createMenu(@PathVariable(value = "siteSlug") String slug, @RequestParam LocalizedString name) {
+    @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
+    public RedirectView createMenu(@PathVariable String slug, @RequestParam LocalizedString name) {
         Site site = Site.fromSlug(slug);
-        PermissionEvaluation.ensureCanDoThis(site, Permission.CREATE_MENU);
+        PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU, Permission.CREATE_MENU);
         Menu menu = service.createMenu(site, name);
         return new RedirectView("/cms/menus/" + site.getSlug() + "/" + menu.getSlug() + "/edit", true);
     }
@@ -75,7 +77,7 @@ public class AdminMenu {
         FenixFramework.atomic(() -> {
             Site site = Site.fromSlug(slugSite);
             AdminSites.canEdit(site);
-            PermissionEvaluation.ensureCanDoThis(site, Permission.DELETE_MENU);
+            PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU, Permission.DELETE_MENU);
             site.menuForSlug(slugMenu).delete();
         });
         return new RedirectView("/cms/menus/" + slugSite, true);
@@ -85,6 +87,7 @@ public class AdminMenu {
     public String viewEditMenu(Model model, @PathVariable String slugSite, @PathVariable String slugMenu) {
         Site site = Site.fromSlug(slugSite);
         AdminSites.canEdit(site);
+        PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
         model.addAttribute("site", site);
         model.addAttribute("menu", site.menuForSlug(slugMenu));
         return "fenixedu-cms/editMenu";
@@ -94,6 +97,7 @@ public class AdminMenu {
     public @ResponseBody String menuData(@PathVariable String slugSite, @PathVariable String slugMenu) {
         Site site = Site.fromSlug(slugSite);
         AdminSites.canEdit(site);
+        PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
         Menu menu = site.menuForSlug(slugMenu);
         JsonObject data = new JsonObject();
         JsonObject pages = new JsonObject();
@@ -107,7 +111,9 @@ public class AdminMenu {
     public @ResponseBody String editMenu(@PathVariable String slugSite, @PathVariable String slugMenu, HttpEntity<String> http) {
         Site site = Site.fromSlug(slugSite);
         FenixFramework.atomic(() -> {
-            service.processMenuChanges(site.menuForSlug(slugMenu), JSON_PARSER.parse(http.getBody()).getAsJsonObject());
+            PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
+            JsonObject json = JSON_PARSER.parse(http.getBody()).getAsJsonObject();
+            service.processMenuChanges(site.menuForSlug(slugMenu), json);
             AdminSites.canEdit(site);
         });
         return menuData(slugSite, slugMenu);

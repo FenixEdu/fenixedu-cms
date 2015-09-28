@@ -96,7 +96,8 @@ public class AdminMenusService {
     }
 
     void processMenuChanges(Menu menu, JsonObject menuJson) {
-	LocalizedString newName = LocalizedString.fromJson(menuJson.get("name"));
+      PermissionEvaluation.ensureCanDoThis(menu.getSite(), Permission.EDIT_MENU);
+      LocalizedString newName = LocalizedString.fromJson(menuJson.get("name"));
 	if(!menu.getName().equals(newName)) {
 	    menu.setName(newName);
 	}

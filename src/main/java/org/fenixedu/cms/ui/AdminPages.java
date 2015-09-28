@@ -98,7 +98,10 @@ public class AdminPages {
 
         JsonObject data = new JsonObject();
         JsonArray menus = new JsonArray();
-        site.getMenusSet().stream().sorted(Comparator.comparing(Menu::getName)).map(service::serializeMenu).forEach(menus::add);
+        if(PermissionEvaluation.canDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU)) {
+            site.getMenusSet().stream().sorted(Comparator.comparing(Menu::getName))
+                .map(service::serializeMenu).forEach(menus::add);
+        }
         data.add("post", service.serializePage(page));
         data.add("menus", menus);
         return data.toString();

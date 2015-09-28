@@ -20,7 +20,7 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissons" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
 
 <c:set var="locale" value="<%= org.fenixedu.commons.i18n.I18N.getLocale() %>"/>
 
@@ -42,7 +42,9 @@
 			<li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/posts/${site.slug}">Posts</a></li>
 	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/pages/${site.slug}">Pages</a></li>
 			<li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/categories/${site.slug}">Categories</a></li>
-	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/menus/${site.slug}">Menus</a></li>
+			<c:if test="${permissions:canDoThis(site, 'LIST_MENUS')}">
+	        	<li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/menus/${site.slug}">Menus</a></li>
+	        </c:if>
 	        <li role="presentation"><a role="menuitem" href="${pageContext.request.contextPath}/cms/media/${site.slug}">Media</a></li>
       	</ul>
       	</div>
@@ -227,9 +229,15 @@
 					<i class="glance-icon glyphicon glyphicon-file"></i> <a href="${pageContext.request.contextPath}/cms/pages/${site.slug}">${site.pagesSet.size()} Pages</a>
 				</div>
 			</div>
+
 			<div class="row">
 				<div class="col-sm-6 glance ">
-					<i class="glance-icon glyphicon glyphicon-th-list"></i> <a href="${pageContext.request.contextPath}/cms/menus/${site.slug}">${site.menusSet.size()} Menus</a>
+					<c:if test="${permissions:canDoThis(site, 'LIST_MENUS')}">
+						<i class="glance-icon glyphicon glyphicon-th-list"></i> <a href="${pageContext.request.contextPath}/cms/menus/${site.slug}">${site.menusSet.size()} Menus</a>
+					</c:if>
+					<c:if test="${not permissions:canDoThis(site, 'LIST_MENUS')}">
+						<i class="glance-icon glyphicon glyphicon-th-list"></i> ${site.menusSet.size()} Menus
+					</c:if>
 				</div>
 				<div class="col-sm-6 glance ">
 					<i class="glance-icon glyphicon glyphicon-edit"></i> <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/edit">Published</a>
