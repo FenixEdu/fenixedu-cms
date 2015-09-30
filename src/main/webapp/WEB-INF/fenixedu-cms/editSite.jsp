@@ -20,6 +20,7 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/font-awesome.css"/>
 ${portal.toolkit()}
@@ -36,7 +37,9 @@ ${portal.toolkit()}
             <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a></li>
                 <li role="presentation"><a href="#permissions" aria-controls="permissions" role="tab" data-toggle="tab">Permissions</a></li>
-                <li role="presentation"><a href="#external" aria-controls="external" role="tab" data-toggle="tab">External Applications</a></li>
+                <c:if test="${permissions:canDoThis(site, 'MANAGE_ANALYTICS')}">
+                    <li role="presentation"><a href="#external" aria-controls="external" role="tab" data-toggle="tab">External Applications</a></li>
+                </c:if>
                 <li role="presentation"><a href="#io" aria-controls="external" role="tab" data-toggle="tab">Import/Export</a></li>
             </ul>
         </p>
@@ -107,7 +110,7 @@ ${portal.toolkit()}
                             <label class="col-sm-2 control-label">Homepage:</label>
 
                             <div class="col-sm-10">
-                                <select name="initialPageSlug" class="form-control">
+                                <select name="initialPageSlug" class="form-control" ${permissions:canDoThis(site, 'CHOOSE_DEFAULT_PAGE') ? '' : 'disabled'}>
                                     <option value="---null---">-</option>
                                     <c:forEach var="p" items="${site.pages}">
                                         <option ${p == site.initialPage ? 'selected' : ''} value="${p.slug}">${p.name.content}</option>
@@ -131,7 +134,17 @@ ${portal.toolkit()}
                             <div class="panel-body">
                                 <dl>
                                     <dt><spring:message code="site.create.label.published"/></dt>
-                                    <dd> <input name="published" type="checkbox" value="true" ${site.published ? "checked='checked'" : ""}></dd>
+                                    <c:choose>
+                                        <c:when test="${permissions:canDoThis(site, 'PUBLISH_SITE')}">
+                                            <dd> <input name="published" type="checkbox" value="true" ${site.published ? "checked='checked'" : ""}></dd>
+                                        </c:when>
+                                        <c:when test="${site.published}">
+                                            <dd><span class="label label-success">Published</span></dd>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <dd><span class="label label-default">NOT Published</span></dd>
+                                        </c:otherwise>
+                                    </c:choose>
                                     <dt>Created by</dt>
                                     <dd>${site.createdBy.username}</dd>
                                     <dt>Created at</dt>
@@ -168,79 +181,79 @@ ${portal.toolkit()}
             </ul>
         </div>
 
-        <div role="tabpanel" class="tab-pane form-horizontal" id="external">
+        <c:if test="${permissions:canDoThis(site, 'MANAGE_ANALYTICS')}">
+            <div role="tabpanel" class="tab-pane form-horizontal" id="external">
+                <c:if test="${google.isConfigured()}">
+                    <h3>Google</h3>
 
-            <c:if test="${google.isConfigured()}">
-                <h3>Google</h3>
+                    <c:if test="${googleUser == null}">
+                        <p class="help-block">To use <a href="http://www.google.com/analytics/">Analytics</a>, <a href="https://plus.google.com">Plus</a>, <a href="https://maps.google.com">Maps</a> and other integrationss from Google you need to connect your site with your Google account.</p>
+                        <a class="btn btn-primary" href="${google.getAuthenticationUrlForUser(user)}">Connect with Google</a>
+                    </c:if>
 
-                <c:if test="${googleUser == null}">
-                    <p class="help-block">To use <a href="http://www.google.com/analytics/">Analytics</a>, <a href="https://plus.google.com">Plus</a>, <a href="https://maps.google.com">Maps</a> and other integrationss from Google you need to connect your site with your Google account.</p>
-                    <a class="btn btn-primary" href="${google.getAuthenticationUrlForUser(user)}">Connect with Google</a>
-                </c:if>
-
-                <c:if test="${googleUser != null}">
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label">Analytics Property</label>
-                        <div class="col-sm-10">
-                            <span class="property"></span> <a class="btn btn-xs btn-default" data-toggle="modal" href='#select-property'>Select property</a>
-                            <p class="help-block">Integrate this site with Google Analytics so you can receive information about the number of visits and correlate them with your posting history. </p>
+                    <c:if test="${googleUser != null}">
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-2 control-label">Analytics Property</label>
+                            <div class="col-sm-10">
+                                <span class="property"></span> <a class="btn btn-xs btn-default" data-toggle="modal" href='#select-property'>Select property</a>
+                                <p class="help-block">Integrate this site with Google Analytics so you can receive information about the number of visits and correlate them with your posting history. </p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="modal fade" id="select-property">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
-                                    <h3 class="modal-title">Select Property</h3>
-                                    <small>Choose one of your properties</small>
-                                </div>
-                                <div class="modal-body">
+                        <div class="modal fade" id="select-property">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
+                                        <h3 class="modal-title">Select Property</h3>
+                                        <small>Choose one of your properties</small>
+                                    </div>
+                                    <div class="modal-body">
 
-                                    <div class="form-group">
-                                            <label class="col-sm-2 control-label">Property</label>
-                                            <div class="col-sm-10">
-                                                <div class="row">
-                                                    <div class="col-sm-6">
-                                                        <select name="accountId" class="form-control" value="${site.analyticsAccountId}">
-                                                            <option class="form-control" value="">---</option>
-                                                            <c:forEach var="account" items="${accounts}">
-                                                                <option value="${account.id}" class="account" ${account.getId().equals(site.analyticsAccountId) ? 'selected' : ''} class="form-control">${account.name}</option>
-                                                            </c:forEach>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-sm-6">
-                                                        <select name="analyticsCode" class="form-control" value="${site.getAnalyticsCode()}">
-                                                            <option class="form-control" value="">---</option>
-                                                            <c:forEach var="account" items="${accounts}">
-                                                                <c:forEach var="property" items="${account.properties}">
-                                                                    <option value="${property.id}" data-account="${account.id}" class="google-property" ${property.getId().equals(site.getAnalyticsCode()) ? 'selected' : ''} class="form-control">${property.name}</option>
+                                        <div class="form-group">
+                                                <label class="col-sm-2 control-label">Property</label>
+                                                <div class="col-sm-10">
+                                                    <div class="row">
+                                                        <div class="col-sm-6">
+                                                            <select name="accountId" class="form-control" value="${site.analyticsAccountId}">
+                                                                <option class="form-control" value="">---</option>
+                                                                <c:forEach var="account" items="${accounts}">
+                                                                    <option value="${account.id}" class="account" ${account.getId().equals(site.analyticsAccountId) ? 'selected' : ''} class="form-control">${account.name}</option>
                                                                 </c:forEach>
-                                                            </c:forEach>
-                                                        </select>
-                                                    </div>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-6">
+                                                            <select name="analyticsCode" class="form-control" value="${site.getAnalyticsCode()}">
+                                                                <option class="form-control" value="">---</option>
+                                                                <c:forEach var="account" items="${accounts}">
+                                                                    <c:forEach var="property" items="${account.properties}">
+                                                                        <option value="${property.id}" data-account="${account.id}" class="google-property" ${property.getId().equals(site.getAnalyticsCode()) ? 'selected' : ''} class="form-control">${property.name}</option>
+                                                                    </c:forEach>
+                                                                </c:forEach>
+                                                            </select>
+                                                        </div>
 
+                                                    </div>
+                                                    <p class="help-block">
+                                                        If you need to create a new property for this site, go to <a href="https://www.google.com/analytics">Google Analytics</a> create it there and then selected it here.
+                                                    </p>
                                                 </div>
-                                                <p class="help-block">
-                                                    If you need to create a new property for this site, go to <a href="https://www.google.com/analytics">Google Analytics</a> create it there and then selected it here.
-                                                </p>
-                                            </div>
+
+                                        </div>
 
                                     </div>
-
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                    <button type="submit" class="save btn btn-primary">Save changes</button>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="save btn btn-primary">Save changes</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <script src="https://apis.google.com/js/client.js?onload=authorize"></script>
+                        <script src="https://apis.google.com/js/client.js?onload=authorize"></script>
+                    </c:if>
                 </c:if>
-
-            </c:if>
-        </div>
+            </div>
+        </c:if>
 
 
         <div role="tabpanel" class="tab-pane form-horizontal" id="io">

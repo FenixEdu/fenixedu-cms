@@ -51,6 +51,8 @@ import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.CloneCache;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.PermissionsArray;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.cms.domain.SiteExporter;
@@ -234,7 +236,8 @@ public class AdminSites {
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
     public RedirectView edit(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
                              @RequestParam LocalizedString description, @RequestParam String theme,
-                             @RequestParam String newSlug, @RequestParam String initialPageSlug,
+                             @RequestParam String newSlug,
+                             @RequestParam(required = false, defaultValue = "") String initialPageSlug,
                              @RequestParam(required = false, defaultValue = "false") Boolean published,
                              @RequestParam String viewGroup, @RequestParam String folder,
                              @RequestParam(required = false) String analyticsCode,
@@ -263,32 +266,36 @@ public class AdminSites {
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
         model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet());
         model.addAttribute("defaultSite", Bennu.getInstance().getDefaultSite());
-        model.addAttribute("google", GoogleAPI.getInstance());
+        if(PermissionEvaluation.canDoThis(site, Permission.MANAGE_ANALYTICS)) {
+          model.addAttribute("google", GoogleAPI.getInstance());
 
-        GoogleAPI.getInstance().getAuthenticatedUser(Authenticate.getUser()).ifPresent(
-            googleUser -> {
-              Analytics analytics = getUserAnalytics();
-              List<GoogleAccountBean> googleAccountBeans = new ArrayList<>();
-              try {
-                Accounts accounts = analytics.management().accounts().list().execute();
-                for (Account account : accounts.getItems()) {
-                  Webproperties properties = analytics.management().webproperties().list(account.getId()).execute();
-                  googleAccountBeans.add(new GoogleAccountBean(account, properties));
+          GoogleAPI.getInstance().getAuthenticatedUser(Authenticate.getUser()).ifPresent(
+              googleUser -> {
+                Analytics analytics = getUserAnalytics();
+                List<GoogleAccountBean> googleAccountBeans = new ArrayList<>();
+                try {
+                  Accounts accounts = analytics.management().accounts().list().execute();
+                  for (Account account : accounts.getItems()) {
+                    Webproperties
+                        properties =
+                        analytics.management().webproperties().list(account.getId()).execute();
+                    googleAccountBeans.add(new GoogleAccountBean(account, properties));
+                  }
+                  model.addAttribute("googleUser", googleUser);
+                  model.addAttribute("accounts", googleAccountBeans);
+                } catch (GoogleJsonResponseException e) {
+                  LOGGER.error("Error loading analytics properties", e);
+                  if (e.getDetails().getCode() == 401) {
+                    //Invalid credentials -> remove invalid user
+                    FenixFramework.atomic(() -> googleUser.delete());
+                  }
+                } catch (IOException e) {
+                  LOGGER.error("Error loading analytics properties", e);
                 }
-                model.addAttribute("googleUser", googleUser);
-                model.addAttribute("accounts", googleAccountBeans);
-              } catch(GoogleJsonResponseException e){
-                LOGGER.error("Error loading analytics properties", e);
-                if(e.getDetails().getCode() == 401) {
-                  //Invalid credentials -> remove invalid user
-                  FenixFramework.atomic(()->googleUser.delete());
-                }
-              }catch (IOException e) {
-                LOGGER.error("Error loading analytics properties", e);
-              }
 
-            });
+              });
 
+        }
         return "fenixedu-cms/editSite";
     }
 
@@ -337,12 +344,18 @@ public class AdminSites {
         if((Strings.isNullOrEmpty(analyticsCode) || Strings.isNullOrEmpty(accountId)) && googleUser.isPresent()) {
             googleUser.get().delete();
         }
+        if(PermissionEvaluation.canDoThis(s, Permission.MANAGE_ANALYTICS)) {
+          s.setAnalyticsCode(analyticsCode);
+          s.setAnalyticsAccountId(accountId);
+        }
 
-        s.setAnalyticsCode(analyticsCode);
-        s.setAnalyticsAccountId(accountId);
+        if(PermissionEvaluation.canDoThis(s, Permission.PUBLISH_SITE)) {
+          s.setPublished(published);
+        }
 
-        s.setPublished(published);
-        s.setInitialPage(initialPage);
+        if(PermissionEvaluation.canDoThis(s, Permission.CHOOSE_DEFAULT_PAGE)) {
+          s.setInitialPage(initialPage);
+        }
 
         s.setCanViewGroup(Group.parse(viewGroup));
     }
