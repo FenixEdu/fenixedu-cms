@@ -55,7 +55,7 @@ ${portal.toolkit()}
                             <div class="col-sm-4">
                                 <div class="input-group">
                                     <span class="input-group-addon"><code>${site.folder == null ? '' : site.folder.functionality.fullPath}/</code></span>
-                                    <input required type="text" name="newSlug" class="form-control" id="inputEmail3" placeholder="<spring:message code="site.edit.label.slug" />" value='${site.slug}' \>
+                                    <input required type="text" name="newSlug" class="form-control" id="inputEmail3" placeholder="<spring:message code="site.edit.label.slug" />" value='${site.slug}' ${permissions:canDoThis(site, 'CHOOSE_PATH_AND_FOLDER') ? '' : 'disabled'} \>
                                 </div>
                             </div>
 
@@ -80,11 +80,12 @@ ${portal.toolkit()}
                                 <textarea id="site-description" bennu-localized-string required-any name="description" class="form-control" rows="3">${site.description.json()}</textarea>
                             </div>
                         </div>
+
                         <div class="form-group">
                             <label for="theme" class="col-sm-2 control-label"><spring:message code="site.edit.label.theme"/></label>
 
                             <div class="col-sm-10">
-                                <select name="theme" id="theme" class="form-control">
+                                <select name="theme" id="theme" class="form-control" ${permissions:canDoThis(site, 'CHANGE_THEME') ? '' : 'disabled'}>
                                     <c:forEach var="theme" items="${themes}">
                                         <option value="${theme.type}" ${theme == site.theme ? 'selected' : ''}>${theme.name}</option>
                                     </c:forEach>
@@ -96,7 +97,7 @@ ${portal.toolkit()}
                             <label for="folder" class="col-sm-2 control-label"><spring:message code="site.edit.label.folder"/></label>
 
                             <div class="col-sm-10">
-                                <select name="folder" id="" class="form-control">
+                                <select name="folder" id="" class="form-control" ${permissions:canDoThis(site, 'CHOOSE_PATH_AND_FOLDER') ? '' : 'disabled'}>
                                     <option value ${site.folder == null ? 'selected': ''}>--</option>
 
                                     <c:forEach items="${folders}" var="folder">
@@ -123,7 +124,7 @@ ${portal.toolkit()}
                             <label class="col-sm-2 control-label">Who can view this site:</label>
 
                             <div class="col-sm-10">
-                                    <input bennu-group name="viewGroup" type="text" value='${site.getCanViewGroup().getExpression()}'/>
+                                <input bennu-group name="viewGroup" type="text" value='${site.getCanViewGroup().getExpression()}'/>
                             </div>
                         </div>
 

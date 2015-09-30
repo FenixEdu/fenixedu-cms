@@ -234,12 +234,15 @@ public class AdminSites {
 
 
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
-    public RedirectView edit(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
-                             @RequestParam LocalizedString description, @RequestParam String theme,
-                             @RequestParam String newSlug,
+    public RedirectView edit(@PathVariable(value = "slug") String slug,
+                             @RequestParam LocalizedString name,
+                             @RequestParam LocalizedString description,
+                             @RequestParam(required = false) String theme,
+                             @RequestParam(required = false) String newSlug,
                              @RequestParam(required = false, defaultValue = "") String initialPageSlug,
                              @RequestParam(required = false, defaultValue = "false") Boolean published,
-                             @RequestParam String viewGroup, @RequestParam String folder,
+                             @RequestParam(required = false) String viewGroup,
+                             @RequestParam(required = false) String folder,
                              @RequestParam(required = false) String analyticsCode,
                              @RequestParam(required = false) String accountId,
                              RedirectAttributes redirectAttributes) {
@@ -250,9 +253,8 @@ public class AdminSites {
         } else {
             Site s = Site.fromSlug(slug);
             AdminSites.canEdit(s);
-            CMSTheme themeObj = Optional.ofNullable(CMSTheme.forType(theme)).orElseThrow(ResourceNotFoundException::new);
-
-            editSite(name, description, themeObj, newSlug, published, s, viewGroup, folder, analyticsCode, accountId, s.pageForSlug(initialPageSlug));
+            newSlug = Optional.ofNullable(newSlug).orElse(slug);
+            editSite(name, description, theme, newSlug, published, s, viewGroup, folder, analyticsCode, accountId, s.pageForSlug(initialPageSlug));
             return new RedirectView("/cms/sites/" + newSlug + "/edit", true);
         }
     }
@@ -317,47 +319,52 @@ public class AdminSites {
     }
 
     @Atomic(mode = TxMode.WRITE)
-    private void editSite(LocalizedString name, LocalizedString description, CMSTheme themeObj, String slug, Boolean published,
+    private void editSite(LocalizedString name, LocalizedString description, String theme, String slug, Boolean published,
                           Site s, String viewGroup, String folder, String analyticsCode, String accountId, Page initialPage) {
 
         s.setName(name);
         s.setDescription(description);
 
-        s.setThemeType(themeObj.getType());
-        if (!Strings.isNullOrEmpty(folder)) {
-            s.setFolder(FenixFramework.getDomainObject(folder));
-        } else if (s.getFolder() != null) {
-            // Remove the folder and set the new slug, so the MenuFunctionality
-            // will be created
-            s.setFolder(null);
-            s.setSlug(slug);
-            s.updateMenuFunctionality();
+        if(PermissionEvaluation.canDoThis(s, Permission.CHANGE_THEME)) {
+            s.setThemeType(Optional.ofNullable(theme).orElseGet(()->s.getThemeType()));
         }
 
-        if (!s.getSlug().equals(slug)) {
-            s.setSlug(slug);
-            s.updateMenuFunctionality();
+        if(PermissionEvaluation.canDoThis(s, Permission.CHOOSE_PATH_AND_FOLDER)) {
+            slug = Optional.ofNullable(slug).orElseGet(()->s.getSlug());
+            if (!Strings.isNullOrEmpty(folder)) {
+              s.setFolder(FenixFramework.getDomainObject(folder));
+            } else if (s.getFolder() != null) {
+              // Remove the folder and set the new slug, so the MenuFunctionality
+              // will be created
+              s.setFolder(null);
+              s.setSlug(slug);
+              s.updateMenuFunctionality();
+            }
+
+            if (!s.getSlug().equals(slug)) {
+              s.setSlug(slug);
+              s.updateMenuFunctionality();
+            }
         }
 
-
-        Optional<GoogleUser> googleUser = GoogleAPI.getInstance().getAuthenticatedUser(Authenticate.getUser());
-        if((Strings.isNullOrEmpty(analyticsCode) || Strings.isNullOrEmpty(accountId)) && googleUser.isPresent()) {
-            googleUser.get().delete();
-        }
         if(PermissionEvaluation.canDoThis(s, Permission.MANAGE_ANALYTICS)) {
-          s.setAnalyticsCode(analyticsCode);
-          s.setAnalyticsAccountId(accountId);
+            Optional<GoogleUser> googleUser = GoogleAPI.getInstance().getAuthenticatedUser(Authenticate.getUser());
+            if((Strings.isNullOrEmpty(analyticsCode) || Strings.isNullOrEmpty(accountId)) && googleUser.isPresent()) {
+              googleUser.get().delete();
+            }
+            s.setAnalyticsCode(analyticsCode);
+            s.setAnalyticsAccountId(accountId);
         }
 
         if(PermissionEvaluation.canDoThis(s, Permission.PUBLISH_SITE)) {
-          s.setPublished(published);
+            s.setPublished(published);
+            s.setCanViewGroup(Group.parse(viewGroup));
         }
 
         if(PermissionEvaluation.canDoThis(s, Permission.CHOOSE_DEFAULT_PAGE)) {
-          s.setInitialPage(initialPage);
+            s.setInitialPage(initialPage);
         }
 
-        s.setCanViewGroup(Group.parse(viewGroup));
     }
 
     @RequestMapping(value = "{slug}/delete", method = RequestMethod.POST)
