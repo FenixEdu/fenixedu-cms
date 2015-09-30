@@ -166,11 +166,16 @@ public class AdminPostsService {
 		    .map(Group::parse)
 		    .orElse(post.getCanViewGroup());
 
-	    User createdBy = ofNullable(postJson.get("createdBy"))
-	      .map(JsonElement::getAsJsonObject)
-	      .map(json -> json.get("username").getAsString())
-		  .map(User::findByUsername)
-		  .orElse(post.getCreatedBy());
+	      if(PermissionEvaluation.canDoThis(site, Permission.CHANGE_OWNERSHIP_POST)) {
+		User createdBy = ofNullable(postJson.get("createdBy"))
+		    .map(JsonElement::getAsJsonObject)
+		    .map(json -> json.get("username").getAsString())
+		    .map(User::findByUsername)
+		    .orElse(post.getCreatedBy());
+		if(!post.getCreatedBy().equals(createdBy)) {
+		  post.setCreatedBy(createdBy);
+		}
+	      }
 
 	      if(!equalDates(post.getPublicationBegin(), publicationBegin)) {
 		post.setPublicationBegin(publicationBegin);
@@ -184,9 +189,7 @@ public class AdminPostsService {
 	      if(post.getActive() != active) {
 		post.setActive(active);
 	      }
-	      if(!post.getCreatedBy().equals(createdBy)) {
-		post.setCreatedBy(createdBy);
-	      }
+
       	}
     }
 

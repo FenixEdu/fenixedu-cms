@@ -87,10 +87,12 @@ ${portal.angularToolkit()}
                         <dd><input type="text" class="form-control" bennu-date-time="post.publicationBegin"></dd>
                         <dt>Publication End</dt>
                         <dd><input type="text" class="form-control" bennu-date-time="post.publicationEnd"></dd>
-                        <dt>Author</dt>
-                        <dd><input type="text" class="form-control" bennu-user-autocomplete="post.createdBy" /></dd>
+                        <c:if test="${permissions:canDoThis(site, 'CHANGE_OWNERSHIP_POST')}">
+                            <dt>Author</dt>
+                            <dd><input type="text" class="form-control" bennu-user-autocomplete="post.createdBy" /></dd>
+                        </c:if>
                         <dt>Access Control</dt>
-                        <dd><input type="text" class="form-control" bennu-group="post.canViewGroup" allow="public,users,managers" /></dd>
+                        <dd><input type="text" class="form-control" bennu-group="post.canViewGroup" allow="public,users" /></dd>
                     </dl>
                 </div>
             </div>
