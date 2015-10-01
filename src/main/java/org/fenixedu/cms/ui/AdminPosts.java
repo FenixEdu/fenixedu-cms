@@ -27,7 +27,6 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.PermissionEvaluation;
-import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostFile;
@@ -105,7 +104,7 @@ public class AdminPosts {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         Post post = s.postForSlug(slugPost);
-
+        ensureCanEdit(post);
         JsonObject data = new JsonObject();
         data.add("post", service.serializePost(post));
         return data.toString();
@@ -115,18 +114,19 @@ public class AdminPosts {
     public RedirectView createPost(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name) {
         Site s = Site.fromSlug(slug);
         AdminSites.canEdit(s);
-        PermissionEvaluation.ensureCanDoThis(s, PermissionsArray.Permission.CREATE_POST);
+        PermissionEvaluation.ensureCanDoThis(s, Permission.CREATE_POST, Permission.EDIT_POSTS);
         Post post = service.createPost(s, name);
         return new RedirectView("/cms/posts/" + s.getSlug() + "/" + post.getSlug() + "/edit", true);
     }
 
     @RequestMapping(value = "{siteSlug}/{postSlug}/edit", method = RequestMethod.GET)
-    public String editPost(Model model, @PathVariable String siteSlug, @PathVariable String postSlug) {
-        Site s = Site.fromSlug(siteSlug);
-        AdminSites.canEdit(s);
-        Post p = s.postForSlug(postSlug);
-        model.addAttribute("site", s);
-        model.addAttribute("post", p);
+    public String viewEditPost(Model model, @PathVariable String siteSlug, @PathVariable String postSlug) {
+        Site site = Site.fromSlug(siteSlug);
+        AdminSites.canEdit(site);
+        Post post = site.postForSlug(postSlug);
+        ensureCanEdit(post);
+        model.addAttribute("site", site);
+        model.addAttribute("post", post);
         return "fenixedu-cms/editPost";
     }
 
@@ -136,6 +136,7 @@ public class AdminPosts {
         JsonObject postJson = JSON_PARSER.parse(httpEntity.getBody()).getAsJsonObject();
         Site site = Site.fromSlug(slugSite);
         Post post = site.postForSlug(slugPost);
+        ensureCanEdit(post);
         service.processPostChanges(site, post, postJson);
         return data(site.getSlug(), post.getSlug());
     }
@@ -146,6 +147,7 @@ public class AdminPosts {
             Site s = Site.fromSlug(slugSite);
             AdminSites.canEdit(s);
             Post post = s.postForSlug(slugPost);
+            ensureCanEdit(post);
             ensureCanDoThis(s, Permission.DELETE_POSTS);
             if(post.isVisible()) {
                 ensureCanDoThis(s, Permission.DELETE_POSTS_PUBLISHED);
@@ -165,6 +167,7 @@ public class AdminPosts {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         Post p = s.postForSlug(slugPost);
+        ensureCanEdit(p);
         PostFile postFile = service.createFile(p, name, embedded, p.getCanViewGroup(), file);
         return service.serializePostFile(postFile).toString();
     }
@@ -174,6 +177,7 @@ public class AdminPosts {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         Post post = s.postForSlug(slugPost);
+        ensureCanEdit(post);
         model.addAttribute("site", s);
         model.addAttribute("post", post);
         model.addAttribute("metadata", Optional.ofNullable(post.getMetadata()).map(PostMetadata::json).map(
@@ -187,6 +191,7 @@ public class AdminPosts {
                                          @RequestParam String metadata) {
         Site s = Site.fromSlug(slugSite);
         Post post = s.postForSlug(slugPost);
+        ensureCanEdit(post);
         FenixFramework.atomic(()-> {
             AdminSites.canEdit(s);
             post.setMetadata(PostMetadata.internalize(metadata));
@@ -194,4 +199,13 @@ public class AdminPosts {
         return new RedirectView("/cms/posts/" + s.getSlug() + "/" + post.getSlug() + "/metadata", true);
     }
 
+    private void ensureCanEdit(Post post) {
+        PermissionEvaluation.ensureCanDoThis(post.getSite(), Permission.EDIT_POSTS);
+        if(!Authenticate.getUser().equals(post.getCreatedBy())) {
+            PermissionEvaluation.ensureCanDoThis(post.getSite(), Permission.EDIT_OTHERS_POSTS);
+        }
+        if(post.isVisible()) {
+            PermissionEvaluation.ensureCanDoThis(post.getSite(), Permission.EDIT_POSTS_PUBLISHED);
+        }
+    }
 }

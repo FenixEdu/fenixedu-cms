@@ -92,22 +92,29 @@ ${portal.toolkit()}
             <c:forEach var="post" items="${posts}">
                 <tr>
                     <td>
-                        <h5><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit">${post.name.content}</a></h5>
+                        <c:choose>
+                            <c:when test="${post.canEdit()}">
+                                <h5><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit">${post.name.content}</a></h5>
+                            </c:when>
+                            <c:otherwise>
+                                <h5>${post.name.content}</h5>
+                            </c:otherwise>
+                        </c:choose>
                     </td>
                     <td>${post.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
                         <small>- ${post.createdBy.name}</small>
                     </td>
                     <td>
-                        <c:forEach var="cat" items="${post.categoriesSet}">
+                        <c:forEach var="cat" items="${post.categoriesSet}" end="3">
                             <a href="${cat.getEditUrl()}" class="badge">${cat.name.content}</a>
                         </c:forEach>
                     </td>
                     <td>
                         <div class="btn-group">
-                            <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit"
-                               class="btn btn-icon btn-default">
+                            <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit" class="btn btn-icon btn-default ${post.canEdit() ? '' : 'disabled'}">
                                <i class="glyphicon glyphicon-edit"></i>
                             </a>
+                            
                             <a href="${post.address}"
                                class="btn btn-icon btn-default">
                                <i class="glyphicon glyphicon-link"></i>
