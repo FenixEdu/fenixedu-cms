@@ -178,6 +178,7 @@ public class AdminPosts {
         AdminSites.canEdit(s);
         Post post = s.postForSlug(slugPost);
         ensureCanEdit(post);
+        PermissionEvaluation.ensureCanDoThis(s, Permission.SEE_METADATA, Permission.EDIT_METADATA);
         model.addAttribute("site", s);
         model.addAttribute("post", post);
         model.addAttribute("metadata", Optional.ofNullable(post.getMetadata()).map(PostMetadata::json).map(
@@ -191,9 +192,10 @@ public class AdminPosts {
                                          @RequestParam String metadata) {
         Site s = Site.fromSlug(slugSite);
         Post post = s.postForSlug(slugPost);
-        ensureCanEdit(post);
         FenixFramework.atomic(()-> {
             AdminSites.canEdit(s);
+            ensureCanEdit(post);
+            PermissionEvaluation.ensureCanDoThis(s, Permission.SEE_METADATA, Permission.EDIT_METADATA);
             post.setMetadata(PostMetadata.internalize(metadata));
         });
         return new RedirectView("/cms/posts/" + s.getSlug() + "/" + post.getSlug() + "/metadata", true);

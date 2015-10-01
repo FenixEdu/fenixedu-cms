@@ -2,6 +2,7 @@ package org.fenixedu.cms.ui;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 
 import org.fenixedu.bennu.core.api.UserResource;
@@ -102,7 +103,13 @@ public class AdminPostsService {
 	postJson.add("name", ofNullable(post.getName()).map(LocalizedString::json)
 	    .orElseGet(JsonObject::new));
 	postJson.add("body", ofNullable(post.getBody()).map(LocalizedString::json).orElseGet(JsonObject::new));
-	postJson.add("metadata", ofNullable(post.getMetadata()).map(PostMetadata::json).orElseGet(JsonObject::new));
+
+      	if(PermissionEvaluation.canDoThis(post.getSite(), Permission.SEE_METADATA)) {
+	  postJson.add("metadata", ofNullable(post.getMetadata()).map(PostMetadata::json)
+	      .orElseGet(JsonObject::new));
+	} else {
+	  postJson.add("metadata", JsonNull.INSTANCE);
+	}
 	postJson.add("categories", categoriesJson);
 	postJson.add("files", filesJson);
 	postJson.addProperty("address", post.getAddress());
