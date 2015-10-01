@@ -50,6 +50,7 @@ import java.util.Optional;
 import pt.ist.fenixframework.FenixFramework;
 
 import static java.util.stream.Collectors.toList;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 import static org.fenixedu.cms.ui.SearchUtils.searchPages;
 
 @BennuSpringController(AdminSites.class)
@@ -111,7 +112,7 @@ public class AdminPages {
     public RedirectView createPage(@PathVariable String slug, @RequestParam LocalizedString name) {
         Site site = Site.fromSlug(slug);
         AdminSites.canEdit(site);
-        PermissionEvaluation.ensureCanDoThis(site, Permission.CREATE_PAGE);
+        ensureCanDoThis(site, Permission.CREATE_PAGE);
         Page page = service.createPageAndPost(name, site);
         return pageRedirect(page);
     }
@@ -131,7 +132,7 @@ public class AdminPages {
         AdminSites.canEdit(s);
         Page page = s.pageForSlug(slugPage);
         FenixFramework.atomic(() -> {
-            PermissionEvaluation.ensureCanDoThis(page.getSite(), Permission.DELETE_PAGE);
+            ensureCanDoThis(page.getSite(), Permission.EDIT_PAGE, Permission.DELETE_PAGE);
             page.getStaticPost().ifPresent(Post::delete);
             page.delete();
         });
@@ -142,6 +143,7 @@ public class AdminPages {
     public String viewEditMetadata(Model model, @PathVariable String slugSite, @PathVariable String slugPage) {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
+        ensureCanDoThis(s, Permission.EDIT_PAGE, Permission.SEE_METADATA, Permission.EDIT_METADATA);
         Page page  = s.pageForSlug(slugPage);
         Post post = page.getStaticPost().get();
         model.addAttribute("site", s);
@@ -160,6 +162,7 @@ public class AdminPages {
         Page page = s.pageForSlug(slugPage);
         FenixFramework.atomic(()-> {
             AdminSites.canEdit(s);
+            ensureCanDoThis(s, Permission.EDIT_PAGE, Permission.SEE_METADATA, Permission.EDIT_METADATA);
             page.getStaticPost().ifPresent(
                 post -> post.setMetadata(PostMetadata.internalize(metadata)));
         });

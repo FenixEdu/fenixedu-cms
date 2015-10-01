@@ -53,9 +53,11 @@ ${portal.angularToolkit()}
                 <a href="${pageContext.request.contextPath}/cms/versions/${site.slug}/${post.slug}" class="btn btn-default">
                     <span class="glyphicon glyphicon-time"></span> Versions
                 </a>
-                <button ng-class="{disabled: !post.metadata}" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">
-                    <span class="glyphicon glyphicon-cog"></span> Metadata
-                </button>
+                <c:if test="${permissions:canDoThis(site, 'SEE_METADATA')}">
+                    <button ng-class="{disabled: !post.metadata}" class="btn btn-default" data-toggle="modal" data-target="#viewMetadata">
+                        <span class="glyphicon glyphicon-cog"></span> Metadata
+                    </button>
+                </c:if>
                 <a ng-class="{disabled: !post.active || !post.address}" target="_blank" href="{{ post.address }}" class="btn btn-default">
                     <span class="glyphicon glyphicon-link"></span> Link
                 </a>
@@ -307,40 +309,44 @@ ${portal.angularToolkit()}
         </div>
     </c:if>
 
-    <div class="modal fade" id="viewMetadata" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+    <c:if test="${permissions:canDoThis(site, 'SEE_METADATA')}">
+        <div class="modal fade" id="viewMetadata" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
 
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-                    </button>
-                    <h4>Metadata</h4>
-                </div>
-            
-                <div class="modal-body">
-                    <div class="clearfix">
-                        <div class="form-group">
-                            <div class="col-sm-12">
-                                <p>
-                                    <a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/${page.slug}/metadata" class="btn btn-default">
-                                        <span class="glyphicon glyphicon-edit"></span> Edit
-                                    </a>
-                                </p>
-                                <pre ng-show="{{Object.keys(post.metadata).length}}">{{ post.metadata }}</pre>
-                                <p ng-hide="{{Object.keys(post.metadata).length}}">There is no metadata for this page.</p>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                        </button>
+                        <h4>Metadata</h4>
+                    </div>
+                
+                    <div class="modal-body">
+                        <div class="clearfix">
+                            <div class="form-group">
+                                <div class="col-sm-12">
+                                    <c:if test="${permissions:canDoThis(site, 'EDIT_METADATA')}">
+                                        <p>
+                                            <a href="${pageContext.request.contextPath}/cms/pages/${site.slug}/${page.slug}/metadata" class="btn btn-default">
+                                                <span class="glyphicon glyphicon-edit"></span> Edit
+                                            </a>
+                                        </p>
+                                    </c:if>
+                                    <pre ng-show="{{Object.keys(post.metadata).length}}">{{ post.metadata }}</pre>
+                                    <p ng-hide="{{Object.keys(post.metadata).length}}">There is no metadata for this page.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
+                
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
 
+                </div>
             </div>
         </div>
-    </div>
+    </c:if>
 </div>
 <style type="text/css">
     .json-data {
