@@ -1,6 +1,5 @@
 package org.fenixedu.cms.ui;
 
-import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -161,8 +160,8 @@ public class AdminMenusService {
     }
 
     private void setMenuItemUrl(MenuItem menuItem, JsonObject menuItemJson) {
-	String newUrl = Optional.ofNullable(menuItemJson.get("url"))
-	    .map(JsonElement::getAsString).orElse("#");
+	String newUrl = Optional.ofNullable(menuItemJson).map(json->json.get("url"))
+	    .filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString).orElse("#");
 	if(!newUrl.equals(menuItem.getUrl())) {
 	    menuItem.setFolder(false);
 	    menuItem.setPage(null);
@@ -171,14 +170,15 @@ public class AdminMenusService {
     }
 
     private void setMenuItemPage(MenuItem menuItem, JsonObject menuItemJson) {
-	if(!Strings.isNullOrEmpty(menuItemJson.get("page").getAsString())) {
-	    Page p = menuItem.getMenu().getSite().pageForSlug(menuItemJson.get("page").getAsString());
-	    if (p != menuItem.getPage()) {
-		menuItem.setPage(p);
-		menuItem.setFolder(false);
-		menuItem.setUrl(null);
-	    }
-	}
+      Site site = menuItem.getMenu().getSite();
+      Optional.ofNullable(menuItemJson).map(json -> json.get("page"))
+	 .filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString)
+	 .map(pageSlug->site.pageForSlug(pageSlug)).filter(page -> page != menuItem.getPage())
+	 .ifPresent(page->{
+	    menuItem.setPage(page);
+	    menuItem.setFolder(false);
+	    menuItem.setUrl(null);
+	  });
     }
 
     private Set<String> allJsonKeys(JsonObject menuItemJson) {

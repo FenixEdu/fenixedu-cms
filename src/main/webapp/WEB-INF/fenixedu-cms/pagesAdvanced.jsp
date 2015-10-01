@@ -70,10 +70,19 @@ ${portal.toolkit()}
 			<c:forEach var="page" items="${pages}">
 				<tr>
 					<td>
-						<h5><a href="${pageContext.request.contextPath}/cms/pages/advanced/${page.site.slug}/${page.slug}/edit">${page.name.content}</a>
-							<c:if test="${page.site.initialPage == page}">
-								<span class="label label-success"><spring:message code="site.manage.label.default"/></span>
-							</c:if>
+
+						<h5>
+							<c:choose>
+								<c:when test="${permissions:canDoThis(site, 'EDIT_PAGE')}">
+									<a href="${pageContext.request.contextPath}/cms/pages/advanced/${page.site.slug}/${page.slug}/edit">${page.name.content}</a>
+									<c:if test="${page.site.initialPage == page}">
+										<span class="label label-success"><spring:message code="site.manage.label.default"/></span>
+									</c:if>
+								</c:when>
+								<c:otherwise>
+									${page.name.content}
+								</c:otherwise>
+							</c:choose>
 						</h5>
 
 						<div>
@@ -95,15 +104,22 @@ ${portal.toolkit()}
 					<td>
 						<div class="btn-group">
 							<c:choose>
-								<c:when test="${page.slug != ''}">
-									<a href="${pageContext.request.contextPath}/cms/pages/advanced/${page.site.slug}/${page.slug}/edit" class="btn btn-sm btn-default">
-										<i class="glyphicon glyphicon-edit"></i>
-									</a>
+								<c:when test="${permissions:canDoThis(site, 'EDIT_PAGE')}">
+									<c:choose>
+										<c:when test="${page.slug != ''}">
+											<a href="${pageContext.request.contextPath}/cms/pages/advanced/${page.site.slug}/${page.slug}/edit" class="btn btn-sm btn-default">
+												<i class="glyphicon glyphicon-edit"></i>
+											</a>
+										</c:when>
+										<c:otherwise>
+											<a href="${pageContext.request.contextPath}/cms/pages/advanced/${page.site.slug}/--**--/edit" class="btn btn-sm btn-default">
+												<i class="glyphicon glyphicon-edit"></i>
+											</a>
+										</c:otherwise>
+									</c:choose>
 								</c:when>
 								<c:otherwise>
-									<a href="${pageContext.request.contextPath}/cms/pages/advanced/${page.site.slug}/--**--/edit" class="btn btn-sm btn-default">
-										<i class="glyphicon glyphicon-edit"></i>
-									</a>
+									<button type="button" class="btn btn-sm btn-default disabled"><i class="glyphicon glyphicon-edit"></i></button>
 								</c:otherwise>
 							</c:choose>
 							
@@ -118,7 +134,7 @@ ${portal.toolkit()}
 
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                                     <li><a href="#"><i class="glyphicon glyphicon-bullhorn">&nbsp;Unpublish</i></a></li>
-									<c:if test="${permissions:canDoThis(site, 'DELETE_PAGE')}">
+									<c:if test="${permissions:canDoThis(site, 'EDIT_PAGE, DELETE_PAGE')}">
                                     	<li><a href="#" data-page="${page.slug}"><i class="glyphicon glyphicon-trash">&nbsp;Delete</i></a></li>
                                     </c:if>
                                 </ul>
@@ -147,7 +163,7 @@ ${portal.toolkit()}
 	</c:otherwise>
 </c:choose>
 
-<c:if test="${permissions:canDoThis(site, 'DELETE_PAGE')}">
+<c:if test="${permissions:canDoThis(site, 'EDIT_PAGE, DELETE_PAGE')}">
 	<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
@@ -171,37 +187,38 @@ ${portal.toolkit()}
 	</div>
 </c:if>
 
-<div class="modal fade" id="create-page" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<form class="form-horizontal" action="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}/create" method="post" role="form">
-			  ${csrf.field()}
-		      <div class="modal-header">
-		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
-		        <h3 class="modal-title">New Page</h3>
-		        <small>This could be the start of something great!</small>
-		      </div>
+<c:if test="${permissions:canDoThis(site, 'CREATE_PAGE')}">
+	<div class="modal fade" id="create-page" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form class="form-horizontal" action="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}/create" method="post" role="form">
+				  ${csrf.field()}
+			      <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
+			        <h3 class="modal-title">New Page</h3>
+			        <small>This could be the start of something great!</small>
+			      </div>
 
-		      <div class="modal-body">
-		        <div class="${emptyName ? "form-group has-error" : "form-group"}">
-		            <label class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
-		            <div class="col-sm-10">
-		                <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.create.label.name" />">
-		                <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="post.create.error.emptyName"/></p>
-		                </c:if>
-		            </div>
-		        </div>
-		      </div>
+			      <div class="modal-body">
+			        <div class="${emptyName ? "form-group has-error" : "form-group"}">
+			            <label class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
+			            <div class="col-sm-10">
+			                <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.create.label.name" />">
+			                <c:if test="${emptyName != null}"><p class="text-danger"><spring:message code="post.create.error.emptyName"/></p>
+			                </c:if>
+			            </div>
+			        </div>
+			      </div>
 
-		      <div class="modal-footer">
-		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-		        <button type="Submit" class="btn btn-primary">Make</button>
-		      </div>
-			</form>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			        <button type="Submit" class="btn btn-primary">Make</button>
+			      </div>
+				</form>
+			</div>
 		</div>
 	</div>
-</div>
-
+</c:if>
 <script type="application/javascript">
   function getParameterByName(name) {
       var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);

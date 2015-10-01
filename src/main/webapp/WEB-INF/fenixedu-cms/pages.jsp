@@ -74,11 +74,22 @@ ${portal.toolkit()}
 			<c:forEach var="page" items="${pages}">
 				<tr>
 					<td>
-						<h5><a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit">${page.name.content}</a>
-							<c:if test="${page.site.initialPage == page}">
-								<span class="label label-success"><spring:message code="site.manage.label.default"/></span>
-							</c:if>
-						</h5>
+						<c:choose>
+							<c:when test="${permissions:canDoThis(site, 'EDIT_PAGE')}">
+								<h5><a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit">${page.name.content}</a>
+									<c:if test="${page.site.initialPage == page}">
+										<span class="label label-success"><spring:message code="site.manage.label.default"/></span>
+									</c:if>
+								</h5>
+							</c:when>
+							<c:otherwise>
+								<h5>${page.name.content}
+									<c:if test="${page.site.initialPage == page}">
+										<span class="label label-success"><spring:message code="site.manage.label.default"/></span>
+									</c:if>
+								</h5>
+							</c:otherwise>
+						</c:choose>
 
 						<div>
 							<small><spring:message code="page.manage.label.url"/>:
@@ -99,18 +110,25 @@ ${portal.toolkit()}
 					<td>
 						<div class="btn-group">
 							<c:choose>
-								<c:when test="${page.slug != ''}">
-									<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit" class="btn btn-sm btn-default">
-										<i class="glyphicon glyphicon-edit"></i>
-									</a>
+								<c:when test="${permissions:canDoThis(site, 'EDIT_PAGE')}">
+									<c:choose>
+										<c:when test="${page.slug != ''}">
+											<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit" class="btn btn-sm btn-default">
+												<i class="glyphicon glyphicon-edit"></i>
+											</a>
+										</c:when>
+										<c:otherwise>
+											<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/--**--/edit" class="btn btn-sm btn-default">
+												<i class="glyphicon glyphicon-edit"></i>
+											</a>
+										</c:otherwise>
+									</c:choose>
 								</c:when>
 								<c:otherwise>
-									<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/--**--/edit" class="btn btn-sm btn-default">
-										<i class="glyphicon glyphicon-edit"></i>
-									</a>
+									<button type="button" class="btn btn-sm btn-default disabled"><i class="glyphicon glyphicon-edit"></i></button>
 								</c:otherwise>
 							</c:choose>
-							
+
 							<a href="${page.address}" class="btn btn-default btn-sm">
 								<i class="glyphicon glyphicon-link"></i>
 							</a>
@@ -122,7 +140,7 @@ ${portal.toolkit()}
 
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                                     <li><a href="#"><i class="glyphicon glyphicon-bullhorn">&nbsp;Unpublish</i></a></li>
-									<c:if test="${permissions:canDoThis(site, 'DELETE_PAGE')}">
+									<c:if test="${permissions:canDoThis(site, 'EDIT_PAGE, DELETE_PAGE')}">
                                     	<li><a href="#" data-page="${page.slug}"><i class="glyphicon glyphicon-trash">&nbsp;Delete</i></a></li>
                                     </c:if>
                                 </ul>
@@ -152,7 +170,7 @@ ${portal.toolkit()}
 	</c:otherwise>
 </c:choose>
 
-<c:if test="${permissions:canDoThis(site, 'DELETE_PAGE')}">
+<c:if test="${permissions:canDoThis(site, 'EDIT_PAGE, DELETE_PAGE')}">
 	<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">

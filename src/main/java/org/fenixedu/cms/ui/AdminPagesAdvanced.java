@@ -45,6 +45,7 @@ import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
 import static java.util.Optional.ofNullable;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 import static org.fenixedu.cms.ui.SearchUtils.searchPages;
 
 @BennuSpringController(AdminSites.class)
@@ -57,6 +58,7 @@ public class AdminPagesAdvanced {
                         @RequestParam(required = false) String query,
                         @RequestParam(required = false, defaultValue = "1") int currentPage) {
         Site site = Site.fromSlug(slug);
+        ensureCanDoThis(site, Permission.SEE_PAGES);
         AdminSites.canEdit(site);
         Collection<Page> allPages = Strings.isNullOrEmpty(query) ? site.getPagesSet() : searchPages(site.getPagesSet(), query);
         SearchUtils.Partition<Page> partition =
@@ -79,7 +81,7 @@ public class AdminPagesAdvanced {
 
     @Atomic
     private Page createPage(LocalizedString name, Site s) {
-        PermissionEvaluation.ensureCanDoThis(s, Permission.CREATE_PAGE);
+        ensureCanDoThis(s, Permission.SEE_PAGES, Permission.EDIT_PAGE, Permission.CREATE_PAGE);
         Page p = new Page(s, name);
         return p;
     }
@@ -87,7 +89,7 @@ public class AdminPagesAdvanced {
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.GET)
     public String edit(Model model, @PathVariable String slugSite, @PathVariable String slugPage) {
         Site s = Site.fromSlug(slugSite);
-
+        ensureCanDoThis(s, Permission.SEE_PAGES, Permission.EDIT_PAGE);
         AdminSites.canEdit(s);
 
         if (slugPage.equals("--**--")) {
@@ -113,6 +115,7 @@ public class AdminPagesAdvanced {
                              @RequestParam(required = false) Boolean published) {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
+        ensureCanDoThis(s, Permission.SEE_PAGES, Permission.EDIT_PAGE);
         Page p = s.pageForSlug(slugPage.equals("--**--") ? "" : slugPage);
         slug = ofNullable(slug).orElseGet(()->p.getSlug());
         published = ofNullable(published).orElse(false);
@@ -125,7 +128,7 @@ public class AdminPagesAdvanced {
     private void editPage(LocalizedString name, String slug, String template, Site s, Page p, boolean published, Group canView) {
         p.setName(name);
         if (!Objects.equals(slug, p.getSlug())) {
-            PermissionEvaluation.ensureCanDoThis(s, Permission.CHANGE_PATH_PAGES);
+            ensureCanDoThis(s, Permission.CHANGE_PATH_PAGES);
             p.setSlug(slug);
         }
         CMSTheme theme = s.getTheme();
@@ -148,7 +151,7 @@ public class AdminPagesAdvanced {
         FenixFramework.atomic(() -> {
             Site site = Site.fromSlug(slugSite);
             AdminSites.canEdit(site);
-            PermissionEvaluation.ensureCanDoThis(site, Permission.DELETE_PAGE);
+            ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE, Permission.DELETE_PAGE);
             site.pageForSlug(slugPage).delete();
         });
         return new RedirectView("/cms/pages/advanced/" + slugSite + "", true);

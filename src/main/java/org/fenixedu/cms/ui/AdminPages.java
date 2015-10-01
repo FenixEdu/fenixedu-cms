@@ -27,7 +27,6 @@ import com.google.gson.JsonParser;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostMetadata;
@@ -50,6 +49,7 @@ import java.util.Optional;
 import pt.ist.fenixframework.FenixFramework;
 
 import static java.util.stream.Collectors.toList;
+import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
 import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 import static org.fenixedu.cms.ui.SearchUtils.searchPages;
 
@@ -69,6 +69,7 @@ public class AdminPages {
                     @RequestParam(required = false, defaultValue = "1") int currentPage) {
         Site site = Site.fromSlug(slug);
         AdminSites.canEdit(site);
+        ensureCanDoThis(site, Permission.SEE_PAGES);
         Collection<Page> allPages = Strings.isNullOrEmpty(query) ? getStaticPages(site) : searchPages(getStaticPages(site), query);
         SearchUtils.Partition<Page> partition =
                         new SearchUtils.Partition<>(allPages, Page.CREATION_DATE_COMPARATOR, PER_PAGE, currentPage);
@@ -84,6 +85,7 @@ public class AdminPages {
     public String edit(Model model, @PathVariable String slugSite, @PathVariable String slugPage) {
         Site site = Site.fromSlug(slugSite);
         AdminSites.canEdit(site);
+        ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE);
         Page page = site.pageForSlug(slugPage);
         model.addAttribute("site", site);
         model.addAttribute("page", page);
@@ -95,11 +97,11 @@ public class AdminPages {
     public @ResponseBody String data(@PathVariable String slugSite, @PathVariable String slugPage) {
         Site site = Site.fromSlug(slugSite);
         AdminSites.canEdit(site);
+        ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE);
         Page page = site.pageForSlug(slugPage);
-
         JsonObject data = new JsonObject();
         JsonArray menus = new JsonArray();
-        if(PermissionEvaluation.canDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU)) {
+        if(canDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU)) {
             site.getMenusSet().stream().sorted(Comparator.comparing(Menu::getName))
                 .map(service::serializeMenu).forEach(menus::add);
         }
@@ -112,15 +114,16 @@ public class AdminPages {
     public RedirectView createPage(@PathVariable String slug, @RequestParam LocalizedString name) {
         Site site = Site.fromSlug(slug);
         AdminSites.canEdit(site);
-        ensureCanDoThis(site, Permission.CREATE_PAGE);
+        ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE, Permission.CREATE_PAGE);
         Page page = service.createPageAndPost(name, site);
         return pageRedirect(page);
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST, consumes = JSON, produces = JSON)
     public @ResponseBody String edit(@PathVariable String slugSite, @PathVariable String slugPage, HttpEntity<String> httpEntity) {
-        JsonObject editData = JSON_PARSER.parse(httpEntity.getBody()).getAsJsonObject();
         Site site = Site.fromSlug(slugSite);
+        ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE);
+        JsonObject editData = JSON_PARSER.parse(httpEntity.getBody()).getAsJsonObject();
         Page page = site.pageForSlug(slugPage);
         service.processChanges(site, page, editData);
         return data(site.getSlug(), page.getSlug());

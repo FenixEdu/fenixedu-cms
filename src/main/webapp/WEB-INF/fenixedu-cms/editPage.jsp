@@ -217,6 +217,7 @@ ${portal.angularToolkit()}
                     <div ng-show="useMenu"><fancy-tree items="menus" selected="selected"></fancy-tree></div>
                 </div>
             </div>
+            <pre>{{ menus | json }} </pre>
         </c:if>
 
     </fieldset>
@@ -411,7 +412,7 @@ ${portal.angularToolkit()}
 
                     function findMenuItem() {
                         function isMenuItemPagePredicate(menuItem) {
-                            return menuItem && menuItem.page && menuItem.page == $scope.post.slug;
+                            return menuItem && menuItem.use && menuItem.use == 'page' && menuItem.page && menuItem.page == $scope.post.slug;
                         }
                         return findMenus($scope.menus, isMenuItemPagePredicate);
                     }
@@ -437,7 +438,7 @@ ${portal.angularToolkit()}
                             if(!firstMenu.children) {
                                 firstMenu.children = [];
                             }
-                            firstMenu.children.push({
+                            firstMenu.children.unshift({
                                 name: $scope.post.name,
                                 title: Bennu.localizedString.getContent($scope.post.name),
                                 use: 'page',
@@ -476,7 +477,7 @@ ${portal.angularToolkit()}
 
                 $scope.update = function() {
                     var data = {post: $scope.post, menus: $scope.menus};
-                    $http.post(updatePostUrl, data).success(init);
+                    $http.post(updatePostUrl, angular.toJson(data)).success(init);
                 };
 
                 $(window).bind('keydown', function(event) {
