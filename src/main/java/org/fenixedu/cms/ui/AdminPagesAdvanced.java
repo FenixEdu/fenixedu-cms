@@ -107,21 +107,25 @@ public class AdminPagesAdvanced {
 
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST)
     public RedirectView edit(@PathVariable String slugSite, @PathVariable String slugPage,
-                             @RequestParam LocalizedString name, @RequestParam String slug,
-                             @RequestParam String template, @RequestParam String viewGroup,
+                             @RequestParam LocalizedString name, @RequestParam String template,
+                             @RequestParam(required = false) String slug,
+                             @RequestParam String viewGroup,
                              @RequestParam(required = false) Boolean published) {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         Page p = s.pageForSlug(slugPage.equals("--**--") ? "" : slugPage);
+        slug = ofNullable(slug).orElseGet(()->p.getSlug());
+        published = ofNullable(published).orElse(false);
         editPage(name, slug, template, s, p, ofNullable(published)
                 .orElse(false), Group.parse(viewGroup));
-        return new RedirectView("/cms/pages/advanced/" + slugSite + "/" + slugPage + "/edit", true);
+        return new RedirectView("/cms/pages/advanced/" + slugSite + "/" + p.getSlug() + "/edit", true);
     }
 
     @Atomic(mode = TxMode.WRITE)
     private void editPage(LocalizedString name, String slug, String template, Site s, Page p, boolean published, Group canView) {
         p.setName(name);
         if (!Objects.equals(slug, p.getSlug())) {
+            PermissionEvaluation.ensureCanDoThis(s, Permission.CHANGE_PATH_PAGES);
             p.setSlug(slug);
         }
         CMSTheme theme = s.getTheme();
@@ -130,9 +134,11 @@ public class AdminPagesAdvanced {
             p.setTemplate(t);
         }
         if (p.getPublished() != published) {
+            PermissionEvaluation.canDoThis(s, Permission.PUBLISH_PAGES);
             p.setPublished(published);
         }
         if (!p.getCanViewGroup().equals(canView)) {
+            PermissionEvaluation.canDoThis(s, Permission.PUBLISH_PAGES);
             p.setCanViewGroup(canView);
         }
     }

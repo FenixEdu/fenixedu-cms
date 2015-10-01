@@ -54,7 +54,7 @@
             <div class="col-sm-10">
                 <div class="input-group">
                     <span class="input-group-addon"><code>/${site.baseUrl}/</code></span>
-                    <input type="text" name="slug" class="form-control" placeholder="<spring:message code="page.edit.label.slug" />" value='${page.slug}' \>
+                    <input type="text" name="slug" class="form-control" placeholder="<spring:message code="page.edit.label.slug" />" value='${page.slug}' ${permissions:canDoThis(site, 'CHANGE_PATH_PAGES') ? '' : 'disabled'} \>
                 </div>
             </div>
         </div>

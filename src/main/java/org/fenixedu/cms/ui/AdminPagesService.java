@@ -51,6 +51,7 @@ public class AdminPagesService {
 	    page.setName(post.getName());
 	}
 	if(!page.getSlug().equals(post.getSlug())) {
+	    PermissionEvaluation.ensureCanDoThis(site, Permission.CHANGE_PATH_PAGES);
 	    page.setSlug(post.getSlug());
 	}
 	if(!page.getCanViewGroup().equals(post.getCanViewGroup())) {
