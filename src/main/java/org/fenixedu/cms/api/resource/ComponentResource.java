@@ -1,16 +1,16 @@
 package org.fenixedu.cms.api.resource;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import com.google.gson.JsonElement;
 
 import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.api.json.ComponentAdapter;
 import org.fenixedu.cms.domain.component.Component;
 
-import com.google.gson.JsonElement;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 @Path("/cms/components")
 public class ComponentResource extends BennuRestResource {

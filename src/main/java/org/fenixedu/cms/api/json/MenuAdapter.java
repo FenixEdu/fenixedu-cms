@@ -3,6 +3,7 @@ package org.fenixedu.cms.api.json;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
 import org.fenixedu.bennu.core.api.json.DateTimeViewer;
 import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
@@ -10,6 +11,10 @@ import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.commons.i18n.LocalizedString;
+
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.LIST_MENUS;
 
 @DefaultJsonAdapter(Menu.class)
 public class MenuAdapter implements JsonAdapter<Menu> {
@@ -22,6 +27,8 @@ public class MenuAdapter implements JsonAdapter<Menu> {
 
     @Override
     public Menu update(JsonElement json, Menu menu, JsonBuilder ctx) {
+        ensureCanDoThis(menu.getSite(), LIST_MENUS, EDIT_MENU);
+
         JsonObject jObj = json.getAsJsonObject();
 
         if (jObj.has("slug") && !jObj.get("slug").isJsonNull()) {
@@ -37,6 +44,8 @@ public class MenuAdapter implements JsonAdapter<Menu> {
 
     @Override
     public JsonElement view(Menu menu, JsonBuilder ctx) {
+        ensureCanDoThis(menu.getSite(), LIST_MENUS);
+
         JsonObject json = new JsonObject();
 
         json.addProperty("id", menu.getExternalId());

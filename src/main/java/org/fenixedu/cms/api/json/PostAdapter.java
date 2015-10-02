@@ -2,12 +2,15 @@ package org.fenixedu.cms.api.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
 import org.fenixedu.bennu.core.api.json.DateTimeViewer;
 import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
 import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
+import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.ui.AdminPosts;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -24,7 +27,7 @@ public class PostAdapter implements JsonAdapter<Post> {
 
     @Override
     public Post update(JsonElement json, Post post, JsonBuilder ctx) {
-
+        AdminPosts.ensureCanEditPost(post);
         JsonObject jObj = json.getAsJsonObject();
 
         if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {

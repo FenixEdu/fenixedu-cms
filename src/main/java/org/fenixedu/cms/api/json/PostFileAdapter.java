@@ -6,9 +6,16 @@ import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
 import org.fenixedu.cms.domain.PostFile;
+import org.fenixedu.cms.exceptions.CmsDomainException;
+
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_PAGE;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_POSTS;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.SEE_PAGES;
 
 @DefaultJsonAdapter(PostFile.class)
 public class PostFileAdapter implements JsonAdapter<PostFile> {
@@ -21,6 +28,11 @@ public class PostFileAdapter implements JsonAdapter<PostFile> {
 
     @Override
     public PostFile update(JsonElement json, PostFile postFile, JsonBuilder ctx) {
+        if(postFile.getPost()!=null && postFile.getPost().isStaticPost()) {
+            ensureCanDoThis(postFile.getSite(), SEE_PAGES, EDIT_PAGE);
+        } else {
+            ensureCanDoThis(postFile.getSite(), EDIT_POSTS);
+        }
         JsonObject jObj = json.getAsJsonObject();
 
         if (jObj.has("index") && !jObj.get("index").isJsonNull()) {
@@ -40,6 +52,10 @@ public class PostFileAdapter implements JsonAdapter<PostFile> {
 
     @Override
     public JsonElement view(PostFile postFile, JsonBuilder ctx) {
+        if(postFile.getPost()!=null && postFile.getPost().isStaticPost()) {
+            ensureCanDoThis(postFile.getSite(), SEE_PAGES);
+        }
+
         JsonObject json = new JsonObject();
 
         json.addProperty("id", postFile.getExternalId());
@@ -55,6 +71,9 @@ public class PostFileAdapter implements JsonAdapter<PostFile> {
         json.addProperty("size", file.getSize());
 
         if (file.getAccessGroup() != null) {
+            if(!file.getAccessGroup().isMember(Authenticate.getUser())) {
+                throw CmsDomainException.forbiden();
+            }
             json.addProperty("accessGroup", file.getAccessGroup().getPresentationName());
         }
 

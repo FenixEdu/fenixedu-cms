@@ -2,12 +2,14 @@ package org.fenixedu.cms.api.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
 import org.fenixedu.bennu.core.api.json.DateTimeViewer;
 import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
 import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.cms.domain.PostContentRevision;
+import org.fenixedu.cms.ui.AdminPosts;
 
 @DefaultJsonAdapter(PostContentRevision.class)
 public class PostRevisionAdapter implements JsonAdapter<PostContentRevision> {
@@ -24,7 +26,7 @@ public class PostRevisionAdapter implements JsonAdapter<PostContentRevision> {
 
     @Override
     public JsonElement view(PostContentRevision revision, JsonBuilder ctx) {
-
+        AdminPosts.ensureCanEditPost(revision.getPost());
         JsonObject json = new JsonObject();
 
         json.add("body", ctx.view(revision.getBody(), LocalizedStringViewer.class));

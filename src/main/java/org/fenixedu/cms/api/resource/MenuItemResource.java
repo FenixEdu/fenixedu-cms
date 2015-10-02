@@ -1,5 +1,11 @@
 package org.fenixedu.cms.api.resource;
 
+import com.google.gson.JsonElement;
+
+import org.fenixedu.bennu.core.rest.BennuRestResource;
+import org.fenixedu.cms.api.json.MenuItemAdapter;
+import org.fenixedu.cms.domain.MenuItem;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -10,11 +16,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.fenixedu.bennu.core.rest.BennuRestResource;
-import org.fenixedu.cms.api.json.MenuItemAdapter;
-import org.fenixedu.cms.domain.MenuItem;
-
-import com.google.gson.JsonElement;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_MENU_ITEM;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU_ITEM;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.LIST_MENUS;
 
 @Path("/cms/menuItems")
 public class MenuItemResource extends BennuRestResource {
@@ -32,6 +38,7 @@ public class MenuItemResource extends BennuRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
     public Response deleteMenuItem(@PathParam("oid") MenuItem menuItem) {
+        ensureCanDoThis(menuItem.getMenu().getSite(), LIST_MENUS, EDIT_MENU, EDIT_MENU_ITEM, DELETE_MENU_ITEM);
         menuItem.delete();
         return Response.ok().build();
     }

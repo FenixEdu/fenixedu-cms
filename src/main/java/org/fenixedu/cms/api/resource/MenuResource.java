@@ -8,8 +8,6 @@ import org.fenixedu.cms.api.json.MenuAdapter;
 import org.fenixedu.cms.api.json.MenuItemAdapter;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
-import org.fenixedu.cms.domain.PermissionEvaluation;
-import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.commons.i18n.LocalizedString;
 
 import javax.ws.rs.Consumes;
@@ -25,6 +23,12 @@ import javax.ws.rs.core.Response;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
+
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.CREATE_MENU_ITEM;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_MENU;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.LIST_MENUS;
 
 @Path("/cms/menus")
 public class MenuResource extends BennuRestResource {
@@ -42,7 +46,7 @@ public class MenuResource extends BennuRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
     public Response deleteMenu(@PathParam("oid") Menu menu) {
-        PermissionEvaluation.ensureCanDoThis(menu.getSite(), Permission.DELETE_MENU);
+        ensureCanDoThis(menu.getSite(), LIST_MENUS, EDIT_MENU, DELETE_MENU);
         menu.delete();
         return Response.ok().build();
     }
@@ -76,6 +80,7 @@ public class MenuResource extends BennuRestResource {
 
     @Atomic(mode = TxMode.WRITE)
     private MenuItem createMenuItemFromJson(Menu menu, JsonObject jObj) {
+        ensureCanDoThis(menu.getSite(), LIST_MENUS, EDIT_MENU, CREATE_MENU_ITEM);
 
         MenuItem menuItem = new MenuItem(menu);
 

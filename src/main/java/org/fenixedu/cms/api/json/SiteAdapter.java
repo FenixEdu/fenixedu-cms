@@ -2,6 +2,7 @@ package org.fenixedu.cms.api.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
 import org.fenixedu.bennu.core.api.json.DateTimeViewer;
 import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
@@ -10,14 +11,20 @@ import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
+
 import pt.ist.fenixframework.FenixFramework;
+
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.CHANGE_THEME;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_SITE_INFORMATION;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.MANAGE_ANALYTICS;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.PUBLISH_SITE;
 
 @DefaultJsonAdapter(Site.class)
 public class SiteAdapter implements JsonAdapter<Site> {
 
     @Override
     public Site create(JsonElement json, JsonBuilder ctx) {
-
         JsonObject jObj = json.getAsJsonObject();
 
         JsonElement name = getRequiredValue(jObj, "name");
@@ -45,7 +52,6 @@ public class SiteAdapter implements JsonAdapter<Site> {
 
     @Override
     public Site update(JsonElement json, Site site, JsonBuilder ctx) {
-
         JsonObject jObj = json.getAsJsonObject();
 
         if (jObj.has("slug") && !jObj.get("slug").isJsonNull()) {
@@ -53,26 +59,32 @@ public class SiteAdapter implements JsonAdapter<Site> {
         }
 
         if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
+            ensureCanDoThis(site, EDIT_SITE_INFORMATION);
             site.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 
         if (jObj.has("description") && !jObj.get("description").isJsonNull() && jObj.get("description").isJsonObject()) {
+            ensureCanDoThis(site, EDIT_SITE_INFORMATION);
             site.setDescription(LocalizedString.fromJson(jObj.get("description")));
         }
 
         if (jObj.has("analyticsCode") && !jObj.get("analyticsCode").isJsonNull()) {
+            ensureCanDoThis(site, MANAGE_ANALYTICS);
             site.setAnalyticsCode(jObj.get("analyticsCode").getAsString());
         }
 
         if (jObj.has("theme") && !jObj.get("theme").isJsonNull()) {
+            ensureCanDoThis(site, CHANGE_THEME);
             site.setTheme(FenixFramework.getDomainObject(jObj.get("theme").getAsString()));
         }
 
         if (jObj.has("alternativeSite") && !jObj.get("alternativeSite").isJsonNull()) {
+            ensureCanDoThis(site, EDIT_SITE_INFORMATION);
             site.setAlternativeSite(jObj.get("alternativeSite").getAsString());
         }
 
         if (jObj.has("published") && !jObj.get("published").isJsonNull()) {
+            ensureCanDoThis(site, PUBLISH_SITE);
             site.setPublished(jObj.get("published").getAsBoolean());
         }
 

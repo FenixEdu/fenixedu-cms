@@ -10,9 +10,9 @@ import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.cms.api.json.PostAdapter;
 import org.fenixedu.cms.api.json.PostFileAdapter;
 import org.fenixedu.cms.api.json.PostRevisionAdapter;
-import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostFile;
+import org.fenixedu.cms.ui.AdminPosts;
 
 import java.io.IOException;
 
@@ -35,6 +35,10 @@ import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
 import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_OTHERS_POSTS;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_POSTS;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_POSTS_PUBLISHED;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_POSTS;
 
 @Path("/cms/posts")
 public class PostResource extends BennuRestResource {
@@ -52,12 +56,12 @@ public class PostResource extends BennuRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
     public Response deletePost(@PathParam("oid") Post post) {
-        ensureCanDoThis(post.getSite(), Permission.DELETE_POSTS);
+        ensureCanDoThis(post.getSite(), EDIT_POSTS, DELETE_POSTS);
         if(post.isVisible()) {
-            ensureCanDoThis(post.getSite(), Permission.DELETE_POSTS_PUBLISHED);
+            ensureCanDoThis(post.getSite(), EDIT_POSTS, DELETE_POSTS_PUBLISHED);
         }
         if(!Authenticate.getUser().equals(post.getCreatedBy())) {
-            ensureCanDoThis(post.getSite(), Permission.DELETE_OTHERS_POSTS);
+            ensureCanDoThis(post.getSite(), EDIT_POSTS, DELETE_OTHERS_POSTS);
         }
         post.delete();
         return ok();
@@ -95,15 +99,13 @@ public class PostResource extends BennuRestResource {
     @Path("/{oid}/files")
     public JsonElement addPostFile(@PathParam("oid") Post post, @Context HttpServletRequest request) throws IOException,
     ServletException {
-        Part part = request.getPart("file");
-
-        createFileFromRequest(post, part);
-
+        createFileFromRequest(post, request.getPart("file"));
         return view(post, PostAdapter.class);
     }
 
     @Atomic(mode = TxMode.WRITE)
     public void createFileFromRequest(Post post, Part part) throws IOException {
+        AdminPosts.ensureCanEditPost(post);
         GroupBasedFile groupBasedFile =
                 new GroupBasedFile(part.getName(), part.getName(), ByteStreams.toByteArray(part.getInputStream()), Group.logged());
 

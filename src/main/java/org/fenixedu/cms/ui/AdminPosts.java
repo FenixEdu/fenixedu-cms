@@ -104,7 +104,7 @@ public class AdminPosts {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         Post post = s.postForSlug(slugPost);
-        ensureCanEdit(post);
+        ensureCanEditPost(post);
         JsonObject data = new JsonObject();
         data.add("post", service.serializePost(post));
         return data.toString();
@@ -124,7 +124,7 @@ public class AdminPosts {
         Site site = Site.fromSlug(siteSlug);
         AdminSites.canEdit(site);
         Post post = site.postForSlug(postSlug);
-        ensureCanEdit(post);
+        ensureCanEditPost(post);
         model.addAttribute("site", site);
         model.addAttribute("post", post);
         return "fenixedu-cms/editPost";
@@ -136,7 +136,7 @@ public class AdminPosts {
         JsonObject postJson = JSON_PARSER.parse(httpEntity.getBody()).getAsJsonObject();
         Site site = Site.fromSlug(slugSite);
         Post post = site.postForSlug(slugPost);
-        ensureCanEdit(post);
+        ensureCanEditPost(post);
         service.processPostChanges(site, post, postJson);
         return data(site.getSlug(), post.getSlug());
     }
@@ -147,7 +147,7 @@ public class AdminPosts {
             Site s = Site.fromSlug(slugSite);
             AdminSites.canEdit(s);
             Post post = s.postForSlug(slugPost);
-            ensureCanEdit(post);
+            ensureCanEditPost(post);
             ensureCanDoThis(s, Permission.DELETE_POSTS);
             if(post.isVisible()) {
                 ensureCanDoThis(s, Permission.DELETE_POSTS_PUBLISHED);
@@ -167,7 +167,7 @@ public class AdminPosts {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         Post p = s.postForSlug(slugPost);
-        ensureCanEdit(p);
+        ensureCanEditPost(p);
         PostFile postFile = service.createFile(p, name, embedded, p.getCanViewGroup(), file);
         return service.serializePostFile(postFile).toString();
     }
@@ -177,7 +177,7 @@ public class AdminPosts {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         Post post = s.postForSlug(slugPost);
-        ensureCanEdit(post);
+        ensureCanEditPost(post);
         PermissionEvaluation.ensureCanDoThis(s, Permission.SEE_METADATA, Permission.EDIT_METADATA);
         model.addAttribute("site", s);
         model.addAttribute("post", post);
@@ -194,14 +194,14 @@ public class AdminPosts {
         Post post = s.postForSlug(slugPost);
         FenixFramework.atomic(()-> {
             AdminSites.canEdit(s);
-            ensureCanEdit(post);
+            ensureCanEditPost(post);
             PermissionEvaluation.ensureCanDoThis(s, Permission.SEE_METADATA, Permission.EDIT_METADATA);
             post.setMetadata(PostMetadata.internalize(metadata));
         });
         return new RedirectView("/cms/posts/" + s.getSlug() + "/" + post.getSlug() + "/metadata", true);
     }
 
-    private void ensureCanEdit(Post post) {
+    public static void ensureCanEditPost(Post post) {
         PermissionEvaluation.ensureCanDoThis(post.getSite(), Permission.EDIT_POSTS);
         if(!Authenticate.getUser().equals(post.getCreatedBy())) {
             PermissionEvaluation.ensureCanDoThis(post.getSite(), Permission.EDIT_OTHERS_POSTS);

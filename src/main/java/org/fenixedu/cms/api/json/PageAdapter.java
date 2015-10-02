@@ -2,6 +2,7 @@ package org.fenixedu.cms.api.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
 import org.fenixedu.bennu.core.api.json.DateTimeViewer;
 import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
@@ -9,6 +10,10 @@ import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.commons.i18n.LocalizedString;
+
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_PAGE;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.SEE_PAGES;
 
 @DefaultJsonAdapter(Page.class)
 public class PageAdapter implements JsonAdapter<Page> {
@@ -21,6 +26,7 @@ public class PageAdapter implements JsonAdapter<Page> {
 
     @Override
     public Page update(JsonElement json, Page page, JsonBuilder ctx) {
+        ensureCanDoThis(page.getSite(), SEE_PAGES, EDIT_PAGE);
         JsonObject jObj = json.getAsJsonObject();
 
         if (jObj.has("name") && !jObj.get("name").isJsonNull() && jObj.get("name").isJsonObject()) {
@@ -40,6 +46,7 @@ public class PageAdapter implements JsonAdapter<Page> {
 
     @Override
     public JsonElement view(Page page, JsonBuilder ctx) {
+        ensureCanDoThis(page.getSite(), SEE_PAGES);
         JsonObject json = new JsonObject();
 
         json.addProperty("id", page.getExternalId());
