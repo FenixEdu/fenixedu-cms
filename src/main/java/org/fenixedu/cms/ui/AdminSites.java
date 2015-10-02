@@ -120,13 +120,6 @@ public class AdminSites {
         return "fenixedu-cms/manageSite";
     }
 
-    private boolean hasGoogle(Site site, User user) {
-        return GoogleAPI.getInstance().isConfigured()
-                && GoogleAPI.getInstance().isUserAuthenticated(user)
-                && !Strings.isNullOrEmpty(site.getAnalyticsAccountId())
-                && !Strings.isNullOrEmpty(site.getAnalyticsCode());
-    }
-
     @RequestMapping(value = "/{slug}/analytics", method = RequestMethod.GET, produces = JSON)
     public @ResponseBody String viewSiteAnalyticsData(@PathVariable String slug) {
         Site site = Site.fromSlug(slug);
@@ -322,8 +315,10 @@ public class AdminSites {
     private void editSite(LocalizedString name, LocalizedString description, String theme, String slug, Boolean published,
                           Site s, String viewGroup, String folder, String analyticsCode, String accountId, Page initialPage) {
 
-        s.setName(name);
-        s.setDescription(description);
+        if(PermissionEvaluation.canDoThis(s, Permission.EDIT_SITE_INFORMATION)) {
+          s.setName(name);
+          s.setDescription(description);
+        }
 
         if(PermissionEvaluation.canDoThis(s, Permission.CHANGE_THEME)) {
             s.setThemeType(Optional.ofNullable(theme).orElseGet(()->s.getThemeType()));
