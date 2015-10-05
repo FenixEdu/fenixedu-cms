@@ -135,6 +135,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         this.setDescription(description);
 
         this.setPublished(false);
+        this.setAnalytics(new SiteAnalytics());
 
         Signal.emit(Site.SIGNAL_CREATED, new DomainObjectEvent<Site>(this));
     }
@@ -377,6 +378,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         this.setTheme(null);
         this.setCreatedBy(null);
         this.setBennu(null);
+        this.setAnalytics(null);
 
         getActivityLinesSet().stream().forEach(org.fenixedu.cms.domain.SiteActivity::delete);
         getPostSet().stream().forEach(Post::delete);
@@ -633,4 +635,5 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
         return result;
     }
+
 }

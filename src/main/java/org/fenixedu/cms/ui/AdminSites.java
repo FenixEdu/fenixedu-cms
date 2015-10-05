@@ -124,44 +124,7 @@ public class AdminSites {
     public @ResponseBody String viewSiteAnalyticsData(@PathVariable String slug) {
         Site site = Site.fromSlug(slug);
         canEdit(site);
-        return getSiteAnalytics(site).toString();
-    }
-
-    private JsonElement getSiteAnalytics(Site site) {
-        try {
-            if (!Strings.isNullOrEmpty(site.getAnalyticsAccountId()) && !Strings.isNullOrEmpty(
-                site.getAnalyticsCode())) {
-                Analytics analytics = getUserAnalytics();
-                Profiles profiles = analytics.management().profiles().list(
-                    site.getAnalyticsAccountId(), site.getAnalyticsCode()).execute();
-                JsonObject db = new JsonObject();
-                for (Profile profile : profiles.getItems()) {
-                    GaData query = analytics.data().ga()
-                            .get("ga:" + profile.getId(), "30daysAgo", "today",
-                                 "ga:pageviews,ga:visitors")
-                            .setDimensions("ga:date")
-                            .execute();
-
-                    for (List<String> days : query.getRows()) {
-                        JsonObject o;
-                        if (db.has(days.get(0))) {
-                            o = (JsonObject) db.get(days.get(0));
-                            o.addProperty("pageviews", o.get("pageviews") + days.get(1));
-                            o.addProperty("visitors", o.get("visitors") + days.get(2));
-                        } else {
-                            o = new JsonObject();
-                            db.add(days.get(0), o);
-                        }
-                        o.addProperty("pageviews", days.get(1));
-                        o.addProperty("visitors", days.get(2));
-                    }
-                }
-                return db;
-            }
-        } catch(Exception e) {
-            LOGGER.error("Error loading analytics data for site '" + site.getSlug() + "'", e);
-        }
-        return new JsonObject();
+        return site.getAnalytics().getOrFetch(site).toString();
     }
 
     private Analytics getUserAnalytics() {
@@ -209,9 +172,8 @@ public class AdminSites {
     private List<Site> getSites() {
         User user = Authenticate.getUser();
         Set<Site> allSites = Bennu.getInstance().getSitesSet();
-
-        return allSites.stream().filter(x -> PermissionEvaluation.canAccess(user, x)).sorted(
-            Site.NAME_COMPARATOR).collect(toList());
+        return allSites.stream().filter(x -> PermissionEvaluation.canAccess(user, x))
+            .sorted(Site.CREATION_DATE_COMPARATOR).collect(toList());
     }
 
     public static void canEdit(Site site) {

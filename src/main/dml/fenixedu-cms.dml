@@ -1,5 +1,12 @@
 package org.fenixedu.cms.domain;
 
+valueType org.fenixedu.cms.domain.SiteAnalytics as SiteAnalytics {
+    externalizeWith {
+        JsonElement externalize();
+    }
+    internalizeWith internalize();
+}
+
 valueType org.fenixedu.cms.domain.PostMetadata as PostMetadata {
     externalizeWith {
         String externalize();
@@ -39,6 +46,7 @@ class Site{
   public String analyticsCode;
   public String analyticsAccountId;
   public String themeType;
+  public SiteAnalytics analytics;
 }
 
 public class PersistentSiteViewersGroup extends .org.fenixedu.bennu.core.domain.groups.PersistentGroup;
