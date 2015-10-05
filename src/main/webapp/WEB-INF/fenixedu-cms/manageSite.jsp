@@ -177,9 +177,10 @@
 
 		$(document).ready(function() {
 			$.get('${pageContext.request.contextPath}/cms/sites/${site.slug}/analytics').done(function(analyticsData) {
-				if(analyticsData && !$.isEmptyObject(analyticsData)) {
+				console.log(analyticsData)
+				if(analyticsData && !$.isEmptyObject(analyticsData) &&  !$.isEmptyObject(analyticsData.google)) {
 					$('.graph').fadeIn();
-					loadAnalyticsGraph(analyticsData)
+					loadAnalyticsGraph(analyticsData.google)
 				}
 			}).error(function(err){
 				$('.graph').hide();

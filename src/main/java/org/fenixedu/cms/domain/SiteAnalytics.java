@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import pt.ist.fenixframework.Atomic;
+
 public class SiteAnalytics implements Serializable {
   private static final String LAST_UPDATE_PROPERTY = "$$last_update";
   private static final Logger LOGGER = LoggerFactory.getLogger(SiteAnalytics.class);
@@ -59,6 +61,7 @@ public class SiteAnalytics implements Serializable {
     return this.metadata;
   }
 
+  @Atomic(mode = Atomic.TxMode.WRITE)
   private SiteAnalytics update(Site site) {
     SiteAnalytics siteAnalytics = new SiteAnalytics(fetch(site));
     site.setAnalytics(siteAnalytics);
@@ -74,8 +77,9 @@ public class SiteAnalytics implements Serializable {
   }
 
   private JsonObject fetch(Site site) {
-    JsonObject data = new JsonObject();
-    data.addProperty(LAST_UPDATE_PROPERTY, DateTime.now().toDateTimeISO().toString());
+    JsonObject result = new JsonObject();
+    result.addProperty(LAST_UPDATE_PROPERTY, DateTime.now().toDateTimeISO().toString());
+    JsonObject googleData = new JsonObject();
     try {
         if (!Strings.isNullOrEmpty(site.getAnalyticsAccountId()) && !Strings.isNullOrEmpty(
             site.getAnalyticsCode())) {
@@ -91,13 +95,13 @@ public class SiteAnalytics implements Serializable {
 
             for (List<String> days : query.getRows()) {
               JsonObject views;
-              if (data.has(days.get(0))) {
-                views = (JsonObject) data.get(days.get(0));
+              if (googleData.has(days.get(0))) {
+                views = (JsonObject) googleData.get(days.get(0));
                 views.addProperty("pageviews", views.get("pageviews") + days.get(1));
                 views.addProperty("visitors", views.get("visitors") + days.get(2));
               } else {
                 views = new JsonObject();
-                data.add(days.get(0), views);
+                googleData.add(days.get(0), views);
               }
               views.addProperty("pageviews", days.get(1));
               views.addProperty("visitors", days.get(2));
@@ -109,7 +113,8 @@ public class SiteAnalytics implements Serializable {
         LOGGER.error("Error loading analytics data for site '" + site.getSlug() + "'", e);
       }
 
-      return data;
+      result.add("google", googleData);
+      return result;
   }
 
   private Analytics getUserAnalytics() {
