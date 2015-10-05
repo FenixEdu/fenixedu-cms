@@ -43,9 +43,15 @@ ${portal.angularToolkit()}
         </div>
         <div class="col-md-8 col-sm-12">
             <div class="btn-group">
-                <button class="btn btn-primary btn-sm" ng-click="save()"><span class="glyphicon glyphicon-floppy-disk"></span> <spring:message code="label.save"/></button>
-                <button class="btn btn-default btn-sm" ng-show="canCreateMenuItem" ng-click="create()"><span class="glyphicon glyphicon-plus"></span> <spring:message code="action.create"/></button>
-                <button ng-class="{disabled: selectedItem.root}" class="btn btn-danger btn-sm" ng-click="delete()"><span class="glyphicon glyphicon-trash"></span> <spring:message code="action.delete"/></button>
+                <button class="btn btn-primary btn-sm" ng-click="save()">
+                    <span class="glyphicon glyphicon-floppy-disk"></span> <spring:message code="label.save"/>
+                </button>
+                <button class="btn btn-default btn-sm" ng-show="canCreateMenuItem" ng-click="create()">
+                    <span class="glyphicon glyphicon-plus"></span> <spring:message code="action.create"/>
+                </button>
+                <button ng-class="{disabled: selectedItem.root}" class="btn btn-danger btn-sm" ng-click="delete()">
+                    <span class="glyphicon glyphicon-trash"></span> <spring:message code="action.delete"/>
+                </button>
             </div>
 
             <fieldset>
@@ -54,7 +60,9 @@ ${portal.angularToolkit()}
                 <div class="form-group">
                     <label class="control-label"><spring:message code="menu.edit.label.name"/></label>
                     <input type="text" required="true" bennu-localized-string="selectedItem.name" class="form-control" placeholder="<spring:message code="menu.edit.label.name"/>">
-                    <p class="text-info" ng-class="{'text-danger': !selectedItem.name}">Please enter the name that should be presented for this menu item.</p>
+                    <p class="text-info" ng-class="{'text-danger': !selectedItem.name}">
+                        Please enter the name that should be presented for this menu item.
+                    </p>
                 </div>
                 <div class="menuItemEdit" ng-hide="selectedItem.root">
                     
@@ -78,7 +86,6 @@ ${portal.angularToolkit()}
                             <spring:message code="menu.edit.label.linkToPage"/>
                         </label>
 
-
                         <div ng-show="selectedItem.use=='page'">
                             <div class="row">
                                 <div class="col-sm-6">
@@ -92,7 +99,9 @@ ${portal.angularToolkit()}
                                 </div>
 
                                 <div class="col-sm-2">
-                                    <a class="btn btn-default" ng-class="{disabled: !selectedItem.page || !pages[selectedItem.page]}" ng-href="{{pages[selectedItem.page].editUrl}}"><i class="glyphicon glyphicon-link"></i></a>
+                                    <a class="btn btn-default" ng-class="{disabled: !selectedItem.page || !pages[selectedItem.page]}" ng-href="{{pages[selectedItem.page].editUrl}}">
+                                        <i class="glyphicon glyphicon-link"></i>
+                                    </a>
                                 </div>
                             </div>
                             <p class="text-danger" ng-hide="selectedItem.page">Please select a page.</p>
@@ -151,14 +160,13 @@ ${portal.angularToolkit()}
                 };
 
                 $scope.save = function() {
-                    var selected = $scope.selectedItem;
                     $http.post(saveMenuUrl, $scope.menuItems[0]).
                         success(function(data, status, headers, config) {
                             var menu = data.menu;
-                            $scope.selectedItem = selected;
                             $scope.menuItems = [menu]
                             $scope.menu = menu;
                             $scope.pages = data.pages;
+                            $scope.selectedItem = $scope.menuItems[0];
                         });
                 };
 

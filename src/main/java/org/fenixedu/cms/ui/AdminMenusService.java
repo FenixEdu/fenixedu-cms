@@ -74,6 +74,7 @@ public class AdminMenusService {
 	    root.addProperty("use", "page");
 	} else if(ofNullable(item.getFolder()).orElse(false)) {
 	    root.addProperty("use", "folder");
+	    root.addProperty("folder", true);
 	} else {
 	    root.addProperty("use", "url");
 	}
@@ -172,9 +173,9 @@ public class AdminMenusService {
     private void setMenuItemPage(MenuItem menuItem, JsonObject menuItemJson) {
       Site site = menuItem.getMenu().getSite();
       Optional.ofNullable(menuItemJson).map(json -> json.get("page"))
-	 .filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString)
-	 .map(pageSlug->site.pageForSlug(pageSlug)).filter(page -> page != menuItem.getPage())
-	 .ifPresent(page->{
+	  .filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString)
+	  .map(pageSlug->site.pageForSlug(pageSlug)).filter(page -> page != menuItem.getPage())
+	  .ifPresent(page -> {
 	    menuItem.setPage(page);
 	    menuItem.setFolder(false);
 	    menuItem.setUrl(null);
