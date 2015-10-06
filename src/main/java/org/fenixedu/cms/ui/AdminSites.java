@@ -54,6 +54,7 @@ import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
+import org.fenixedu.cms.domain.Role;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.cms.domain.SiteExporter;
@@ -90,6 +91,7 @@ import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
 
 import static java.util.stream.Collectors.toList;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 @SpringApplication(group = "logged", path = "cms", title = "application.title.cms")
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")
@@ -125,6 +127,7 @@ public class AdminSites {
     @RequestMapping(value = "/{slug}/analytics", method = RequestMethod.GET, produces = JSON)
     public @ResponseBody String viewSiteAnalyticsData(@PathVariable String slug) {
         Site site = Site.fromSlug(slug);
+        ensureCanDoThis(site, Permission.MANAGE_ANALYTICS);
         canEdit(site);
         return site.getAnalytics().getOrFetch(site).toString();
     }
@@ -139,6 +142,8 @@ public class AdminSites {
     public void export(@PathVariable String slug, HttpServletResponse response) {
         Site site = Site.fromSlug(slug);
         canEdit(site);
+        CmsSettings.getInstance().ensureCanManageSettings();
+
         try {
             response.setContentType(ZIP_MIME_TYPE);
             response.setHeader("Content-Disposition", "attachment;filename=" + FilenameUtils.normalize(slug + ".zip"));
@@ -351,8 +356,28 @@ public class AdminSites {
         return new RedirectView("/cms/sites", true);
     }
 
+    @RequestMapping(value = "/{slugSite}/roles/{roleId}/edit", method = RequestMethod.GET)
+    public String viewEditRole(@PathVariable String slugSite, @PathVariable String roleId, Model model) {
+      PermissionEvaluation.canAccess(Authenticate.getUser(), Site.fromSlug(slugSite));
+      model.addAttribute("role", FenixFramework.getDomainObject(roleId));
+      return "fenixedu-cms/editRole";
+    }
 
-    public static class GoogleAccountBean {
+    @RequestMapping(value = "/{slugSite}/roles/{roleId}/edit", method = RequestMethod.POST)
+    public RedirectView editSiteRole(@PathVariable String slugSite,
+                                     @PathVariable String roleId, @RequestParam String group) {
+      FenixFramework.atomic(()->{
+        Site site = Site.fromSlug(slugSite);
+        PermissionEvaluation.canDoThis(site, Permission.MANAGE_ROLES);
+        Role role = FenixFramework.getDomainObject(roleId);
+        role.setGroup(Group.parse(group).toPersistentGroup());
+      });
+      return new RedirectView("/cms/sites/" + slugSite + "/roles/" + roleId +"/edit", true);
+    }
+
+
+
+  public static class GoogleAccountBean {
       private final Account account;
       private final Webproperties properties;
 

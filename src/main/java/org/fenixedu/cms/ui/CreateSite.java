@@ -20,9 +20,12 @@ package org.fenixedu.cms.ui;
 
 import com.google.common.base.Strings;
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CmsSettings;
+import org.fenixedu.cms.domain.DefaultRoles;
+import org.fenixedu.cms.domain.Role;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -79,7 +82,13 @@ public class CreateSite {
         site.setEmbedded(embedded);
         site.updateMenuFunctionality();
         site.setPublished(published);
-        
+        Role adminRole = new Role(DefaultRoles.getInstance().getAdminRole(), site);
+        adminRole.setGroup(Group.users(Authenticate.getUser()).toPersistentGroup());
+
+        new Role(DefaultRoles.getInstance().getAuthorRole(), site);
+        new Role(DefaultRoles.getInstance().getContributorRole(), site);
+        new Role(DefaultRoles.getInstance().getEditorRole(), site);
+
         if (!template.equals("null")) {
             Site.templateFor(template).makeIt(site);
         }

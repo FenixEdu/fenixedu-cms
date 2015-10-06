@@ -6,6 +6,7 @@ import org.fenixedu.bennu.core.bootstrap.annotations.Bootstrapper;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.cms.domain.CmsSettings;
+import org.fenixedu.cms.domain.DefaultRoles;
 
 import pt.ist.fenixframework.FenixFramework;
 
@@ -15,11 +16,11 @@ import pt.ist.fenixframework.FenixFramework;
 public class CmsBootstrapper {
 
   @Bootstrap
-  public static void bootstrapPortal() {
-    PortalConfiguration portalConfiguration = PortalConfiguration.getInstance();
+  public static void bootstrapCms() {
     if(Bennu.getInstance().getCmsSettings() == null) {
-      FenixFramework.atomic(() ->Bennu.getInstance().setCmsSettings(new CmsSettings()));
+      FenixFramework.atomic(() -> Bennu.getInstance().setCmsSettings(new CmsSettings()));
     }
+    DefaultRoles.getInstance().init();
   }
 
 

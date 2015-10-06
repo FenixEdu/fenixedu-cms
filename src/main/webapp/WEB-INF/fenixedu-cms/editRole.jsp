@@ -1,17 +1,21 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
+
 ${portal.toolkit()}
 
 <div class="page-header">
     <h1>Permissions</h1>
-    <h2><a href="${pageContext.request.contextPath}/cms/permissions/${role.roleTemplate.externalId}/edit"><small>Manage Role '${role.name.content}'</small></a></h2>
+    <h2><a href="${pageContext.request.contextPath}/cms/sites/${role.site.slug}/edit#permissions"><small>Manage Role '${role.name.content}'</small></a></h2>
 </div>
 
-<p>
-    <button type="button" data-toggle="modal" data-target="#edit-modal" class="btn btn-primary">
-        <i class="glyphicon glyphicon-edit"></i> Associate Users
-    </button>
-</p>
+<c:if test="${permissions:canDoThis(role.site, 'MANAGE_ROLES')}">
+    <p>
+        <button type="button" data-toggle="modal" data-target="#edit-modal" class="btn btn-primary">
+            <i class="glyphicon glyphicon-edit"></i> Associate Users
+        </button>
+    </p>
+</c:if>
 
 <div class="row">
 	<div class="col-sm-8">

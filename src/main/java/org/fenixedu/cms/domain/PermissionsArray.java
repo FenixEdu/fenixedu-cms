@@ -95,7 +95,6 @@ public class PermissionsArray implements Serializable {
         CHANGE_THEME(1),
         PUBLISH_SITE(1),
         MANAGE_ROLES(1),
-        ATTACH_USERS_TO_ROLES(1),
         MANAGE_ANALYTICS(1);
         int order = 0;
 

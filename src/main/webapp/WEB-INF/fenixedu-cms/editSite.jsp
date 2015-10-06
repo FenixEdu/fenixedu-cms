@@ -170,12 +170,16 @@ ${portal.toolkit()}
             <ul class="list-group">
                 <c:forEach var="role" items="${site.roles}">
                     <li class="list-group-item">
-                        <h3><a href="${pageContext.request.contextPath}/cms/permissions/${role.roleTemplate.externalId}/${role.externalId}/edit" target="_blank">${role.name.content}</a></h3>
+                        <h3>
+                            <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/${role.externalId}/edit" target="_blank">
+                                ${role.name.content}
+                            </a>
+                        </h3>
                         <c:if test="${not role.name.equals(role.roleTemplate.description)}">
                             <p><small>${role.roleTemplate.description.content}</small></p>
                         </c:if>
                         <p><span class="label label-primary">${role.group.toGroup().members.count()} Users</span></p>
-                        <a href='${pageContext.request.contextPath}/cms/permissions/${role.roleTemplate.externalId}/${role.externalId}/edit' target="_blank" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-edit"></span>&nbsp;Edit</a>
+                        <a href='${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/${role.externalId}/edit' target="_blank" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-edit"></span>&nbsp;Edit</a>
                     </li>
                 </c:forEach>
 
