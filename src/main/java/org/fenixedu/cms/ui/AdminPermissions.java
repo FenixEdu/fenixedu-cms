@@ -23,6 +23,7 @@ import com.google.gson.JsonParser;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
+import org.fenixedu.cms.domain.CmsSettings;
 import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.Role;
 import org.fenixedu.cms.domain.RoleTemplate;
@@ -51,6 +52,7 @@ public class AdminPermissions {
 
     @RequestMapping(method = RequestMethod.GET)
     public String permissions(Model model) {
+        CmsSettings.getInstance().ensureCanManageRoles();
         model.addAttribute("templates", allTemplates());
         model.addAttribute("allPermissions", PermissionsArray.all());
         return "fenixedu-cms/permissions";
@@ -58,12 +60,18 @@ public class AdminPermissions {
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public RedirectView create(@RequestParam LocalizedString description, @RequestParam String permissions) {
-        FenixFramework.atomic(() ->editRoleDescription(new RoleTemplate(), description, toJsonArray(permissions)));
+        CmsSettings.getInstance().ensureCanManageRoles();
+        FenixFramework.atomic(() -> {
+            RoleTemplate template = new RoleTemplate();
+            template.setDescription(description);
+            template.setPermissions(PermissionsArray.fromJson(toJsonArray(permissions)));
+        });
         return new RedirectView("/cms/permissions", true);
     }
 
     @RequestMapping(value = "/{roleTemplateId}/edit", method = RequestMethod.GET)
     public String viewEditTemplate(@PathVariable String roleTemplateId, Model model) {
+        CmsSettings.getInstance().ensureCanManageRoles();
         model.addAttribute("roleTemplate", FenixFramework.getDomainObject(roleTemplateId));
         model.addAttribute("allPermissions", PermissionsArray.all());
         return "fenixedu-cms/editRoleTemplate";
@@ -82,6 +90,7 @@ public class AdminPermissions {
     @RequestMapping(value="/site/{slugSite}/addRole", method = RequestMethod.POST)
     public RedirectView createSiteRole(@PathVariable String slugSite, @RequestParam String roleTemplateId) {
         FenixFramework.atomic(()->{
+            CmsSettings.getInstance().ensureCanManageRoles();
             Site site = Site.fromSlug(slugSite);
             RoleTemplate template = FenixFramework.getDomainObject(roleTemplateId);
             if(!template.getRolesSet().stream().map(Role::getSite).filter(roleSite->roleSite.equals(site)).findAny().isPresent()) {
@@ -94,6 +103,7 @@ public class AdminPermissions {
     @RequestMapping(value = "/{roleTemplateId}/addSite", method = RequestMethod.POST)
     public RedirectView createRole(@PathVariable String roleTemplateId, @RequestParam String siteSlug) {
         FenixFramework.atomic(()->{
+            CmsSettings.getInstance().ensureCanManageRoles();
             RoleTemplate template = FenixFramework.getDomainObject(roleTemplateId);
             Site site = Site.fromSlug(siteSlug);
             if(!template.getRolesSet().stream().map(Role::getSite).filter(roleSite->roleSite.equals(site)).findAny().isPresent()) {
@@ -105,12 +115,14 @@ public class AdminPermissions {
 
     @RequestMapping(value = "site/{slugSite}/{roleId}/delete", method = RequestMethod.POST)
     public RedirectView removeRole(@PathVariable String slugSite, @PathVariable String roleId) {
+        CmsSettings.getInstance().ensureCanManageRoles();
         FenixFramework.atomic(() -> ((Role) FenixFramework.getDomainObject(roleId)).delete());
         return new RedirectView("/cms/permissions/site/" + slugSite, true);
     }
 
     @RequestMapping(value = "/{roleTemplateId}/{roleId}/edit", method = RequestMethod.GET)
     public String viewEditRole(@PathVariable String roleTemplateId, @PathVariable String roleId, Model model) {
+        CmsSettings.getInstance().ensureCanManageRoles();
         model.addAttribute("role", FenixFramework.getDomainObject(roleId));
         return "fenixedu-cms/editRole";
     }
@@ -119,6 +131,7 @@ public class AdminPermissions {
     public RedirectView editRole(@PathVariable String roleTemplateId, @PathVariable String roleId,
                                  @RequestParam String group) {
         FenixFramework.atomic(()->{
+            CmsSettings.getInstance().ensureCanManageRoles();
             Role role = FenixFramework.getDomainObject(roleId);
             role.setGroup(Group.parse(group).toPersistentGroup());
         });
@@ -127,20 +140,20 @@ public class AdminPermissions {
 
     @RequestMapping(value = "/{roleTemplateId}/edit", method = RequestMethod.POST)
     public RedirectView edit(@PathVariable String roleTemplateId, @RequestParam LocalizedString description, @RequestParam String permissions) {
-        FenixFramework.atomic(() ->editRoleDescription(FenixFramework.getDomainObject(roleTemplateId), description, toJsonArray(permissions)));
+        FenixFramework.atomic(() -> {
+            CmsSettings.getInstance().ensureCanManageRoles();
+            RoleTemplate template = FenixFramework.getDomainObject(roleTemplateId);
+            template.setDescription(description);
+            template.setPermissions(PermissionsArray.fromJson(toJsonArray(permissions)));
+        });
         return new RedirectView("/cms/permissions/" + roleTemplateId + "/edit", true);
     }
 
     @RequestMapping(value = "/{roleTemplateId}/delete", method = RequestMethod.POST)
     public RedirectView edit(@PathVariable String roleTemplateId) {
+        CmsSettings.getInstance().ensureCanManageRoles();
         FenixFramework.atomic(()->((RoleTemplate)FenixFramework.getDomainObject(roleTemplateId)).delete());
         return new RedirectView("/cms/permissions", true);
-    }
-
-    @Atomic(mode = Atomic.TxMode.WRITE)
-    private static void editRoleDescription(RoleTemplate template, LocalizedString description, JsonArray permissions) {
-        template.setDescription(description);
-        template.setPermissions(PermissionsArray.fromJson(permissions));
     }
 
     private static JsonArray toJsonArray(String json) {

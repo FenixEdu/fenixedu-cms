@@ -128,12 +128,14 @@ public class AdminThemes {
 
     @RequestMapping(method = RequestMethod.GET)
     public String themes(Model model) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
         return "fenixedu-cms/themes";
     }
 
     @RequestMapping(value = "{type}/see", method = RequestMethod.GET)
     public String viewTheme(Model model, @PathVariable(value = "type") String type) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         model.addAttribute("theme", theme);
         model.addAttribute("sites", theme.getAllSitesStream()
@@ -144,31 +146,35 @@ public class AdminThemes {
     @RequestMapping(value = "loadDefault", method = RequestMethod.GET)
     public RedirectView loadDefaultThemes(Model model) {
         // TODO
+        CmsSettings.getInstance().ensureCanManageThemes();
         return new RedirectView("/cms/themes", true);
     }
 
     @RequestMapping(value = "{type}/delete", method = RequestMethod.POST)
     public RedirectView deleteTheme(Model model, @PathVariable(value = "type") String type) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme.forType(type).delete();
         return new RedirectView("/cms/themes", true);
     }
 
     @RequestMapping(value = "create", method = RequestMethod.GET)
     public String importTheme(Model model) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         return "fenixedu-cms/importTheme";
     }
 
     @RequestMapping(value = "create", method = RequestMethod.POST)
     public RedirectView addTheme(@RequestParam("uploadedFile") MultipartFile uploadedFile) throws IOException {
+        CmsSettings.getInstance().ensureCanManageThemes();
         File tempFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
         Files.write(uploadedFile.getBytes(), tempFile);
         CMSTheme theme = CMSThemeLoader.createFromZip(new ZipFile(tempFile));
-
         return new RedirectView("/cms/themes", true);
     }
 
     @RequestMapping(value = "{type}/editFile/**", method = RequestMethod.GET)
     public String editFile(Model model, @PathVariable(value = "type") String type, HttpServletRequest request) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
         path = path.substring(("/cms/themes/" + theme.getType() + "/editFile/").length());
@@ -267,6 +273,7 @@ public class AdminThemes {
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "{type}/editFile/**", method = RequestMethod.PUT)
     public void saveFileEdition(@PathVariable(value = "type") String type, HttpServletRequest request, @RequestBody String content) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
         path = path.substring(("/cms/themes/" + theme.getType() + "/editFile/").length());
@@ -281,6 +288,7 @@ public class AdminThemes {
 
     @RequestMapping(value = "{type}/deleteFile", method = RequestMethod.POST)
     public RedirectView deleteFile(@PathVariable(value = "type") String type, @RequestParam String path) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         theme.changeFiles(theme.getFiles().without(path));
         return new RedirectView("/cms/themes/" + type + "/see", true);
@@ -288,6 +296,7 @@ public class AdminThemes {
 
     @RequestMapping(value = "new", method = RequestMethod.GET)
     public String newTheme(Model model) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
         return "fenixedu-cms/newTheme";
     }
@@ -295,6 +304,7 @@ public class AdminThemes {
     @RequestMapping(value = "new", method = RequestMethod.POST)
     public RedirectView newTheme(Model model, @RequestParam String type, @RequestParam String name,
             @RequestParam String description, @RequestParam(value = "extends") String ext) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(ext);
         newTheme(type, name, description, theme);
         return new RedirectView("/cms/themes/" + type + "/see", true);
@@ -313,6 +323,7 @@ public class AdminThemes {
 
     @RequestMapping(value = "{type}/newFile", method = RequestMethod.POST)
     public RedirectView newFile(@PathVariable(value = "type") String type, @RequestParam String filename) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         String[] r = filename.split("/");
         if (theme.fileForPath(filename) == null) {
@@ -327,6 +338,7 @@ public class AdminThemes {
     @RequestMapping(value = "{type}/importFile", method = RequestMethod.POST)
     public RedirectView importFile(@PathVariable(value = "type") String type, @RequestParam String filename,
             @RequestParam("uploadedFile") MultipartFile uploadedFile) throws IOException {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         String[] r = filename.split("/");
         if (theme.fileForPath(filename) == null) {
@@ -346,6 +358,7 @@ public class AdminThemes {
     @RequestMapping(value = "{type}/newTemplate", method = RequestMethod.POST)
     public RedirectView newTemplate(@PathVariable(value = "type") String type, @RequestParam(value = "type") String templateType,
             @RequestParam String name, @RequestParam String description, @RequestParam String filename) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         if (theme.templateForType(templateType) == null) {
             newTemplate(templateType, name, description, filename, theme);
@@ -368,6 +381,7 @@ public class AdminThemes {
     @RequestMapping(value = "{type}/deleteTemplate", method = RequestMethod.POST)
     public RedirectView deleteTemplate(@PathVariable(value = "type") String type,
             @RequestParam(value = "type") String templateType) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         deleteTemplate(templateType, theme);
         return new RedirectView("/cms/themes/" + type + "/see#templates", true);
@@ -381,6 +395,7 @@ public class AdminThemes {
     @RequestMapping(value = "{type}/duplicate", method = RequestMethod.POST)
     public RedirectView duplicateTheme(Model model, @PathVariable String type,
             @RequestParam(value = "newThemeType") String newThemeType, @RequestParam String name, @RequestParam String description) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme orig = CMSTheme.forType(type);
         duplicateTheme(orig, newThemeType, name, description);
         return new RedirectView("/cms/themes/" + newThemeType + "/see", true);
@@ -408,6 +423,7 @@ public class AdminThemes {
     @RequestMapping(value = "{type}/moveFile", method = RequestMethod.POST)
     public RedirectView moveFile(Model model, @PathVariable String type, @RequestParam String origFilename,
             @RequestParam String filename) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         CMSThemeFile file = theme.fileForPath(origFilename);
 
@@ -425,6 +441,7 @@ public class AdminThemes {
 
     @RequestMapping(value = "{type}/edit", method = RequestMethod.GET)
     public String editTheme(Model model, @PathVariable(value = "type") String type) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         model.addAttribute("theme", CMSTheme.forType(type));
         model.addAttribute("supportedTypes", supportedContentTypes.keySet());
         return "fenixedu-cms/editTheme";
@@ -433,6 +450,7 @@ public class AdminThemes {
     @RequestMapping(value = "{type}/listFiles", method = RequestMethod.GET)
     @ResponseBody
     public String listFiles(Model model, @PathVariable(value = "type") String type) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         Collection<CMSThemeFile> totalFiles = theme.getFiles().getFiles();
         JsonArray result = new JsonArray();
@@ -454,7 +472,7 @@ public class AdminThemes {
             @RequestParam String description, @RequestParam(value = "extends") String ext, @RequestParam(value = "thumbnail",
             required = false) MultipartFile thumbnail,
             @RequestParam(value = "defaultTemplate", required = false) String defaultTemplate) {
-
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
 
         CMSTheme extTheme = null;
@@ -499,6 +517,8 @@ public class AdminThemes {
 
     @RequestMapping(value = "{type}/deleteDir", method = RequestMethod.POST)
     public RedirectView deleteDir(@PathVariable(value = "type") String type, @RequestParam(value = "path") String path) {
+        CmsSettings.getInstance().ensureCanManageThemes();
+
         CMSTheme theme = CMSTheme.forType(type);
         deleteDirectory(theme, path);
         return new RedirectView("/cms/themes/" + type + "/see#templates", true);
@@ -520,6 +540,7 @@ public class AdminThemes {
     @RequestMapping(value = "{type}/templates", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public String getTemplates(@PathVariable(value = "type") String type) {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         JsonObject obj = new JsonObject();
 
@@ -539,6 +560,7 @@ public class AdminThemes {
     @RequestMapping(value = "{type}/export", method = RequestMethod.GET, produces = "application/zip")
     @ResponseBody
     public byte[] export(@PathVariable(value = "type") String type) throws IOException {
+        CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
 
         BufferedInputStream origin = null;

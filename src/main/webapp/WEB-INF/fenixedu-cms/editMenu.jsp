@@ -53,6 +53,8 @@ ${portal.angularToolkit()}
                     <span class="glyphicon glyphicon-trash"></span> <spring:message code="action.delete"/>
                 </button>
             </div>
+                
+            <p class="text-danger">{{error}}</p>
 
             <fieldset>
                 <h3>{{selectedItem.title}}</h3>
@@ -213,7 +215,8 @@ ${portal.angularToolkit()}
                     }
                 });
             })
-            .error(function(){
+            .error(function(e){
+                debugger;
                 $scope.error = "An error occurred while trying to save the menu."
             });
 

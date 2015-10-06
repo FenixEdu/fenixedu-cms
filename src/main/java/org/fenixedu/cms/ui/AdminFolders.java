@@ -25,6 +25,7 @@ import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSFolder;
 import org.fenixedu.cms.domain.CMSFolder.FolderResolver;
+import org.fenixedu.cms.domain.CmsSettings;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,7 @@ public class AdminFolders {
 
     @RequestMapping(method = RequestMethod.GET)
     public String listFolders(Model model) {
+        CmsSettings.getInstance().ensureCanManageFolders();
         model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet());
         return "fenixedu-cms/folders";
     }
@@ -49,6 +51,7 @@ public class AdminFolders {
     @RequestMapping(method = RequestMethod.POST)
     public RedirectView createFolder(@RequestParam String path, @RequestParam LocalizedString description) {
         atomic(() -> {
+            CmsSettings.getInstance().ensureCanManageFolders();
             new CMSFolder(PortalConfiguration.getInstance().getMenu(), path, description);
         });
         return new RedirectView("/cms/folders", true);
@@ -56,12 +59,14 @@ public class AdminFolders {
 
     @RequestMapping(value = "/resolver/{folder}", method = RequestMethod.GET)
     public String folderResolver(Model model, @PathVariable CMSFolder folder) {
+        CmsSettings.getInstance().ensureCanManageFolders();
         model.addAttribute("folder", folder);
         return "fenixedu-cms/folderResolver";
     }
 
     @RequestMapping(value = "/resolver/{folder}", method = RequestMethod.PUT)
     public ResponseEntity<?> saveFolderResolver(@PathVariable CMSFolder folder, @RequestBody String code) {
+        CmsSettings.getInstance().ensureCanManageFolders();
         try {
             atomic(() -> {
                 if (Strings.isNullOrEmpty(code)) {
@@ -79,6 +84,13 @@ public class AdminFolders {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/delete/{folder}", method = RequestMethod.POST)
+    public RedirectView deleteFolder(@PathVariable CMSFolder folder) {
+        CmsSettings.getInstance().ensureCanManageFolders();
+        atomic(() -> folder.delete());
+        return new RedirectView("/cms/folders", true);
+    }
+
     private Throwable unwrap(Throwable e) {
         while (e.getCause() != null) {
             if (e instanceof ScriptException) {
@@ -87,11 +99,5 @@ public class AdminFolders {
             e = e.getCause();
         }
         return e;
-    }
-
-    @RequestMapping(value = "/delete/{folder}", method = RequestMethod.POST)
-    public RedirectView deleteFolder(@PathVariable CMSFolder folder) {
-        atomic(() -> folder.delete());
-        return new RedirectView("/cms/folders", true);
     }
 }

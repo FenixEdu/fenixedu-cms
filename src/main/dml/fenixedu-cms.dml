@@ -199,6 +199,41 @@ relation SiteViewersGroup {
     }
 }
 
+class CmsSettings {}
+
+relation CmsSettingsHasRoot {
+  CmsSettings playsRole cmsSettings;
+  protected .org.fenixedu.bennu.core.domain.Bennu playsRole bennu;
+}
+
+relation ThemesHaveManagers {
+    protected CmsSettings playsRole;
+    .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole themesManagers {
+        multiplicity 1..1;
+    }
+}
+
+relation RolesHaveManagers {
+    protected CmsSettings playsRole;
+    .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole rolesManagers {
+        multiplicity 1..1;
+    }
+}
+
+relation FoldersHaveManagers {
+    protected CmsSettings playsRole;
+    .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole foldersManagers {
+        multiplicity 1..1;
+    }
+}
+
+relation SettingsHaveManagers {
+    protected CmsSettings playsRole;
+    .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole settingsManagers {
+        multiplicity 1..1;
+    }
+}
+
 relation ComponentUser{
   .org.fenixedu.bennu.core.domain.User playsRole createdBy{
     multiplicity 1..1;

@@ -49,6 +49,7 @@ import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.CloneCache;
+import org.fenixedu.cms.domain.CmsSettings;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.PermissionsArray;
@@ -108,6 +109,7 @@ public class AdminSites {
         model.addAttribute("sites", partition.getItems());
         model.addAttribute("isManager", DynamicGroup.get("managers").isMember(Authenticate.getUser()));
         model.addAttribute("query", query);
+        model.addAttribute("cmsSettings", CmsSettings.getInstance());
 
         return "fenixedu-cms/manage";
     }
@@ -150,6 +152,7 @@ public class AdminSites {
 
     @RequestMapping(value = "/import", method = RequestMethod.POST)
     public RedirectView importSite(@RequestParam MultipartFile attachment) {
+        CmsSettings.getInstance().ensureCanManageSettings();
         try {
             siteImport(attachment);
             //TODO - show success message
@@ -335,14 +338,12 @@ public class AdminSites {
     }
 
     @RequestMapping(value = "cmsSettings", method = RequestMethod.POST)
-    public RedirectView view(@RequestParam String slug) {
+    public RedirectView editSettings(@RequestParam String slug) {
         FenixFramework.atomic(()->{
           if (Bennu.getInstance().getDefaultSite() == null || !Bennu.getInstance().getDefaultSite().getSlug().equals(slug)) {
             Site s = Site.fromSlug(slug);
 
-            if (!DynamicGroup.get("managers").isMember(Authenticate.getUser())) {
-              throw CmsDomainException.forbiden();
-            }
+            CmsSettings.getInstance().ensureCanManageSettings();
 
             Bennu.getInstance().setDefaultSite(s);
           }

@@ -26,27 +26,36 @@
   <h2><small>Manage your content</small></h2>
 </div>
 
-<c:if test="${isManager}">
 <p>
-<div class="row">
-  <div class="col-sm-8">
-    <a href="${pageContext.request.contextPath}/cms/sites/new" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>
-    <a href="${pageContext.request.contextPath}/cms/folders" class="btn btn-default"><i class="glyphicon glyphicon-folder-close"></i> Folders</a>
-    <a href="${pageContext.request.contextPath}/cms/themes" class="btn btn-default"><i class="icon icon-brush"></i> Themes</a>
-    <button type="button" data-target="#sites-settings" data-toggle="modal" class="btn btn-default"><i class="glyphicon glyphicon-cog"></i> Settings</button>
-    <button type="button" class="btn btn-default" onclick="$('#import-button').click();"><i class="glyphicon-cloud-upload"></i> Import</button>
-    <form id="import-form" method="post" action="${pageContext.request.contextPath}/cms/sites/import" enctype='multipart/form-data'>
-      ${csrf.field()}
-      <input id="import-button" class="hidden" type="file" name="attachment" onchange="$('#import-form').submit();" />
-    </form>
+  <div class="row">
+    <div class="col-sm-8">
+      <c:if test="${cmsSettings.canManageSettings()}">
+        <a href="${pageContext.request.contextPath}/cms/sites/new" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>
+      </c:if>
+      <c:if test="${cmsSettings.canManageFolders()}">
+        <a href="${pageContext.request.contextPath}/cms/folders" class="btn btn-default"><i class="glyphicon glyphicon-folder-close"></i> Folders</a>
+      </c:if>
+      <c:if test="${cmsSettings.canManageThemes()}">
+        <a href="${pageContext.request.contextPath}/cms/themes" class="btn btn-default"><i class="icon icon-brush"></i> Themes</a>
+      </c:if>
+      <c:if test="${cmsSettings.canManageRoles()}">
+        <a href="${pageContext.request.contextPath}/cms/permissions" class="btn btn-default"><i class="icon icon-brush"></i> Roles</a>
+      </c:if>
+      <c:if test="${cmsSettings.canManageSettings()}">
+        <button type="button" data-target="#sites-settings" data-toggle="modal" class="btn btn-default"><i class="glyphicon glyphicon-cog"></i> Settings</button>
+        <button type="button" class="btn btn-default" onclick="$('#import-button').click();"><i class="glyphicon-cloud-upload"></i> Import</button>
+        <form id="import-form" method="post" action="${pageContext.request.contextPath}/cms/sites/import" enctype='multipart/form-data'>
+          ${csrf.field()}
+          <input id="import-button" class="hidden" type="file" name="attachment" onchange="$('#import-form').submit();" />
+        </form>
+      </c:if>
+    </div>
+    <div class="col-sm-4">
+        <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}" autofocus>
+    </div>
   </div>
-  <div class="col-sm-4">
-      <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}" autofocus>
-  </div>
-</div>
 </p>
 
-</c:if>
 <c:choose>
     <c:when test="${sites.size() == 0}">
         <div class="panel panel-default">
@@ -105,42 +114,43 @@
   </c:otherwise>
 </c:choose>
 
-<div class="modal fade" id="sites-settings">
-  <div class="modal-dialog modal-lg">
-    <form method="post" action="${pageContext.request.contextPath}/cms/sites/cmsSettings">
-      ${csrf.field()}
-      <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
-            <h3 class="modal-title">CMS Settings</h3>
-            <small>Global Settings for your sites</small>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-              <label class="col-sm-3 control-label">Default Site</label>
-
-              <div class="col-sm-9">
-                  <select class="form-control" name="slug">
-                      <option value="**null**">-</option>
-                      <c:forEach var="i" items="${sites}">
-                         <option ${i.isDefault() ? 'selected' : ''}  value="${i.slug}">${i.name.content}</option>
-                      </c:forEach>
-                  </select>
-                  <p class="help-block">The Default Site is the site that is used when you visit the root of the server.</p>
-              </div>
+<c:if test="${cmsSettings.canManageSettings()}">
+  <div class="modal fade" id="sites-settings">
+    <div class="modal-dialog modal-lg">
+      <form method="post" action="${pageContext.request.contextPath}/cms/sites/cmsSettings">
+        ${csrf.field()}
+        <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
+              <h3 class="modal-title">CMS Settings</h3>
+              <small>Global Settings for your sites</small>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Save changes</button>
-        </div>
-      </form>
+          <div class="modal-body">
+            <div class="form-group">
+                <label class="col-sm-3 control-label">Default Site</label>
+
+                <div class="col-sm-9">
+                    <select class="form-control" name="slug">
+                        <option value="**null**">-</option>
+                        <c:forEach var="i" items="${sites}">
+                           <option ${i.isDefault() ? 'selected' : ''}  value="${i.slug}">${i.name.content}</option>
+                        </c:forEach>
+                    </select>
+                    <p class="help-block">The Default Site is the site that is used when you visit the root of the server.</p>
+                </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
+
+      </div>
 
     </div>
-
   </div>
-</div>
-
+</c:if>
 
 <script type="application/javascript">
   function getParameterByName(name) {

@@ -22,6 +22,7 @@ import com.google.common.base.Strings;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
+import org.fenixedu.cms.domain.CmsSettings;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -42,36 +43,39 @@ public class CreateSite {
 
     @RequestMapping(method = RequestMethod.GET)
     public String create(Model model) {
+        CmsSettings.getInstance().ensureCanManageSettings();
         model.addAttribute("templates", Site.getTemplates());
         model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet());
         return "fenixedu-cms/create";
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public RedirectView create(Model model, @RequestParam LocalizedString name, @RequestParam LocalizedString description,
-            @RequestParam String template, HttpServletRequest request,
-            @RequestParam(required = false, defaultValue = "false") Boolean published, @RequestParam String folder,
-            @RequestParam(required = false) boolean embedded, RedirectAttributes redirectAttributes) {
-        if (name.isEmpty()) {
+    public RedirectView create(@RequestParam LocalizedString name,
+                               @RequestParam LocalizedString description,
+                               @RequestParam String template,
+                               @RequestParam(required = false) boolean embedded,
+                               @RequestParam(required = false, defaultValue = "false") boolean published,
+                               @RequestParam String folder,
+                               RedirectAttributes redirectAttributes) {
+       if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/sites/new", true);
         } else {
-            if (published == null) {
-                published = false;
-            }
             createSite(name, description, published, template, folder, embedded);
             return new RedirectView("/cms/sites/", true);
         }
     }
 
     @Atomic
-    private void createSite(LocalizedString name, LocalizedString description, boolean published, String template, String folder,
-            boolean embedded) {
+    private void createSite(LocalizedString name, LocalizedString description, boolean published,
+                            String template, String folder, boolean embedded) {
+        CmsSettings.getInstance().ensureCanManageSettings();
         Site site = new Site(name,description);
         
         if (!Strings.isNullOrEmpty(folder)) {
             site.setFolder(FenixFramework.getDomainObject(folder));
         }
+
         site.setEmbedded(embedded);
         site.updateMenuFunctionality();
         site.setPublished(published);
