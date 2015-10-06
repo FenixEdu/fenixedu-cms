@@ -68,6 +68,7 @@ class Category{
   DateTime creationDate;
   LocalizedString name;
   String slug;
+  boolean privileged;
 }
 
 class Menu{
@@ -75,6 +76,7 @@ class Menu{
   LocalizedString name;
   String slug;
   boolean topMenu;
+  boolean privileged;
 }
 
 class MenuItem{

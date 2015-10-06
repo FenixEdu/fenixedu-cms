@@ -62,7 +62,7 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
         this.setCreationDate(new DateTime());
         this.setSite(site);
         this.setName(name);
-
+        this.setPrivileged(false);
         Signal.emit(Category.SIGNAL_CREATED, new DomainObjectEvent<Category>(this));
     }
 

@@ -83,8 +83,9 @@ public class CreateSite {
         site.updateMenuFunctionality();
         site.setPublished(published);
         Role adminRole = new Role(DefaultRoles.getInstance().getAdminRole(), site);
-        adminRole.setGroup(Group.users(Authenticate.getUser()).toPersistentGroup());
-
+        if(!Group.managers().isMember(Authenticate.getUser())) {
+          adminRole.setGroup(Group.users(Authenticate.getUser()).toPersistentGroup());
+        }
         new Role(DefaultRoles.getInstance().getAuthorRole(), site);
         new Role(DefaultRoles.getInstance().getContributorRole(), site);
         new Role(DefaultRoles.getInstance().getEditorRole(), site);

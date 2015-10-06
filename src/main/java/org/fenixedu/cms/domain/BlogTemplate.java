@@ -117,7 +117,7 @@ public class BlogTemplate implements SiteTemplate {
         SiteActivity.createdPost(post, Authenticate.getUser());
         about = new Post(site);
         post.setActive(true);
-        about.setName(new LocalizedString(I18N.getLocale(), "About " + site.getCreatedBy().getUsername()));
+        about.setName(new LocalizedString(I18N.getLocale(), "About "));
         about.setBody(new LocalizedString(I18N.getLocale(), "This is a simple page show how to create a page about you."));
         SiteActivity.createdPost(post, Authenticate.getUser());
     }

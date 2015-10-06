@@ -8,7 +8,6 @@ import com.google.gson.JsonPrimitive;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -22,6 +21,7 @@ import java.util.stream.Stream;
 import pt.ist.fenixframework.Atomic;
 
 import static java.util.Optional.ofNullable;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 /**
  * Created by borgez on 03-08-2015.
@@ -36,7 +36,6 @@ public class AdminMenusService {
     }
 
     public JsonObject serializeMenu(Menu menu) {
-
 	JsonObject menuJson = new JsonObject();
 
 	menuJson.addProperty("title", Optional.ofNullable(menu.getName())
@@ -45,7 +44,7 @@ public class AdminMenusService {
 	menuJson.addProperty("key", menu.getSlug());
 	menuJson.addProperty("root", true);
 	menuJson.addProperty("folder", true);
-
+    	menuJson.addProperty("privileged", menu.getPrivileged());
 	JsonArray child = new JsonArray();
 	menu.getToplevelItemsSorted().map(this::serializeMenuItem).forEach(json -> child.add(json));
 	menuJson.add("children", child);
@@ -96,7 +95,24 @@ public class AdminMenusService {
     }
 
     void processMenuChanges(Menu menu, JsonObject menuJson) {
-      PermissionEvaluation.ensureCanDoThis(menu.getSite(), Permission.EDIT_MENU);
+      ensureCanDoThis(menu.getSite(), Permission.EDIT_MENU);
+
+      if(menu.getPrivileged()) {
+	ensureCanDoThis(menu.getSite(), Permission.EDIT_PRIVILEGED_MENU);
+      }
+
+      if(menuJson.get("privileged") != null) {
+	boolean newIsPrivileged = menuJson.get("privileged").getAsBoolean();
+	if(newIsPrivileged != menu.getPrivileged()) {
+	  ensureCanDoThis(menu.getSite(), Permission.EDIT_PRIVILEGED_MENU);
+	  if(newIsPrivileged) {
+	    ensureCanDoThis(menu.getSite(), Permission.CREATE_PRIVILEGED_MENU);
+	  } else {
+	    ensureCanDoThis(menu.getSite(), Permission.DELETE_PRIVILEGED_MENU);
+	  }
+	}
+      }
+
       LocalizedString newName = LocalizedString.fromJson(menuJson.get("name"));
 	if(!menu.getName().equals(newName)) {
 	    menu.setName(newName);
@@ -117,7 +133,7 @@ public class AdminMenusService {
       	String key = menuItemJson.get("key").getAsString();
 
 	MenuItem menuItem = menuItemForOid(menu.getSite(), key).orElseGet(()-> {
-	  PermissionEvaluation.ensureCanDoThis(menu.getSite(), Permission.CREATE_MENU_ITEM);
+	  ensureCanDoThis(menu.getSite(), Permission.CREATE_MENU_ITEM);
 	  return new MenuItem(menu);
 	});
 

@@ -178,7 +178,6 @@ ${portal.toolkit()}
                         <c:if test="${not role.name.equals(role.roleTemplate.description)}">
                             <p><small>${role.roleTemplate.description.content}</small></p>
                         </c:if>
-                        <p><span class="label label-primary">${role.group.toGroup().members.count()} Users</span></p>
                         <a href='${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/${role.externalId}/edit' target="_blank" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-edit"></span>&nbsp;Edit</a>
                     </li>
                 </c:forEach>

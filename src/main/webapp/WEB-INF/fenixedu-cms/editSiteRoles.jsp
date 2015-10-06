@@ -38,7 +38,7 @@ ${portal.toolkit()}
             <c:forEach var="role" items="${roles}">
                 <tr>
                     <td>
-                        <h5><a href="${pageContext.request.contextPath}/cms/permissions/${role.roleTemplate.externalId}/${role.externalId}/edit">${role.roleTemplate.description.content}</a></h5>
+                        <h5><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/${role.externalId}/edit">${role.roleTemplate.description.content}</a></h5>
                     </td>
                     <td>${role.roleTemplate.permissions.get().size()}</td>
                     <td>${role.group.toGroup().getMembers().count()}</td>
@@ -46,7 +46,7 @@ ${portal.toolkit()}
                         <div class="btn-group">
 	                        <button data-toggle="modal" data-target="#delete-modal" class="btn btn-icon btn-danger" data-role-id="${role.externalId}"><i class="glyphicon glyphicon-trash"></i></button>
                             
-                            <a href="${pageContext.request.contextPath}/cms/permissions/${role.roleTemplate.externalId}/${role.externalId}/edit" class="btn btn-icon btn-primary">
+                            <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/${role.externalId}/edit" class="btn btn-icon btn-primary">
                                <i class="glyphicon glyphicon-edit"></i>
                             </a>
 
@@ -63,7 +63,7 @@ ${portal.toolkit()}
 <div class="modal fade" id="add-role-modal">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-        <form method="post" class="form-horizontal" role="form" action="${pageContext.request.contextPath}/cms/permissions/site/${site.slug}/addRole">
+        <form method="post" class="form-horizontal" role="form" action="${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/add">
 
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -108,7 +108,7 @@ ${portal.toolkit()}
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
         <button type="button" onclick="$('#deleteForm').submit();" class="btn btn-danger">Yes</button>
-        <form action="${pageContext.request.contextPath}/cms/permissions/site/${roleTemplate.externalId}/${role.externalId}/delete" method="post" id="deleteForm">${csrf.field()}</form> 
+        <form action="#" method="post" id="deleteForm">${csrf.field()}</form> 
       </div>
     </div>
   </div>
@@ -116,7 +116,7 @@ ${portal.toolkit()}
 
 <script type="application/javascript">			
 	$('[data-role-id]').click(function(e){
-		var action = '${pageContext.request.contextPath}/cms/permissions/site/${site.slug}/' + $(this).data('role-id') + '/delete';
+		var action = '${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/' + $(this).data('role-id') + '/delete';
 		$('#delete-modal form').attr('action', action);
 	});
 </script>

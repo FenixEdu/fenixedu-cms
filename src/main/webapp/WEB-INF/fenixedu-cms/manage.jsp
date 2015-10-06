@@ -20,6 +20,7 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
 
 <div class="page-header">
   <h1>Sites</h1>
@@ -90,7 +91,9 @@
 
           <div class="btn-group pull-right">
             <a href="${i.fullUrl}" class="btn btn-icon btn-default ${i.published ? '' : 'disabled'}"><i class="glyphicon glyphicon-link"></i></a>
-            <a href="${pageContext.request.contextPath}/cms/permissions/site/${i.slug}" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-eye-close"></i></a>
+            <c:if test="${permissions:canDoThis(i, 'MANAGE_ROLES')}">
+              <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/roles" class="btn btn-icon btn-default"><i class="glyphicon glyphicon-eye-close"></i></a>
+            </c:if>
             <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/edit" class="btn btn-icon btn-primary"><i class="glyphicon glyphicon-cog"></i></a>
           </div>
         </li>

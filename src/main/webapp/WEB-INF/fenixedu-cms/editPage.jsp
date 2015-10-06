@@ -217,7 +217,6 @@ ${portal.angularToolkit()}
                     <div ng-show="useMenu"><fancy-tree items="menus" selected="selected"></fancy-tree></div>
                 </div>
             </div>
-            <pre>{{ menus | json }} </pre>
         </c:if>
 
     </fieldset>

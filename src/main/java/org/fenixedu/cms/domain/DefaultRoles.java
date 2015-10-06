@@ -11,13 +11,15 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU_ITEM;
+
 public class DefaultRoles {
 
   private static final String ADMIN_ROLE_NAME = "roles.admin";
   private static final String EDITOR_ROLE_NAME = "roles.editor";
   private static final String AUTHOR_ROLE_NAME = "roles.author";
   private static final String CONTRIBUTOR_ROLE_NAME = "roles.contributor";
-  private static final String DEFAULT_BUNDLE = "resources.CmsPermissionResources";
+  private static final String DEFAULT_BUNDLE = "CmsPermissionResources";
   private static DefaultRoles instance;
   private RoleTemplate adminRole;
   private RoleTemplate editorRole;
@@ -76,6 +78,15 @@ public class DefaultRoles {
     permissions.add(Permission.PUBLISH_PAGES);
     permissions.add(Permission.PUBLISH_POSTS);
     permissions.add(Permission.PUBLISH_SITE);
+    permissions.add(Permission.CREATE_MENU);
+    permissions.add(Permission.DELETE_MENU);
+    permissions.add(Permission.LIST_MENUS);
+    permissions.add(Permission.EDIT_MENU);
+    permissions.add(Permission.CREATE_MENU_ITEM);
+    permissions.add(Permission.DELETE_MENU_ITEM);
+    permissions.add(Permission.EDIT_MENU_ITEM);
+    permissions.add(Permission.CHANGE_PATH_PAGES);
+    permissions.add(Permission.CHOOSE_PATH_AND_FOLDER);
     return permissions;
   }
 
@@ -99,7 +110,14 @@ public class DefaultRoles {
       permissions.add(Permission.CREATE_CATEGORY);
       permissions.add(Permission.PUBLISH_PAGES);
       permissions.add(Permission.PUBLISH_POSTS);
-      return permissions;
+
+      permissions.add(Permission.LIST_MENUS);
+      permissions.add(Permission.EDIT_MENU);
+      permissions.add(Permission.CREATE_MENU_ITEM);
+      permissions.add(Permission.DELETE_MENU_ITEM);
+      permissions.add(Permission.EDIT_MENU_ITEM);
+
+    return permissions;
   }
 
   private Set<Permission> getAuthorPermissions() {
@@ -112,6 +130,7 @@ public class DefaultRoles {
     permissions.add(Permission.LIST_CATEGORIES);
     permissions.add(Permission.CREATE_CATEGORY);
     permissions.add(Permission.PUBLISH_POSTS);
+    permissions.add(Permission.LIST_MENUS);
     return permissions;
   }
 

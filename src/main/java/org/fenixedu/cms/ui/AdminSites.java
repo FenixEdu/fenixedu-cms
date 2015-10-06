@@ -55,6 +55,7 @@ import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Role;
+import org.fenixedu.cms.domain.RoleTemplate;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.cms.domain.SiteExporter;
@@ -77,11 +78,14 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -356,6 +360,20 @@ public class AdminSites {
         return new RedirectView("/cms/sites", true);
     }
 
+
+
+    @RequestMapping(value="/{slugSite}/roles", method = RequestMethod.GET)
+    public String viewSiteRoles(@PathVariable String slugSite, Model model) {
+      Site site = Site.fromSlug(slugSite);
+      ensureCanDoThis(site, Permission.MANAGE_ROLES);
+      Set<RoleTemplate> siteTemplates = site.getRolesSet().stream()
+          .map(Role::getRoleTemplate).collect(Collectors.toSet());
+      model.addAttribute("site", site);
+      model.addAttribute("roles", site.getRolesSet().stream()
+          .sorted(Comparator.comparing(Role::getName)).collect(Collectors.toList()));
+      return "fenixedu-cms/editSiteRoles";
+    }
+
     @RequestMapping(value = "/{slugSite}/roles/{roleId}/edit", method = RequestMethod.GET)
     public String viewEditRole(@PathVariable String slugSite, @PathVariable String roleId, Model model) {
       PermissionEvaluation.canAccess(Authenticate.getUser(), Site.fromSlug(slugSite));
@@ -375,6 +393,25 @@ public class AdminSites {
       return new RedirectView("/cms/sites/" + slugSite + "/roles/" + roleId +"/edit", true);
     }
 
+    @RequestMapping(value="/{slugSite}/roles/add", method = RequestMethod.POST)
+    public RedirectView createSiteRole(@PathVariable String slugSite, @RequestParam String roleTemplateId) {
+      FenixFramework.atomic(()->{
+        Site site = Site.fromSlug(slugSite);
+        ensureCanDoThis(site, Permission.MANAGE_ROLES);
+        RoleTemplate template = FenixFramework.getDomainObject(roleTemplateId);
+        if(!template.getRolesSet().stream().map(Role::getSite).filter(roleSite->roleSite.equals(site)).findAny().isPresent()) {
+          new Role(template, site);
+        }
+      });
+      return new RedirectView("/cms/sites/" + slugSite + "/roles/" + roleTemplateId +"/edit", true);
+    }
+
+    @RequestMapping(value = "/{slugSite}/roles/{roleId}/delete", method = RequestMethod.POST)
+    public RedirectView removeRole(@PathVariable String slugSite, @PathVariable String roleId) {
+      CmsSettings.getInstance().ensureCanManageRoles();
+      FenixFramework.atomic(() -> ((Role) FenixFramework.getDomainObject(roleId)).delete());
+      return new RedirectView("/cms/sites/" + slugSite + "/roles", true);
+    }
 
 
   public static class GoogleAccountBean {

@@ -53,7 +53,6 @@ public class PermissionsArray implements Serializable {
     }
 
     public enum Permission {
-
         CREATE_POST(1),
         DELETE_POSTS(1),
         DELETE_POSTS_PUBLISHED(1),
@@ -95,7 +94,17 @@ public class PermissionsArray implements Serializable {
         CHANGE_THEME(1),
         PUBLISH_SITE(1),
         MANAGE_ROLES(1),
-        MANAGE_ANALYTICS(1);
+        MANAGE_ANALYTICS(1),
+
+        CREATE_PRIVILEGED_MENU(1),
+        DELETE_PRIVILEGED_MENU(1),
+        EDIT_PRIVILEGED_MENU(1),
+
+        CREATE_PRIVILEGED_CATEGORY(1),
+        DELETE_PRIVILEGED_CATEGORY(1),
+        EDIT_PRIVILEGED_CATEGORY(1),
+        USE_PRIVILEGED_CATEGORY(1);
+
         int order = 0;
 
         Permission(int order){
