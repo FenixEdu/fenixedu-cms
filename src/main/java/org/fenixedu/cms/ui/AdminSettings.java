@@ -7,7 +7,6 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CmsSettings;
 import org.fenixedu.cms.exceptions.CmsDomainException;
-import org.fenixedu.cms.rendering.CMSExtensions;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,7 +21,7 @@ public class AdminSettings {
 
   @RequestMapping
   public String view(Model model) {
-    ensureManager();
+    CmsSettings.getInstance().ensureCanManageGlobalPermissions();
     model.addAttribute("cmsSettings", Bennu.getInstance().getCmsSettings());
     return "fenixedu-cms/settings";
   }
@@ -31,8 +30,8 @@ public class AdminSettings {
   public RedirectView view(@RequestParam String themesManagers, @RequestParam String rolesManagers,
                      @RequestParam String foldersManagers, @RequestParam String settingsManagers) {
     FenixFramework.atomic(()->{
-      ensureManager();
-      CmsSettings settings = Bennu.getInstance().getCmsSettings();
+      CmsSettings settings = CmsSettings.getInstance().getInstance();
+      settings.ensureCanManageGlobalPermissions();
       settings.setThemesManagers(group(themesManagers));
       settings.setRolesManagers(group(rolesManagers));
       settings.setFoldersManagers(group(foldersManagers));
@@ -50,9 +49,4 @@ public class AdminSettings {
     return group.toPersistentGroup();
   }
 
-  private static void ensureManager() {
-    if(!Group.managers().isMember(Authenticate.getUser())) {
-      CmsDomainException.forbiden();
-    }
-  }
 }

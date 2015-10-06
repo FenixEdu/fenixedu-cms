@@ -31,6 +31,10 @@ public class CmsSettings extends CmsSettings_Base {
         return getThemesManagers().isMember(Authenticate.getUser());
     }
 
+    public boolean canManageGloabalPermissions() {
+        return Group.managers().isMember(Authenticate.getUser());
+    }
+
     public void ensureCanManageFolders() {
         if(!canManageFolders()) {
             throw CmsDomainException.forbiden();
@@ -51,6 +55,12 @@ public class CmsSettings extends CmsSettings_Base {
 
     public void ensureCanManageThemes() {
         if(!canManageThemes()) {
+            throw CmsDomainException.forbiden();
+        }
+    }
+
+    public void ensureCanManageGlobalPermissions() {
+        if(!canManageGloabalPermissions()) {
             throw CmsDomainException.forbiden();
         }
     }
