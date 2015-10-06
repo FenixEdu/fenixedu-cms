@@ -57,7 +57,7 @@ ${portal.toolkit()}
     <div class="form-group">
         <label class="control-label">Global Settings:</label>
         <input bennu-group allow="public,users,managers,custom" name="settingsManagers" type="text" value='${cmsSettings.settingsManagers.toGroup().expression}'/>
-        <p class="help-block">Users that are allowed to global settings such as the <a href="${pageContext.request.contextPath}/cms/sites">default site</a>.</p>
+        <p class="help-block">Users that are allowed to global settings such setting the <a href="${pageContext.request.contextPath}/cms/sites">default site</a> or <a href="${pageContext.request.contextPath}/cms/sites/new">create new sites</a></p>
     </div>
     
 </form>
