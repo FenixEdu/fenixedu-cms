@@ -168,13 +168,17 @@ ${portal.toolkit()}
                         <div class="col-sm-10">
                             <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.edit.label.name" />" value='<c:out value="${category.name.json()}"/>'>
                         </div>
+                        <c:if test="${permissions:canDoThis(site, 'EDIT_PRIVILEGED_CATEGORY')}">
+                            <label class="col-sm-2 control-label">Privileged</label>
+
+                            <div class="switch switch-success col-sm-10">
+                                <input type="checkbox" ${category.privileged ? 'checked' : ''} name="privileged" id="success">
+                                <label for="success">Privileged</label>
+                                <p class="text-info">Privileged categories can only be edited by users with permission to <strong>EDIT_PRIVILEGED_CATEGORY</strong> and used by the ones with permission to <strong>USE_PRIVILEGED_CATEGORY</strong></p>
+                            </div>
+                        </c:if>
                     </div>
-                    <c:if test="${permissions:canDoThis(site, 'EDIT_PRIVILEGED_CATEGORY')}">
-                        <div class="form-group">
-                            <input type="checkbox" ${category.privileged ? 'checked' : ''} name="privileged" id="success">
-                            <label for="success">Privileged</label>
-                        </div>
-                    </c:if>
+
                 </div>
 
                 <div class="modal-footer">

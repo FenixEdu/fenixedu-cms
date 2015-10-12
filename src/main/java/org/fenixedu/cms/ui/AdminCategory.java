@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import pt.ist.fenixframework.Atomic;
@@ -108,7 +107,7 @@ public class AdminCategory {
     @RequestMapping(value = "{slugSite}/{slugCategory}", method = RequestMethod.POST)
     public RedirectView editCategory(@PathVariable String slugSite, @PathVariable String slugCategory,
                                      @RequestParam LocalizedString name,
-                                     @RequestParam(required = false) Boolean privileged) {
+                                     @RequestParam(required = false, defaultValue = "false") boolean privileged) {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         Category c = s.categoryForSlug(slugCategory);
@@ -118,7 +117,7 @@ public class AdminCategory {
             if(c.getPrivileged()) {
                 ensureCanDoThis(s, Permission.USE_PRIVILEGED_CATEGORY, Permission.EDIT_PRIVILEGED_CATEGORY);
             }
-            c.setPrivileged(Optional.ofNullable(privileged).orElse(c.getPrivileged()));
+            c.setPrivileged(privileged);
             c.setName(name);
         });
         return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);

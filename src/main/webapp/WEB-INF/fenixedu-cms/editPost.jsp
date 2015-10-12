@@ -86,7 +86,12 @@ ${portal.angularToolkit()}
 		        <div class="panel-body">
 		            <dl class="dl-horizontal">
 		                <dt>Published</dt>
-		                <dd><input type="checkbox" class="form-control" ng-model="post.active"></dd>
+		                <dd>
+                            <div class="switch switch-success">
+                                <input type="checkbox" ng-model="post.active" id="success">
+                                <label for="success">Privileged</label>
+                            </div>
+		                </dd>
 		                <dt>Publication Begin</dt>
 		                <dd><input type="text" class="form-control" bennu-date-time="post.publicationBegin"></dd>
 		                <dt>Publication End</dt>
