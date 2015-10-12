@@ -31,6 +31,7 @@ import pt.ist.fenixframework.FenixFramework;
 
 import static java.util.Optional.ofNullable;
 import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 /**
  * Created by borgez on 30-07-2015.
@@ -95,7 +96,10 @@ public class AdminPostsService {
 	JsonArray categoriesJson = new JsonArray();
 	JsonArray filesJson = new JsonArray();
       	if(canDoThis(post.getSite(), Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY)) {
-	  post.getSite().getCategoriesSet().stream().sorted(Category.CATEGORY_NAME_COMPARATOR)
+	  boolean canUsePrivileged = canDoThis(post.getSite(), Permission.USE_PRIVILEGED_CATEGORY);
+	  post.getSite().getCategoriesSet().stream()
+	      .filter(cat -> canUsePrivileged || !cat.getPrivileged())
+	      .sorted(Category.CATEGORY_NAME_COMPARATOR)
 	      .map(category -> serializeCategory(category, post)).forEach(categoriesJson::add);
 	}
 	post.getFilesSorted().stream().map(this::serializePostFile).forEach(filesJson::add);
@@ -216,9 +220,18 @@ public class AdminPostsService {
 		PermissionEvaluation
 		    .ensureCanDoThis(site, Permission.CREATE_CATEGORY);
 		category = new Category(site, categoryName);
+	      } else if(category.getPrivileged()) {
+		ensureCanDoThis(site, Permission.USE_PRIVILEGED_CATEGORY);
 	      }
 	      newCategories.add(category);
 	    }
+	  }
+
+	  if(!canDoThis(site, Permission.USE_PRIVILEGED_CATEGORY)) {
+	    //If the user has no access to remove previleged categories, then we add them back
+	    HashSet<Category> removed = new HashSet<>(post.getCategoriesSet());
+	    removed.removeAll(newCategories);
+	    removed.stream().filter(Category::getPrivileged).forEach(newCategories::add);
 	  }
 
 	  if (!newCategories.containsAll(post.getCategoriesSet()) || !post.getCategoriesSet()

@@ -100,8 +100,6 @@ public class PermissionsArray implements Serializable {
         DELETE_PRIVILEGED_MENU(1),
         EDIT_PRIVILEGED_MENU(1),
 
-        CREATE_PRIVILEGED_CATEGORY(1),
-        DELETE_PRIVILEGED_CATEGORY(1),
         EDIT_PRIVILEGED_CATEGORY(1),
         USE_PRIVILEGED_CATEGORY(1);
 

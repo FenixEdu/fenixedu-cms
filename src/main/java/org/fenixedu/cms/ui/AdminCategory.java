@@ -31,9 +31,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
+import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
 import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 @BennuSpringController(AdminSites.class)
@@ -46,7 +51,7 @@ public class AdminCategory {
         AdminSites.canEdit(site);
         ensureCanDoThis(site, Permission.LIST_CATEGORIES);
         model.addAttribute("site", site);
-        model.addAttribute("categories", site.getCategoriesSet());
+        model.addAttribute("categories", getCategories(site));
         return "fenixedu-cms/categories";
     }
 
@@ -64,7 +69,13 @@ public class AdminCategory {
             Site s = Site.fromSlug(slugSite);
             AdminSites.canEdit(s);
             ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY, Permission.DELETE_CATEGORY);
-            s.categoryForSlug(slugCategory).delete();
+
+            Category category = s.categoryForSlug(slugCategory);
+            if(category.getPrivileged()) {
+                ensureCanDoThis(s, Permission.EDIT_PRIVILEGED_CATEGORY);
+            }
+
+            category.delete();
         });
         return new RedirectView("/cms/categories/" + slugSite, true);
     }
@@ -85,20 +96,29 @@ public class AdminCategory {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY);
+        Category category = s.categoryForSlug(slugCategory);
+        if(category.getPrivileged()) {
+            ensureCanDoThis(s, Permission.USE_PRIVILEGED_CATEGORY);
+        }
         model.addAttribute("site", s);
-        model.addAttribute("category", s.categoryForSlug(slugCategory));
+        model.addAttribute("category", category);
         return "fenixedu-cms/editCategory";
     }
 
     @RequestMapping(value = "{slugSite}/{slugCategory}", method = RequestMethod.POST)
     public RedirectView editCategory(@PathVariable String slugSite, @PathVariable String slugCategory,
-                                     @RequestParam LocalizedString name) {
+                                     @RequestParam LocalizedString name,
+                                     @RequestParam(required = false) Boolean privileged) {
         Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
         Category c = s.categoryForSlug(slugCategory);
         FenixFramework.atomic(()->{
             AdminSites.canEdit(s);
             ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY);
+            if(c.getPrivileged()) {
+                ensureCanDoThis(s, Permission.USE_PRIVILEGED_CATEGORY, Permission.EDIT_PRIVILEGED_CATEGORY);
+            }
+            c.setPrivileged(Optional.ofNullable(privileged).orElse(c.getPrivileged()));
             c.setName(name);
         });
         return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);
@@ -113,6 +133,9 @@ public class AdminCategory {
     @Atomic(mode = Atomic.TxMode.WRITE)
     private Post createPost(Site site, Category category, LocalizedString name) {
         ensureCanDoThis(site, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY, Permission.CREATE_POST);
+        if(category.getPrivileged()) {
+            ensureCanDoThis(site, Permission.USE_PRIVILEGED_CATEGORY);
+        }
         Post p = new Post(site);
         p.setName(Post.sanitize(name));
         p.setBody(new LocalizedString());
@@ -122,4 +145,10 @@ public class AdminCategory {
         return p;
     }
 
+    public List<Category> getCategories(Site site) {
+        boolean canUsePrivileged = canDoThis(site, Permission.USE_PRIVILEGED_CATEGORY);
+        return site.getCategoriesSet().stream()
+            .filter(category->!category.getPrivileged() || canUsePrivileged)
+            .sorted(Category.CATEGORY_NAME_COMPARATOR).collect(Collectors.toList());
+    }
 }

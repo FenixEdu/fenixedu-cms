@@ -30,9 +30,18 @@ ${portal.toolkit()}
 </div>
 
 <p>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateModal">
-        <i class="glyphicon glyphicon-edit"></i> Edit
-    </button>
+    <c:choose>
+        <c:when test="${!category.privileged || permissions:canDoThis(site, 'EDIT_PRIVILEGED_CATEGORY')}">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateModal">
+                <i class="glyphicon glyphicon-edit"></i> Edit
+            </button>        
+        </c:when>
+        <c:otherwise>
+            <button type="button" class="btn btn-default disabled">
+                <i class="glyphicon glyphicon-edit"></i> Edit
+            </button>  
+        </c:otherwise>
+    </c:choose>
 
     <c:choose>
         <c:when test="${permissions:canDoThis(site, 'CREATE_POST')}">
@@ -108,18 +117,19 @@ ${portal.toolkit()}
             </dl>
           </div>
         </div>
-
-        <div class="panel panel-danger">
-          <div class="panel-heading">Danger Zone</div>
-          <div class="panel-body">
-            <p class="help-block">Once you delete a category, there is no going back. Please be certain.</p>
-            <button data-toggle="modal" data-target="#deleteModal" class="btn btn-danger ${permissions:canDoThis(site, 'DELETE_CATEGORY') ? '' : 'disabled'}">Delete this Category</button>
-          </div>
-        </div>
+        <c:if test="${permissions:canDoThis(site, 'DELETE_CATEGORY') && (!category.privileged || permissions:canDoThis(site, 'EDIT_PRIVILEGED_CATEGORY'))}">
+            <div class="panel panel-danger">
+              <div class="panel-heading">Danger Zone</div>
+              <div class="panel-body">
+                <p class="help-block">Once you delete a category, there is no going back. Please be certain.</p>
+                <button data-toggle="modal" data-target="#deleteModal" class="btn btn-danger">Delete this Category</button>
+              </div>
+            </div>
+        </c:if>
     </div>
 </div>
 
-<c:if test="${permissions:canDoThis(site, 'DELETE_CATEGORY')}">
+<c:if test="${permissions:canDoThis(site, 'DELETE_CATEGORY') && (!category.privileged || permissions:canDoThis(site, 'EDIT_PRIVILEGED_CATEGORY'))}">
     <div class="modal fade" id="deleteModal">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -159,6 +169,14 @@ ${portal.toolkit()}
                             <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.edit.label.name" />" value='<c:out value="${category.name.json()}"/>'>
                         </div>
                     </div>
+                    <c:if test="${permissions:canDoThis(site, 'EDIT_PRIVILEGED_CATEGORY')}">
+                        <div class="form-group">
+                            <div class="switch switch-success">
+                                <input type="checkbox" ${category.privileged ? 'checked' : ''} name="privileged" id="success">
+                                <label for="success">Privileged</label>
+                            </div>
+                        </div>
+                    </c:if>
                 </div>
 
                 <div class="modal-footer">
