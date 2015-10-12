@@ -56,11 +56,41 @@ ${portal.toolkit()}
           <dt>Number of users</dt>
       		<dd>${role.group.members.count()}</dd>
         </dl>
-        </div>
+      </div>
     </div>
+    <c:if test="${permissions:canDoThis(role.site, 'MANAGE_ROLES')}">
+      <div class="panel panel-danger">
+        <div class="panel-heading">Danger Zone</div>
+        <div class="panel-body">
+          <p class="help-block">Once you delete a role, there is no going back. Please be certain.</p>
+          <button data-toggle="modal" data-target="#delete-modal" class="btn btn-danger">Delete role</button>
+        </div>
+      </div>
+    </c:if>
+  </div>
 	  
 </div>
 
+<c:if test="${permissions:canDoThis(role.site, 'MANAGE_ROLES')}">
+  <div class="modal fade" id="delete-modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Are you sure?</h4>
+        </div>
+        <div class="modal-body">
+          <p>You are about to delete the role '<c:out value="${role.name.content}" />'. There is no way to rollback this operation. Are you sure? </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+          <button type="button" onclick="$('#deleteForm').submit();" class="btn btn-danger">Yes</button>
+          <form action="${pageContext.request.contextPath}/cms/sites/${role.site.slug}/roles/${role.externalId}/delete" method="post" id="deleteForm">${csrf.field()}</form> 
+        </div>
+      </div>
+    </div>
+  </div>
+</c:if>
 
 <div class="modal fade" id="edit-modal">
   <div class="modal-dialog modal-lg">

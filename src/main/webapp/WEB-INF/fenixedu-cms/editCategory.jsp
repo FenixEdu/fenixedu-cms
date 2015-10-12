@@ -171,10 +171,8 @@ ${portal.toolkit()}
                     </div>
                     <c:if test="${permissions:canDoThis(site, 'EDIT_PRIVILEGED_CATEGORY')}">
                         <div class="form-group">
-                            <div class="switch switch-success">
-                                <input type="checkbox" ${category.privileged ? 'checked' : ''} name="privileged" id="success">
-                                <label for="success">Privileged</label>
-                            </div>
+                            <input type="checkbox" ${category.privileged ? 'checked' : ''} name="privileged" id="success">
+                            <label for="success">Privileged</label>
                         </div>
                     </c:if>
                 </div>
