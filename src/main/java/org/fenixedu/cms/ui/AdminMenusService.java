@@ -110,22 +110,23 @@ public class AdminMenusService {
 	  } else {
 	    ensureCanDoThis(menu.getSite(), Permission.DELETE_PRIVILEGED_MENU);
 	  }
+	  menu.setPrivileged(newIsPrivileged);
 	}
       }
 
       LocalizedString newName = LocalizedString.fromJson(menuJson.get("name"));
-	if(!menu.getName().equals(newName)) {
-	    menu.setName(newName);
-	}
+      if(!menu.getName().equals(newName)) {
+	  menu.setName(newName);
+      }
 
-	allDeletedItems(menu, menuJson).forEach(MenuItem::delete);
+      allDeletedItems(menu, menuJson).forEach(MenuItem::delete);
 
-	if(menuJson.get("children")!=null && menuJson.get("children").isJsonArray()) {
-	    JsonArray children = menuJson.get("children").getAsJsonArray();
-	    for (int newPosition = 0; newPosition < children.size(); ++newPosition) {
-		processMenuItemChanges(menu, null, children.get(newPosition).getAsJsonObject(), newPosition);
-	    }
-	}
+      if(menuJson.get("children")!=null && menuJson.get("children").isJsonArray()) {
+	  JsonArray children = menuJson.get("children").getAsJsonArray();
+	  for (int newPosition = 0; newPosition < children.size(); ++newPosition) {
+	      processMenuItemChanges(menu, null, children.get(newPosition).getAsJsonObject(), newPosition);
+	  }
+      }
     }
 
     void processMenuItemChanges(Menu menu, MenuItem parent, JsonObject menuItemJson, int newPosition) {

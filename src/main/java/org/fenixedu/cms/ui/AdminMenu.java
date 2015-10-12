@@ -23,7 +23,6 @@ import com.google.gson.JsonParser;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
-import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -42,7 +41,9 @@ import java.util.Comparator;
 import pt.ist.fenixframework.FenixFramework;
 
 import static java.util.stream.Collectors.toList;
+import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
 import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_PRIVILEGED_MENU;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/menus")
@@ -58,9 +59,11 @@ public class AdminMenu {
     public String menus(Model model, @PathVariable String siteSlug) {
         Site site = Site.fromSlug(siteSlug);
         AdminSites.canEdit(site);
-        PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS);
+        ensureCanDoThis(site, Permission.LIST_MENUS);
+        boolean canManagePrivileged = canDoThis(site, EDIT_PRIVILEGED_MENU);
         model.addAttribute("site", site);
         model.addAttribute("menus", site.getMenusSet().stream()
+            .filter(menu -> !menu.getPrivileged() || canManagePrivileged)
             .sorted(Comparator.comparing(Menu::getName)).collect(toList()));
         return "fenixedu-cms/menus";
     }
@@ -68,7 +71,7 @@ public class AdminMenu {
     @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
     public RedirectView createMenu(@PathVariable String slug, @RequestParam LocalizedString name) {
         Site site = Site.fromSlug(slug);
-        PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU, Permission.CREATE_MENU);
+        ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU, Permission.CREATE_MENU);
         Menu menu = service.createMenu(site, name);
         return new RedirectView("/cms/menus/" + site.getSlug() + "/" + menu.getSlug() + "/edit", true);
     }
@@ -78,10 +81,11 @@ public class AdminMenu {
         FenixFramework.atomic(() -> {
             Site site = Site.fromSlug(slugSite);
             AdminSites.canEdit(site);
-            PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU, Permission.DELETE_MENU);
+            ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU,
+                            Permission.DELETE_MENU);
             Menu menu = site.menuForSlug(slugMenu);
             if(menu.getPrivileged()) {
-                ensureCanDoThis(site, Permission.EDIT_PRIVILEGED_MENU,
+                ensureCanDoThis(site, EDIT_PRIVILEGED_MENU,
                                 Permission.DELETE_PRIVILEGED_MENU);
             }
             menu.delete();
@@ -93,10 +97,10 @@ public class AdminMenu {
     public String viewEditMenu(Model model, @PathVariable String slugSite, @PathVariable String slugMenu) {
         Site site = Site.fromSlug(slugSite);
         AdminSites.canEdit(site);
-        PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
+        ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
         Menu menu = site.menuForSlug(slugMenu);
         if(menu.getPrivileged()) {
-            ensureCanDoThis(site, Permission.EDIT_PRIVILEGED_MENU);
+            ensureCanDoThis(site, EDIT_PRIVILEGED_MENU);
         }
         model.addAttribute("site", site);
         model.addAttribute("menu", menu);
@@ -107,10 +111,10 @@ public class AdminMenu {
     public @ResponseBody String menuData(@PathVariable String slugSite, @PathVariable String slugMenu) {
         Site site = Site.fromSlug(slugSite);
         AdminSites.canEdit(site);
-        PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
+        ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
         Menu menu = site.menuForSlug(slugMenu);
         if(menu.getPrivileged()) {
-            ensureCanDoThis(menu.getSite(), Permission.EDIT_PRIVILEGED_MENU);
+            ensureCanDoThis(menu.getSite(), EDIT_PRIVILEGED_MENU);
         }
         JsonObject data = new JsonObject();
         JsonObject pages = new JsonObject();
@@ -124,7 +128,7 @@ public class AdminMenu {
     public @ResponseBody String editMenu(@PathVariable String slugSite, @PathVariable String slugMenu, HttpEntity<String> http) {
         Site site = Site.fromSlug(slugSite);
         FenixFramework.atomic(() -> {
-            PermissionEvaluation.ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
+            ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
             JsonObject json = JSON_PARSER.parse(http.getBody()).getAsJsonObject();
             service.processMenuChanges(site.menuForSlug(slugMenu), json);
             AdminSites.canEdit(site);

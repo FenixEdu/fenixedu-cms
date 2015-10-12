@@ -65,6 +65,15 @@ ${portal.angularToolkit()}
                     <p class="text-info" ng-class="{'text-danger': !selectedItem.name}">
                         Please enter the name that should be presented for this menu item.
                     </p>
+                    <c:if test="${permissions:canDoThis(site, 'EDIT_PRIVILEGED_MENU,CREATE_PRIVILEGED_MENU,DELETE_PRIVILEGED_MENU')}">
+                        <div class="switch switch-success" ng-show="selectedItem.root">
+                            <input type="checkbox" checked name="toggle" id="success" ng-model="selectedItem.privileged">
+                            <label for="success">Privileged</label>
+                            <p class="text-info" ng-show="selectedItem.privileged">Only users with permission to Edit <strong>privileged menus</strong> will be able to use and edit this menu.</p>
+                            <p class="text-info" ng-hide="selectedItem.privileged">All users with permissions to edit menus will be able to use and edit this menu.</p>
+                        </div>
+
+                    </c:if>
                 </div>
                 <div class="menuItemEdit" ng-hide="selectedItem.root">
                     
