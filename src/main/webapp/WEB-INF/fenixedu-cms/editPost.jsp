@@ -435,7 +435,6 @@ ${portal.angularToolkit()}
 					            fields: {'name': files[i].name, embedded: true},
 					            file: files[i]
 					        }).success(function (data, status, headers, config) {
-					        	debugger;
 						    	if(data && data.url) { 
 						    		cb([data.url]);
 						    	}
