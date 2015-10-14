@@ -21,6 +21,7 @@ package org.fenixedu.cms.ui;
 import com.google.common.base.Strings;
 
 import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
 import org.fenixedu.cms.domain.CMSTheme;
@@ -28,6 +29,7 @@ import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
@@ -83,6 +85,7 @@ public class AdminPagesAdvanced {
     private Page createPage(LocalizedString name, Site s) {
         ensureCanDoThis(s, Permission.SEE_PAGES, Permission.EDIT_PAGE, Permission.CREATE_PAGE);
         Page p = new Page(s, name);
+        SiteActivity.createdPage(p, Authenticate.getUser());
         return p;
     }
 

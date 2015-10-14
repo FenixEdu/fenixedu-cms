@@ -323,6 +323,7 @@ public class AdminSites {
             }
             s.setAnalyticsCode(analyticsCode);
             s.setAnalyticsAccountId(accountId);
+            s.getAnalytics().update(s);
         }
 
         if(PermissionEvaluation.canDoThis(s, Permission.PUBLISH_SITE)) {

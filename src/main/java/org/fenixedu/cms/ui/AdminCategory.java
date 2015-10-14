@@ -18,11 +18,13 @@
  */
 package org.fenixedu.cms.ui;
 
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -141,6 +143,7 @@ public class AdminCategory {
         p.setCanViewGroup(site.getCanViewGroup());
         p.setActive(false);
         p.addCategories(category);
+        SiteActivity.createdPost(p, Authenticate.getUser());
         return p;
     }
 

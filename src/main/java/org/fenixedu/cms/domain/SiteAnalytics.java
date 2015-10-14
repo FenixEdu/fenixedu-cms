@@ -62,7 +62,7 @@ public class SiteAnalytics implements Serializable {
   }
 
   @Atomic(mode = Atomic.TxMode.WRITE)
-  private SiteAnalytics update(Site site) {
+  public SiteAnalytics update(Site site) {
     SiteAnalytics siteAnalytics = new SiteAnalytics(fetch(site));
     site.setAnalytics(siteAnalytics);
     return siteAnalytics;

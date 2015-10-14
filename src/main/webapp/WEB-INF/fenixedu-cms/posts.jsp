@@ -220,6 +220,11 @@ ${portal.toolkit()}
 			e.preventDefault();
 			searchPosts({ categorySlug: $(e.target).data('category-slug') });
 		});
+        setTimeout(function() {
+            if(window.location.hash === '#new') {
+                $('#create-post').modal();
+            }
+        });
 	});
 </script>
 

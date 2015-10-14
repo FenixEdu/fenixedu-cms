@@ -140,6 +140,14 @@ ${portal.toolkit()}
           var slug = slugify(name);
           $("#create-category [name='type']").val(slug);
         });
+        
+        $(document).ready(function() {
+            setTimeout(function() {
+                if(window.location.hash === '#new') {
+                    $('#create-category').modal();
+                }
+            });
+        });
     </script>
 
 </c:if>

@@ -32,6 +32,7 @@ import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostFile;
 import org.fenixedu.cms.domain.PostMetadata;
 import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -116,6 +117,7 @@ public class AdminPosts {
         AdminSites.canEdit(s);
         PermissionEvaluation.ensureCanDoThis(s, Permission.CREATE_POST, Permission.EDIT_POSTS);
         Post post = service.createPost(s, name);
+        SiteActivity.createdPost(post, Authenticate.getUser());
         return new RedirectView("/cms/posts/" + s.getSlug() + "/" + post.getSlug() + "/edit", true);
     }
 

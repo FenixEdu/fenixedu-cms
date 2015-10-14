@@ -2,6 +2,8 @@ package org.fenixedu.cms.ui;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.commons.i18n.LocalizedString;
 
@@ -35,59 +37,51 @@ public class SiteActivityRender {
         attachRenderer("postCreated", SiteActivityRender::postCreated);
         attachRenderer("siteImported", SiteActivityRender::siteImported);
         attachRenderer("siteCloned", SiteActivityRender::siteCloned);
+        attachRenderer("pageCreated", SiteActivityRender::pageCreated);
     }
 
     private static void siteImported(SiteActivity activity, Writer writer) {
         JsonElement el = activity.getContent();
-
         JsonObject obj = el.getAsJsonObject();
-
-        try {
-            writer.write("<i class='glyphicon glyphicon-globe'></i> ");
-            writer.write(obj.get("userName").getAsString() + " imported '"
-                    + LocalizedString.fromJson(obj.get("siteName")).getContent() + "'");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String postName = LocalizedString.fromJson(obj.get("siteName")).getContent();
+        write(writer, obj.get("user").getAsString(), "imported", postName);
     }
 
     private static void siteCloned(SiteActivity activity, Writer writer) {
         JsonElement el = activity.getContent();
-
         JsonObject obj = el.getAsJsonObject();
-
-        try {
-            writer.write("<i class='glyphicon glyphicon-globe'></i> ");
-            writer.write(obj.get("userName").getAsString() + " cloned '"
-                    + LocalizedString.fromJson(obj.get("siteName")).getContent() + "'");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String postName = LocalizedString.fromJson(obj.get("siteName")).getContent();
+        write(writer, obj.get("user").getAsString(), "cloned", postName);
     }
 
     private static void siteCreated(SiteActivity activity, Writer writer) {
         JsonElement el = activity.getContent();
-
         JsonObject obj = el.getAsJsonObject();
-
-        try {
-            writer.write("<i class='glyphicon glyphicon-globe'></i> ");
-            writer.write(obj.get("userName").getAsString() + " created '"
-                    + LocalizedString.fromJson(obj.get("siteName")).getContent() + "'");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String postName = LocalizedString.fromJson(obj.get("siteName")).getContent();
+        write(writer, obj.get("user").getAsString(), "created", postName);
     }
 
     private static void postCreated(SiteActivity activity, Writer writer) {
         JsonElement el = activity.getContent();
-
         JsonObject obj = el.getAsJsonObject();
+        String postName = LocalizedString.fromJson(obj.get("postName")).getContent();
+        write(writer, obj.get("user").getAsString(), "created", postName);
+    }
 
+    private static void pageCreated(SiteActivity activity, Writer writer) {
+        JsonElement el = activity.getContent();
+        JsonObject obj = el.getAsJsonObject();
+        String postName = LocalizedString.fromJson(obj.get("pageName")).getContent();
+        write(writer, obj.get("user").getAsString(), "created", postName);
+    }
+
+    private static void write(Writer writer, String username, String action, String content) {
         try {
-            writer.write("<i class='glyphicon glyphicon-pushpin'></i> ");
-            writer.write(obj.get("userName").getAsString() + " created '"
-                    + LocalizedString.fromJson(obj.get("postName")).getContent() + "'");
+            User user = User.findByUsername(username);
+            writer.write("<a href='#' class='avatar'><img src='"+ user.getProfile().getAvatarUrl() + "?s=32" +"' alt='"+ user.getProfile().getDisplayName()+"' /></a>");
+            writer.write(
+                "<p>" + "<strong>" + user.getProfile().getDisplayName() + "</strong> " + action
+                + " " + content + " </p>");
         } catch (Exception e) {
             e.printStackTrace();
         }

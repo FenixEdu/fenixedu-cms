@@ -67,6 +67,19 @@ public class SiteActivity extends SiteActivity_Base {
         makeActivity(post.getSite(), object);
     }
 
+    public static void createdPage(Page page, User user) {
+        JsonObject object = new JsonObject();
+
+        object.addProperty("type", "pageCreated");
+        object.addProperty("post", page.getExternalId());
+        object.add("pageName", page.getName().json());
+        object.addProperty("pageSlug", page.getSlug());
+        object.addProperty("user", user.getUsername());
+        object.addProperty("userName", user.getProfile().getDisplayName());
+
+        makeActivity(page.getSite(), object);
+    }
+
     public void delete() {
         setPrevious(null);
         setNext(null);

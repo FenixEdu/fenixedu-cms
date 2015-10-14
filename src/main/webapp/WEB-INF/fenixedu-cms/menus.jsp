@@ -118,6 +118,11 @@ ${portal.toolkit()}
             $('#delete-form').attr('action', '${pageContext.request.contextPath}/cms/menus/${site.slug}/' + menuSlug + '/delete');
             $('#delete-modal').modal('show');
         });
+        setTimeout(function() {
+          if(window.location.hash === '#new') {
+            $('#create-menu').modal();
+          }
+        });
     });
   </script>
 </c:if>

@@ -292,4 +292,12 @@ ${portal.toolkit()}
       }
     });
   })();
+
+  $(document).ready(function() {
+  	setTimeout(function() {
+	  	if(window.location.hash === '#new') {
+		  	$('#create-page').modal();
+	  	}
+	});
+  })
 </script>

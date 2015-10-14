@@ -3,12 +3,14 @@ package org.fenixedu.cms.ui;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,7 @@ public class AdminPagesService {
 	page.setTemplateType("view");
 	page.setPublished(true);
 	page.setCanViewGroup(site.getCanViewGroup());
+      	SiteActivity.createdPage(page, Authenticate.getUser());
 	return page;
     }
 
