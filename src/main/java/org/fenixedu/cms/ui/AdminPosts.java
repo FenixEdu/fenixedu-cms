@@ -49,6 +49,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
 import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
@@ -115,9 +116,7 @@ public class AdminPosts {
     public RedirectView createPost(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name) {
         Site s = Site.fromSlug(slug);
         AdminSites.canEdit(s);
-        PermissionEvaluation.ensureCanDoThis(s, Permission.CREATE_POST, Permission.EDIT_POSTS);
-        Post post = service.createPost(s, name);
-        SiteActivity.createdPost(post, Authenticate.getUser());
+        Post post = createPost(s, name);
         return new RedirectView("/cms/posts/" + s.getSlug() + "/" + post.getSlug() + "/edit", true);
     }
 
@@ -212,4 +211,13 @@ public class AdminPosts {
             PermissionEvaluation.ensureCanDoThis(post.getSite(), Permission.EDIT_POSTS_PUBLISHED);
         }
     }
+
+    @Atomic(mode = Atomic.TxMode.WRITE)
+    private Post createPost(Site site, LocalizedString name) {
+        PermissionEvaluation.ensureCanDoThis(site, Permission.CREATE_POST, Permission.EDIT_POSTS);
+        Post post = service.createPost(site, name);
+        SiteActivity.createdPost(post, Authenticate.getUser());
+        return post;
+    }
+
 }

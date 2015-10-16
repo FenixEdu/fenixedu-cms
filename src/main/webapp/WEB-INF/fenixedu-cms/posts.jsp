@@ -85,7 +85,7 @@ ${portal.toolkit()}
                 <th><spring:message code="page.manage.label.name"/></th>
                 <th><spring:message code="page.manage.label.creationDate"/></th>
                 <th><spring:message code="site.manage.label.categories"/></th>
-                <th><spring:message code="page.manage.label.operations"/></th>
+                <th>Published</th>
             </tr>
             </thead>
             <tbody>
@@ -101,40 +101,35 @@ ${portal.toolkit()}
                             </c:otherwise>
                         </c:choose>
                     </td>
-                    <td>${post.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
-                        <small>- ${post.createdBy.name}</small>
-                    </td>
+                    <td>${post.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}</td>
                     <td>
                         <c:forEach var="cat" items="${post.categoriesSet}" end="3">
                             <a href="${cat.getEditUrl()}" class="badge">${cat.name.content}</a>
                         </c:forEach>
                     </td>
                     <td>
-                        <div class="btn-group">
-                            <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit" class="btn btn-icon btn-default ${post.canEdit() ? '' : 'disabled'}">
-                               <i class="glyphicon glyphicon-edit"></i>
-                            </a>
-                            
-                            <a href="${post.address}"
-                               class="btn btn-icon btn-default">
-                               <i class="glyphicon glyphicon-link"></i>
-                            </a>
-
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-icon dropdown-toggle" data-toggle="dropdown"
-                                        aria-expanded="false">
-                                    <i class="icon icon-dot-3"></i>
-                                </button>
-
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li><a href="#"><i class="glyphicon glyphicon-bullhorn"></i> Unpublish</a></li>
-                                    <c:if test="${post.canDelete()}">
-                                        <li><a href="#" data-post="${post.slug}"><i class="glyphicon glyphicon-trash"></i> Delete</a></li>
-                                    </c:if>
-                                </ul>
-                            </div>
+                        <div class="switch switch-success">
+                            <input type="checkbox" ${post.active ? 'checked' : ''} class="disabled" id="success">
+                            <label for="success">Active</label>
                         </div>
-
+                        <div class="btn-group pull-right">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="glyphicon glyphicon-option-vertical"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <c:if test="${post.canEdit()}">
+                                    <li>
+                                        <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit">
+                                            <i class="glyphicon glyphicon-edit"></i> Edit
+                                        </a>
+                                    </li>
+                                </c:if>
+                                <li><a href="${post.address}"><i class="glyphicon glyphicon-link"></i> Link</a></li>
+                                <c:if test="${post.canDelete()}">
+                                    <li><a href="#" data-post="${post.slug}"><i class="glyphicon glyphicon-trash"></i> Delete</a></li>
+                                </c:if>
+                            </ul>
+                        </div>
 					</td>
 				</tr>
 			</c:forEach>
@@ -143,17 +138,17 @@ ${portal.toolkit()}
 
         <!-- Pagination -->
         <c:if test="${partition.getNumPartitions() > 1}">
-          <nav class="text-center">
-            <ul class="pagination">
-              <li ${partition.isFirst() ? 'class="disabled"' : ''}>
-                <a href="#" onclick="goToPage(${partition.getNumber() - 1})">&laquo;</a>
-              </li>
-              <li class="disabled"><a>${partition.getNumber()} / ${partition.getNumPartitions()}</a></li>
-              <li ${partition.isLast() ? 'class="disabled"' : ''}>
-                <a href="#" onclick="goToPage(${partition.getNumber() + 1})">&raquo;</a>
-              </li>
-            </ul>
-          </nav>
+            <nav class="pull-right">
+              <ul class="pagination">
+                <li ${partition.isFirst() ? 'class="disabled"' : ''}>
+                    <a href="#" onclick="goToPage(${partition.getNumber() - 1})">&laquo;</a>
+                </li>
+                <li class="disabled"><a>${partition.getNumber()} / ${partition.getNumPartitions()}</a></li>
+                <li ${partition.isLast() ? 'class="disabled"' : ''}>
+                    <a href="#" onclick="goToPage(${partition.getNumber() + 1})">&raquo;</a>
+                </li>
+              </ul>
+            </nav>
         </c:if>
 	</c:otherwise>
 </c:choose>
@@ -190,6 +185,37 @@ ${portal.toolkit()}
         })
     </script>
 </c:if>
+
+<c:if test="${permissions:canDoThis(site, 'CREATE_POST')}">
+    <div class="modal fade" id="create-post" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/posts/${site.slug}/create" method="post" role="form">
+                ${csrf.field()}
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
+                    <h3 class="modal-title">New Post</h3>
+                    <small>This could be the start of something great!</small>
+                </div>
+                <div class="modal-body">
+                    <div class="${emptyName ? "form-group has-error" : "form-group"}">
+                        <label class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
+
+                        <div class="col-sm-10">
+                            <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.create.label.name" />">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="Submit" class="btn btn-primary">Make</button>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+</c:if>
+
 <script type="application/javascript">
     function getParameterByName(name) {
         var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
@@ -227,33 +253,3 @@ ${portal.toolkit()}
         });
 	});
 </script>
-
-<c:if test="${permissions:canDoThis(site, 'CREATE_POST')}">
-    <div class="modal fade" id="create-post" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-            <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/posts/${site.slug}/create" method="post" role="form">
-                ${csrf.field()}
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
-                    <h3 class="modal-title">New Post</h3>
-                    <small>This could be the start of something great!</small>
-                </div>
-                <div class="modal-body">
-                    <div class="${emptyName ? "form-group has-error" : "form-group"}">
-                        <label class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
-
-                        <div class="col-sm-10">
-                            <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.create.label.name" />">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="Submit" class="btn btn-primary">Make</button>
-                </div>
-            </form>
-        </div>
-      </div>
-    </div>
-</c:if>

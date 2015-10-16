@@ -33,7 +33,7 @@
 	</div>
 	<div class="row">
 		<div class="col-sm-6">
-			<h3 class="sub-header">At a glance</h3>
+			<h3>At a glance</h3>
 			
 			<div class="input-group">
 				<div class="input-group-btn">
@@ -78,7 +78,7 @@
 				</c:if>
 			</ul>
 
-			<h3 class="sub-header">Properties</h3>
+			<h3>Properties</h3>
             <dl class="dl-entity-horizontal">
                 <dt>Theme</dt>
             	<c:choose>
@@ -126,7 +126,7 @@
 					<rect x="0" y="0" width="100%" height="450" style=" fill: url(#pattern1);" />    
 				</svg>
 			</div>
-			<h3 class="sub-header">Activity</h3>
+			<h3>Activity</h3>
 			<c:set var="activities" value="${site.lastFiveDaysOfActivity}"/>
 		
 			<c:choose>
@@ -155,10 +155,6 @@
 
 
 <style>
-.sub-header {
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
-}
 ul.events {
 	display: table;
 	list-style: none;

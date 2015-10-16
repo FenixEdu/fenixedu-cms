@@ -152,19 +152,19 @@ ${portal.toolkit()}
 			</tbody>
 		</table>
 
-		<!-- Pagination -->
+        <!-- Pagination -->
         <c:if test="${partition.getNumPartitions() > 1}">
-          <nav class="text-center">
-            <ul class="pagination">
-              <li ${partition.isFirst() ? 'class="disabled"' : ''}>
-                <a href="#" onclick="goToPage(${partition.getNumber() - 1})">&laquo;</a>
-              </li>
-              <li class="disabled"><a>${partition.getNumber()} / ${partition.getNumPartitions()}</a></li>
-              <li ${partition.isLast() ? 'class="disabled"' : ''}>
-                <a href="#" onclick="goToPage(${partition.getNumber() + 1})">&raquo;</a>
-              </li>
-            </ul>
-          </nav>
+            <nav class="pull-right">
+              <ul class="pagination">
+                <li ${partition.isFirst() ? 'class="disabled"' : ''}>
+                    <a href="#" onclick="goToPage(${partition.getNumber() - 1})">&laquo;</a>
+                </li>
+                <li class="disabled"><a>${partition.getNumber()} / ${partition.getNumPartitions()}</a></li>
+                <li ${partition.isLast() ? 'class="disabled"' : ''}>
+                    <a href="#" onclick="goToPage(${partition.getNumber() + 1})">&raquo;</a>
+                </li>
+              </ul>
+            </nav>
         </c:if>
 
 	</c:otherwise>
