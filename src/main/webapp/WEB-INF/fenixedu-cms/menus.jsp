@@ -54,35 +54,49 @@ ${portal.toolkit()}
       </c:when>
 
       <c:otherwise>
-        <ul class="list-group">
-          <c:forEach var="menu" items="${menus}">
-              <c:set var="menuEditUrl" value="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.slug}/edit"></c:set>
-              <li class="list-group-item">
-                  
-                  <c:choose>
+        <table class="table">
+          <thead>
+              <tr>
+                  <th><spring:message code="post.manage.label.name"/></th>
+                  <th><spring:message code="post.manage.label.creationDate"/></th>
+                  <th>Items</th>
+              </tr>
+          </thead>
+          <tbody>
+              <c:forEach var="menu" items="${menus}">
+                <c:set var="menuEditUrl" value="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.slug}/edit"></c:set>
+                <tr>
+                  <td>
+                    <c:choose>
                       <c:when test="${permissions:canDoThis(site, 'EDIT_MENU')}">
-                          <h3><a href="${menuEditUrl}">${menu.name.content}</a></h3>
+                          <h5><a href="${menuEditUrl}">${menu.name.content}</a></h5>
                       </c:when>
                       <c:otherwise>
-                          <h3>${menu.name.content}</h3>
+                          <h5>${menu.name.content}</h5>
                       </c:otherwise>
-                  </c:choose>
-
-                  <div><small><code>${menu.getSlug()}</code></small></div>
-
-                  <span class="label label-primary">${menu.getItemsSet().size()} Menu Items</span>
-
-                  <div class="btn-group pull-right">
-                      <a href="${menuEditUrl}" class="btn btn-icon btn-primary ${permissions:canDoThis(site, 'EDIT_MENU') ? '' : 'disabled'}">
-                          <i class="glyphicon glyphicon-cog"></i>
-                      </a>
-                      <button type="button" data-menu="${menu.slug}" class="btn btn-icon btn-danger ${permissions:canDoThis(site, 'DELETE_MENU') ? '' : 'disabled'}">
-                          <i class="glyphicon glyphicon-trash"></i>
-                      </button>
-                  </div>
-              </li>
-          </c:forEach>
-        </ul>
+                    </c:choose>
+                  </td>
+                  <td>${menu.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}</td>
+                  <td>
+                    <span class="badge">${menu.getItemsSet().size()}</span>
+                    <div class="btn-group pull-right">
+                        <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="glyphicon glyphicon-option-vertical"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <c:if test="${permissions:canDoThis(site, 'EDIT_MENU')}">
+                                <li><a href="${menuEditUrl}"><i class="glyphicon glyphicon-edit"></i>&nbsp;Edit</a></li>
+                            </c:if>
+                            <c:if test="${permissions:canDoThis(site, 'DELETE_MENU')}">
+                                <li><a data-menu="${menu.slug}" href="#"><i class="glyphicon glyphicon-trash"></i>&nbsp;Delete</a></li>
+                            </c:if>
+                        </ul>
+                    </div>
+                  </td>
+                </tr>
+              </c:forEach>
+          </tbody>
+        </table>
       </c:otherwise>
 
 </c:choose>
@@ -113,7 +127,7 @@ ${portal.toolkit()}
 
   <script type="application/javascript">
     $(document).ready(function () {
-        $("button[data-menu]").on('click', function(el) {
+        $("a[data-menu]").on('click', function(el) {
             var menuSlug = $(this).data('menu');
             $('#delete-form').attr('action', '${pageContext.request.contextPath}/cms/menus/${site.slug}/' + menuSlug + '/delete');
             $('#delete-modal').modal('show');
