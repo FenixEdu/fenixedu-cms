@@ -127,8 +127,10 @@
               <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
               <h3 class="modal-title">CMS Settings</h3>
               <small>Global Settings for your sites</small>
+              <a href="${pageContext.request.contextPath}/cms/settings" class="pull-right btn">Manage Global Roles</a>
           </div>
           <div class="modal-body">
+
             <div class="form-group">
                 <label class="col-sm-3 control-label">Default Site</label>
 
@@ -139,7 +141,6 @@
                            <option ${i.isDefault() ? 'selected' : ''}  value="${i.slug}">${i.name.content}</option>
                         </c:forEach>
                     </select>
-                    <p class="help-block">The Default Site is the site that is used when you visit the root of the server.</p>
                 </div>
             </div>
           </div>
