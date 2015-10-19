@@ -62,13 +62,13 @@ ${portal.toolkit()}
 	</c:when>
 
 	<c:otherwise>
-		<table class="table table-striped">
+		<table class="table">
 			<thead>
-			<tr>
-				<th><spring:message code="page.manage.label.name"/></th>
-				<th><spring:message code="page.manage.label.creationDate"/></th>
-				<th><spring:message code="page.manage.label.operations"/></th>
-			</tr>
+            <tr>
+                <th><spring:message code="post.manage.label.name"/></th>
+                <th><spring:message code="post.manage.label.creationDate"/></th>
+                <th>Published</th>
+            </tr>
 			</thead>
 			<tbody>
 			<c:forEach var="page" items="${pages}">
@@ -90,62 +90,34 @@ ${portal.toolkit()}
 								</h5>
 							</c:otherwise>
 						</c:choose>
-
-						<div>
-							<small><spring:message code="page.manage.label.url"/>:
-								<c:choose>
-									<c:when test="${page.slug != ''}">
-										<code>${page.slug}</code>
-									</c:when>
-									<c:otherwise>
-										<code>-</code>
-									</c:otherwise>
-								</c:choose>
-							</small>
-						</div>
 					</td>
 					<td>${page.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
 						<small>- ${page.createdBy.name}</small>
 					</td>
-					<td>
-						<div class="btn-group">
-							<c:choose>
-								<c:when test="${permissions:canDoThis(site, 'EDIT_PAGE')}">
-									<c:choose>
-										<c:when test="${page.slug != ''}">
-											<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit" class="btn btn-sm btn-default">
-												<i class="glyphicon glyphicon-edit"></i>
-											</a>
-										</c:when>
-										<c:otherwise>
-											<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/--**--/edit" class="btn btn-sm btn-default">
-												<i class="glyphicon glyphicon-edit"></i>
-											</a>
-										</c:otherwise>
-									</c:choose>
-								</c:when>
-								<c:otherwise>
-									<button type="button" class="btn btn-sm btn-default disabled"><i class="glyphicon glyphicon-edit"></i></button>
-								</c:otherwise>
-							</c:choose>
+                    <td>
+                        <div class="switch switch-success">
 
-							<a href="${page.address}" class="btn btn-default btn-sm">
-								<i class="glyphicon glyphicon-link"></i>
-							</a>
-
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-default btn-sm btn-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <i class="icon icon-dot-3"></i>
-                                </button>
-
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li><a href="#"><i class="glyphicon glyphicon-bullhorn">&nbsp;Unpublish</i></a></li>
-									<c:if test="${permissions:canDoThis(site, 'EDIT_PAGE, DELETE_PAGE')}">
-                                    	<li><a href="#" data-page="${page.slug}"><i class="glyphicon glyphicon-trash">&nbsp;Delete</i></a></li>
-                                    </c:if>
-                                </ul>
-                            </div>
-						</div>
+                            <input type="checkbox" ${page.published && page.staticPost.get().active ? 'checked' : ''} class="disabled" id="success">
+                            <label for="success">Active</label>
+                        </div>
+                        <div class="btn-group pull-right">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="glyphicon glyphicon-option-vertical"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <c:if test="${permissions:canDoThis(site, 'EDIT_PAGE')}">
+                                    <li>
+										<a href="${pageContext.request.contextPath}/cms/pages/${page.site.slug}/${page.slug}/edit">
+                                            <i class="glyphicon glyphicon-edit"></i>&nbsp;Edit
+                                        </a>
+                                    </li>
+                                </c:if>
+                                <li><a href="${page.address}"><i class="glyphicon glyphicon-link"></i>&nbsp;Link</a></li>
+                                <c:if test="${permissions:canDoThis(site, 'EDIT_PAGE, DELETE_PAGE')}">
+                                	<li><a href="#" data-page="${page.slug}"><i class="glyphicon glyphicon-trash"></i>&nbsp;Delete</a></li>
+                                </c:if>
+                            </ul>
+                        </div>
 					</td>
 				</tr>
 			</c:forEach>
