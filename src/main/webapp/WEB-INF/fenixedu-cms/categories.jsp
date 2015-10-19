@@ -54,33 +54,45 @@ ${portal.toolkit()}
     </c:when>
 
     <c:otherwise>
-
-        <ul class="list-group">
+    <table class="table">
+        <thead>
+            <tr>
+                <th><spring:message code="post.manage.label.name"/></th>
+                <th><spring:message code="post.manage.label.creationDate"/></th>
+                <th>Posts</th>
+            </tr>
+        </thead>
+        <tbody>
             <c:forEach var="category" items="${categories}">
-                <li class="list-group-item">
-
-                    <c:choose>
-                        <c:when test="${permissions:canDoThis(site, 'EDIT_CATEGORY')}">
-                            <h3><a href="${category.getEditUrl()}">${category.name.content}</a></h3>
-                        </c:when>
-                        <c:otherwise>
-                            <h3>${category.name.content}</h3>
-                        </c:otherwise>
-                    </c:choose>
-                    
-                    <div><small><code>${category.getSlug()}</code></small></div>
-
-                    <span class="label label-primary">${category.postsSet.size()} Posts</span>
-
-                    <div class="btn-group pull-right">
-                        <a href="${category.getEditUrl()}" class="btn btn-icon btn-primary pull-right ${permissions:canDoThis(site, 'EDIT_CATEGORY') ? '' : 'disabled'}">
-                            <i class="glyphicon glyphicon-cog"></i>
-                        </a>
-                    </div>
-                </li>
+                <tr>
+                    <td>
+                       <c:choose>
+                            <c:when test="${permissions:canDoThis(site, 'EDIT_CATEGORY')}">
+                                <h5><a href="${category.getEditUrl()}">${category.name.content}</a></h5>
+                            </c:when>
+                            <c:otherwise>
+                                <h5>${category.name.content}</h5>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
+                    <td>${category.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}</td>
+                    <td>
+                        <span class="badge">${category.postsSet.size()}</span>
+                        <div class="btn-group pull-right">
+                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="glyphicon glyphicon-option-vertical"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <c:if test="${permissions:canDoThis(site, 'EDIT_CATEGORY')}">
+                                    <li><a href="${category.getEditUrl()}"><i class="glyphicon glyphicon-edit"></i>&nbsp;Edit</a></li>
+                                </c:if>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
             </c:forEach>
-        </ul>
-
+        </tbody>
+    </table>
     </c:otherwise>
 </c:choose>
 
