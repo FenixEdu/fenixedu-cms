@@ -64,7 +64,7 @@
 			
 			<ul class="list-group">
 				<c:if test="${permissions:canDoThis(site, 'EDIT_POSTS')}">
-					<li class="list-group-item"><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}">Posts<span class="badge pull-right">${site.postSet.size()}</span></a></li>
+					<li class="list-group-item"><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}">Posts<span class="badge pull-right">${site.nonStaticPostsStream.count()}</span></a></li>
 				</c:if>
 				<c:if test="${permissions:canDoThis(site, 'SEE_PAGES,EDIT_PAGE')}">
 					<li class="list-group-item"><a href="${pageContext.request.contextPath}/cms/pages/${site.slug}">Pages<span class="badge pull-right">${site.pagesSet.size()}</span></a></li>

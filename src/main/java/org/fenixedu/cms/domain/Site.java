@@ -636,4 +636,12 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         return result;
     }
 
+    public Stream<Post> getStaticPostsStream() {
+        return getPostSet().stream().filter(Post::isStaticPost).sorted(Post.CREATION_DATE_COMPARATOR);
+    }
+
+    public Stream<Post> getNonStaticPostsStream() {
+        return getPostSet().stream().filter(p->!p.isStaticPost()).sorted(Post.CREATION_DATE_COMPARATOR);
+    }
+
 }
