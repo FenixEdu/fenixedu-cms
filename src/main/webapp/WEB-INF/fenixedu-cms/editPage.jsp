@@ -208,8 +208,8 @@ ${portal.angularToolkit()}
 
                     <c:if test="${permissions:canDoThis(site, 'CREATE_MENU_ITEM')}">
                         <div class="switch switch-success" ng-show="menus && menus.length">
-                              <input type="checkbox" checked name="toggle" id="success" ng-model="useMenu">
-                              <label for="success">Show on menu</label>
+                              <input type="checkbox" checked name="toggle" id="use-menu" ng-model="useMenu">
+                              <label for="use-menu">Show on menu</label>
                         </div>
                     </c:if>
 
