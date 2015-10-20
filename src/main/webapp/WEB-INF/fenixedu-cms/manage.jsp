@@ -166,7 +166,7 @@ ${portal.toolkit()}
         <td class="col-md-2">${cms.prettyDate(i.creationDate)}</td>
         <td class="col-md-2">
             <div class="switch switch-success">
-              <input type="checkbox" ng-model="post.active" id="success" class="ng-pristine ng-valid">
+              <input type="checkbox" id="success" ${i.published ? 'checked' : ''}>
               <label for="success">Privileged</label>
             </div>
             <div class="dropdown pull-right">
