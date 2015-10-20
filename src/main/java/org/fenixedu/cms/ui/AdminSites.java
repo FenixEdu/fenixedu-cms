@@ -179,6 +179,7 @@ public class AdminSites {
         canEdit(site);
         model.addAttribute("site", site);
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
+        editSiteInfo(site, model);
         return "fenixedu-cms/manageSite";
     }
 
@@ -275,47 +276,51 @@ public class AdminSites {
             newSlug = Optional.ofNullable(newSlug).orElse(slug);
             editSite(name, description, theme, newSlug, published, s, viewGroup, folder, analyticsCode, accountId,
                     s.pageForSlug(initialPageSlug));
-            return new RedirectView("/cms/sites/" + newSlug + "/edit", true);
+            return new RedirectView("/cms/sites/" + newSlug + "#general", true);
         }
     }
 
-    @RequestMapping(value = "{slug}/edit", method = RequestMethod.GET)
-    public String edit(Model model, @PathVariable(value = "slug") String slug) {
-        Site site = Site.fromSlug(slug);
-        AdminSites.canEdit(site);
-
-        model.addAttribute("site", site);
-        model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
-        model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet());
-        model.addAttribute("defaultSite", Bennu.getInstance().getDefaultSite());
-        if (PermissionEvaluation.canDoThis(site, Permission.MANAGE_ANALYTICS)) {
-            model.addAttribute("google", GoogleAPI.getInstance());
-
-            GoogleAPI.getInstance().getAuthenticatedUser(Authenticate.getUser()).ifPresent(googleUser -> {
-                Analytics analytics = getUserAnalytics();
-                List<GoogleAccountBean> googleAccountBeans = new ArrayList<>();
-                try {
-                    Accounts accounts = analytics.management().accounts().list().execute();
-                    for (Account account : accounts.getItems()) {
-                        Webproperties properties = analytics.management().webproperties().list(account.getId()).execute();
-                        googleAccountBeans.add(new GoogleAccountBean(account, properties));
-                    }
-                    model.addAttribute("googleUser", googleUser);
-                    model.addAttribute("accounts", googleAccountBeans);
-                } catch (GoogleJsonResponseException e) {
-                    LOGGER.error("Error loading analytics properties", e);
-                    if (e.getDetails().getCode() == 401) {
-                        //Invalid credentials -> remove invalid user
-                    FenixFramework.atomic(() -> googleUser.delete());
-                }
-            } catch (IOException e) {
-                LOGGER.error("Error loading analytics properties", e);
+    public void editSiteInfo(Site site, Model model) {
+        if(PermissionEvaluation.canDoThis(site, Permission.EDIT_SITE_INFORMATION)) {
+            if (CmsSettings.getInstance().canManageThemes()) {
+                model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
             }
+            if (CmsSettings.getInstance().canManageFolders()) {
+                model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet());
+            }
+            if (CmsSettings.getInstance().canManageSettings()) {
+                model.addAttribute("defaultSite", Bennu.getInstance().getDefaultSite());
+            }
+            if (PermissionEvaluation.canDoThis(site, Permission.MANAGE_ANALYTICS)) {
+                model.addAttribute("google", GoogleAPI.getInstance());
 
-        }   );
-
+                GoogleAPI.getInstance().getAuthenticatedUser(Authenticate.getUser())
+                    .ifPresent(googleUser -> {
+                        Analytics analytics = getUserAnalytics();
+                        List<GoogleAccountBean> googleAccountBeans = new ArrayList<>();
+                        try {
+                            Accounts accounts = analytics.management().accounts().list().execute();
+                            for (Account account : accounts.getItems()) {
+                                Webproperties
+                                    properties =
+                                    analytics.management().webproperties().list(account.getId())
+                                        .execute();
+                                googleAccountBeans.add(new GoogleAccountBean(account, properties));
+                            }
+                            model.addAttribute("googleUser", googleUser);
+                            model.addAttribute("accounts", googleAccountBeans);
+                        } catch (GoogleJsonResponseException e) {
+                            LOGGER.error("Error loading analytics properties", e);
+                            if (e.getDetails().getCode() == 401) {
+                                //Invalid credentials -> remove invalid user
+                                FenixFramework.atomic(() -> googleUser.delete());
+                            }
+                        } catch (IOException e) {
+                            LOGGER.error("Error loading analytics properties", e);
+                        }
+                    });
+            }
         }
-        return "fenixedu-cms/editSite";
     }
 
     @RequestMapping(value = "{siteSlug}/clone", method = RequestMethod.POST)
@@ -444,6 +449,7 @@ public class AdminSites {
     public String viewEditRole(@PathVariable String slugSite, @PathVariable String roleId, Model model) {
         PermissionEvaluation.canAccess(Authenticate.getUser(), Site.fromSlug(slugSite));
         model.addAttribute("role", FenixFramework.getDomainObject(roleId));
+        model.addAttribute("cmsSettings", CmsSettings.getInstance());
         return "fenixedu-cms/editRole";
     }
 

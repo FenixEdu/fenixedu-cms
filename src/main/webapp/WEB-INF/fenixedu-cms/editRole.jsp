@@ -6,7 +6,7 @@ ${portal.toolkit()}
 
 <div class="page-header">
     <h1>Permissions</h1>
-    <h2><a href="${pageContext.request.contextPath}/cms/sites/${role.site.slug}/edit#permissions"><small>Manage Role '${role.name.content}'</small></a></h2>
+    <h2><a href="${pageContext.request.contextPath}/cms/sites/${role.site.slug}#roles"><small>Manage Role '${role.name.content}'</small></a></h2>
 </div>
 
 <c:if test="${permissions:canDoThis(role.site, 'MANAGE_ROLES')}">
@@ -14,6 +14,9 @@ ${portal.toolkit()}
         <button type="button" data-toggle="modal" data-target="#edit-modal" class="btn btn-primary">
             <i class="glyphicon glyphicon-edit"></i> Associate Users
         </button>
+        <c:if test="${cmsSettings.canManageGloabalPermissions()}">
+          <a class="btn btn-default" href="${pageContext.request.contextPath}/cms/permissions/${role.roleTemplate.externalId}/edit">Template</a>
+        </c:if>
     </p>
 </c:if>
 

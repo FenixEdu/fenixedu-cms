@@ -174,7 +174,7 @@ ${portal.toolkit()}
                 <span class="glyphicon glyphicon-option-vertical"></span>
               </a>
               <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/edit">View details</a></li>
+                <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}#settings">View details</a></li>
                 <c:if test="${i.published}">
                   <li><a href="${i.fullUrl}">Visit public URL</a></li>
                 </c:if>
