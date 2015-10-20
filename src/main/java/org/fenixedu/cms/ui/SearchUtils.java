@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.toList;
 public class SearchUtils {
 
     public static List<Site> searchSites(Collection<Site> allSites, String query) {
-        return allSites.stream().filter(site -> matches(site, query)).sorted(Site.NAME_COMPARATOR).collect(toList());
+        return allSites.stream().filter(site -> matches(site, query.toLowerCase())).sorted(Site.NAME_COMPARATOR).collect(toList());
     }
 
     public static List<Post> searchPosts(Collection<Post> allPosts, String query) {
@@ -64,7 +64,7 @@ public class SearchUtils {
                 .filter(content -> !Strings.isNullOrEmpty(content));
     }
 
-    private static boolean matches(Site site, String query) {
+    public static boolean matches(Site site, String query) {
         return containsContent(site.getName(), query) || containsContent(site.getDescription(), query)
                 || containsContent(site.getSlug(), query) || containsContent(site.getCreatedBy(), query);
     }

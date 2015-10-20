@@ -41,20 +41,13 @@ import static pt.ist.fenixframework.FenixFramework.atomic;
 @RequestMapping("/cms/folders")
 public class AdminFolders {
 
-    @RequestMapping(method = RequestMethod.GET)
-    public String listFolders(Model model) {
-        CmsSettings.getInstance().ensureCanManageFolders();
-        model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet());
-        return "fenixedu-cms/folders";
-    }
-
     @RequestMapping(method = RequestMethod.POST)
     public RedirectView createFolder(@RequestParam String path, @RequestParam LocalizedString description) {
         atomic(() -> {
             CmsSettings.getInstance().ensureCanManageFolders();
             new CMSFolder(PortalConfiguration.getInstance().getMenu(), path, description);
         });
-        return new RedirectView("/cms/folders", true);
+        return new RedirectView("/cms/", true);
     }
 
     @RequestMapping(value = "/resolver/{folder}", method = RequestMethod.GET)
@@ -88,7 +81,7 @@ public class AdminFolders {
     public RedirectView deleteFolder(@PathVariable CMSFolder folder) {
         CmsSettings.getInstance().ensureCanManageFolders();
         atomic(() -> folder.delete());
-        return new RedirectView("/cms/folders", true);
+        return new RedirectView("/cms/", true);
     }
 
     private Throwable unwrap(Throwable e) {

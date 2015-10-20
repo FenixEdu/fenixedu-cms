@@ -25,14 +25,19 @@ ${portal.toolkit()}
 <script src="${pageContext.request.contextPath}/static/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 
 <div class="page-header">
-    <h1>Folders</h1>
-    <h2><a href="${pageContext.request.contextPath}/cms/folders"><small>${folder.functionality.title.content}</small></a></h2>
+    <h1>${folder.functionality.description.content}
+          <small>
+              <ol class="breadcrumb">
+                    <li><a href="${pageContext.request.contextPath}/cms">Sites</a></li>
+                    <li><a href="${pageContext.request.contextPath}/cms">Tags</a></li>
+                </ol>
+          </small>
+    </h1>
 </div>
 
 <div class="editor-content">
     <p>
         <div class="btn-toolbar" style="background:white" role="toolbar">
-            <a href="${pageContext.request.contextPath}/cms/folders" class="btn btn-default">« <spring:message code="action.back"/></a>
             <button class="btn btn-primary" id="saveBtn"><spring:message code="action.save" /></button>
             <div class="pull-right">
                 <div class="btn-group">
@@ -69,58 +74,9 @@ ${portal.toolkit()}
     <div id="folder-code-full"></div>
 
     <div class="row" id="folder-container">
-        <div class="col-md-8 col-sm-12" id="folder-code-default">
+        <div class="col-md-12" id="folder-code-default">
             <pre id="editor"><c:out value="${folder.resolver.code}"/></pre>
         </div>
-
-        <div class="col-md-4 col-sm-12" id="folder-info">
-            <div class="panel panel-primary">
-              <div class="panel-heading">Details</div>
-              <div class="panel-body">
-                <dl class="dl-horizontal">
-                    <dt><spring:message code="folder.manage.label.description"/></dt>
-                    <dd>${folder.functionality.description.content}</dd>
-
-                    <dt><spring:message code="folder.manage.label.path"/></dt>
-                    <dd>
-                        <code>${folder.functionality.fullPath}</code>
-                        <c:if test="${folder.resolver != null}">
-                            <span class="label label-primary">Custom Resolver</span>
-                        </c:if>
-                    </dd>
-
-                    <dt><spring:message code="folder.manage.label.site.number"/></dt>
-                    <dd>${folder.siteSet.size()}</dd>
-                </dl>
-              </div>
-            </div>
-
-            <div class="panel panel-danger">
-              <div class="panel-heading">Danger Zone</div>
-              <div class="panel-body">
-                <p class="help-block">Once you delete a folder, there is no going back. Please be certain.</p>
-                <button data-toggle="modal" data-target="#deleteModal" class="btn btn-danger" ${folder.siteSet.size() > 0 ? 'disabled' : ''}><spring:message code="action.delete"/></button>
-              </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="deleteModal">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title">Are you sure?</h4>
-          </div>
-          <div class="modal-body">
-            <p>You are about to delete the file '<c:out value="${postFile.files.displayName}" />'. There is no way to rollback this operation. Are you sure? </p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
-            <button type="button" onclick="$('#deleteForm').submit();" class="btn btn-danger">Yes</button>
-            <form action="${pageContext.request.contextPath}/cms/folders/delete/${folder.externalId}" method="post" id="deleteForm">${csrf.field()}</form> 
-          </div>
-        </div>
-      </div>
     </div>
 </div>
 
