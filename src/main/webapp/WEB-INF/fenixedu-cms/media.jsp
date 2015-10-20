@@ -54,13 +54,11 @@
                             <div class="thumbnail">
                                 <c:choose>
                                     <c:when test="${postFile.files.contentType.startsWith('image/')}">
-                                        <div style="max-width:100%; height:250px; background: none;" >
-                                            <img src="${cms.downloadUrl(postFile.files)}" height="250" class="img-responsive" data-holder-rendered="true" />
-                                        </div>
+                                      <img src="${cms.downloadUrl(postFile.files)}" style="height: 200px; width: 100%; display: block;" data-holder-rendered="true" />
                                     </c:when>
                                 
                                     <c:otherwise>
-                                        <div style="max-width:100%; height:250px; background:#efefef;" >
+                                        <div style="height: 200px; width: 100%; display: block;" >
                                             <div class="empty-preview">
                                                 <h5>No thumbnail available</h5>
                                             </div>
