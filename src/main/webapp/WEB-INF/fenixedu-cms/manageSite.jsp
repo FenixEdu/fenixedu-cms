@@ -91,7 +91,8 @@
             <dl class="dl-entity-horizontal">
                 <dt>Theme</dt>
             	<c:choose>
-            		<c:when test="${site.theme != null}"><dd>${site.theme.name}</dd></c:when>
+            		<c:when test="${site.theme != null && cmsSettings.canManageThemes()}"><dd><a href="${pageContext.request.contextPath}/cms/themes/${site.theme.type}/see">${site.theme.name}</a></dd></c:when>
+            		<c:when test="${site.theme != null && !cmsSettings.canManageThemes()}"><dd>${site.theme.name}</dd></c:when>
             		<c:otherwise><dd><span class="label label-warning">None</span></dd></c:otherwise>
             	</c:choose>
 
@@ -116,7 +117,8 @@
                 <dd>${site.createdBy.displayName}</dd>
 
                 <dt>Creation Date</dt>
-                <dd><fmt:formatDate value="${site.creationDate.toDate()}" dateStyle="FULL" /></dd>
+
+                <dd>${cms.prettyDate(site.creationDate)}</dd>
             </dl>
 
 		</div>
@@ -151,7 +153,7 @@
 				    <ul class="events">
 				    	<c:forEach var="activity" items="${activities}">
 				    		<c:forEach var="item" items="${activity.items}">
-								<li>${item.getRender()}<time class="pull-right">${activity.date}</time></li>
+								<li>${item.getRender()}<time class="pull-right">${cms.prettyDate(activity.date)}</time></li>
 							</c:forEach>
 						</c:forEach>
 					</ul>

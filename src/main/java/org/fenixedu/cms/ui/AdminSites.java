@@ -178,6 +178,7 @@ public class AdminSites {
         Site site = Site.fromSlug(slug);
         canEdit(site);
         model.addAttribute("site", site);
+        model.addAttribute("cmsSettings", CmsSettings.getInstance());
         return "fenixedu-cms/manageSite";
     }
 
@@ -400,14 +401,15 @@ public class AdminSites {
     public RedirectView editSettings(@RequestParam String slug, @RequestParam(required = false) String themesManagers, @RequestParam(required = false) String rolesManagers,
                                      @RequestParam(required = false) String foldersManagers, @RequestParam(required = false) String settingsManagers) {
         FenixFramework.atomic(() -> {
-            if (Bennu.getInstance().getDefaultSite() == null || !Bennu.getInstance().getDefaultSite().getSlug().equals(slug)) {
+            if (Bennu.getInstance().getDefaultSite() == null || !Bennu.getInstance()
+                .getDefaultSite().getSlug().equals(slug)) {
                 Site s = Site.fromSlug(slug);
 
                 CmsSettings.getInstance().ensureCanManageSettings();
 
                 Bennu.getInstance().setDefaultSite(s);
             }
-            if(DynamicGroup.get("managers").isMember(Authenticate.getUser())){
+            if (DynamicGroup.get("managers").isMember(Authenticate.getUser())) {
                 CmsSettings settings = CmsSettings.getInstance().getInstance();
                 settings.ensureCanManageGlobalPermissions();
                 settings.setThemesManagers(group(themesManagers));

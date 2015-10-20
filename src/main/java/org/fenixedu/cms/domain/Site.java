@@ -585,14 +585,14 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     }
 
     public static class SiteActivities {
-        private LocalDate date;
+        private DateTime date;
         private List<SiteActivity> items;
 
-        public LocalDate getDate() {
+        public DateTime getDate() {
             return date;
         }
 
-        private void setDate(LocalDate date) {
+        private void setDate(DateTime date) {
             this.date = date;
         }
 
@@ -609,11 +609,11 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         List<SiteActivities> result = Lists.newArrayList();
 
         SiteActivity pivot = getLastActivityLine();
-        LocalDate current = null;
+        DateTime current = null;
         List<SiteActivity> day = null;
 
         while (pivot != null) {
-            LocalDate date = pivot.getEventDate().toLocalDate();
+            DateTime date = pivot.getEventDate();
 
             if (!date.equals(current)) {
                 if (result.size() != 5) {
