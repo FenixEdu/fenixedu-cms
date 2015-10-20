@@ -28,9 +28,18 @@
 <c:set var="locale" value="<%= org.fenixedu.commons.i18n.I18N.getLocale() %>"/>
 
 	<div class="page-header">
-	  	<h1>Site</h1>
-	  	<a href="${pageContext.request.contextPath}/cms/sites"><h2><small>${site.name.content}</small></h2></a>
+	    <h1>${site.name.content}
+	        <c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION')}">
+	          	<a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/edit" class="btn btn-link"><i class="icon icon-tools"></i></a>
+	        </c:if>
+	        <small>
+          		<ol class="breadcrumb">
+                    <li><a href="${pageContext.request.contextPath}/cms/sites">Content Management</a></li>
+                </ol>
+	        </small>
+	    </h1>
 	</div>
+
 	<div class="row">
 		<div class="col-sm-6">
 			<h3>At a glance</h3>
