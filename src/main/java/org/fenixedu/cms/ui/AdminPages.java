@@ -31,6 +31,7 @@ import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostMetadata;
 import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -87,6 +88,9 @@ public class AdminPages {
         AdminSites.canEdit(site);
         ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE);
         Page page = site.pageForSlug(slugPage);
+        if(!page.isStaticPage()) {
+            throw CmsDomainException.forbiden();
+        }
         model.addAttribute("site", site);
         model.addAttribute("page", page);
         model.addAttribute("post", page.getStaticPost().get());
@@ -99,6 +103,9 @@ public class AdminPages {
         AdminSites.canEdit(site);
         ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE);
         Page page = site.pageForSlug(slugPage);
+        if(!page.isStaticPage()) {
+            throw CmsDomainException.forbiden();
+        }
         JsonObject data = new JsonObject();
         JsonArray menus = new JsonArray();
         if(canDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU)) {
@@ -127,6 +134,9 @@ public class AdminPages {
         ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE);
         JsonObject editData = JSON_PARSER.parse(httpEntity.getBody()).getAsJsonObject();
         Page page = site.pageForSlug(slugPage);
+        if(!page.isStaticPage()) {
+            throw CmsDomainException.forbiden();
+        }
         service.processChanges(site, page, editData);
         return data(site.getSlug(), page.getSlug());
     }
@@ -138,6 +148,9 @@ public class AdminPages {
         Page page = s.pageForSlug(slugPage);
         FenixFramework.atomic(() -> {
             ensureCanDoThis(page.getSite(), Permission.EDIT_PAGE, Permission.DELETE_PAGE);
+            if(!page.isStaticPage()) {
+                throw CmsDomainException.forbiden();
+            }
             page.getStaticPost().ifPresent(Post::delete);
             page.delete();
         });
@@ -150,6 +163,9 @@ public class AdminPages {
         AdminSites.canEdit(s);
         ensureCanDoThis(s, Permission.EDIT_PAGE, Permission.SEE_METADATA, Permission.EDIT_METADATA);
         Page page  = s.pageForSlug(slugPage);
+        if(!page.isStaticPage()) {
+            throw CmsDomainException.forbiden();
+        }
         Post post = page.getStaticPost().get();
         model.addAttribute("site", s);
         model.addAttribute("page", page);
@@ -165,6 +181,9 @@ public class AdminPages {
                                          @RequestParam String metadata) {
         Site s = Site.fromSlug(slugSite);
         Page page = s.pageForSlug(slugPage);
+        if(!page.isStaticPage()) {
+            throw CmsDomainException.forbiden();
+        }
         FenixFramework.atomic(()-> {
             AdminSites.canEdit(s);
             ensureCanDoThis(s, Permission.EDIT_PAGE, Permission.SEE_METADATA, Permission.EDIT_METADATA);

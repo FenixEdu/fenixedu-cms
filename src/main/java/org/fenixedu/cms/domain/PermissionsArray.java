@@ -67,6 +67,7 @@ public class PermissionsArray implements Serializable {
         DELETE_OTHERS_POSTS(1),
         EDIT_OTHERS_POSTS(1),
         CHANGE_OWNERSHIP_POST(1),
+
         SEE_PAGES(1),
         CREATE_PAGE(1),
         EDIT_PAGE(1),
@@ -77,10 +78,13 @@ public class PermissionsArray implements Serializable {
         SEE_PAGE_COMPONENTS(1),
         EDIT_PAGE_COMPONENTS(1),
         DELETE_PAGE_COMPONENTS(1),
+        EDIT_ADVANCED_PAGES(1),
+
         LIST_CATEGORIES(1),
         CREATE_CATEGORY(1),
         EDIT_CATEGORY(1),
         DELETE_CATEGORY(1),
+
         LIST_MENUS(1),
         CREATE_MENU(1),
         EDIT_MENU(1),
@@ -88,6 +92,7 @@ public class PermissionsArray implements Serializable {
         CREATE_MENU_ITEM(1),
         EDIT_MENU_ITEM(1),
         DELETE_MENU_ITEM(1),
+
         CHOOSE_DEFAULT_PAGE(1),
         CHOOSE_PATH_AND_FOLDER(1),
         EDIT_SITE_INFORMATION(1),

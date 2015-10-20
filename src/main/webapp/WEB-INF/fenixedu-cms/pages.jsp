@@ -42,9 +42,11 @@ ${portal.toolkit()}
 					<button type="button" class="btn btn-primary disabled"><i class="icon icon-plus"></i> New</button>
 				</c:otherwise>
 			</c:choose>
-			<a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}" class="btn btn-default">
-				<i class="glyphicon glyphicon-cog"></i> Advanced
-			</a>
+			<c:if test="${permissions:canDoThis(site, 'EDIT_ADVANCED_PAGES')}">
+				<a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}" class="btn btn-default">
+					<i class="glyphicon glyphicon-cog"></i> Advanced
+				</a>
+			</c:if>
 		</div>
 		<div class="col-sm-4 pull-right">
 			<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
