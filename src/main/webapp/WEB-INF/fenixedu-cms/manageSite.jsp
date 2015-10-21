@@ -297,6 +297,7 @@ ${portal.toolkit()}
 								        <div role="tabpanel" class="tab-pane form-horizontal" id="roles">
 								            <ul class="list-group">
 							                	<table class="table">
+							                		<thead><tr><th colspan="2">Role Name</th></tr></theader>
 							                		<tbody>
 										                <c:forEach var="role" items="${site.roles}">
 								                			<tr>
@@ -306,9 +307,20 @@ ${portal.toolkit()}
 										                            </a>
 									                            </td>
 									                            <td>
-									                            	<span class="badge">${role.group.members.count()} Users</span>
-									                            	
-									                            	<a href='${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/${role.externalId}/edit' class="btn btn-sm btn-default pull-right">Edit</a>
+									                            	<div class="pull-right">
+										                            	<button type="button" class="btn btn-default btn-xs">Add user</button>
+							                            	            <div class="dropdown">
+																			<a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+																				<span class="glyphicon glyphicon-option-vertical"></span>
+																			</a>
+																			<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+																				<li><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/${role.externalId}/edit">View</a></li>
+																				<c:if test="${cmsSettings.canManageRoles()}">
+																					<li><a href="#delete-role-modal" data-target="#delete-role-modal" data-toggle="modal" data-role="${role.externalId}">Remove</a></li>
+																				</c:if>
+																			</ul>
+																		</div>
+																	</div>
 									                            </td>
 								                			</tr>
 										                </c:forEach>
@@ -316,6 +328,7 @@ ${portal.toolkit()}
 							                	</table>
 								            </ul>
 								        </div>
+
 							        </c:if>
 
 							        <c:if test="${permissions:canDoThis(site, 'MANAGE_ANALYTICS')}">
@@ -431,6 +444,27 @@ ${portal.toolkit()}
 					        </div>
 					    </form>
 					</div>
+
+					<c:if test="${cmsSettings.canManageRoles()}">
+					  <div class="modal fade" id="delete-role-modal">
+					    <div class="modal-dialog">
+					      <div class="modal-content">
+					        <div class="modal-header">
+					          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					          <h4 class="modal-title">Are you sure?</h4>
+					        </div>
+					        <div class="modal-body">
+					          <p>There is no way to rollback this operation. Are you sure? </p>
+					        </div>
+					        <div class="modal-footer">
+					          <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+					          <button type="button" onclick="$('#delete-role-form').submit();" class="btn btn-danger">Yes</button>
+					          <form action="#" method="post" id="delete-role-form">${csrf.field()}</form> 
+					        </div>
+					      </div>
+					    </div>
+					  </div>
+					</c:if>
 				</div>
 			</div>
 
@@ -524,6 +558,10 @@ ul.events li time
         	$('#site-settings').modal('show')
         	$("a[href='" + window.location.hash +"']").tab('show');
         }
+
+        $('[data-target="#delete-role-modal"]').click(function(){
+    		$('#delete-role-form').attr('action', "${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/" + $(this).data("role") + "/delete");
+        });
 
         $('[name="accountId"]').change(function(){
             var accountId = $('[name="accountId"]').val();

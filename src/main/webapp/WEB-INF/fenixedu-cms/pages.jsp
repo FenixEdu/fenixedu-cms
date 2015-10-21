@@ -93,9 +93,7 @@ ${portal.toolkit()}
 							</c:otherwise>
 						</c:choose>
 					</td>
-					<td>${page.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
-						<small>- ${page.createdBy.name}</small>
-					</td>
+					<td>${cms.prettyDate(post.creationDate)}</td>
                     <td>
                         <div class="switch switch-success">
 

@@ -101,11 +101,9 @@ ${portal.toolkit()}
                             </c:otherwise>
                         </c:choose>
                     </td>
-                    <td>${post.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}</td>
+                    <td>${cms.prettyDate(post.creationDate)}</td>
                     <td>
-                        <c:forEach var="cat" items="${post.categoriesSet}" end="3">
-                            <a href="${cat.getEditUrl()}" class="badge">${cat.name.content}</a>
-                        </c:forEach>
+                        <c:forEach var="cat" items="${post.categoriesSet}">${cat.name.content}</c:forEach>
                     </td>
                     <td>
                         <div class="switch switch-success">
