@@ -633,7 +633,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
             pivot = pivot.getPrevious();
         }
 
-        return result;
+        return result.subList(0, Math.min(result.size(), 10));
     }
 
     public Stream<Post> getStaticPostsStream() {

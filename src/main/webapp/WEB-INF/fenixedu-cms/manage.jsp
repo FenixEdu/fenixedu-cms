@@ -68,7 +68,7 @@ ${portal.toolkit()}
   <div class="col-sm-8">
     <c:if test="${cmsSettings.canManageSettings()}">
       <div class="btn-group">
-      <a href="${pageContext.request.contextPath}/cms/sites/new" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create-site"><i class="glyphicon glyphicon-plus"></i> New</button>
       <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <span class="caret"></span>
         <span class="sr-only">Toggle Dropdown</span>
@@ -473,7 +473,7 @@ ${portal.toolkit()}
                             <label class="col-sm-3 control-label">Global Settings:</label>
                             <div class="col-sm-9">
                                 <input bennu-group allow="public,users,managers,custom" name="settingsManagers" type="text" value='${cmsSettings.settingsManagers.toGroup().expression}'/>
-                                <p class="help-block">Users that are allowed to global settings such setting the <a href="${pageContext.request.contextPath}/cms/sites">default site</a> or <a href="${pageContext.request.contextPath}/cms/sites/new">create new sites</a></p>
+                                <p class="help-block">Users that are allowed to global settings such setting the <a href="${pageContext.request.contextPath}/cms/sites">default site</a> or <a href="#create-site">create new sites</a></p>
                             </div>
                         </div>
                         </div>
@@ -714,6 +714,99 @@ ${portal.toolkit()}
         </div>
 
     </div>
+</div>
+
+<div class="modal fade" id="create-site" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/sites/new" method="post" role="form">
+        ${csrf.field()}
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><spanclass="sr-only"></span></button>
+            <h4>Create</h4>
+            <small>Create a new site</small>
+        </div>
+        <div class="modal-body">
+          <div class="${emptyName ? "form-group has-error" : "form-group"}">
+              <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.create.label.name"/></label>
+
+              <div class="col-sm-10">
+                  <input bennu-localized-string required-any type="text" name="name" class="form-control" id="inputEmail3"
+                         placeholder="<spring:message code="site.create.label.name"/>">
+                  <c:if test="${emptyName !=null }"><p class="text-danger"><spring:message code="site.create.error.emptyName"/></p>
+                  </c:if>
+              </div>
+          </div>
+
+          <div class="form-group">
+              <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.create.label.description"/></label>
+
+              <div class="col-sm-10">
+                  <input bennu-localized-string name="description" placeholder="<spring:message code="site.create.label.description"/>" class="form-control" \>
+              </div>
+          </div>
+
+          <div class="form-group">
+              <label for="inputEmail3" class="col-sm-2 control-label">Theme</label>
+
+              <div class="col-sm-10">
+                  <select name="theme" id="" class="form-control">
+                      <option value="${null}">&lt; None &gt;</option>
+
+                      <c:forEach var="theme" items="${themes}">
+                          <option value="${theme.type}">${theme.name}</option>
+                      </c:forEach>
+                  </select>
+              </div>
+          </div>
+
+          <div class="form-group">
+              <label for="inputEmail3" class="col-sm-2 control-label">Template</label>
+
+              <div class="col-sm-10">
+                  <select name="template" id="" class="form-control">
+                      <option value="${null}">&lt; <spring:message code="site.create.label.emptySite"/> &gt;</option>
+
+                      <c:forEach items="${templates}" var="template">
+                          <option value="${template.key}">${template.value.name()} - ${template.value.description()}</option>
+                      </c:forEach>
+                  </select>
+              </div>
+          </div>
+
+          <div class="form-group">
+              <label for="folder" class="col-sm-2 control-label">Tag</label>
+
+              <div class="col-sm-10">
+                  <select name="folder" id="" class="form-control">
+                      <option value>--</option>
+
+                      <c:forEach items="${folders}" var="folder">
+                          <option value="${folder.externalId}">${folder.functionality.description.content}</option>
+                      </c:forEach>
+                  </select>
+              </div>
+          </div>
+
+          <div class="form-group">
+              <label for="embedded" class="col-sm-2 control-label"><spring:message code="label.embedded"/></label>
+
+              <div class="col-sm-2">
+                <div class="switch switch-success">
+                  <input type="checkbox" id="embeded" value="true" \>
+                  <label for="embeded">Embedded</label>
+                </div>
+              </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="reset" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Make</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script>

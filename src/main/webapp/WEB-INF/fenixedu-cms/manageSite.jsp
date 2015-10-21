@@ -209,7 +209,7 @@ ${portal.toolkit()}
 				                            <label for="site-description" class="col-sm-2 control-label"><spring:message code="site.edit.label.description"/></label>
 
 				                            <div class="col-sm-10">
-				                                <input id="site-description" bennu-localized-string required-any name="description" class="form-control" value='${site.description.json()}' \>
+				                                <input id="site-description" bennu-localized-string name="description" class="form-control" value='${site.description.json()}' \>
 				                            </div>
 				                        </div>
 

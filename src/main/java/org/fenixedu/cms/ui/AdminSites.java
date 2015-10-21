@@ -44,6 +44,7 @@ import org.fenixedu.bennu.social.domain.user.GoogleUser;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.cms.domain.CMSFolder;
+import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.CloneCache;
 import org.fenixedu.cms.domain.CmsSettings;
 import org.fenixedu.cms.domain.Page;
@@ -61,6 +62,7 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
+import org.springframework.ui.context.Theme;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -168,8 +170,11 @@ public class AdminSites {
 
         model.addAttribute("allPermissions",PermissionsArray.all());
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
-        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(Authenticate.getUser()));
-
+        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(
+            Authenticate.getUser()));
+        model.addAttribute("templates", Site.getTemplates());
+        model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
+            .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
         return "fenixedu-cms/manage";
     }
 
