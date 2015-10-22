@@ -60,7 +60,7 @@ ${portal.toolkit()}
                     </ul>
                 </div>
                 <div class="form-group">
-                    <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">                    
+                    <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}" autofocus> 
                 </div>
             </div>
         </div>

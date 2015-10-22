@@ -28,7 +28,7 @@
 <p>
     <div class="row">
         <div class="col-md-4 pull-right">
-                <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">                    
+                <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}" autofocus>
         </div>
     </div>
 </p>

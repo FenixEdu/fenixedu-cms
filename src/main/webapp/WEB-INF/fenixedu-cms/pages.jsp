@@ -49,7 +49,7 @@ ${portal.toolkit()}
 			</c:if>
 		</div>
 		<div class="col-sm-4 pull-right">
-			<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}">
+			<input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}" autofocus>
 		</div>
 	</div>
 </p>
@@ -93,7 +93,7 @@ ${portal.toolkit()}
 							</c:otherwise>
 						</c:choose>
 					</td>
-					<td>${cms.prettyDate(post.creationDate)}</td>
+					<td>${cms.prettyDate(page.creationDate)}</td>
                     <td>
                         <div class="switch switch-success">
 
