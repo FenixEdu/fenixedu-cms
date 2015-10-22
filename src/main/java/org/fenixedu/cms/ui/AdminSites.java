@@ -458,6 +458,17 @@ public class AdminSites {
         return "fenixedu-cms/editRole";
     }
 
+    @RequestMapping(value = "/{slugSite}/roles/{roleId}/change", method = RequestMethod.POST)
+    public RedirectView changeSiteRole(@PathVariable String slugSite, @PathVariable String roleId, @RequestParam String group) {
+        FenixFramework.atomic(() -> {
+            Site site = Site.fromSlug(slugSite);
+            PermissionEvaluation.canDoThis(site, Permission.MANAGE_ROLES);
+            Role role = FenixFramework.getDomainObject(roleId);
+            role.setGroup(Group.parse(group).toPersistentGroup());
+        });
+        return new RedirectView("/cms/sites/" + slugSite + "#roles", true);
+    }
+
     @RequestMapping(value = "/{slugSite}/roles/{roleId}/edit", method = RequestMethod.POST)
     public RedirectView editSiteRole(@PathVariable String slugSite, @PathVariable String roleId, @RequestParam String group) {
         FenixFramework.atomic(() -> {

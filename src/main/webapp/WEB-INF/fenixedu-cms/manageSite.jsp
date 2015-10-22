@@ -165,7 +165,7 @@ ${portal.toolkit()}
 		<c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION')}">
 
 			<div class="modal fade" id="site-settings" tabindex="-1" role="dialog" aria-hidden="true">
-				<div class="modal-dialog modal-lg">
+				<div class="modal-dialog">
 					<form class="form-horizontal" action="${pageContext.request.contextPath}/cms/sites/${site.slug}/edit" method="post" role="form">
 					    ${csrf.field()}
 					    <div class="modal-content">
@@ -308,7 +308,7 @@ ${portal.toolkit()}
 									                            </td>
 									                            <td>
 									                            	<div class="pull-right">
-										                            	<button type="button" class="btn btn-default btn-xs">Add user</button>
+										                            	<button type="button" class="btn btn-default btn-xs add-user-btn" data-role-id="${role.externalId}" data-role-name="${role.name.content}" data-role-group='${role.getGroup().toGroup().getExpression()}'>Add user</button>
 							                            	            <div class="dropdown">
 																			<a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 																				<span class="glyphicon glyphicon-option-vertical"></span>
@@ -316,7 +316,7 @@ ${portal.toolkit()}
 																			<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
 																				<li><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/${role.externalId}/edit">View</a></li>
 																				<c:if test="${cmsSettings.canManageRoles()}">
-																					<li><a href="#delete-role-modal" data-target="#delete-role-modal" data-toggle="modal" data-role="${role.externalId}">Remove</a></li>
+																					<li><a href="#delete-role-modal" data-target="#delete-role-modal" data-toggle="modal" data-role-id="${role.externalId}">Remove</a></li>
 																				</c:if>
 																			</ul>
 																		</div>
@@ -446,24 +446,55 @@ ${portal.toolkit()}
 					</div>
 
 					<c:if test="${cmsSettings.canManageRoles()}">
-					  <div class="modal fade" id="delete-role-modal">
-					    <div class="modal-dialog">
-					      <div class="modal-content">
-					        <div class="modal-header">
-					          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					          <h4 class="modal-title">Are you sure?</h4>
-					        </div>
-					        <div class="modal-body">
-					          <p>There is no way to rollback this operation. Are you sure? </p>
-					        </div>
-					        <div class="modal-footer">
-					          <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
-					          <button type="button" onclick="$('#delete-role-form').submit();" class="btn btn-danger">Yes</button>
-					          <form action="#" method="post" id="delete-role-form">${csrf.field()}</form> 
-					        </div>
-					      </div>
-					    </div>
-					  </div>
+						<div class="modal fade" id="delete-role-modal">
+						    <div class="modal-dialog">
+						      <div class="modal-content">
+						        <div class="modal-header">
+						          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						          <h4 class="modal-title">Are you sure?</h4>
+						        </div>
+						        <div class="modal-body">
+						          <p>There is no way to rollback this operation. Are you sure? </p>
+						        </div>
+						        <div class="modal-footer">
+						          <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+						          <button type="button" onclick="$('#delete-role-form').submit();" class="btn btn-danger">Yes</button>
+						          <form action="#" method="post" id="delete-role-form">${csrf.field()}</form> 
+						        </div>
+						      </div>
+						    </div>
+						</div>
+
+						<div class="modal fade" id="edit-role-modal" tabindex="1">
+						  <div class="modal-dialog">
+						    <div class="modal-content">
+						        <form id="edit-role-form" method="post" class="form-horizontal" role="form">
+
+						            <div class="modal-header">
+						                <button type="reset" class="close" aria-label="Close" onclick="$('#edit-role-modal').modal('hide');"><span aria-hidden="true">&times;</span></button>
+						                <h3 class="modal-title">Edit role</h3>
+						                <small>Change the members that have access to this role</small>
+						            </div>
+						            <div class="modal-body">
+						               ${csrf.field()}           
+						                <div class="form-group">
+						                    <label class="col-sm-2 control-label">Members</label>
+						                    <div class="col-sm-10">
+						                    	<div id="edit-role-group"></div>
+						                    </div>
+						                </div>
+						            </div>
+
+						            <div class="modal-footer">
+						                <button type="reset" class="btn btn-default" onclick="$('#edit-role-modal').modal('hide');" >Cancel</button>
+						                <button type="submit" class="btn btn-primary">Save</button>
+						            </div>
+
+						        </form>
+
+						    </div>
+						</div>
+
 					</c:if>
 				</div>
 			</div>
@@ -560,8 +591,19 @@ ul.events li time
         }
 
         $('[data-target="#delete-role-modal"]').click(function(){
-    		$('#delete-role-form').attr('action', "${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/" + $(this).data("role") + "/delete");
+    		$('#delete-role-form').attr('action', "${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/" + $(this).data("role-id") + "/delete");
         });
+
+        $('.add-user-btn').click(function(){
+        	var id = $(this).data('role-id');
+        	var name = $(this).data('role-name');
+        	var group = $(this).data('role-group');
+
+        	var input = '<input bennu-group allow="nobody,custom" name="group" type="text" value="' + group + '" />';
+        	$("#edit-role-form").attr("action", "${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/" + id + "/change")
+        	$('#edit-role-group').html(input);
+        	$('#edit-role-modal').modal('show');
+        })
 
         $('[name="accountId"]').change(function(){
             var accountId = $('[name="accountId"]').val();
