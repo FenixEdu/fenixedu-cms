@@ -24,14 +24,17 @@
 ${portal.toolkit()}
 
 <div class="page-header">
-    <h1>Content Management
+    <h1>Content Managment
           <c:if test="${cmsSettings.canManageSettings()}">
           <button type="button" class="btn btn-link" data-target="#sites-settings" data-toggle="modal"><i class="icon icon-tools"></i></button>
           </c:if>
           <small>
+
               <ol class="breadcrumb">
-                    <li><a href="${pageContext.request.contextPath}/cms/sites">Sites</a></li>
-                </ol>
+                  <c:if test="${not empty query}">
+                      <li><c:out value="${query}"/></li>
+                  </c:if>
+              </ol>
           </small>
     </h1>
 </div>
@@ -61,6 +64,7 @@ ${portal.toolkit()}
     margin-bottom: 0px;
     margin-top: 0px;
   }
+  .modal .modal-header h3{ text-transform: uppercase; }
 </style>
 <p>
 
@@ -114,7 +118,6 @@ ${portal.toolkit()}
     </div><!-- /input-group -->
   </div>
   </div>
-</p>
 
 
 <c:if test="${empty query and empty tag}">
@@ -154,7 +157,7 @@ ${portal.toolkit()}
       
        <c:forEach var="i" items="${sites}" >
       <tr>
-        <td class="col-md-8 site">
+        <td class="col-md-9 site">
 
         <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a> 
 
@@ -164,11 +167,8 @@ ${portal.toolkit()}
 
         </td>
         <td class="col-md-2">${cms.prettyDate(i.creationDate)}</td>
-        <td class="col-md-2">
-            <div class="switch switch-success">
-              <input type="checkbox" id="success" ${i.published ? 'checked' : ''}>
-              <label for="success">Privileged</label>
-            </div>
+        <td class="col-md-1">
+            <i class="icon icon-check"></i>
             <div class="dropdown pull-right">
               <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 <span class="glyphicon glyphicon-option-vertical"></span>
@@ -282,7 +282,7 @@ ${portal.toolkit()}
 
 <c:if test="${cmsSettings.canManageSettings()}">
   <div class="modal fade" id="sites-settings">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
       <form method="post" class="form-horizontal" action="${pageContext.request.contextPath}/cms/sites/cmsSettings">
         ${csrf.field()}
         <div class="modal-content">
@@ -419,7 +419,7 @@ ${portal.toolkit()}
                             <tr>
                               <td class="col-md-10">
                                 ${role.description.content}
-                                <a href="${pageContext.request.contextPath}/cms/permissions/${role.externalId}/edit" class="btn btn-small btn-default pull-right">Edit</a>
+                                <a href="#" data-id="${role.externalId}" class="edit-permissions-link btn btn-small btn-default pull-right">Edit</a>
                               </td>
                               <td class="col-md-2">
                                 ${role.roles.size()}
@@ -428,9 +428,9 @@ ${portal.toolkit()}
                                     <span class="glyphicon glyphicon-option-vertical"></span>
                                   </a>
                                   <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                                    <li><a href="${pageContext.request.contextPath}/cms/permissions/${role.externalId}/edit">Edit permissions</a></li>
-                                    <li><a class="connect-site-link" data-id="${role.externalId}" >Add to website</a></li>
-                                    <li><a class="delete-role-link" data-id="${role.externalId}" >Delete</a></li>
+                                    <li><a class="edit-permissions-link" data-id="${role.externalId}" href="#">Edit permissions</a></li>
+                                    <li><a class="connect-site-link" data-id="${role.externalId}" href="#">Add to website</a></li>
+                                    <li><a class="delete-role-link" data-id="${role.externalId}" href="#">Delete</a></li>
                                   </ul>
                                 </div>
                               </td>
@@ -530,12 +530,12 @@ ${portal.toolkit()}
 <div class="modal fade" id="newFolderModal" tabindex="-1" role="dialog" aria-hidden="true">
     <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/folders" method="post">
         ${csrf.field()}
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
                             class="sr-only">Close</span></button>
-                    <h4><spring:message code="folder.manage.label.new.folder"/></h4>
+                    <h3><spring:message code="folder.manage.label.new.folder"/></h3>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
@@ -583,7 +583,7 @@ ${portal.toolkit()}
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Are you sure?</h4>
+        <h3 class="modal-title">Are you sure?</h3>
       </div>
       <div class="modal-body">
         <p>You are about to delete this tag. There is no way to rollback this operation. Are you sure? </p>
@@ -606,7 +606,7 @@ ${portal.toolkit()}
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Are you sure?</h4>
+        <h3 class="modal-title">Are you sure?</h3>
       </div>
       <div class="modal-body">
         <p>You are about to delete this role. There is no way to rollback this operation. Are you sure? </p>
@@ -621,11 +621,11 @@ ${portal.toolkit()}
 </div>
 
 <div class="modal fade" id="connect-site-modal">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Connect with a new site</h4>
+        <h3 class="modal-title">Connect with a new site</h3>
         <small>Using this functionality you are able to make this role available for an existing site.</small>
       </div>
       <form action="${pageContext.request.contextPath}/cms/permissions//addSite" method="post">
@@ -659,23 +659,31 @@ ${portal.toolkit()}
 
   $(".connect-site-link").on("click", connectSiteModal);
 
-    function deleteRoleModal(e){
+  function deleteRoleModal(e){
     $("#delete-role-modal form").attr("action", "${pageContext.request.contextPath}/cms/permissions/" + $(e.target).data("id") + "/delete");
 
     $("#delete-role-modal").modal("show");  
   }
 
   $(".delete-role-link").on("click", deleteRoleModal);
+
+  function editPermissionsModal(e){
+    $("#edit-role-permissions form").attr("action", "${pageContext.request.contextPath}/cms/permissions/" + $(e.target).data("id") + "/edit");
+
+    $("#edit-role-permissions").modal("show");  
+  }
+
+  $(".edit-permissions-link").on("click", editPermissionsModal);
 </script>
 
 <div class="modal fade" id="create-role-modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
         <div class="modal-content">
             <form method="POST" action="${pageContext.request.contextPath}/cms/permissions/create">
                 ${csrf.field()}
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><spanclass="sr-only"></span></button>
-                    <h4>Create</h4>
+                    <h3>Create</h3>
                     <small>Create a new Role that can be used by other sites</small>
                 </div>  
 
@@ -717,13 +725,13 @@ ${portal.toolkit()}
 </div>
 
 <div class="modal fade" id="create-site" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog">
     <div class="modal-content">
       <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/sites/new" method="post" role="form">
         ${csrf.field()}
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><spanclass="sr-only"></span></button>
-            <h4>Create</h4>
+            <h3>Create</h3>
             <small>Create a new site</small>
         </div>
         <div class="modal-body">
@@ -824,4 +832,176 @@ ${portal.toolkit()}
         $(".permissions-inputs").click(updatePermissionsJson);    
     });
 </script>
+<div class="modal fade" id="edit-role-permissions">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><spanclass="sr-only"></span></button>
+        <h3>Permissions</h3>
+        <small>Customize the permissions on all websites with the role</small>
+      </div>
+      <div class="modal-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="col-sm-6">Name</th>
+              <th class="col-sm-1">View</th>
+              <th class="col-sm-1">Create</th>
+              <th class="col-sm-1">Edit</th>
+              <th class="col-sm-1">Delete</th>
+              <th class="col-sm-1">Publish</th>
+              <th class="col-sm-1">Review</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="7" class="folder">
+              <i class="icon icon-down-dir"></i>
+
+                <h5>Posts</h5>
+              </td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td colspan="7" class="folder">
+              <i class="icon icon-down-dir"></i>
+
+                <h5>Posts</h5>
+              </td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Post</td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td><input type="checkbox" class="form-control"></td>
+              <td>&mdash;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 </c:if>

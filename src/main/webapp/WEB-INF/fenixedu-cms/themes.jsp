@@ -22,8 +22,15 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <div class="page-header">
-    <h1>Sites</h1>
-    <h2><a href="sites"><small>Themes</small></a></h2>
+    <h1>Themes
+          
+          <small>
+
+              <ol class="breadcrumb">
+                    <li><a href="${pageContext.request.contextPath}/cms/sites">Content Managment</a></li>
+              </ol>
+          </small>
+    </h1>
 </div>
 <p>
   <a data-toggle="modal" href='#createNewThemeModal' class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</a>
@@ -73,7 +80,7 @@
                             <span class="label label"><spring:message code="site.manage.label.default" /></span>
                         </c:if>
                         <div class="btn-group pull-right">
-                            <a class="btn btn-icon btn-primary" href="${pageContext.request.contextPath}/cms/themes/${i.type}/see"><i class="glyphicon glyphicon-cog"></i></a>
+                            <a class="btn btn-icon btn-link" href="${pageContext.request.contextPath}/cms/themes/${i.type}/see"><i class="glyphicon glyphicon-cog"></i></a>
                         </div>
                     </div>
 

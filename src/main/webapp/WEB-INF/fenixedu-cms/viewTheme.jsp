@@ -22,8 +22,15 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <div class="page-header">
-  <h1>Themes</h1>
-  <h2><a href="${pageContext.request.contextPath}/cms/themes"><small><c:out value="${theme.name}" /></small></a></h2>
+    <h1><c:out value="${theme.name}" />
+          <small>
+
+              <ol class="breadcrumb">
+                    <li><a href="${pageContext.request.contextPath}/cms/sites">Sites</a></li>
+                    <li><a href="${pageContext.request.contextPath}/cms/themes">Themes</a></li>
+              </ol>
+          </small>
+    </h1>
 </div>
 
 <p>

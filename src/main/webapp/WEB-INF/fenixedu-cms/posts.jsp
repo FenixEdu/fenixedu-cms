@@ -24,10 +24,17 @@
 
 ${portal.toolkit()}
 
-<div class="page-header">
-    <h1>Posts</h1>
-    <h2><small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></small></h2>
-</div>
+    <div class="page-header">
+        <h1>Posts
+            <small>
+                <ol class="breadcrumb">
+                    <li><a href="${pageContext.request.contextPath}/cms/sites">Content Management</a></li>
+                    <li><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></li>
+                </ol>
+            </small>
+        </h1>
+    </div>
+
 
 <div class="row">
     <div class="col-sm-5">
@@ -91,7 +98,7 @@ ${portal.toolkit()}
             <tbody>
             <c:forEach var="post" items="${posts}">
                 <tr>
-                    <td>
+                    <td class="col-md-6">
                         <c:choose>
                             <c:when test="${post.canEdit()}">
                                 <h5><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit">${post.name.content}</a></h5>
@@ -101,19 +108,20 @@ ${portal.toolkit()}
                             </c:otherwise>
                         </c:choose>
                     </td>
-                    <td>${cms.prettyDate(post.creationDate)}</td>
-                    <td>
-                        <c:forEach var="cat" items="${post.categoriesSet}">${cat.name.content}</c:forEach>
+                    <td class="col-md-2">${cms.prettyDate(post.creationDate)}</td>
+                    <td class="col-md-3">
+                        <c:forEach var="cat" items="${post.categoriesSet}" end="3">
+                            <a href="${cat.getEditUrl()}" class="badge">${cat.name.content}</a>
+                        </c:forEach>
                     </td>
-                    <td>
-                        <div class="switch switch-success">
-                            <input type="checkbox" ${post.active ? 'checked' : ''} class="disabled" id="success">
-                            <label for="success">Active</label>
-                        </div>
-                        <div class="btn-group pull-right">
-                            <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <td class="col-md-1">
+                        <c:if test="${post.active}">
+                            <i class="icon icon-check"></i>
+                        </c:if>
+                        <div class="dropdown pull-right">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="glyphicon glyphicon-option-vertical"></span>
-                            </button>
+                            </a>
                             <ul class="dropdown-menu">
                                 <c:if test="${post.canEdit()}">
                                     <li>

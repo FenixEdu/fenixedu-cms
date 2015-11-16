@@ -7,14 +7,20 @@ ${portal.toolkit()}
     <h2><a href="${pageContext.request.contextPath}/cms/permissions"><small>Manage Role</small></a></h2>
 </div>
 
-<p>
-  <a href="#" data-toggle="modal" data-target="#edit-modal" class="btn btn-default btn-primary">
-    <span class="glyphicon glyphicon-edit"></span>&nbsp;Edit
-  </a>
-  <a href="#" data-toggle="modal" data-target="#connect-site-modal" class="btn btn-default">
-    <span class="glyphicon glyphicon-plus"></span>&nbsp;Site
-  </a>
-</p>
+<div row="row">
+  <div class="col-sm-6">
+    <a href="#" data-toggle="modal" data-target="#edit-modal" class="btn btn-default btn-primary">
+      <span class="glyphicon glyphicon-edit"></span>&nbsp;Edit
+    </a>
+    <a href="#" data-toggle="modal" data-target="#connect-site-modal" class="btn btn-default">
+      <span class="glyphicon glyphicon-plus"></span>&nbsp;Site
+    </a>
+  </div>
+
+  <div class="col-sm-6">
+    <button data-toggle="modal" data-target="#delete-modal" class="btn pull-right btn-danger">Delete</button>
+  </div>
+</div>
 
 <div class="row">
   <div class="col-sm-8">
@@ -50,14 +56,6 @@ ${portal.toolkit()}
               <dt>Number of Sites</dt>
               <dd>${roleTemplate.numSites}</dd>
           </dl>
-        </div>
-      </div>
-
-      <div class="panel panel-danger">
-        <div class="panel-heading">Danger Zone</div>
-        <div class="panel-body">
-          <p class="help-block">Once you delete a role category, there is no going back. Please be certain.</p>
-          <button data-toggle="modal" data-target="#delete-modal" class="btn btn-danger">Delete this template</button>
         </div>
       </div>
   </div>

@@ -102,10 +102,9 @@ ${portal.toolkit()}
 
                 <dt>Published</dt>
                 <dd>
-                    <div class="switch switch-success">
-                        <input type="checkbox" ${site.published ? 'checked' : ''} id="success" class="disabled">
-                        <label for="success">Published</label>
-                    </div>
+                    <c:if test="${site.published}">
+                        <i class="icon icon-check"></i>
+                    </c:if>
                 </dd>
 
                 <dt>Homepage</dt>
@@ -116,9 +115,7 @@ ${portal.toolkit()}
 
                 <dt>Author</dt>
                 <dd>${site.createdBy.displayName}</dd>
-
-                <dt>Creation Date</dt>
-
+                <dt>Created</dt>
                 <dd>${cms.prettyDate(site.creationDate)}</dd>
             </dl>
 
@@ -154,7 +151,7 @@ ${portal.toolkit()}
 				    <ul class="events">
 				    	<c:forEach var="activity" items="${activities}">
 				    		<c:forEach var="item" items="${activity.items}">
-								<li>${item.getRender()}<time class="pull-right">${cms.prettyDate(activity.date)}</time></li>
+								<li>${item.getRender()}<time class="pull-right">${cms.prettyDate(item.eventDate)}</time></li>
 							</c:forEach>
 						</c:forEach>
 					</ul>

@@ -37,11 +37,20 @@ ${portal.angularToolkit()}
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload-shim.js" type="text/javascript" charset="utf-8"></script>
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload.js" type="text/javascript" charset="utf-8"></script>
 
-<div ng-app="editPostApp" ng-controller="PostCtrl">
-	<div class="page-header">
-		<h1>${site.name.content}</h1>
+<div class="page-header">
+    <h1>${post.name.content}
+        <small>
+      		<ol class="breadcrumb">
+                <li><a href="${pageContext.request.contextPath}/cms/sites">Content Management</a></li>
+                <li><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></li>
+                <li><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/posts">Posts</a></li>
+            </ol>
+        </small>
+    </h1>
+</div>
 
-		<h2><small><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}">Edit Post - ${post.name.content}</small></a></h2>
+<div ng-app="editPostApp" ng-controller="PostCtrl">
+
 
 		<div class="row">
 			<div class="col-sm-12">
@@ -64,8 +73,6 @@ ${portal.angularToolkit()}
 				</a>
 			</div>
 		</div>
-	</div>
-
 	<fieldset>
 
 		<!-- NAME -->
