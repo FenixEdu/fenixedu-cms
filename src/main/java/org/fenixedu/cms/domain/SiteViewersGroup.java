@@ -18,9 +18,8 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.Collections;
 import java.util.Objects;
-import java.util.Set;
+import java.util.stream.Stream;
 
 import org.fenixedu.bennu.core.annotation.GroupArgument;
 import org.fenixedu.bennu.core.annotation.GroupArgumentParser;
@@ -83,15 +82,15 @@ public class SiteViewersGroup extends CustomGroup {
     }
 
     @Override
-    public Set<User> getMembers() {
+    public Stream<User> getMembers() {
         if (!site.getPublished()) {
-            return Collections.emptySet();
+            return Stream.empty();
         }
         return site.getCanViewGroup().getMembers();
     }
 
     @Override
-    public Set<User> getMembers(DateTime when) {
+    public Stream<User> getMembers(DateTime when) {
         return getMembers();
     }
 

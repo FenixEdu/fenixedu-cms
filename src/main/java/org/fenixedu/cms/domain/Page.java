@@ -19,7 +19,6 @@
 package org.fenixedu.cms.domain;
 
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
@@ -49,7 +48,7 @@ public class Page extends Page_Base implements Sluggable {
             throw CmsDomainException.forbiden();
         }
         this.setCreatedBy(Authenticate.getUser());
-        this.setCanViewGroup(AnyoneGroup.get());
+        this.setCanViewGroup(Group.anyone());
         this.setSite(site);
         this.setPublished(true);
     }

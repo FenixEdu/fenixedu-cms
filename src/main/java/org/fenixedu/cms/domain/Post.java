@@ -18,19 +18,20 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.base.Preconditions;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
-import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
+import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.wraps.UserWrap;
 import org.fenixedu.cms.domain.wraps.Wrap;
@@ -40,11 +41,11 @@ import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
-import pt.ist.fenixframework.Atomic;
-
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+
+import pt.ist.fenixframework.Atomic;
 
 /**
  * A post models a given content to be presented to the user.
@@ -69,7 +70,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         this.setCreationDate(now);
         this.setModificationDate(now);
         this.setActive(true);
-        this.setCanViewGroup(AnyoneGroup.get());
+        this.setCanViewGroup(Group.anyone());
         this.setSite(site);
         
         Signal.emit(Post.SIGNAL_CREATED, new DomainObjectEvent<Post>(this));
@@ -194,8 +195,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         }
     }
 
-    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category,
-            boolean active, User creator) {
+    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category, boolean active,
+            User creator) {
         Post post = new Post(site);
         post.setSite(site);
         post.setName(name);
@@ -280,9 +281,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         }
 
         public GroupBasedFile removeFile(int position) {
-            PostFile pf =
-                    Post.this.getAttachementsSet().stream().filter(x -> x.getIndex() == position).findAny()
-                            .orElseThrow(() -> new RuntimeException("Invalid Position"));
+            PostFile pf = Post.this.getAttachementsSet().stream().filter(x -> x.getIndex() == position).findAny()
+                    .orElseThrow(() -> new RuntimeException("Invalid Position"));
             GroupBasedFile f = pf.getFiles();
 
             pf.setFiles(null);
@@ -429,21 +429,17 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         }
 
         public List<ImmutableMap<String, Object>> getAttachments() {
-            return Post.this
-                    .getAttachments()
-                    .getFiles()
-                    .stream()
-                    .map((f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType", (Object) f.getContentType(),
-                            "url", FileDownloadServlet.getDownloadUrl(f))).collect(Collectors.toList());
+            return Post.this.getAttachments().getFiles()
+                    .stream().map((f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType",
+                            (Object) f.getContentType(), "url", FileDownloadServlet.getDownloadUrl(f)))
+                    .collect(Collectors.toList());
         }
 
         public List<ImmutableMap<String, Object>> getPostFiles() {
-            return Post.this
-                    .getPostFiles()
-                    .getFiles()
-                    .stream()
-                    .map((f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType", (Object) f.getContentType(),
-                            "url", FileDownloadServlet.getDownloadUrl(f))).collect(Collectors.toList());
+            return Post.this.getPostFiles().getFiles()
+                    .stream().map((f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType",
+                            (Object) f.getContentType(), "url", FileDownloadServlet.getDownloadUrl(f)))
+                    .collect(Collectors.toList());
         }
 
     }

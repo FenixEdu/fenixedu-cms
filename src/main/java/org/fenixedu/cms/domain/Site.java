@@ -28,10 +28,8 @@ import java.util.stream.Stream;
 
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.core.groups.UserGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuContainer;
@@ -54,13 +52,13 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 
 public class Site extends Site_Base implements Wrappable, Sluggable {
     /**
@@ -120,8 +118,8 @@ public class Site extends Site_Base implements Wrappable, Sluggable {
         this.setCreatedBy(Authenticate.getUser());
         this.setCreationDate(new DateTime());
 
-        this.setCanViewGroup(AnyoneGroup.get());
-        this.setCanPostGroup(UserGroup.of(Authenticate.getUser()));
+        this.setCanViewGroup(Group.anyone());
+        this.setCanPostGroup(Authenticate.getUser().groupOf());
         this.setCanAdminGroup(DynamicGroup.get("managers"));
 
         new PersistentSiteViewersGroup(this);

@@ -367,6 +367,7 @@ ${portal.toolkit()}
 
 <div class="modal fade" id="addFile" tabindex="-1" role="dialog" aria-hidden="true">
     <form action="addFile" enctype="multipart/form-data" class="form-horizontal" method="post">
+        ${csrf.field()}
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -447,6 +448,7 @@ ${portal.toolkit()}
             </div>
             <div class="modal-footer">
                 <form action="deleteFile" id="deleteFile" method="POST">
+		    ${csrf.field()}
                     <input type="hidden" name="file"/>
                     <button type="submit" class="btn btn-danger"><spring:message code="label.yes"/></button>
                     <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="label.no"/></button>
