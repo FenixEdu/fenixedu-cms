@@ -1,12 +1,11 @@
 package org.fenixedu.cms.api.json;
 
-import com.google.gson.JsonElement;
-
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
 import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
-import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.component.Component;
+
+import com.google.gson.JsonElement;
 
 @DefaultJsonAdapter(Component.class)
 public class ComponentAdapter implements JsonAdapter<Component> {

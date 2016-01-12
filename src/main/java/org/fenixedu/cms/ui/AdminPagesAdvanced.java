@@ -18,7 +18,12 @@
  */
 package org.fenixedu.cms.ui;
 
-import com.google.common.base.Strings;
+import static java.util.Optional.ofNullable;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.ui.SearchUtils.searchPages;
+
+import java.util.Collection;
+import java.util.Objects;
 
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -39,16 +44,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.util.Collection;
-import java.util.Objects;
+import com.google.common.base.Strings;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
-
-import static java.util.Optional.ofNullable;
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.ui.SearchUtils.searchPages;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/pages/advanced")

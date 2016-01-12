@@ -26,11 +26,13 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/jquery.jsonview.css"/>
 <script src="${pageContext.request.contextPath}/static/js/jquery.jsonview.js"></script>
 
+
 ${portal.angularToolkit()}
 
-<script src="${pageContext.request.contextPath}/bennu-admin/libs/fancytree/jquery-ui.min.js"></script>
+<script src="${pageContext.request.contextPath}/bennu-admin/fancytree/jquery-ui.min.js"></script>
 <link href="${pageContext.request.contextPath}/static/css/skin-awesome/ui.fancytree.css" rel="stylesheet" type="text/css">
 <script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.js" type="text/javascript"></script>
+<script src="https://raw.githubusercontent.com/FenixEdu/bennu/master/bennu-toolkit/src/main/webapp/bennu-toolkit/js/bennu-angular.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/jquery.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/js/fancytree-directive.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload-shim.js" type="text/javascript" charset="utf-8"></script>
@@ -71,7 +73,7 @@ ${portal.angularToolkit()}
             <input bennu-localized-string="post.name" required-any placeholder="<spring:message code="page.edit.label.name" />">
             <p class="text-danger" ng-show="!post.name"><spring:message code="page.edit.error.emptyName"/></p>
         </div>
-        
+
         <!-- BODY -->
         <div class="form-group">
             <textarea bennu-localized-html-editor="post.body" on-image-added="onImageAdded"></textarea>
@@ -87,7 +89,7 @@ ${portal.angularToolkit()}
                         <dd>
                             <div class="switch switch-success">
                                 <input type="checkbox" ng-model="post.active" id="success">
-                                <label for="success">Privileged</label>
+                                <label for="success">Active</label>
                             </div>
                         </dd>
                         <dt>Publication Begin</dt>
@@ -99,28 +101,28 @@ ${portal.angularToolkit()}
                             <dd><input type="text" class="form-control" bennu-user-autocomplete="post.createdBy" /></dd>
                         </c:if>
                         <dt>Access Control</dt>
-                        <dd><input type="text" class="form-control" bennu-group="post.canViewGroup" allow="public,users" /></dd>
-                    </dl>
+                            <dd><input bennu-group="post.canViewGroup" allow="public,users,managers,custom" name="viewGroup" type="text"/></dd>
+                        </dl>
                 </div>
             </div>
         </c:if>
-        
+
         <!-- CATEGORIES -->
         <c:if test="${permissions:canDoThis(site, 'LIST_CATEGORIES,EDIT_CATEGORY')}">
             <div class="panel panel-default">
                 <div class="panel-heading"><spring:message code="site.manage.label.categories"/></div>
                 <div class="panel-body">
-            
+
                     <p>
                         <c:choose>
                             <c:when test="${permissions:canDoThis(site, 'CREATE_CATEGORY')}">
                                 <button type="button" data-toggle="modal" data-target="#addCategory" class="btn btn-default btn-xs">
-                                    <i class="icon icon-plus"></i> Create Category
+                                    <i class="glyphicon glyphicon-plus"></i> Create Category
                                 </button>
                             </c:when>
                             <c:otherwise>
                                 <button type="button" class="btn btn-default btn-xs disabled">
-                                    <i class="icon icon-plus"></i> Create Category
+                                    <i class="glyphicon glyphicon-plus"></i> Create Category
                                 </button>
                             </c:otherwise>
                         </c:choose>
@@ -149,7 +151,7 @@ ${portal.angularToolkit()}
                         <span class="glyphicon glyphicon-plus"></span> Add File
                     </a>
                 </p>
-                
+
                 <div ng-show="post && post.files && post.files.length">
                     <table class="table table-striped table-bordered">
                         <thead>
@@ -282,7 +284,7 @@ ${portal.angularToolkit()}
                         <h3 class="modal-title">New Category</h3>
                         <small>Please specify the name for the new category</small>
                     </div>
-                        
+
                         <div class="modal-body">
                             <div class="form-group">
                                 <label class="col-sm-2 control-label"><spring:message code="categories.create.label.name"/></label>
@@ -325,7 +327,7 @@ ${portal.angularToolkit()}
                         </button>
                         <h4>Metadata</h4>
                     </div>
-                
+
                     <div class="modal-body">
                         <div class="clearfix">
                             <div class="form-group">
@@ -343,7 +345,7 @@ ${portal.angularToolkit()}
                             </div>
                         </div>
                     </div>
-                
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </div>
@@ -365,17 +367,14 @@ ${portal.angularToolkit()}
 </style>
 
 <script type="application/javascript">
+
     var updatePostUrl = 'edit';
     var postDataUrl = 'data';
     var createPostFilesUrl = '${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/files';
 
     angular.module('editPostApp', ['bennuToolkit', 'fancyTreeDirective', 'ngFileUpload'])
-        .config(['$httpProvider', function($httpProvider) {
-            $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
-            $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
-        }])
         .controller('PostCtrl', ['$scope', '$http','Upload', function($scope, $http, Upload){
-            
+
             function init(data) {
                 function treeFind(node, predicate) {
                     if(predicate(node)) {
@@ -396,7 +395,7 @@ ${portal.angularToolkit()}
                 }
 
                 function initMenus() {
-                    
+
                     $scope.menus = data.menus;
                     $scope.post = data.post;
                     $scope.newCategory = {};
@@ -410,9 +409,9 @@ ${portal.angularToolkit()}
                             } else {
                                 removeMenuItem();
                             }
-                        });    
+                        });
                     });
-                    
+
 
                     function findMenuItem() {
                         function isMenuItemPagePredicate(menuItem) {
@@ -531,8 +530,8 @@ ${portal.angularToolkit()}
                     };
                     var currentPosition = $scope.post.files.indexOf(postFile);
                     var newPosition = currentPosition + offset;
-                    if(currentPosition > -1 && newPosition > -1 && newPosition < $scope.post.files.length) { 
-                        swapFiles(currentPosition, newPosition); 
+                    if(currentPosition > -1 && newPosition > -1 && newPosition < $scope.post.files.length) {
+                        swapFiles(currentPosition, newPosition);
                     }
                 };
 
@@ -554,7 +553,7 @@ ${portal.angularToolkit()}
                     }
                 };
 
-            }); 
+            });
         }]);
 
 </script>

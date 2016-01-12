@@ -18,17 +18,19 @@
  */
 package org.fenixedu.cms.domain.component;
 
-import com.google.gson.JsonObject;
+import java.util.Collection;
+import java.util.Optional;
+
 import org.fenixedu.cms.domain.CloneCache;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.rendering.TemplateContext;
+
+import com.google.gson.JsonObject;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
-
-import java.util.Collection;
-import java.util.Optional;
 
 @ComponentType(name = "Static Post", description = "Static Post")
 public class StaticPost extends StaticPost_Base {

@@ -26,7 +26,7 @@ ${portal.toolkit()}
 <div class="page-header">
     <h1>Content Managment
           <c:if test="${cmsSettings.canManageSettings()}">
-          <button type="button" class="btn btn-link" data-target="#sites-settings" data-toggle="modal"><i class="icon icon-tools"></i></button>
+          <button type="button" class="btn btn-link" data-target="#sites-settings" data-toggle="modal"><i class="glyphicon glyphicon-wrench"></i></button>
           </c:if>
           <small>
 
@@ -88,7 +88,7 @@ ${portal.toolkit()}
     </c:if>
 
     <c:if test="${cmsSettings.canManageThemes()}">
-      <a href="${pageContext.request.contextPath}/cms/themes" class="btn btn-default"><i class="icon icon-brush"></i> Themes</a>
+      <a href="${pageContext.request.contextPath}/cms/themes" class="btn btn-default"><i class="glyphicon glyphicon-wrench"></i> Themes</a>
     </c:if>
 
   </div>
@@ -107,7 +107,7 @@ ${portal.toolkit()}
           <c:forEach var="f" items="${foldersSorted}">
             <c:if test="${f == null}">
               <li><a href="?tag=&#10008;">Untagged</a></li>
-            </c:if> 
+            </c:if>
             <c:if test="${f != null}">
               <li><a href="?tag=${f.functionality.path}">${f.functionality.title.content}</a></li>
             </c:if>
@@ -146,20 +146,20 @@ ${portal.toolkit()}
     <c:set var="totalCount" value="${foldersCount.get(f)}" />
       <tr>
         <td colspan="3" class="folder">
-        <i class="icon icon-down-dir"></i>
+        <i class="glyphicon glyphicon-wrench"></i>
 
        <a href="?tag=${f == null ? '&#10008;' : f.functionality.path}"><h5>
-          <c:if test="${f == null}">Untagged</c:if> 
-          <c:if test="${f != null}">${f.functionality.title.content}</c:if> 
+          <c:if test="${f == null}">Untagged</c:if>
+          <c:if test="${f != null}">${f.functionality.title.content}</c:if>
         <span class="badge">${totalCount}</span></h5></a>
         </td>
       </tr>
-      
+
        <c:forEach var="i" items="${sites}" >
       <tr>
         <td class="col-md-9 site">
 
-        <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a> 
+        <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a>
 
         <c:if test="${i.getEmbedded()}">
           <span class="label label-info">Embedded</span></c:if><c:if test="${i.isDefault()}"><span class="label label-success"><spring:message code="site.manage.label.default"/></span>
@@ -168,7 +168,7 @@ ${portal.toolkit()}
         </td>
         <td class="col-md-2">${cms.prettyDate(i.creationDate)}</td>
         <td class="col-md-1">
-            <i class="icon icon-check"></i>
+            <i class="glyphicon glyphicon-ok"></i>
             <div class="dropdown pull-right">
               <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 <span class="glyphicon glyphicon-option-vertical"></span>
@@ -226,12 +226,12 @@ ${portal.toolkit()}
       <th>Published</th>
     </tr>
   </thead>
-  <tbody>  
+  <tbody>
        <c:forEach var="i" items="${sites}" >
       <tr>
         <td class="col-md-8 site">
 
-        <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a> 
+        <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a>
 
         <c:if test="${i.getEmbedded()}">
           <span class="label label-info">Embedded</span></c:if><c:if test="${i.isDefault()}"><span class="label label-success"><spring:message code="site.manage.label.default"/></span>
@@ -239,11 +239,11 @@ ${portal.toolkit()}
 
         </td>
         <td class="col-md-2">${cms.prettyDate(i.creationDate)}</td>
-        <td class="col-md-2">
-            <div class="switch switch-success">
+        <td class="col-md-2"><p>
+         <span class="glyphicon glyphicon-option-vertical"></span>
               <input type="checkbox" ng-model="post.active" id="success" class="ng-pristine ng-valid">
-              <label for="success">Privileged</label>
-            </div>
+              <label for="success">Published</label>
+              </p>
             <div class="dropdown pull-right">
               <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 <span class="glyphicon glyphicon-option-vertical"></span>
@@ -442,7 +442,7 @@ ${portal.toolkit()}
                         </c:choose>
                         </div>
                         </c:if>
-       
+
                         <c:if test="${isManager}">
                         <div role="tabpanel" class="tab-pane" id="acl">
                         <div class="form-group">
@@ -573,7 +573,7 @@ ${portal.toolkit()}
   function deleteFolder(e){
     $("#deleteFolderModal form").attr("action", "${pageContext.request.contextPath}/cms/folders/delete/" + $(e.target).data("id"));
 
-    $("#deleteFolderModal").modal("show");  
+    $("#deleteFolderModal").modal("show");
   }
 
   $(".delete-tag-link").on("click", deleteFolder);
@@ -591,7 +591,7 @@ ${portal.toolkit()}
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
         <button type="button" onclick="$('#deleteTagForm').submit();" class="btn btn-danger">Yes</button>
-        <form action="${pageContext.request.contextPath}/cms/folders/delete/" method="post" id="deleteTagForm">${csrf.field()}</form> 
+        <form action="${pageContext.request.contextPath}/cms/folders/delete/" method="post" id="deleteTagForm">${csrf.field()}</form>
       </div>
     </div>
   </div>
@@ -614,7 +614,7 @@ ${portal.toolkit()}
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
         <button type="button" onclick="$('#deleteRoleForm').submit();" class="btn btn-danger">Yes</button>
-        <form action="${pageContext.request.contextPath}/cms/permissions//delete" method="post" id="deleteRoleForm">${csrf.field()}</form> 
+        <form action="${pageContext.request.contextPath}/cms/permissions//delete" method="post" id="deleteRoleForm">${csrf.field()}</form>
       </div>
     </div>
   </div>
@@ -635,7 +635,7 @@ ${portal.toolkit()}
               <label class="col-sm-2 control-label">Site</label>
               <div class="col-sm-10">
                   <input required-any name="siteSlug" placeholder="Enter the site slug" class="form-control">
-                  <p class="help-block">Please enter the slug of the site you want to associate with.</p> 
+                  <p class="help-block">Please enter the slug of the site you want to associate with.</p>
               </div>
           </div>
         </div>
@@ -645,7 +645,7 @@ ${portal.toolkit()}
           <button type="submit" class="btn btn-primary">Connect</button>
         </div>
 
-      </form> 
+      </form>
     </div>
   </div>
 </div>
@@ -654,7 +654,7 @@ ${portal.toolkit()}
   function connectSiteModal(e){
     $("#connect-site-modal form").attr("action", "${pageContext.request.contextPath}/cms/permissions/" + $(e.target).data("id") + "/addSite");
 
-    $("#connect-site-modal").modal("show");  
+    $("#connect-site-modal").modal("show");
   }
 
   $(".connect-site-link").on("click", connectSiteModal);
@@ -662,7 +662,7 @@ ${portal.toolkit()}
   function deleteRoleModal(e){
     $("#delete-role-modal form").attr("action", "${pageContext.request.contextPath}/cms/permissions/" + $(e.target).data("id") + "/delete");
 
-    $("#delete-role-modal").modal("show");  
+    $("#delete-role-modal").modal("show");
   }
 
   $(".delete-role-link").on("click", deleteRoleModal);
@@ -670,7 +670,7 @@ ${portal.toolkit()}
   function editPermissionsModal(e){
     $("#edit-role-permissions form").attr("action", "${pageContext.request.contextPath}/cms/permissions/" + $(e.target).data("id") + "/edit");
 
-    $("#edit-role-permissions").modal("show");  
+    $("#edit-role-permissions").modal("show");
   }
 
   $(".edit-permissions-link").on("click", editPermissionsModal);
@@ -685,7 +685,7 @@ ${portal.toolkit()}
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><spanclass="sr-only"></span></button>
                     <h3>Create</h3>
                     <small>Create a new Role that can be used by other sites</small>
-                </div>  
+                </div>
 
 
                 <div class="modal-body">
@@ -829,7 +829,7 @@ ${portal.toolkit()}
         }
 
         updatePermissionsJson();
-        $(".permissions-inputs").click(updatePermissionsJson);    
+        $(".permissions-inputs").click(updatePermissionsJson);
     });
 </script>
 <div class="modal fade" id="edit-role-permissions">
@@ -856,7 +856,7 @@ ${portal.toolkit()}
           <tbody>
             <tr>
               <td colspan="7" class="folder">
-              <i class="icon icon-down-dir"></i>
+              <i class="glyphicon glyphicon-folder-open"></i>
 
                 <h5>Posts</h5>
               </td>
@@ -908,7 +908,7 @@ ${portal.toolkit()}
             </tr>
             <tr>
               <td colspan="7" class="folder">
-              <i class="icon icon-down-dir"></i>
+              <i class="glyphicon glyphicon-folder-open"></i>
 
                 <h5>Posts</h5>
               </td>

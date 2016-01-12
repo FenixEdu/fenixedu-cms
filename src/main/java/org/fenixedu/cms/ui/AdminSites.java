@@ -18,17 +18,24 @@
  */
 package org.fenixedu.cms.ui;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.analytics.Analytics;
-import com.google.api.services.analytics.model.Account;
-import com.google.api.services.analytics.model.Accounts;
-import com.google.api.services.analytics.model.Webproperties;
-import com.google.api.services.analytics.model.Webproperty;
-import com.google.common.base.Strings;
-import com.google.common.io.Files;
+import static java.util.stream.Collectors.toList;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.zip.ZipFile;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.tika.io.FilenameUtils;
 import org.fenixedu.bennu.core.domain.Bennu;
@@ -37,7 +44,6 @@ import org.fenixedu.bennu.core.domain.groups.PersistentGroup;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.bennu.portal.domain.BennuPortalDomainException;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.bennu.social.domain.api.GoogleAPI;
 import org.fenixedu.bennu.social.domain.user.GoogleUser;
@@ -62,7 +68,6 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
-import org.springframework.ui.context.Theme;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -72,19 +77,21 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.zip.ZipFile;
-
-import javax.servlet.http.HttpServletResponse;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.analytics.Analytics;
+import com.google.api.services.analytics.model.Account;
+import com.google.api.services.analytics.model.Accounts;
+import com.google.api.services.analytics.model.Webproperties;
+import com.google.api.services.analytics.model.Webproperty;
+import com.google.common.base.Strings;
+import com.google.common.io.Files;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
-import static java.util.stream.Collectors.toList;
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 @SpringApplication(group = "logged", path = "cms", title = "application.title.cms")
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")

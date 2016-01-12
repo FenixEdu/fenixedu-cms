@@ -18,7 +18,11 @@
  */
 package org.fenixedu.cms.ui;
 
-import com.google.common.base.Strings;
+import static org.fenixedu.cms.ui.SearchUtils.searchFiles;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.PostFile;
@@ -29,12 +33,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
+
+import com.google.common.base.Strings;
+
 import pt.ist.fenixframework.FenixFramework;
-
-import java.util.Collection;
-import java.util.stream.Collectors;
-
-import static org.fenixedu.cms.ui.SearchUtils.searchFiles;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/media")

@@ -18,9 +18,7 @@
  */
 package org.fenixedu.cms.rendering;
 
-import java.io.InputStream;
 import java.util.Set;
-import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -28,7 +26,6 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
 
 import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.CMSThemeLoader;
 import org.fenixedu.cms.domain.RegisterSiteTemplate;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;

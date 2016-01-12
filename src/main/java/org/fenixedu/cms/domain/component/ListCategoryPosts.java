@@ -18,18 +18,24 @@
  */
 package org.fenixedu.cms.domain.component;
 
-import com.google.gson.JsonObject;
-import org.fenixedu.cms.domain.*;
-import org.fenixedu.cms.domain.wraps.Wrap;
-import org.fenixedu.cms.rendering.TemplateContext;
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.CloneCache;
+import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.wraps.Wrap;
+import org.fenixedu.cms.rendering.TemplateContext;
+
+import com.google.gson.JsonObject;
+
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.Atomic.TxMode;
 
 /**
  * Component that lists the {@link Post} of a given category.

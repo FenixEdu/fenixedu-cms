@@ -18,16 +18,16 @@
  */
 package org.fenixedu.cms.ui;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
+import static java.util.stream.Collectors.toList;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
 import org.fenixedu.bennu.core.domain.Bennu;
-import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CmsSettings;
-import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.PermissionsArray;
-import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Role;
 import org.fenixedu.cms.domain.RoleTemplate;
 import org.fenixedu.cms.domain.Site;
@@ -39,16 +39,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 
 import pt.ist.fenixframework.FenixFramework;
-
-import static java.util.stream.Collectors.toList;
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/permissions")

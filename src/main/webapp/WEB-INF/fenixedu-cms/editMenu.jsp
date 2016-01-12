@@ -23,7 +23,7 @@
 
 ${portal.angularToolkit()}
 
-<script src="${pageContext.request.contextPath}/bennu-admin/libs/fancytree/jquery-ui.min.js"></script>
+<script src="${pageContext.request.contextPath}/bennu-admin/fancytree/jquery-ui.min.js"></script>
 <link href="${pageContext.request.contextPath}/static/css/skin-awesome/ui.fancytree.css" rel="stylesheet" type="text/css">
 <script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/jquery.js" type="text/javascript"></script>
@@ -53,7 +53,7 @@ ${portal.angularToolkit()}
                     <span class="glyphicon glyphicon-trash"></span> <spring:message code="action.delete"/>
                 </button>
             </div>
-                
+
             <p class="text-danger">{{error}}</p>
 
             <fieldset>
@@ -61,7 +61,7 @@ ${portal.angularToolkit()}
 
                 <div class="form-group">
                     <label class="control-label"><spring:message code="menu.edit.label.name"/></label>
-                    <input type="text" required="true" bennu-localized-string="selectedItem.name" class="form-control" placeholder="<spring:message code="menu.edit.label.name"/>">
+                    <input type="text" required="true" ng-localized-string="selectedItem.name" class="form-control" placeholder="<spring:message code="menu.edit.label.name"/>">
                     <p class="text-info" ng-class="{'text-danger': !selectedItem.name}">
                         Please enter the name that should be presented for this menu item.
                     </p>
@@ -76,7 +76,7 @@ ${portal.angularToolkit()}
                     </c:if>
                 </div>
                 <div class="menuItemEdit" ng-hide="selectedItem.root">
-                    
+
                     <!-- MENU ITEM IS AN URL -->
                     <div class="radio form-group">
                         <label>
@@ -212,7 +212,7 @@ ${portal.angularToolkit()}
                     return array;
                 };
 
-                
+
                 $(window).bind('keydown', function(event) {
                     if (event.ctrlKey || event.metaKey) {
                         switch (String.fromCharCode(event.which).toLowerCase()) {
@@ -231,14 +231,9 @@ ${portal.angularToolkit()}
 
         }])
 
-        .config(['$httpProvider', function($httpProvider) {
-            $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
-            $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
-        }]);
-
 
 </script>
-  
+
 <style type="text/css">
 .ui-fancytree {
     outline: none;

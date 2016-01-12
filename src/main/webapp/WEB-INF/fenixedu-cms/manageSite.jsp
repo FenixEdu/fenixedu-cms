@@ -31,7 +31,7 @@ ${portal.toolkit()}
 	<div class="page-header">
 	    <h1>${site.name.content}
 	        <c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION')}">
-	          	<button type="button" data-toggle="modal" data-target="#site-settings" class="btn btn-link"><i class="icon icon-tools"></i></button>
+	          	<button type="button" data-toggle="modal" data-target="#site-settings" class="btn btn-link"><i class="glyphicon glyphicon-wrench"></i></button>
 	        </c:if>
 	        <small>
           		<ol class="breadcrumb">
@@ -44,7 +44,7 @@ ${portal.toolkit()}
 	<div class="row">
 		<div class="col-sm-6">
 			<h3>At a glance</h3>
-			
+
 			<div class="input-group">
 				<div class="input-group-btn">
 					<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -69,9 +69,9 @@ ${portal.toolkit()}
 				</div>
 				<input type="text" class="form-control" placeholder="Search this website..." id="search-query" autofocus>
 			</div>
-		
+
 			<br />
-			
+
 			<ul class="list-group">
 				<c:if test="${permissions:canDoThis(site, 'EDIT_POSTS')}">
 					<li class="list-group-item"><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}">Posts<span class="badge pull-right">${site.nonStaticPostsStream.count()}</span></a></li>
@@ -89,7 +89,7 @@ ${portal.toolkit()}
 			</ul>
 
 			<h3>Properties</h3>
-            <dl class="dl-entity-horizontal">
+            <dl class="dl-horizontal">
                 <dt>Theme</dt>
             	<c:choose>
             		<c:when test="${site.theme != null && cmsSettings.canManageThemes()}"><dd><a href="${pageContext.request.contextPath}/cms/themes/${site.theme.type}/see">${site.theme.name}</a></dd></c:when>
@@ -103,7 +103,10 @@ ${portal.toolkit()}
                 <dt>Published</dt>
                 <dd>
                     <c:if test="${site.published}">
-                        <i class="icon icon-check"></i>
+                        <i class="glyphicon glyphicon-ok"></i>
+                    </c:if>
+                    <c:if test="${!site.published}">
+                        <i class="glyphicon glyphicon-remove"></i>
                     </c:if>
                 </dd>
 
@@ -114,7 +117,7 @@ ${portal.toolkit()}
             	</c:choose>
 
                 <dt>Author</dt>
-                <dd>${site.createdBy.displayName}</dd>
+                <dd>${site.createdBy.profile.displayName}</dd>
                 <dt>Created</dt>
                 <dd>${cms.prettyDate(site.creationDate)}</dd>
             </dl>
@@ -125,19 +128,19 @@ ${portal.toolkit()}
 				<h3>Analytics</h3>
 
 				<svg id="visualisation" width="100%" height="255">
-					
+
 					<defs>
 					  <pattern id="pattern1" x="0" y="0" width="49" height="49" patternUnits="userSpaceOnUse" >
 					      <rect x="0" y="0" width="50" height="50" style="fill:white;stroke-width:2;stroke:#f3f3f3;"/>
 					  </pattern>
 					</defs>
 
-					<rect x="0" y="0" width="100%" height="450" style=" fill: url(#pattern1);" />    
+					<rect x="0" y="0" width="100%" height="450" style=" fill: url(#pattern1);" />
 				</svg>
 			</div>
 			<h3>Activity</h3>
 			<c:set var="activities" value="${site.lastFiveDaysOfActivity}"/>
-		
+
 			<c:choose>
 			    <c:when test="${activities.size() == 0}">
 				    <div class="panel panel-default">
@@ -264,7 +267,7 @@ ${portal.toolkit()}
 				                            <label class="col-sm-2 control-label">Visibility</label>
 
 				                            <div class="col-sm-10">
-				                                <input bennu-group name="viewGroup" type="text" value='${site.getCanViewGroup().getExpression()}'/>
+				                                <input bennu-group name="viewGroup" type="text" allow="public,users,managers,custom"  value='${site.getCanViewGroup().getExpression()}'/>
 				                            </div>
 				                        </div>
 
@@ -412,10 +415,10 @@ ${portal.toolkit()}
 							            	<spring:message code="action.cancel"/>
 						            	</a>
 							        </div>
-							    </div>    	
+							    </div>
 						    </div>
 					    </div>
-					    
+
 					</form>
 
 					<div class="modal fade" id="confirmDeleteModal" role="dialog" aria-hidden="true">
@@ -456,7 +459,7 @@ ${portal.toolkit()}
 						        <div class="modal-footer">
 						          <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
 						          <button type="button" onclick="$('#delete-role-form').submit();" class="btn btn-danger">Yes</button>
-						          <form action="#" method="post" id="delete-role-form">${csrf.field()}</form> 
+						          <form action="#" method="post" id="delete-role-form">${csrf.field()}</form>
 						        </div>
 						      </div>
 						    </div>
@@ -473,7 +476,7 @@ ${portal.toolkit()}
 						                <small>Change the members that have access to this role</small>
 						            </div>
 						            <div class="modal-body">
-						               ${csrf.field()}           
+						               ${csrf.field()}
 						                <div class="form-group">
 						                    <label class="col-sm-2 control-label">Members</label>
 						                    <div class="col-sm-10">
@@ -569,7 +572,7 @@ ul.events li time
 {
 	font-style: italic;
 }
-.avatar{ 
+.avatar{
 	margin-top:4px
 }
 .avatar img {
@@ -628,7 +631,7 @@ ul.events li time
                     }
                 });
         }
-        
+
         initGoogleAccounts();
 
     });
@@ -637,7 +640,7 @@ ul.events li time
 		var listDb = []
 		var i = 0;
 		for (var x in db) {
-			db[x].i = i++; 
+			db[x].i = i++;
 			listDb.push(db[x]);
 		};
 		function genGraph(){
@@ -717,7 +720,7 @@ ul.events li time
 	         		.attr("cy", function(d, i) { return yRange(parseInt(d.visitors)); })
 	         		.attr("r", function(d, i) { return 3 });
 		  });
-		
+
 		};
 		genGraph();
 		$( window ).resize(function() {

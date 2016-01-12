@@ -11,8 +11,6 @@ import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.api.json.FolderAdapter;
 import org.fenixedu.cms.domain.CMSFolder;
 
-import com.google.gson.JsonElement;
-
 @Path("/cms/folders")
 public class FolderResource extends BennuRestResource {
 
@@ -20,14 +18,14 @@ public class FolderResource extends BennuRestResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public JsonElement listAllFolders() {
+    public String listAllFolders() {
         return view(Bennu.getInstance().getCmsFolderSet(), FolderAdapter.class);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public JsonElement listFolder(@PathParam("oid") CMSFolder folder) {
+    public String listFolder(@PathParam("oid") CMSFolder folder) {
         return view(folder, FolderAdapter.class);
     }
 }

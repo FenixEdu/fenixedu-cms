@@ -1,8 +1,5 @@
 package org.fenixedu.cms.ui;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
@@ -15,6 +12,9 @@ import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import pt.ist.fenixframework.Atomic;
 

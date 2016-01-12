@@ -1,10 +1,8 @@
 package org.fenixedu.cms.api.resource;
 
-import com.google.gson.JsonElement;
-
-import org.fenixedu.bennu.core.rest.BennuRestResource;
-import org.fenixedu.cms.api.json.PostFileAdapter;
-import org.fenixedu.cms.domain.PostFile;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_PAGE;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_POSTS;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -16,9 +14,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_PAGE;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_POSTS;
+import org.fenixedu.bennu.core.rest.BennuRestResource;
+import org.fenixedu.cms.api.json.PostFileAdapter;
+import org.fenixedu.cms.domain.PostFile;
 
 @Path("/cms/postFiles")
 public class PostFileResource extends BennuRestResource {
@@ -28,7 +26,7 @@ public class PostFileResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public JsonElement getPostFile(@PathParam("oid") PostFile postFile) {
+    public String getPostFile(@PathParam("oid") PostFile postFile) {
         return view(postFile, PostFileAdapter.class);
     }
 
@@ -36,11 +34,11 @@ public class PostFileResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public JsonElement updatePostFile(@PathParam("oid") PostFile postFile, JsonElement json) {
+    public String updatePostFile(@PathParam("oid") PostFile postFile, String json) {
         return updatePostFileFromJson(postFile, json);
     }
 
-    private JsonElement updatePostFileFromJson(PostFile postFile, JsonElement json) {
+    private String updatePostFileFromJson(PostFile postFile, String json) {
         return view(update(json, postFile, PostFileAdapter.class));
     }
 
@@ -48,7 +46,7 @@ public class PostFileResource extends BennuRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
     public Response deletePostFile(@PathParam("oid") PostFile postFile) {
-        if(postFile.getPost()!=null && postFile.getPost().isStaticPost()) {
+        if (postFile.getPost() != null && postFile.getPost().isStaticPost()) {
             ensureCanDoThis(postFile.getSite(), EDIT_PAGE);
         } else {
             ensureCanDoThis(postFile.getSite(), EDIT_POSTS);

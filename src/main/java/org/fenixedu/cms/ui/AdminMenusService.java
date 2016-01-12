@@ -1,27 +1,31 @@
 package org.fenixedu.cms.ui;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import static java.util.Optional.ofNullable;
+import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_ADVANCED_PAGES;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 import pt.ist.fenixframework.Atomic;
-
-import static java.util.Optional.ofNullable;
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 /**
  * Created by borgez on 03-08-2015.
@@ -29,7 +33,13 @@ import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 @Service
 public class AdminMenusService {
 
-    @Atomic
+	private final Predicate<MenuItem> isStaticPageOrHasPermissions = menuItem -> menuItem.getPage() != null
+			&& (canDoThis(menuItem.getPage()
+			.getSite(),EDIT_ADVANCED_PAGES) || menuItem.getPage().isStaticPage());
+
+
+
+	@Atomic
     public Menu createMenu(Site site, LocalizedString name) {
 	AdminSites.canEdit(site);
 	return new Menu(site, name);
@@ -44,7 +54,7 @@ public class AdminMenusService {
 	menuJson.addProperty("key", menu.getSlug());
 	menuJson.addProperty("root", true);
 	menuJson.addProperty("folder", true);
-    	menuJson.addProperty("privileged", menu.getPrivileged());
+		menuJson.addProperty("privileged", menu.getPrivileged());
 	JsonArray child = new JsonArray();
 	menu.getToplevelItemsSorted().map(this::serializeMenuItem).forEach(json -> child.add(json));
 	menuJson.add("children", child);

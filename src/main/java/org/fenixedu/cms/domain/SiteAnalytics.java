@@ -1,5 +1,18 @@
 package org.fenixedu.cms.domain;
 
+import java.io.Serializable;
+import java.time.Duration;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+
+import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.portal.domain.PortalConfiguration;
+import org.fenixedu.bennu.social.domain.api.GoogleAPI;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -11,19 +24,6 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.bennu.portal.domain.PortalConfiguration;
-import org.fenixedu.bennu.social.domain.api.GoogleAPI;
-import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.time.Duration;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 
 import pt.ist.fenixframework.Atomic;
 

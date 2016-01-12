@@ -24,7 +24,7 @@
 
 <div class="page-header">
     <h1>${site.name.content}</h1>
-    
+
     <h2>
         <small>
             <a href="${pageContext.request.contextPath}/cms/pages/advanced/${site.slug}">
@@ -44,7 +44,7 @@
         <span class="glyphicon glyphicon-link"></span> Link
     </a>
 </p>
-    
+
 
 <div ng-app="componentsApp" ng-controller="ComponentController">
     <form id="mainForm" class="form-horizontal" action="" method="post" role="form">
@@ -95,9 +95,9 @@
         </div>
 
     </form>
-    
+
     <hr>
-    
+
     <c:if test="${permissions:canDoThis(site, 'SEE_PAGE_COMPONENTS')}">
 
         <h3><spring:message code="page.edit.label.pageComponents"/>:</h3>
@@ -147,7 +147,7 @@
                             <td>${component.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}
                                 <small>- ${component.createdBy.name}</small>
                             </td>
-                            
+
                             <td>
                                 <div class="btn-group" role="group">
                                     <c:if test="${permissions:canDoThis(site, 'EDIT_PAGE_COMPONENTS')}">
@@ -271,8 +271,4 @@ ${portal.toolkit()}
         }
     }]);
 
-    angular.module('componentsApp').config(['$httpProvider', function($httpProvider) {
-        $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
-        $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
-    }]);
 </script>

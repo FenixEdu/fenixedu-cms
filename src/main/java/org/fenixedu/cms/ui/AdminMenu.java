@@ -18,13 +18,22 @@
  */
 package org.fenixedu.cms.ui;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import static java.util.stream.Collectors.toList;
+import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_ADVANCED_PAGES;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_PRIVILEGED_MENU;
+
+import java.util.Comparator;
+import java.util.function.Predicate;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
+import org.fenixedu.cms.domain.MenuItem;
+import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -36,14 +45,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.util.Comparator;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import pt.ist.fenixframework.FenixFramework;
-
-import static java.util.stream.Collectors.toList;
-import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_PRIVILEGED_MENU;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/menus")
@@ -107,6 +112,10 @@ public class AdminMenu {
         return "fenixedu-cms/editMenu";
     }
 
+    private final Predicate<MenuItem> isStaticPage = menuItem -> menuItem.getPage() != null
+            && menuItem.getPage().getComponentsSet().stream().filter(StaticPost.class::isInstance)
+            .map(component -> ((StaticPost) component).getPost()).filter(post -> post != null).findFirst().isPresent();
+
     @RequestMapping(value = "{slugSite}/{slugMenu}/data", method = RequestMethod.GET, produces = JSON)
     public @ResponseBody String menuData(@PathVariable String slugSite, @PathVariable String slugMenu) {
         Site site = Site.fromSlug(slugSite);
@@ -118,7 +127,8 @@ public class AdminMenu {
         }
         JsonObject data = new JsonObject();
         JsonObject pages = new JsonObject();
-        site.getSortedPages().forEach(page-> pages.add(page.getSlug(), service.serializePage(page)));
+        site.getSortedPages().stream()
+                .forEach(page-> pages.add(page.getSlug(), service.serializePage(page)));
         data.add("menu", service.serializeMenu(menu));
         data.add("pages", pages);
         return data.toString();

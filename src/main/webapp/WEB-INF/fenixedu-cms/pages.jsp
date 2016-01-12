@@ -35,11 +35,11 @@ ${portal.toolkit()}
 	        <c:choose>
             	<c:when test="${permissions:canDoThis(site, 'CREATE_PAGE')}">
 					<button type="button" data-toggle="modal" data-target="#create-page" class="btn btn-primary">
-						<i class="icon icon-plus"></i> New
+						<i class="glyphicon glyphicon-plus"></i> New
 					</button>
 				</c:when>
 				<c:otherwise>
-					<button type="button" class="btn btn-primary disabled"><i class="icon icon-plus"></i> New</button>
+					<button type="button" class="btn btn-primary disabled"><i class="glyphicon glyphicon-plus"></i> New</button>
 				</c:otherwise>
 			</c:choose>
 			<c:if test="${permissions:canDoThis(site, 'EDIT_ADVANCED_PAGES')}">
@@ -58,7 +58,7 @@ ${portal.toolkit()}
 	<c:when test="${pages.size() == 0}">
         <div class="panel panel-default">
           <div class="panel-body">
-			<i><spring:message code="site.manage.label.emptySites"/></i>
+			<i><spring:message code="page.manage.label.emptyPages"/></i>
           </div>
         </div>
 	</c:when>
@@ -95,14 +95,14 @@ ${portal.toolkit()}
 					</td>
 					<td>${cms.prettyDate(page.creationDate)}</td>
                     <td>
-                        <div class="switch switch-success">
+                        <div class="btn-group pull-left">
 
                             <input type="checkbox" ${page.published && page.staticPost.get().active ? 'checked' : ''} class="disabled" id="success">
                             <label for="success">Active</label>
                         </div>
                         <div class="btn-group pull-right">
                             <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="glyphicon glyphicon-option-vertical"></span>
+                                <span class="fa fa-bars"></span>
                             </button>
                             <ul class="dropdown-menu">
                                 <c:if test="${permissions:canDoThis(site, 'EDIT_PAGE')}">

@@ -100,14 +100,14 @@ var Directory = function(name, path, parent){
         return Object.keys(this.files).map(function(e){
             return that.files[e];
         }).sort(alphabetical);
-        
+
     }
     this.getPath = function(){
         var pivot = this;
         var result = []
         while(true){
             if (pivot.parent == null){
-                break    
+                break
             }
             result.unshift(pivot);
             pivot = pivot.parent;
@@ -133,7 +133,7 @@ function generateTree(files){
         var file = files[i];
 
         if (file.path.indexOf("/") > -1){
-            var path = file.path.split('/');    
+            var path = file.path.split('/');
             _subdir(tld, path, file, "");
         }else{
             tld.files[file.name] = file;
@@ -171,14 +171,14 @@ app.config(['$routeProvider','$locationProvider', function($routeProvider, $loca
         controller:'viewerCtrl'
     });
 }]).run(function($http,$rootScope,$location){
-    $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){ 
+    $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){
         $rootScope.root = generateTree(e);
         $rootScope.theme = "${theme.name}"
         if ($location.path()){
             $location.path($location.path());
         }
     });
-    $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/templates").success(function(e){ 
+    $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/templates").success(function(e){
         genTemplates(e);
     });
 });
@@ -266,7 +266,7 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
                     //console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
                 }).success(function (data, status, headers, config) {
                     //console.log('file ' + config.file.name + 'uploaded. Response: ');
-                    $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){ 
+                    $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){
                         $rootScope.root = generateTree(e);
                         $rootScope.theme = "${theme.name}"
                         $scope.node = chdir($rootScope.root,$routeParams.resourceUrl);
@@ -308,7 +308,7 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
             $.post(Bennu.contextPath + Bennu.contextPath + "/cms/themes/${theme.type}/deleteFile", {
                 path : $scope.contextFile.path
             }, function() {
-                $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){ 
+                $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){
                     $rootScope.root = generateTree(e);
                     $rootScope.theme = "${theme.name}"
                     $scope.node = chdir($rootScope.root,$routeParams.resourceUrl);
@@ -332,7 +332,7 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
             $.post(Bennu.contextPath + "/cms/themes/${theme.type}/deleteDir", {
                 path : $scope.contextFile.path.substr(1)
             }, function() {
-                $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){ 
+                $http.get(Bennu.contextPath + "/cms/themes/${theme.type}/listFiles").success(function(e){
                     $rootScope.root = generateTree(e);
                     $rootScope.theme = "${theme.name}"
                     $scope.node = chdir($rootScope.root,$routeParams.resourceUrl);
@@ -342,8 +342,8 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
     }
 
     $scope.node = chdir($rootScope.root,$routeParams.resourceUrl);
-    
-    $scope.open = function(node){       
+
+    $scope.open = function(node){
         if (node.contentType === "application/vnd.fenixedu.docs.directory"){
             $location.path(node.path);
         }else{
@@ -355,7 +355,7 @@ app.controller('viewerCtrl', function($scope,$http,$rootScope,$location,$routePa
 angular.module('cmsFileViewer')
     .filter('fileIcon', function () {
         return function (obj) {
-            
+
 
             var specificMimetypes = {
                 'application/pdf': 'pdf',
@@ -398,9 +398,9 @@ angular.module('cmsFileViewer')
             // generic mimetypes: application, audio, chemical, image, message, model, text, video, x-conference
 
             if ( specificMimetypes[obj] ) {
-                return 'icon icon-filetype-' + specificMimetypes[obj];
+                return 'glyphicon glyphicon-file-' + specificMimetypes[obj];
             } else {
-                return 'icon icon-filetype-' + obj.split('/')[0];
+                return 'glyphicon glyphicon-file-' + obj.split('/')[0];
             }
         };
     });
@@ -433,17 +433,13 @@ angular.module('cmsFileViewer')
         return function (date) {
             if(date) {
                 moment.locale(Bennu.locale.tag);
-                return moment(date).fromNow();   
+                return moment(date).fromNow();
             } else {
                 return "-";
             }
-        }; 
+        };
     });
-    
-app.config(['$httpProvider', function($httpProvider) {
-    $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
-    $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
-}]);
+
 </script>
 
 <div class="modal fade" id="templates-modal">
@@ -455,7 +451,7 @@ app.config(['$httpProvider', function($httpProvider) {
                 <small>View templates for ${theme.name}</small>
             </div>
             <div class="modal-body">
-                <div class="content"> 
+                <div class="content">
                 </div>
                     <p class="help-block">If you want to create a new template, right click on the file and select 'Make a Template'</p>
             </div>
@@ -508,9 +504,9 @@ app.config(['$httpProvider', function($httpProvider) {
                                     <option selected value="${theme.type}">${theme.name}</option>
                                 </c:if>
                                 <c:if test="${theme.getExtends() != theme}">
-                                    <option value="${theme.type}">${theme.name}</option>    
+                                    <option value="${theme.type}">${theme.name}</option>
                                 </c:if>
-                                
+
                                 </c:forEach>
                             </select>
                         </div>
@@ -534,7 +530,7 @@ app.config(['$httpProvider', function($httpProvider) {
                                 <select id="default-theme-select" name="defaultTemplate" class="form-control"></select>
                                 <p class="help-block">The default template is the template used when a theme is missing a template.</p>
                             </c:if>
-                            
+
                         </div>
                     </div>
             </div>
@@ -608,7 +604,7 @@ app.config(['$httpProvider', function($httpProvider) {
                 <small>Create a new template</small>
             </div>
             <div class="modal-body form-horizontal">
-            
+
                     <div class="form-group">
                         <label for="inputEmail3" class="col-sm-2 control-label">File</label>
                         <div class="col-sm-10">
@@ -647,7 +643,6 @@ app.config(['$httpProvider', function($httpProvider) {
 </div><!-- /.modal -->
 
 <script type="text/javascript">
-$.ajaxSetup({headers: {'${csrf.headerName}': '${csrf.token}'}});
 
 function makeTemplate(){
     var filename = $("#make-template-modal input[name='filename']").val();
@@ -692,7 +687,7 @@ function slugify(text)
 
     $("#make-template-modal [name='type']").on("keyup", function(e){
         e=$(e.target);
-        
+
         if (!e.val() || e.val().length == 0) {
             $("#make-template-modal [name='type']").data("written", false);
         }else if (!$("#make-template-modal [name='type']").data("written")){

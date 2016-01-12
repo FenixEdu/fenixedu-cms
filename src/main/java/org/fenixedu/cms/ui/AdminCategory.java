@@ -18,6 +18,12 @@
  */
 package org.fenixedu.cms.ui;
 
+import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
@@ -33,14 +39,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
-
-import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/categories")

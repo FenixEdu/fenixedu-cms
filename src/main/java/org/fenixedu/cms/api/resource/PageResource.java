@@ -1,10 +1,9 @@
 package org.fenixedu.cms.api.resource;
 
-import com.google.gson.JsonElement;
-
-import org.fenixedu.bennu.core.rest.BennuRestResource;
-import org.fenixedu.cms.api.json.PageAdapter;
-import org.fenixedu.cms.domain.Page;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_PAGE;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_PAGE;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.SEE_PAGES;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -16,10 +15,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_PAGE;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_PAGE;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.SEE_PAGES;
+import org.fenixedu.bennu.core.rest.BennuRestResource;
+import org.fenixedu.cms.api.json.PageAdapter;
+import org.fenixedu.cms.domain.Page;
 
 @Path("/cms/pages")
 public class PageResource extends BennuRestResource {
@@ -29,7 +27,7 @@ public class PageResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public JsonElement getPage(@PathParam("oid") Page page) {
+    public String getPage(@PathParam("oid") Page page) {
         return view(page, PageAdapter.class);
     }
 
@@ -37,11 +35,11 @@ public class PageResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public JsonElement updatePage(@PathParam("oid") Page page, JsonElement json) {
+    public String updatePage(@PathParam("oid") Page page, String json) {
         return updatePageFromJson(page, json);
     }
 
-    private JsonElement updatePageFromJson(Page page, JsonElement json) {
+    private String updatePageFromJson(Page page, String json) {
         return view(update(json, page, PageAdapter.class));
     }
 

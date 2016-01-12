@@ -1,6 +1,6 @@
 package org.fenixedu.cms.ui;
 
-import com.google.gson.JsonObject;
+import static java.util.Optional.ofNullable;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Post;
@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
-import pt.ist.fenixframework.FenixFramework;
+import com.google.gson.JsonObject;
 
-import static java.util.Optional.ofNullable;
+import pt.ist.fenixframework.FenixFramework;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/versions")

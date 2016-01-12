@@ -31,7 +31,7 @@ ${portal.angularToolkit()}
       'use strict';
 
       angular.module('file-model', [])
-      
+
       .directive('fileModel', [
         '$parse',
         function ($parse) {
@@ -120,7 +120,7 @@ ${portal.angularToolkit()}
                     </div>
                 </div>
             </div>
-            
+
             <button ng-click="uploadData()" type="button" class="btn btn-primary">Import</button>
 
         </div>
@@ -160,7 +160,7 @@ ${portal.angularToolkit()}
             reader.onload = function(e) {
                 var zip = new JSZip(e.target.result);
                 a = zip;
-                
+
                 $scope.theme = JSON.parse(zip.file("theme.json").asText());
                 $scope.theme.files = Object.keys(zip.files)
                 $scope.$apply();
@@ -206,10 +206,6 @@ ${portal.angularToolkit()}
         };
     });
 
-    app.config(['$httpProvider', function($httpProvider) {
-        $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
-        $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
-    }]);
 </script>
 
 <style>

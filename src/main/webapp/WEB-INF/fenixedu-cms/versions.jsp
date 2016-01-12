@@ -58,13 +58,13 @@ ${portal.toolkit()}
 
 <div class="row">
     <div class="col-sm-4">
-        <button id="next" class="btn btn-default"><i class="icon icon-left-open"></i></button>
+        <button id="next" class="btn btn-default"><i class="fa fa-angle-left"></i></button>
     </div>
     <div class="col-sm-4">
         
     </div>
     <div class="col-sm-4 ">
-        <button id="previous" class="btn btn-default pull-right"><i class="icon icon-right-open"></i></button>
+        <button id="previous" class="btn btn-default pull-right"><i class="fa fa-angle-right"></i></button>
     </div>
 </div>
 
@@ -147,8 +147,6 @@ ${portal.toolkit()}
 </style>
 
 <script>
-    $.ajaxSetup({headers: {'${csrf.headerName}': '${csrf.token}'}});
-
     function loadRevision(id){
         if (!id) {
             var params = {}
@@ -202,7 +200,7 @@ ${portal.toolkit()}
                 $("#previous").attr("disabled","disabled").data("id", null);
             }
             $("#author").html(e.userName);
-            $("#revDate").html(moment(e.modifiedAt).locale(Bennu.locale.tag).format('MMMM Do YYYY, h:mm:ss a'));
+            $("#revDate").html(moment(e.modifiedAt).lang(Bennu.locale.tag).format('MMMM Do YYYY, h:mm:ss a'));
             $("#revDate").data("current",e.id)
             $("#merged").html(x);
             $(".before").html(before)

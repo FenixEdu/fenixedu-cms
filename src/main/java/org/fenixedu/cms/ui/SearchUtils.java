@@ -1,10 +1,6 @@
 package org.fenixedu.cms.ui;
 
-import com.google.common.base.Strings;
-import com.google.common.math.IntMath;
-import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.cms.domain.*;
-import org.fenixedu.commons.i18n.LocalizedString;
+import static java.util.stream.Collectors.toList;
 
 import java.math.RoundingMode;
 import java.util.Collection;
@@ -13,7 +9,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
+import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.PostFile;
+import org.fenixedu.cms.domain.Site;
+import org.fenixedu.commons.i18n.LocalizedString;
+
+import com.google.common.base.Strings;
+import com.google.common.math.IntMath;
 
 /**
  * Created by borgez-dsi on 19-05-2015.

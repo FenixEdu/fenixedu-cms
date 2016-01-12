@@ -1,13 +1,14 @@
 package org.fenixedu.cms.domain;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.io.StringWriter;
+
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.ui.SiteActivityRender;
 import org.joda.time.DateTime;
 
-import java.io.StringWriter;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class SiteActivity extends SiteActivity_Base {
 

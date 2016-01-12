@@ -18,10 +18,12 @@
  */
 package org.fenixedu.cms.ui;
 
-import com.google.common.base.Strings;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.ui.SearchUtils.searchPosts;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
@@ -45,15 +47,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.google.common.base.Strings;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
-
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.ui.SearchUtils.searchPosts;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/posts")

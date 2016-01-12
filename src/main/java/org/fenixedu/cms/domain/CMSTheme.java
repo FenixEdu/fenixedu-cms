@@ -18,10 +18,20 @@
  */
 package org.fenixedu.cms.domain;
 
-import com.google.common.collect.Sets;
-import com.google.common.io.ByteStreams;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import static java.util.stream.Collectors.toSet;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.zip.ZipInputStream;
+
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
@@ -29,18 +39,14 @@ import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.cms.CMSConfigurationManager;
 import org.joda.time.DateTime;
+
+import com.google.common.collect.Sets;
+import com.google.common.io.ByteStreams;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
-
-import java.io.*;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.zip.ZipInputStream;
-
-import static java.util.stream.Collectors.toSet;
 
 public class CMSTheme extends CMSTheme_Base {
 

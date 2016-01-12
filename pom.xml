@@ -15,9 +15,9 @@
 	<inceptionYear>2014</inceptionYear>
 
 	<properties>
-		<version.org.fenixedu.bennu>4.0.0.RC2</version.org.fenixedu.bennu>
 		<version.org.fenixedu.bennu.spring>1.1.0</version.org.fenixedu.bennu.spring>
 		<version.org.fenixedu.bennu.signals>1.0.2</version.org.fenixedu.bennu.signals>
+		<version.org.fenixedu.bennu>3.4.1</version.org.fenixedu.bennu>
 	</properties>
 
 	<issueManagement>
@@ -31,7 +31,7 @@
 			<url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
 			<distribution>repo</distribution>
 		</license>
-	</licenses>
+    </licenses>
 
 	<ciManagement>
 		<system>Bamboo</system>
@@ -99,7 +99,7 @@
 		<dependency>
 			<groupId>org.fenixedu</groupId>
 			<artifactId>bennu-spring</artifactId>
-			<version>${version.org.fenixedu.bennu}</version>
+			<version>${version.org.fenixedu.bennu.spring}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.fenixedu</groupId>

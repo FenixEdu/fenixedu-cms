@@ -1,14 +1,10 @@
 package org.fenixedu.cms.api.resource;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
-import org.fenixedu.bennu.core.rest.BennuRestResource;
-import org.fenixedu.cms.api.json.MenuAdapter;
-import org.fenixedu.cms.api.json.MenuItemAdapter;
-import org.fenixedu.cms.domain.Menu;
-import org.fenixedu.cms.domain.MenuItem;
-import org.fenixedu.commons.i18n.LocalizedString;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.CREATE_MENU_ITEM;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_MENU;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.LIST_MENUS;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -21,14 +17,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.fenixedu.bennu.core.rest.BennuRestResource;
+import org.fenixedu.cms.api.json.MenuAdapter;
+import org.fenixedu.cms.api.json.MenuItemAdapter;
+import org.fenixedu.cms.domain.Menu;
+import org.fenixedu.cms.domain.MenuItem;
+import org.fenixedu.commons.i18n.LocalizedString;
+
+import com.google.gson.JsonObject;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
-
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.CREATE_MENU_ITEM;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_MENU;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.LIST_MENUS;
 
 @Path("/cms/menus")
 public class MenuResource extends BennuRestResource {
@@ -38,7 +37,7 @@ public class MenuResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public JsonElement getMenu(@PathParam("oid") Menu menu) {
+    public String getMenu(@PathParam("oid") Menu menu) {
         return view(menu, MenuAdapter.class);
     }
 
@@ -55,18 +54,18 @@ public class MenuResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public JsonElement updateMenu(@PathParam("oid") Menu menu, JsonElement json) {
+    public String updateMenu(@PathParam("oid") Menu menu, String json) {
         return updateMenuFromJson(menu, json);
     }
 
-    private JsonElement updateMenuFromJson(Menu menu, JsonElement json) {
+    private String updateMenuFromJson(Menu menu, String json) {
         return view(update(json, menu, MenuAdapter.class));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/menuItems")
-    public JsonElement listMenuItems(@PathParam("oid") Menu menu) {
+    public String listMenuItems(@PathParam("oid") Menu menu) {
         return view(menu.getItemsSet(), MenuItemAdapter.class);
     }
 
@@ -74,7 +73,7 @@ public class MenuResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/menuItems")
-    public JsonElement createMenuItem(@PathParam("oid") Menu menu, JsonObject json) {
+    public String createMenuItem(@PathParam("oid") Menu menu, JsonObject json) {
         return view(createMenuItemFromJson(menu, json));
     }
 

@@ -33,12 +33,12 @@ ${portal.toolkit()}
     <c:choose>
         <c:when test="${permissions:canDoThis(site, 'EDIT_CATEGORY,CREATE_CATEGORY')}">
             <button type="button" data-toggle="modal" data-target="#create-category" class="btn btn-primary">
-                <i class="icon icon-plus"></i> New
+                <i class="glyphicon glyphicon-plus"></i> New
             </button>
         </c:when>
         <c:otherwise>
             <button type="button" class="btn btn-primary disabled">
-                <i class="icon icon-plus"></i> New
+                <i class="glyphicon glyphicon-plus"></i> New
             </button>
         </c:otherwise>
     </c:choose>

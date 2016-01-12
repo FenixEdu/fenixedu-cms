@@ -18,7 +18,15 @@
  */
 package org.fenixedu.cms.domain;
 
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
@@ -32,14 +40,7 @@ import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import pt.ist.fenixframework.Atomic;
-
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * Model for a page on a given Site.
@@ -56,16 +57,16 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     public Page(Site site, LocalizedString name) {
         super();
         DateTime now = new DateTime();
-        this.setCreationDate(now);
-        this.setModificationDate(now);
+        setCreationDate(now);
+        setModificationDate(now);
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
         }
-        this.setCreatedBy(Authenticate.getUser());
-        this.setCanViewGroup(Group.anyone());
-        this.setSite(site);
-        this.setPublished(false);
-        this.setName(name);
+        setCreatedBy(Authenticate.getUser());
+        setCanViewGroup(AnyoneGroup.get());
+        setSite(site);
+        setPublished(false);
+        setName(name);
 
         Signal.emit(Page.SIGNAL_CREATED, new DomainObjectEvent<Page>(this));
     }
@@ -80,7 +81,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
         LocalizedString prevName = getName();
         super.setName(name);
 
-        this.setModificationDate(new DateTime());
+        setModificationDate(new DateTime());
         if (prevName == null) {
             setSlug(StringNormalizer.slugify(name.getContent()));
         }
@@ -124,17 +125,17 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     @Atomic
     public void delete() {
         for (Component component : getComponentsSet()) {
-            this.removeComponents(component);
+            removeComponents(component);
             component.delete();
         }
 
         getMenuItemsSet().stream().forEach(MenuItem::delete);
 
-        this.setTemplate(null);
-        this.setSite(null);
-        this.setCreatedBy(null);
-        this.setViewGroup(null);
-        this.deleteDomainObject();
+        setTemplate(null);
+        setSite(null);
+        setCreatedBy(null);
+        setViewGroup(null);
+        deleteDomainObject();
     }
 
     /**
@@ -220,10 +221,12 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     }
 
     public String getEditUrl() {
-        if(isStaticPage()) {
-            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/" + getSite().getSlug() + "/" + getSlug() + "/edit";
+        if (isStaticPage()) {
+            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/" + getSite().getSlug() + "/" + getSlug()
+                    + "/edit";
         } else {
-            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/advanced/" + getSite().getSlug() + "/" + getSlug() + "/edit";
+            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/advanced/" + getSite().getSlug() + "/"
+                    + getSlug() + "/edit";
         }
     }
 

@@ -57,7 +57,7 @@ ${portal.toolkit()}
           <dd><a href="${role.site.editUrl}">${role.site.name.content}</a></dd>
       		
           <dt>Number of users</dt>
-      		<dd>${role.group.members.count()}</dd>
+      		<dd>${role.group.members.size()}</dd>
         </dl>
       </div>
     </div>

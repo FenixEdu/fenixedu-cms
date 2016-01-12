@@ -35,11 +35,11 @@ ${portal.toolkit()}
 	        <c:choose>
             	<c:when test="${permissions:canDoThis(site, 'CREATE_PAGE')}">
 					<button type="button" data-toggle="modal" data-target="#create-page" class="btn btn-primary">
-						<i class="icon icon-plus"></i> New
+						<i class="glyphicon glyphicon-plus"></i> New
 					</button>
 				</c:when>
 				<c:otherwise>
-					<button type="button" class="btn btn-primary disabled"><i class="icon icon-plus"></i> New</button>
+					<button type="button" class="btn btn-primary disabled"><i class="glyphicon glyphicon-plus"></i> New</button>
 				</c:otherwise>
 			</c:choose>
 			<a href="${pageContext.request.contextPath}/cms/pages/${site.slug}" class="btn btn-default">

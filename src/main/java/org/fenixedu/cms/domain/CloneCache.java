@@ -1,11 +1,12 @@
 package org.fenixedu.cms.domain;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
-import pt.ist.fenixframework.DomainObject;
-
 import java.util.HashMap;
 import java.util.function.Function;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+
+import pt.ist.fenixframework.DomainObject;
 
 /**
  * Created by borgez-dsi on 17-06-2015.

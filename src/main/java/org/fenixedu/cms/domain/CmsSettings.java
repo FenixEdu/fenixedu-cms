@@ -7,9 +7,9 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 
 public class CmsSettings extends CmsSettings_Base {
-    
+
     public CmsSettings() {
-        PersistentDynamicGroup managers = Group.managers().toPersistentGroup();
+        PersistentDynamicGroup managers = (PersistentDynamicGroup) Group.parse("#managers").toPersistentGroup();
         setFoldersManagers(managers);
         setRolesManagers(managers);
         setSettingsManagers(managers);
@@ -27,40 +27,41 @@ public class CmsSettings extends CmsSettings_Base {
     public boolean canManageSettings() {
         return getSettingsManagers().isMember(Authenticate.getUser());
     }
+
     public boolean canManageThemes() {
         return getThemesManagers().isMember(Authenticate.getUser());
     }
 
     public boolean canManageGloabalPermissions() {
-        return Group.managers().isMember(Authenticate.getUser());
+        return Group.parse("#managers").isMember(Authenticate.getUser());
     }
 
     public void ensureCanManageFolders() {
-        if(!canManageFolders()) {
+        if (!canManageFolders()) {
             throw CmsDomainException.forbiden();
         }
     }
 
     public void ensureCanManageRoles() {
-        if(!canManageRoles()) {
+        if (!canManageRoles()) {
             throw CmsDomainException.forbiden();
         }
     }
 
     public void ensureCanManageSettings() {
-        if(!canManageSettings()) {
+        if (!canManageSettings()) {
             throw CmsDomainException.forbiden();
         }
     }
 
     public void ensureCanManageThemes() {
-        if(!canManageThemes()) {
+        if (!canManageThemes()) {
             throw CmsDomainException.forbiden();
         }
     }
 
     public void ensureCanManageGlobalPermissions() {
-        if(!canManageGloabalPermissions()) {
+        if (!canManageGloabalPermissions()) {
             throw CmsDomainException.forbiden();
         }
     }

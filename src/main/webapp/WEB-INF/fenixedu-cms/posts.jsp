@@ -40,10 +40,10 @@ ${portal.toolkit()}
     <div class="col-sm-5">
         <c:choose>
             <c:when test="${permissions:canDoThis(site, 'CREATE_POST')}">
-                <button type="button" data-toggle="modal" data-target="#create-post" class="btn btn-primary"><i class="icon icon-plus"></i> New</button>
+                <button type="button" data-toggle="modal" data-target="#create-post" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</button>
             </c:when>
             <c:otherwise>
-                <button type="button" class="btn btn-primary disabled"><i class="icon icon-plus"></i> New</button>
+                <button type="button" class="btn btn-primary disabled"><i class="glyphicon glyphicon-plus"></i> New</button>
             </c:otherwise>
         </c:choose>
     </div>
@@ -116,7 +116,7 @@ ${portal.toolkit()}
                     </td>
                     <td class="col-md-1">
                         <c:if test="${post.active}">
-                            <i class="icon icon-check"></i>
+                            <i class="glyphicon glyphicon-check"></i>
                         </c:if>
                         <div class="dropdown pull-right">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

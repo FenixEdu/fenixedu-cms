@@ -104,7 +104,6 @@ ${portal.toolkit()}
 </style>
 
 <script>
-    $.ajaxSetup({headers: {'${csrf.headerName}': '${csrf.token}'}});
     var editor = ace.edit("editor");
 
     var submit = function() {
@@ -135,7 +134,7 @@ ${portal.toolkit()}
       theme = localStorage.getItem("cmsThemeEditorTheme") || "clouds";
     }
     editor.setTheme("ace/theme/" + theme);
-    
+
     $(".theme-msg").html($("a[data-theme='" + theme + "']").html())
 
     $(".themes a").on("click", function (e){
@@ -144,7 +143,7 @@ ${portal.toolkit()}
       localStorage.setItem("cmsThemeEditorTheme", e.data("theme"));
       $(".theme-msg").html($("a[data-theme='" + e.data("theme") + "']").html())
     });
-    
+
     $(".btn-fullscreen").on("click",function() {
       if($(".btn-fullscreen").hasClass("active")) {
         $("#editor").detach().appendTo('#folder-code-default');

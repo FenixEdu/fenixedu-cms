@@ -36,13 +36,10 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.fenixedu.bennu.core.domain.Bennu;
-import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -50,6 +47,9 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.Atomic.TxMode;
 
 public class CMSThemeLoader {
 
@@ -110,9 +110,8 @@ public class CMSThemeLoader {
             return new JsonParser().parse(new String(entry.getContent())).getAsJsonObject();
         }).findAny().orElseThrow(() -> new IllegalArgumentException("Theme does not contain a theme.json file!"));
 
-        CMSThemeFiles themeFiles =
-                new CMSThemeFiles(loadFiles(entries.stream().filter(
-                        entry -> (!entry.getName().equals("theme.json")) && validName(entry.getName()) && !entry.isDirectory())));
+        CMSThemeFiles themeFiles = new CMSThemeFiles(loadFiles(entries.stream()
+                .filter(entry -> !entry.getName().equals("theme.json") && validName(entry.getName()) && !entry.isDirectory())));
 
         return getOrCreateTheme(themeFiles, themeDescription);
     }
@@ -155,7 +154,7 @@ public class CMSThemeLoader {
             CMSThemeFile thumbnail = theme.fileForPath(themeDef.get("thumbnail").getAsString());
 
             theme.setPreviewImage(new GroupBasedFile(thumbnail.getFileName(), thumbnail.getFullPath(), thumbnail.getContent(),
-                    Group.anyone()));
+                    AnyoneGroup.get()));
             theme.setPreviewImagePath(themeDef.get("thumbnail").getAsString());
         }
 
@@ -180,7 +179,8 @@ public class CMSThemeLoader {
         }
     }
 
-    private static void loadPageTemplates(JsonObject themeDef, CMSTheme theme, HashSet<CMSTemplate> refused, CMSThemeFiles files) {
+    private static void loadPageTemplates(JsonObject themeDef, CMSTheme theme, HashSet<CMSTemplate> refused,
+            CMSThemeFiles files) {
         for (Entry<String, JsonElement> entry : themeDef.get("templates").getAsJsonObject().entrySet()) {
             String type = entry.getKey();
             JsonObject obj = entry.getValue().getAsJsonObject();

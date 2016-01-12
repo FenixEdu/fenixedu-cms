@@ -18,18 +18,47 @@
  */
 package org.fenixedu.cms.ui;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.io.Files;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import static java.util.stream.Collectors.toList;
+
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageInputStream;
+import javax.servlet.http.HttpServletRequest;
+
 import org.fenixedu.bennu.core.domain.Bennu;
-import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.*;
+import org.fenixedu.cms.domain.CMSTemplate;
+import org.fenixedu.cms.domain.CMSTheme;
+import org.fenixedu.cms.domain.CMSThemeFile;
+import org.fenixedu.cms.domain.CMSThemeFiles;
+import org.fenixedu.cms.domain.CMSThemeLoader;
+import org.fenixedu.cms.domain.CmsSettings;
+import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.exceptions.ResourceNotFoundException;
 import org.fenixedu.cms.routing.CMSURLHandler;
 import org.fenixedu.commons.stream.StreamUtils;
@@ -38,30 +67,28 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.view.RedirectView;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.io.Files;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import pt.ist.fenixframework.Atomic;
-
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.stream.ImageInputStream;
-import javax.servlet.http.HttpServletRequest;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
-
-import static java.util.stream.Collectors.toList;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/themes")
@@ -138,8 +165,8 @@ public class AdminThemes {
         CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         model.addAttribute("theme", theme);
-        model.addAttribute("sites", theme.getAllSitesStream()
-                .sorted(Site.NAME_COMPARATOR).limit(NUM_TOP_SITES).collect(toList()));
+        model.addAttribute("sites",
+                theme.getAllSitesStream().sorted(Site.NAME_COMPARATOR).limit(NUM_TOP_SITES).collect(toList()));
         return "fenixedu-cms/viewTheme";
     }
 
@@ -272,7 +299,8 @@ public class AdminThemes {
 
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "{type}/editFile/**", method = RequestMethod.PUT)
-    public void saveFileEdition(@PathVariable(value = "type") String type, HttpServletRequest request, @RequestBody String content) {
+    public void saveFileEdition(@PathVariable(value = "type") String type, HttpServletRequest request,
+            @RequestBody String content) {
         CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
         String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
@@ -394,7 +422,8 @@ public class AdminThemes {
 
     @RequestMapping(value = "{type}/duplicate", method = RequestMethod.POST)
     public RedirectView duplicateTheme(Model model, @PathVariable String type,
-            @RequestParam(value = "newThemeType") String newThemeType, @RequestParam String name, @RequestParam String description) {
+            @RequestParam(value = "newThemeType") String newThemeType, @RequestParam String name,
+            @RequestParam String description) {
         CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme orig = CMSTheme.forType(type);
         duplicateTheme(orig, newThemeType, name, description);
@@ -469,8 +498,8 @@ public class AdminThemes {
 
     @RequestMapping(value = "{type}/editSettings", method = RequestMethod.POST)
     public RedirectView editThemeSettings(@PathVariable(value = "type") String type, @RequestParam String name,
-            @RequestParam String description, @RequestParam(value = "extends") String ext, @RequestParam(value = "thumbnail",
-            required = false) MultipartFile thumbnail,
+            @RequestParam String description, @RequestParam(value = "extends") String ext,
+            @RequestParam(value = "thumbnail", required = false) MultipartFile thumbnail,
             @RequestParam(value = "defaultTemplate", required = false) String defaultTemplate) {
         CmsSettings.getInstance().ensureCanManageThemes();
         CMSTheme theme = CMSTheme.forType(type);
@@ -504,9 +533,8 @@ public class AdminThemes {
             }
             GroupBasedFile newthumbnail = null;
             try {
-                newthumbnail =
-                        new GroupBasedFile(thumbnail.getOriginalFilename(), thumbnail.getOriginalFilename(),
-                                thumbnail.getBytes(), Group.anyone());
+                newthumbnail = new GroupBasedFile(thumbnail.getOriginalFilename(), thumbnail.getOriginalFilename(),
+                        thumbnail.getBytes(), AnyoneGroup.get());
             } catch (IOException e) {
                 logger.error("Can't create thumbnail file", e);
             }

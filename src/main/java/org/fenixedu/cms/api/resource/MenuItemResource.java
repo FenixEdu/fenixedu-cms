@@ -1,10 +1,10 @@
 package org.fenixedu.cms.api.resource;
 
-import com.google.gson.JsonElement;
-
-import org.fenixedu.bennu.core.rest.BennuRestResource;
-import org.fenixedu.cms.api.json.MenuItemAdapter;
-import org.fenixedu.cms.domain.MenuItem;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_MENU_ITEM;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU_ITEM;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.LIST_MENUS;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -16,11 +16,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_MENU_ITEM;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU_ITEM;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.LIST_MENUS;
+import org.fenixedu.bennu.core.rest.BennuRestResource;
+import org.fenixedu.cms.api.json.MenuItemAdapter;
+import org.fenixedu.cms.domain.MenuItem;
 
 @Path("/cms/menuItems")
 public class MenuItemResource extends BennuRestResource {
@@ -30,7 +28,7 @@ public class MenuItemResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public JsonElement getMenuItem(@PathParam("oid") MenuItem menuItem) {
+    public String getMenuItem(@PathParam("oid") MenuItem menuItem) {
         return view(menuItem, MenuItemAdapter.class);
     }
 
@@ -47,11 +45,11 @@ public class MenuItemResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public JsonElement updateMenuItem(@PathParam("oid") MenuItem menuItem, JsonElement json) {
+    public String updateMenuItem(@PathParam("oid") MenuItem menuItem, String json) {
         return updateMenuItemFromJson(menuItem, json);
     }
 
-    private JsonElement updateMenuItemFromJson(MenuItem menuItem, JsonElement json) {
+    private String updateMenuItemFromJson(MenuItem menuItem, String json) {
         return view(update(json, menuItem, MenuItemAdapter.class));
     }
 }

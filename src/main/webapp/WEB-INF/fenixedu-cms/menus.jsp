@@ -33,12 +33,12 @@ ${portal.toolkit()}
     <c:choose>
         <c:when test="${permissions:canDoThis(site, 'EDIT_MENU') && permissions:canDoThis(site, 'CREATE_MENU')}">
             <button type="button" data-toggle="modal" data-target="#create-menu" class="btn btn-primary">
-                <i class="icon icon-plus"></i> New
+                <i class="glyphicon glyphicon-plus"></i> New
             </button>
         </c:when>
         <c:otherwise>
             <button type="button" class="btn btn-primary disabled">
-                <i class="icon icon-plus"></i> New
+                <i class="glyphicon glyphicon-plus"></i> New
             </button>
         </c:otherwise>
     </c:choose>

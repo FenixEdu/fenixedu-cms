@@ -1,17 +1,14 @@
 package org.fenixedu.cms.domain;
 
-import org.fenixedu.bennu.core.domain.Bennu;
-import org.fenixedu.bennu.core.i18n.BundleUtil;
-import org.fenixedu.cms.domain.PermissionsArray.Permission;
-import org.fenixedu.commons.i18n.LocalizedString;
-
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_MENU_ITEM;
+import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.i18n.BundleUtil;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 
 public class DefaultRoles {
 

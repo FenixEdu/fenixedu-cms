@@ -10,8 +10,6 @@ import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.api.json.PostRevisionAdapter;
 import org.fenixedu.cms.domain.PostContentRevision;
 
-import com.google.gson.JsonElement;
-
 @Path("/cms/versions")
 public class RevisionResource extends BennuRestResource {
 
@@ -20,7 +18,7 @@ public class RevisionResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public JsonElement getVersion(@PathParam("oid") PostContentRevision revision) {
+    public String getVersion(@PathParam("oid") PostContentRevision revision) {
         return view(revision, PostRevisionAdapter.class);
     }
 }

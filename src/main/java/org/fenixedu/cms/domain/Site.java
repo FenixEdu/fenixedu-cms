@@ -18,11 +18,21 @@
  */
 package org.fenixedu.cms.domain;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
@@ -45,20 +55,17 @@ import org.fenixedu.cms.routing.CMSEmbeddedBackend;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
@@ -113,6 +120,10 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         return map;
     }
 
+    protected Site() {
+        super();
+    }
+
     /**
      * the logged {@link User} creates a new {@link Site}.
      */
@@ -121,21 +132,21 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
         }
-        this.setCreatedBy(Authenticate.getUser());
-        this.setCreationDate(new DateTime());
+        setCreatedBy(Authenticate.getUser());
+        setCreationDate(new DateTime());
 
-        this.setCanViewGroup(Group.anyone());
+        setCanViewGroup(AnyoneGroup.get());
         // TODO: Set Default Permissions
-        this.setBennu(Bennu.getInstance());
+        setBennu(Bennu.getInstance());
 
         new PersistentSiteViewersGroup(this);
 
-        this.setName(name);
-        this.setSlug(StringNormalizer.slugify(name.getContent()));
-        this.setDescription(description);
+        setName(name);
+        setSlug(StringNormalizer.slugify(name.getContent()));
+        setDescription(description);
 
-        this.setPublished(false);
-        this.setAnalytics(new SiteAnalytics());
+        setPublished(false);
+        setAnalytics(new SiteAnalytics());
 
         Signal.emit(Site.SIGNAL_CREATED, new DomainObjectEvent<Site>(this));
     }
@@ -285,8 +296,8 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     @Atomic
     private void deleteMenuFunctionality() {
-        MenuFunctionality mf = this.getFunctionality();
-        this.setFunctionality(null);
+        MenuFunctionality mf = getFunctionality();
+        setFunctionality(null);
         mf.delete();
     }
 
@@ -307,9 +318,9 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
             if (getFunctionality() != null) {
                 deleteMenuFunctionality();
             }
-            this.setFunctionality(new MenuFunctionality(parent, getEmbedded(), getSlug(),
-                    getEmbedded() ? CMSEmbeddedBackend.BACKEND_KEY : CMSBackend.BACKEND_KEY, "anyone", this.getDescription(),
-                    this.getName(), getSlug()));
+            setFunctionality(new MenuFunctionality(parent, getEmbedded(), getSlug(),
+                    getEmbedded() ? CMSEmbeddedBackend.BACKEND_KEY : CMSBackend.BACKEND_KEY, "anyone", getDescription(),
+                    getName(), getSlug()));
             getFunctionality().setAccessGroup(SiteViewersGroup.get(this));
         }
     }
@@ -364,21 +375,21 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     @Atomic
     public void delete() {
-        MenuFunctionality mf = this.getFunctionality();
-        this.setFunctionality(null);
-        this.setFolder(null);
-        this.setInitialPage(null);
+        MenuFunctionality mf = getFunctionality();
+        setFunctionality(null);
+        setFolder(null);
+        setInitialPage(null);
 
         if (mf != null) {
             mf.delete();
         }
 
         getViewerGroup().delete();
-        this.setViewGroup(null);
-        this.setTheme(null);
-        this.setCreatedBy(null);
-        this.setBennu(null);
-        this.setAnalytics(null);
+        setViewGroup(null);
+        setTheme(null);
+        setCreatedBy(null);
+        setBennu(null);
+        setAnalytics(null);
 
         getActivityLinesSet().stream().forEach(org.fenixedu.cms.domain.SiteActivity::delete);
         getPostSet().stream().forEach(Post::delete);
@@ -386,7 +397,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         getMenusSet().stream().forEach(org.fenixedu.cms.domain.Menu::delete);
         getPagesSet().stream().forEach(org.fenixedu.cms.domain.Page::delete);
         getRolesSet().stream().forEach(Role::delete);
-        this.deleteDomainObject();
+        deleteDomainObject();
     }
 
     /**
@@ -525,15 +536,15 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
         // TODO: Most likely this should be Wrappable
         public Object getSiteObject() {
-            return Site.this.getObject();
+            return getObject();
         }
 
         public String getAddress() {
-            return Site.this.getFullUrl();
+            return getFullUrl();
         }
 
         public String getEditAddress() {
-            return Site.this.getEditUrl();
+            return getEditUrl();
         }
     }
 
@@ -641,7 +652,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     }
 
     public Stream<Post> getNonStaticPostsStream() {
-        return getPostSet().stream().filter(p->!p.isStaticPost()).sorted(Post.CREATION_DATE_COMPARATOR);
+        return getPostSet().stream().filter(p -> !p.isStaticPost()).sorted(Post.CREATION_DATE_COMPARATOR);
     }
 
 }

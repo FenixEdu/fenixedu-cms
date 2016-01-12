@@ -53,7 +53,7 @@ along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
             <span class="theme-msg">Theme</span> <span class="caret"></span>
           </button>
-          
+
           <ul class="dropdown-menu themes" role="menu">
             <li><a data-theme="ambiance" href="#">Ambiance</a></li>
             <li><a data-theme="chaos" href="#">Chaos</a></li>
@@ -99,13 +99,12 @@ along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
 
 <script type="application/javascript">
 
-  $.ajaxSetup({headers: {'${csrf.headerName}': '${csrf.token}'}});
   var editor = ace.edit("editor");
 
   var submit = function() {
     $("#saveBtn").attr('disabled', true);
     $("#saveBtn #txt").html('<spring:message code="action.saving"/>');
-    $.ajax('${pageContext.request.contextPath}/cms/themes/${theme.type}/editFile/${file.fullPath}', 
+    $.ajax('${pageContext.request.contextPath}/cms/themes/${theme.type}/editFile/${file.fullPath}',
     { data: editor.getValue(), type: 'PUT' }).done(function () {
     $("#saveBtn").attr('disabled', false); $("#saveBtn #txt").html('<spring:message code="action.save" />');
     });
@@ -134,7 +133,7 @@ along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
     editor.getSession().setMode("ace/mode/" + e.data("mode"));
     $(".modes-msg").html($("a[data-mode='" + e.data("mode") + "']").html())
   });
-  
+
   $(".modes-msg").html($("a[data-mode='${ type }']").html())
 
   $(".themes a").on("click", function (e){
@@ -174,7 +173,7 @@ along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
     height:90%;
   }
 
-  #editor { 
+  #editor {
     height:512px;
   }
 </style>

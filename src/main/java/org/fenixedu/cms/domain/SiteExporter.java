@@ -1,22 +1,31 @@
 package org.fenixedu.cms.domain;
 
-import com.google.gson.*;
-import org.apache.tika.io.FilenameUtils;
-import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.io.domain.GroupBasedFile;
-import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
-import org.fenixedu.cms.domain.component.Component;
-import org.fenixedu.commons.i18n.LocalizedString;
-import org.joda.time.DateTime;
+import static java.nio.charset.Charset.defaultCharset;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static java.nio.charset.Charset.defaultCharset;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
+import org.apache.tika.io.FilenameUtils;
+import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.io.domain.GroupBasedFile;
+import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
+import org.fenixedu.cms.domain.component.Component;
+import org.fenixedu.commons.i18n.LocalizedString;
+import org.joda.time.DateTime;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 /**
  * Created by borgez-dsi on 24-06-2015.
