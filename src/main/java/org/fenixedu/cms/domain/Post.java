@@ -27,6 +27,8 @@ import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
 import org.fenixedu.cms.domain.component.Component;
@@ -51,6 +53,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
 
     public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate)
             .reversed();
+    
+    public static final String SIGNAL_CREATED = "fenixedu.cms.post.created";
 
     /**
      * The logged {@link User} creates a new Post.
@@ -67,6 +71,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         this.setActive(true);
         this.setCanViewGroup(AnyoneGroup.get());
         this.setSite(site);
+        
+        Signal.emit(Post.SIGNAL_CREATED, new DomainObjectEvent<Post>(this));
     }
 
     @Override
