@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.mitchellbosecke.pebble.PebbleEngine;
+import com.mitchellbosecke.pebble.PebbleEngine.Builder;
 import com.mitchellbosecke.pebble.error.LoaderException;
 import com.mitchellbosecke.pebble.error.PebbleException;
 import com.mitchellbosecke.pebble.loader.ClasspathLoader;
@@ -79,35 +81,36 @@ public final class CMSURLHandler implements SemanticURLHandler {
 
     private final DateTimeFormatter formatter = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm:ss z");
 
-    private final PebbleEngine engine = new PebbleEngine(new ClasspathLoader() {
-        @Override
-        public Reader getReader(String templateName) throws LoaderException {
-            String[] parts = templateName.split("/", 2);
-
-            if (parts.length != 2) {
-                throw new IllegalArgumentException("Not a valid name: " + templateName);
-            }
-            CMSTheme theme = CMSTheme.forType(parts[0]);
-            if (theme == null) {
-                throw new IllegalArgumentException("Theme " + parts[0] + " not found!");
-            }
-
-            byte[] bytes = theme.contentForPath(parts[1]);
-            if (bytes == null) {
-                throw new IllegalArgumentException("Theme " + parts[0] + " does not contain resource '" + parts[1] + '"');
-            }
-            return new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8);
-        }
-    });
+    private final PebbleEngine engine;
 
     public CMSURLHandler() {
-        engine.addExtension(new CMSExtensions());
+        Builder builder = new Builder().loader(new ClasspathLoader() {
+            @Override
+            public Reader getReader(String templateName) throws LoaderException {
+                String[] parts = templateName.split("/", 2);
+
+                if (parts.length != 2) {
+                    throw new IllegalArgumentException("Not a valid name: " + templateName);
+                }
+                CMSTheme theme = CMSTheme.forType(parts[0]);
+                if (theme == null) {
+                    throw new IllegalArgumentException("Theme " + parts[0] + " not found!");
+                }
+
+                byte[] bytes = theme.contentForPath(parts[1]);
+                if (bytes == null) {
+                    throw new IllegalArgumentException("Theme " + parts[0] + " does not contain resource '" + parts[1] + '"');
+                }
+                return new InputStreamReader(new ByteArrayInputStream(bytes), StandardCharsets.UTF_8);
+            }
+        }).extension(new CMSExtensions());
         if (CMSConfigurationManager.isInThemeDevelopmentMode()) {
-            engine.setTemplateCache(null);
+            builder.cacheActive(false);
             logger.info("CMS Theme Development Mode enabled!");
         } else {
-            engine.setTemplateCache(CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build());
+            builder.templateCache(CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build());
         }
+        this.engine = builder.build();
     }
 
     public static String rewritePageUrl(HttpServletRequest request) {
@@ -268,13 +271,15 @@ public final class CMSURLHandler implements SemanticURLHandler {
             return;
         } else if (req.getMethod().equals("POST")) {
             if (CoreConfiguration.getConfiguration().developmentMode()) {
-                PebbleEngine engine = new PebbleEngine(new StringLoader());
-                engine.addExtension(new CMSExtensions());
-                PebbleTemplate compiledTemplate =
-                        engine.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
                 res.setStatus(500);
                 res.setContentType("text/html");
-                compiledTemplate.evaluate(res.getWriter());
+                try (Writer writer = res.getWriter()) {
+                    writer.write("<html><head></head><body><h1>POST action with backslash</h1>"
+                            + "<b>You posting data with a URL with a backslash. "
+                            + "+"
+                            + ""
+                            + "Alter the form to post with the same URL without the backslash</body></html>");
+                }
             } else {
                 errorPage(req, res, sites, 500);
             }

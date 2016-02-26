@@ -27,6 +27,7 @@
 </h2>
 <div class="row">
     <form class="form-horizontal" action="" method="post" role="form">
+        ${csrf.field()}
         <div class="col-sm-9">
             <div class="${emptyName ? "form-group has-error" : "form-group"}">
                 <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.edit.label.slug"/></label>
