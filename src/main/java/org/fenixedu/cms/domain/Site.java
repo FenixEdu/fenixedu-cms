@@ -58,11 +58,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
 import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.DomainObject;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
-public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
+final public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.site.created";
     public static final Comparator<Site> NAME_COMPARATOR = Comparator.comparing(Site::getName);
@@ -325,6 +324,7 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         getMenusSet().stream().sorted().forEach(m -> menus.add(m));
         return menus;
     }
+
     @Override
     public Site clone(CloneCache cloneCache) {
         return cloneCache.getOrClone(this, obj -> {
@@ -449,13 +449,6 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         }
     }
 
-    /**
-     * @return the object associated with this {@link Site}.
-     */
-    public DomainObject getObject() {
-        return null;
-    }
-
     @Override
     public boolean isValidSlug(String slug) {
         Stream<MenuItem> menuItems = PortalConfiguration.getInstance().getMenu().getOrderedChild().stream();
@@ -532,11 +525,6 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
         public String getAnalyticsCode() {
             return Site.this.getAnalyticsCode();
-        }
-
-        // TODO: Most likely this should be Wrappable
-        public Object getSiteObject() {
-            return getObject();
         }
 
         public String getAddress() {
