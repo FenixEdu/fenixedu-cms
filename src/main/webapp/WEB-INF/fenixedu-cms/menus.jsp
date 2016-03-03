@@ -65,7 +65,8 @@ ${portal.toolkit()}
           <tbody>
               <c:forEach var="menu" items="${menus}">
                 <c:set var="menuEditUrl" value="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.slug}/edit"></c:set>
-                <tr>
+                <c:set var="menuBaseUrl" value="${pageContext.request.contextPath}/cms/menus/${site.slug}/${menu.slug}"></c:set>
+                  <tr>
                   <td>
                     <c:choose>
                       <c:when test="${permissions:canDoThis(site, 'EDIT_MENU')}">
@@ -81,11 +82,17 @@ ${portal.toolkit()}
                     <span class="badge">${menu.getItemsSet().size()}</span>
                     <div class="btn-group pull-right">
                         <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="glyphicon glyphicon-option-vertical"></span>
+                            <span class="glyphicon glyphicon glyphicon-chevron-down"></span>
                         </button>
                         <ul class="dropdown-menu">
                             <c:if test="${permissions:canDoThis(site, 'EDIT_MENU')}">
                                 <li><a href="${menuEditUrl}"><i class="glyphicon glyphicon-edit"></i>&nbsp;Edit</a></li>
+                            </c:if>
+                            <c:if test="${permissions:canDoThis(site, 'EDIT_MENU') && menu.order>1}">
+                                <li><a data-menuup="${menu.slug}" href="#"><i class="glyphicon glyphicon-chevron-up"></i>&nbsp;Up</a></li>
+                            </c:if>
+                            <c:if test="${permissions:canDoThis(site, 'EDIT_MENU') && menu.order<site.menusSet.size()}">
+                                <li><a data-menudown="${menu.slug}" href="#"><i class="glyphicon glyphicon-chevron-down"></i>&nbsp;Down</a></li>
                             </c:if>
                             <c:if test="${permissions:canDoThis(site, 'DELETE_MENU')}">
                                 <li><a data-menu="${menu.slug}" href="#"><i class="glyphicon glyphicon-trash"></i>&nbsp;Delete</a></li>
@@ -131,6 +138,12 @@ ${portal.toolkit()}
             var menuSlug = $(this).data('menu');
             $('#delete-form').attr('action', '${pageContext.request.contextPath}/cms/menus/${site.slug}/' + menuSlug + '/delete');
             $('#delete-modal').modal('show');
+        });
+        $("a[data-menuup]").on('click', function(el) {
+            $.post('${pageContext.request.contextPath}/cms/menus/${site.slug}/'+$(this).data('menuup')+'/up',function(data){location.reload();});
+        });
+        $("a[data-menudown]").on('click', function(el) {
+            $.post('${pageContext.request.contextPath}/cms/menus/${site.slug}/'+$(this).data('menudown')+'/down',function(data){location.reload();});
         });
         setTimeout(function() {
           if(window.location.hash === '#new') {

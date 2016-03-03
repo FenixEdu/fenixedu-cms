@@ -128,6 +128,7 @@ public class SiteExporter {
         json.addProperty("site", menu.getSite().getSlug());
         json.add("creationDate", toJson(menu.getCreationDate()));
         json.addProperty("createdBy", menu.getCreatedBy().getUsername());
+        json.addProperty("order", menu.getOrder());
         json.add("name", menu.getName().json());
         json.add("topLevelItems", toJsonArray(menu.getToplevelItemsSet().stream().map(this::export)));
         return json;

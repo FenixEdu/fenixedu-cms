@@ -203,7 +203,7 @@ public class SiteResource extends BennuRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/menus")
     public String listSiteMenus(@PathParam("oid") Site site) {
-        return view(site.getMenusSet(), MenuAdapter.class);
+        return view(site.getOrderedMenusSet(), MenuAdapter.class);
     }
 
     @POST

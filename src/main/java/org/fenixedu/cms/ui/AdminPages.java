@@ -110,7 +110,7 @@ public class AdminPages {
         JsonArray menus = new JsonArray();
         if(canDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU)) {
             boolean canEditPrivilegedMenu = canDoThis(site, Permission.EDIT_PRIVILEGED_MENU);
-            site.getMenusSet().stream().sorted(Comparator.comparing(Menu::getName))
+            site.getOrderedMenusSet().stream()
                 .filter(menu->!menu.getPrivileged() || canEditPrivilegedMenu)
                 .map(service::serializeMenu).forEach(menus::add);
         }

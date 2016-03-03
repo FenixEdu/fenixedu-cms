@@ -335,7 +335,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
 
     private Map<String, Object> makeMenuWrapper(Site site, Page page) {
         HashMap<String, Object> result = new HashMap<String, Object>();
-        for (Menu menu : site.getMenusSet()) {
+        for (Menu menu : site.getOrderedMenusSet()) {
             result.put(menu.getSlug(), page == null ? menu.makeWrap() : menu.makeWrap(page));
         }
         return result;

@@ -40,11 +40,12 @@ import com.google.common.collect.Sets;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
+import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
 /**
  * Model of a Menu for a given {@link Page}
  */
-public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
+public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, Comparable<Menu>{
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.menu.created";
 
@@ -179,13 +180,18 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
             Menu clone = new Menu(getSite(), name);
             cloneCache.setClone(Menu.this, clone);
             clone.setName(name);
-
+            clone.setOrder(getOrder());
             for (MenuItem menuItem : menuItems) {
                 menuItem.clone(cloneCache).setMenu(clone);
             }
 
             return clone;
         });
+    }
+
+    @Override
+    public int compareTo(Menu o) {
+        return getOrder().compareTo(o.getOrder());
     }
 
     @SuppressWarnings("unused")
@@ -236,5 +242,10 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable {
             return menuItem;
         }
         return null;
+    }
+
+    @ConsistencyPredicate
+    public boolean checkMenuOrder(){
+        return getOrder() != null && !(getOrder()<0);
     }
 }

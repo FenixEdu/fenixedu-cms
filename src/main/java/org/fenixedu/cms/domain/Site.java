@@ -20,12 +20,7 @@ package org.fenixedu.cms.domain;
 
 import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -325,6 +320,11 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
         }
     }
 
+    public TreeSet<Menu> getOrderedMenusSet(){
+        TreeSet<Menu> menus = new TreeSet<Menu>();
+        getMenusSet().stream().sorted().forEach(m -> menus.add(m));
+        return menus;
+    }
     @Override
     public Site clone(CloneCache cloneCache) {
         return cloneCache.getOrClone(this, obj -> {
@@ -654,5 +654,6 @@ public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
     public Stream<Post> getNonStaticPostsStream() {
         return getPostSet().stream().filter(p -> !p.isStaticPost()).sorted(Post.CREATION_DATE_COMPARATOR);
     }
+
 
 }

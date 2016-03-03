@@ -21,16 +21,13 @@ package org.fenixedu.cms.ui;
 import static java.util.stream.Collectors.toList;
 import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
 import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_ADVANCED_PAGES;
 import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_PRIVILEGED_MENU;
 
-import java.util.Comparator;
 import java.util.function.Predicate;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
-import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.StaticPost;
@@ -67,9 +64,9 @@ public class AdminMenu {
         ensureCanDoThis(site, Permission.LIST_MENUS);
         boolean canManagePrivileged = canDoThis(site, EDIT_PRIVILEGED_MENU);
         model.addAttribute("site", site);
-        model.addAttribute("menus", site.getMenusSet().stream()
+        model.addAttribute("menus", site.getOrderedMenusSet().stream()
             .filter(menu -> !menu.getPrivileged() || canManagePrivileged)
-            .sorted(Comparator.comparing(Menu::getName)).collect(toList()));
+            .collect(toList()));
         return "fenixedu-cms/menus";
     }
 
@@ -97,6 +94,47 @@ public class AdminMenu {
         });
         return new RedirectView("/cms/menus/" + slugSite, true);
     }
+    @RequestMapping(value = "{slugSite}/{slugMenu}/up", method = RequestMethod.POST)
+    public RedirectView moveMenuUp(Model model, @PathVariable String slugSite, @PathVariable String slugMenu) {
+        FenixFramework.atomic(() -> {
+            Site site = Site.fromSlug(slugSite);
+            AdminSites.canEdit(site);
+            ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
+            Menu menu = site.menuForSlug(slugMenu);
+            if(menu.getPrivileged()) {
+                ensureCanDoThis(site, EDIT_PRIVILEGED_MENU,
+                        Permission.DELETE_PRIVILEGED_MENU);
+            }
+            Integer oldOrder = menu.getOrder();
+            if(oldOrder>1) {
+                site.getOrderedMenusSet().stream().filter(m -> m.getOrder() == oldOrder - 1).forEach(m -> m.setOrder(oldOrder));
+                menu.setOrder(oldOrder - 1);
+            }
+        });
+        return new RedirectView("/cms/menus/" + slugSite, true);
+    }
+
+
+    @RequestMapping(value = "{slugSite}/{slugMenu}/down", method = RequestMethod.POST)
+    public RedirectView moveMenuDown(Model model, @PathVariable String slugSite, @PathVariable String slugMenu) {
+        FenixFramework.atomic(() -> {
+            Site site = Site.fromSlug(slugSite);
+            AdminSites.canEdit(site);
+            ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
+            Menu menu = site.menuForSlug(slugMenu);
+            if(menu.getPrivileged()) {
+                ensureCanDoThis(site, EDIT_PRIVILEGED_MENU,
+                        Permission.DELETE_PRIVILEGED_MENU);
+            }
+            Integer oldOrder = menu.getOrder();
+            if(oldOrder<site.getMenusSet().size()) {
+                site.getOrderedMenusSet().stream().filter(m -> m.getOrder() == oldOrder + 1).forEach(m -> m.setOrder(oldOrder));
+                menu.setOrder(oldOrder + 1);
+            }
+        });
+        return new RedirectView("/cms/menus/" + slugSite, true);
+    }
+
 
     @RequestMapping(value = "{slugSite}/{slugMenu}/edit", method = RequestMethod.GET)
     public String viewEditMenu(Model model, @PathVariable String slugSite, @PathVariable String slugMenu) {
