@@ -45,8 +45,12 @@ public class PostAdapter implements JsonAdapter<Post> {
 
         if (jObj.has("body") && !jObj.get("body").isJsonNull() && jObj.get("body").isJsonObject()) {
             LocalizedString body = LocalizedString.fromJson(jObj.get("body"));
-            if (!post.getBody().equals(body)) {
-                post.setBody(body);
+            LocalizedString excerpt = null;
+            if(jObj.has("excerpt") && !jObj.get("excerpt").isJsonNull() && jObj.get("excerpt").isJsonObject()) {
+                excerpt = LocalizedString.fromJson(jObj.get("excerpt"));
+            }
+            if (!post.getBody().equals(body) || !post.getExcerpt().equals(excerpt)) {
+                post.setBodyAndExcerpt(body,excerpt);
             }
         }
 

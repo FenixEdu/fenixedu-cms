@@ -139,7 +139,7 @@ public class AdminCategory {
         }
         Post p = new Post(site);
         p.setName(Post.sanitize(name));
-        p.setBody(new LocalizedString());
+        p.setBodyAndExcerpt(new LocalizedString(), new LocalizedString());
         p.setCanViewGroup(site.getCanViewGroup());
         p.setActive(false);
         p.addCategories(category);

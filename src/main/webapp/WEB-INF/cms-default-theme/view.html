@@ -17,7 +17,11 @@
     {% endfor %}
     </span>
     </p>
-
+    
+    <p>
+        {{post.excerpt.content | raw}}
+    </p>
+    <hr/>
     <p>
         {{post.body.content | raw}}
     </p>

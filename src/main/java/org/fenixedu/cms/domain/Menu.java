@@ -62,6 +62,8 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, 
         this.setName(name);
         this.setPrivileged(false);
 
+        this.setOrder(site.getMenusSet().size());
+
         Signal.emit(Menu.SIGNAL_CREATED, new DomainObjectEvent<Menu>(this));
     }
 

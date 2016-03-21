@@ -156,6 +156,8 @@ public class SiteImporter {
 
             Post post = new Post(site);
             LocalizedString body = fromJson(jsonObject.get("body"));
+            LocalizedString excerpt = jsonObject.has("excerpt") ? fromJson(jsonObject.get("excerpt")) : null;
+
             post.setName(fromJson(jsonObject.get("name")));
             post.setSlug(jsonObject.get("slug").getAsString());
             post.setCanViewGroup(Group.parse(jsonObject.get("canViewGroup").getAsString()));
@@ -186,9 +188,10 @@ public class SiteImporter {
                         Group.parse(postFileJson.get("viewGroup").getAsString()));
                 new PostFile(post, file, postFileJson.get("isEmbedded").getAsBoolean(), postFileJson.get("index").getAsInt());
                 body = replace(body, postFileJson.get("url").getAsString(), FileDownloadServlet.getDownloadUrl(file));
+                excerpt = replace(excerpt, postFileJson.get("url").getAsString(), FileDownloadServlet.getDownloadUrl(file));
             }
 
-            post.setBody(body);
+            post.setBodyAndExcerpt(body, excerpt);
 
             return post;
         });

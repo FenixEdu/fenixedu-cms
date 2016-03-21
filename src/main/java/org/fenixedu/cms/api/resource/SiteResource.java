@@ -129,7 +129,13 @@ public class SiteResource extends BennuRestResource {
         }
 
         if (jObj.has("body") && !jObj.get("body").isJsonNull() && jObj.get("body").isJsonObject()) {
-            post.setBody(LocalizedString.fromJson(jObj.get("body")));
+
+            LocalizedString excerpt = null;
+            if(jObj.has("excerpt") && !jObj.get("excerpt").isJsonNull() && jObj.get("excerpt").isJsonObject()) {
+                excerpt = LocalizedString.fromJson(jObj.get("excerpt"));
+            }
+
+            post.setBodyAndExcerpt(LocalizedString.fromJson(jObj.get("body")), excerpt);
         }
 
         return post;

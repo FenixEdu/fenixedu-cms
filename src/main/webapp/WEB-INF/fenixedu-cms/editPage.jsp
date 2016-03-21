@@ -76,7 +76,12 @@ ${portal.angularToolkit()}
 
         <!-- BODY -->
         <div class="form-group">
+            <div class="panel-heading">Body</div>
             <textarea bennu-localized-html-editor="post.body" on-image-added="onImageAdded"></textarea>
+        </div>
+        <div class="form-group">
+            <div class="panel-heading">Excerpt</div>
+            <textarea bennu-localized-html-editor="post.excerpt" on-image-added="onImageAdded"></textarea>
         </div>
 
         <!-- PUBLISHED -->

@@ -183,11 +183,11 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
                 .forEach(file -> file.setAccessGroup(group));
     }
 
-    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category, boolean active,
-            User creator) {
+    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, LocalizedString excerpt, Category category, boolean active,
+                              User creator) {
         Post post = new Post(site);
         post.setName(name);
-        post.setBody(body);
+        post.setBodyAndExcerpt(body, excerpt);
         post.setCreationDate(new DateTime());
         if (creator == null) {
             post.setCreatedBy(page.getCreatedBy());
@@ -218,9 +218,9 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
             List<PostFile> files = new ArrayList<>(getFilesSorted());
             Post clone = new Post(getSite());
             cloneCache.setClone(Post.this, clone);
-            clone.setBody(getBody() != null ? fromJson(getBody().json()) : null);
+            clone.setBodyAndExcerpt(getBody() != null ? fromJson(getBody().json()) : null, getExcerpt() != null ? fromJson(getExcerpt().json()) : null);
             clone.setName(getName() != null ? fromJson(getName().json()) : null);
-            clone.setBody(getBody() != null ? fromJson(getBody().json()) : null);
+            clone.setBodyAndExcerpt(getBody() != null ? fromJson(getBody().json()) : null, getExcerpt() != null ? fromJson(getExcerpt().json()) : null);
             clone.setLocation(getLocation() != null ? fromJson(getLocation().json()) : null);
             clone.setMetadata(getMetadata() != null ? getMetadata().clone() : null);
             clone.setCanViewGroup(getCanViewGroup());
@@ -286,8 +286,13 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     }
 
     public void setBody(LocalizedString body) {
+        setBodyAndExcerpt(body, null);
+    }
+
+    public void setBodyAndExcerpt(LocalizedString body, LocalizedString excerpt) {
         PostContentRevision pcr = new PostContentRevision();
         pcr.setBody(body);
+        pcr.setExcerpt(excerpt);
         pcr.setCreatedBy(Authenticate.getUser());
         pcr.setPrevious(getLatestRevision());
         pcr.setPost(this);
@@ -296,6 +301,15 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         setLatestRevision(pcr);
 
         setModificationDate(new DateTime());
+    }
+
+    public LocalizedString getExcerpt() {
+        PostContentRevision pcr = getLatestRevision();
+        if (pcr == null) {
+            return new LocalizedString();
+        } else {
+            return pcr.getExcerpt();
+        }
     }
 
     public LocalizedString getBody() {
@@ -346,6 +360,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         return getComponentSet().stream().filter(component -> StaticPost.class.isInstance(component)).findAny().isPresent();
     }
 
+
     public class PostWrap extends Wrap {
 
         public LocalizedString getName() {
@@ -362,6 +377,10 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
         public String getVisibilityGroup() {
             return getCanViewGroup().toPersistentGroup().getPresentationName();
+        }
+
+        public LocalizedString getExcerpt() {
+            return Post.this.getExcerpt();
         }
 
         public LocalizedString getBody() {

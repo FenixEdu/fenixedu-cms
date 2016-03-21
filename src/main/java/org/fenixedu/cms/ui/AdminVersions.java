@@ -87,7 +87,11 @@ public class AdminVersions {
       throw new RuntimeException("Invalid Revision");
     }
 
-    FenixFramework.atomic(() -> post.setBody(revision.getBody()));
+    if (revision.getPost().getLatestRevision().equals(revision)){
+      throw new RuntimeException("Can't revert to last revision");
+    }
+
+    FenixFramework.atomic(() -> post.setBodyAndExcerpt(revision.getBody(),revision.getExcerpt()));
 
     if(post.isStaticPost() && post.getStaticPage().isPresent()) {
       String pageSlug = post.getStaticPage().get().getSlug();

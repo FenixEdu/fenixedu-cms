@@ -33,6 +33,7 @@ public class PostContentRevision extends PostContentRevision_Base implements Clo
             clone.setCreatedBy(getCreatedBy());
             clone.setRevisionDate(getRevisionDate());
             clone.setIsLastestRevision(getIsLastestRevision());
+            clone.setExcerpt(getExcerpt() != null ? fromJson(getExcerpt().json()) : null);
             clone.setBody(getBody() != null ? fromJson(getBody().json()) : null);
             clone.setNext(getNext() != null ? getNext().clone(cloneCache) : null);
             return clone;

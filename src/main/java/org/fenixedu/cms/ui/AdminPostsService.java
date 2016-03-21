@@ -43,7 +43,7 @@ public class AdminPostsService {
     public Post createPost(Site site, LocalizedString name) {
 	Post post = new Post(site);
 	post.setName(Post.sanitize(name));
-	post.setBody(new LocalizedString());
+	post.setBodyAndExcerpt(new LocalizedString(), new LocalizedString() );
 	post.setCanViewGroup(site.getCanViewGroup());
 	post.setActive(false);
 	return post;
@@ -66,14 +66,16 @@ public class AdminPostsService {
 
 	LocalizedString name = Post.sanitize(LocalizedString.fromJson(postJson.get("name")));
 	LocalizedString body = Post.sanitize(LocalizedString.fromJson(postJson.get("body")));
-      	String slug = ofNullable(postJson.get("slug"))
+	LocalizedString excerpt = Post.sanitize(LocalizedString.fromJson(postJson.get("excerpt")));
+
+		String slug = ofNullable(postJson.get("slug"))
 	    .map(JsonElement::getAsString).orElse(post.getSlug());
 
 	if(!post.getName().equals(name)) {
 	    post.setName(name);
 	}
-	if(!post.getBody().equals(body)) {
-	    post.setBody(body);
+	if(!post.getBody().equals(body) || !post.getExcerpt().equals(excerpt)) {
+	    post.setBodyAndExcerpt(body, excerpt);
 	}
 	if(!post.getSlug().equals(slug)) {
 	    post.setSlug(slug);
@@ -107,6 +109,7 @@ public class AdminPostsService {
 	postJson.add("name", ofNullable(post.getName()).map(LocalizedString::json)
 	    .orElseGet(JsonObject::new));
 	postJson.add("body", ofNullable(post.getBody()).map(LocalizedString::json).orElseGet(JsonObject::new));
+	postJson.add("excerpt", ofNullable(post.getExcerpt()).map(LocalizedString::json).orElseGet(JsonObject::new));
 
       	if(PermissionEvaluation.canDoThis(post.getSite(), Permission.SEE_METADATA)) {
 	  postJson.add("metadata", ofNullable(post.getMetadata()).map(PostMetadata::json)

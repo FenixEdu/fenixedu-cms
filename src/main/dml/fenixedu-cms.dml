@@ -101,6 +101,7 @@ class Post{
 }
 
 class PostContentRevision{
+  LocalizedString excerpt;
   LocalizedString body;
   DateTime revisionDate;
 }

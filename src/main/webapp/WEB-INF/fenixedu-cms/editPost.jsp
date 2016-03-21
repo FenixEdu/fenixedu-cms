@@ -43,7 +43,7 @@ ${portal.angularToolkit()}
       		<ol class="breadcrumb">
                 <li><a href="${pageContext.request.contextPath}/cms/sites">Content Management</a></li>
                 <li><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></li>
-                <li><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/posts">Posts</a></li>
+                <li><a href="${pageContext.request.contextPath}/cms/sites/posts/${site.slug}">Posts</a></li>
             </ol>
         </small>
     </h1>
@@ -85,9 +85,14 @@ ${portal.angularToolkit()}
 			</div>
 
 			<!-- BODY -->
-		    <div class="form-group">
-	    		<textarea bennu-localized-html-editor="post.body" on-image-added="onImageAdded"></textarea>
-		    </div>
+					<div class="form-group">
+						<div class="panel-heading">Body</div>
+						<textarea bennu-localized-html-editor="post.body" on-image-added="onImageAdded"></textarea>
+					</div>
+					<div class="form-group">
+						<div class="panel-heading">Excerpt</div>
+						<textarea bennu-localized-html-editor="post.excerpt" on-image-added="onImageAdded"></textarea>
+					</div>
 		        </div>
 			    </div>
 			<!-- PUBLISHED -->
@@ -110,7 +115,7 @@ ${portal.angularToolkit()}
 				                <dd><input type="text" class="form-control" ng-user-autocomplete="post.createdBy" /></dd>
 			                </c:if>
 
-		     	            <dt>Access Control</dt>
+		     	            <dt>Access Controlz</dt>
                             <dd><input bennu-group="post.canViewGroup" allow="public,users,managers,custom" name="viewGroup" type="text"/></dd>
 			            </dl>
 			        </div>

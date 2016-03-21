@@ -11,6 +11,10 @@
 
     <p class="small blog-post-meta">{{ post.creationDate|formatDate("MMMM d, Y, H:m") }} by <a href="#">{{post.createdBy.name}}</a></p>
     <p>
+      {{post.excerpt.content | raw}}
+    </p>
+    <hr/>
+    <p>
       {{post.body.content | raw}}
     </p>
 

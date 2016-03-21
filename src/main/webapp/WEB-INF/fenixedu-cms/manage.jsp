@@ -140,7 +140,7 @@ ${portal.toolkit()}
   <tr>
       <td colspan="3" class="folder">
           <i class="glyphicon glyphicon-wrench"></i>
-          <a href="${pageContext.request.contextPath}/cms/sites/search?tag= '&#10008;'"><h5>Untagged<span class="badge">${sitesWithoutFolderCount}</span></h5></a>
+          <a href="${pageContext.request.contextPath}/cms/sites/search?tag=untagged"><h5>Untagged<span class="badge">${sitesWithoutFolderCount}</span></h5></a>
       </td>
   </tr>
   <c:forEach var="i" items="${sitesWithoutFolder}" >
