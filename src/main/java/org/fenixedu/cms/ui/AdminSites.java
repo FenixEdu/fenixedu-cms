@@ -40,7 +40,10 @@ import org.fenixedu.bennu.core.domain.groups.PersistentGroup;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.bennu.social.domain.api.GoogleAPI;
 import org.fenixedu.bennu.social.domain.user.GoogleUser;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
@@ -109,7 +112,7 @@ public class AdminSites {
                                 .collect(toList()), (u, v) -> {
                             throw new IllegalStateException(String.format("Duplicate key %s", u));
                         },
-                        () -> new TreeMap<>(Comparator.comparing(folder -> folder.getFunctionality().getTitle()))));
+                        () -> new TreeMap<>(Comparator.comparing(folder -> ((MenuFunctionality) folder.getFunctionality()).getTitle()))));
 
         AtomicLong sitesWithoutFolderCount = new AtomicLong();
 
@@ -433,6 +436,7 @@ public class AdminSites {
             s.setInitialPage(initialPage);
         }
 
+        Signal.emit(Site.SIGNAL_EDITED, new DomainObjectEvent<>(s));
     }
 
     @RequestMapping(value = "{slug}/delete", method = RequestMethod.POST)
@@ -498,25 +502,26 @@ public class AdminSites {
 
     @RequestMapping(value = "/{slugSite}/roles/{roleId}/change", method = RequestMethod.POST)
     public RedirectView changeSiteRole(@PathVariable String slugSite, @PathVariable String roleId, @RequestParam String group) {
-        FenixFramework.atomic(() -> {
-            Site site = Site.fromSlug(slugSite);
-            PermissionEvaluation.canDoThis(site, Permission.MANAGE_ROLES);
-            Role role = FenixFramework.getDomainObject(roleId);
-            role.setGroup(Group.parse(group).toPersistentGroup());
-        });
+        editRole(slugSite, roleId, group);
         return new RedirectView("/cms/sites/" + slugSite + "#roles", true);
     }
 
     @RequestMapping(value = "/{slugSite}/roles/{roleId}/edit", method = RequestMethod.POST)
     public RedirectView editSiteRole(@PathVariable String slugSite, @PathVariable String roleId, @RequestParam String group) {
+        editRole(slugSite, roleId, group);
+        return new RedirectView("/cms/sites/" + slugSite + "/roles/" + roleId + "/edit", true);
+    }
+
+    private void editRole(@PathVariable String slugSite, @PathVariable String roleId, @RequestParam String group) {
         FenixFramework.atomic(() -> {
             Site site = Site.fromSlug(slugSite);
             PermissionEvaluation.canDoThis(site, Permission.MANAGE_ROLES);
             Role role = FenixFramework.getDomainObject(roleId);
             role.setGroup(Group.parse(group).toPersistentGroup());
+            Signal.emit(Role.SIGNAL_EDITED, new DomainObjectEvent<>(role));
         });
-        return new RedirectView("/cms/sites/" + slugSite + "/roles/" + roleId + "/edit", true);
     }
+
 
     @RequestMapping(value = "/{slugSite}/roles/add", method = RequestMethod.POST)
     public RedirectView createSiteRole(@PathVariable String slugSite, @RequestParam String roleTemplateId) {

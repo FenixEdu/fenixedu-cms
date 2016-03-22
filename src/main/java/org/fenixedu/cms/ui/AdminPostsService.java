@@ -13,6 +13,8 @@ import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.rest.UserResource;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.PermissionEvaluation;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
@@ -62,29 +64,30 @@ public class AdminPostsService {
 
     @Atomic(mode = Atomic.TxMode.WRITE)
     public void processPostChanges(Site site, Post post, JsonObject postJson) {
-	AdminSites.canEdit(site);
+		AdminSites.canEdit(site);
 
-	LocalizedString name = Post.sanitize(LocalizedString.fromJson(postJson.get("name")));
-	LocalizedString body = Post.sanitize(LocalizedString.fromJson(postJson.get("body")));
-	LocalizedString excerpt = Post.sanitize(LocalizedString.fromJson(postJson.get("excerpt")));
+		LocalizedString name = Post.sanitize(LocalizedString.fromJson(postJson.get("name")));
+		LocalizedString body = Post.sanitize(LocalizedString.fromJson(postJson.get("body")));
+		LocalizedString excerpt = Post.sanitize(LocalizedString.fromJson(postJson.get("excerpt")));
 
 		String slug = ofNullable(postJson.get("slug"))
-	    .map(JsonElement::getAsString).orElse(post.getSlug());
+				.map(JsonElement::getAsString).orElse(post.getSlug());
 
-	if(!post.getName().equals(name)) {
-	    post.setName(name);
-	}
-	if(!post.getBody().equals(body) || !post.getExcerpt().equals(excerpt)) {
-	    post.setBodyAndExcerpt(body, excerpt);
-	}
-	if(!post.getSlug().equals(slug)) {
-	    post.setSlug(slug);
-	}
+		if(!post.getName().equals(name)) {
+			post.setName(name);
+		}
+		if(!post.getBody().equals(body) || !post.getExcerpt().equals(excerpt)) {
+			post.setBodyAndExcerpt(body, excerpt);
+		}
+		if(!post.getSlug().equals(slug)) {
+			post.setSlug(slug);
+		}
 
-	processCategoryChanges(site, post, postJson);
-	processFileChanges(site, post, postJson);
-	processPublicationChanges(site, post, postJson);
-	post.fixOrder(post.getFilesSorted());
+		processCategoryChanges(site, post, postJson);
+		processFileChanges(site, post, postJson);
+		processPublicationChanges(site, post, postJson);
+		post.fixOrder(post.getFilesSorted());
+		Signal.emit(Post.SIGNAL_EDITED,new DomainObjectEvent<>(post));
     }
 
 
@@ -246,24 +249,26 @@ public class AdminPostsService {
       }
     }
 
-    private void processFileChanges(Site site, Post post, JsonObject postJson) {
-      if(postJson.get("files")!=null && postJson.get("files").isJsonArray()) {
-	for (JsonElement fileJsonEl : postJson.get("files").getAsJsonArray()) {
-	  JsonObject fileJson = fileJsonEl.getAsJsonObject();
-	  PostFile postFile = FenixFramework.getDomainObject(fileJson.get("id").getAsString());
-	  if(postFile.getPost() == post) {
-	    int index = fileJson.get("index").getAsInt();
-	    boolean isEmbedded = fileJson.get("isEmbedded").getAsBoolean();
-	    if(postFile.getIndex()!= index) {
-	      postFile.setIndex(index);
-	    }
-	    if(postFile.getIsEmbedded()!=isEmbedded) {
-	      postFile.setIsEmbedded(isEmbedded);
-	    }
-	  }
+	private void processFileChanges(Site site, Post post, JsonObject postJson) {
+		if(postJson.get("files")!=null && postJson.get("files").isJsonArray()) {
+			for (JsonElement fileJsonEl : postJson.get("files").getAsJsonArray()) {
+				JsonObject fileJson = fileJsonEl.getAsJsonObject();
+				PostFile postFile = FenixFramework.getDomainObject(fileJson.get("id").getAsString());
+				if(postFile.getPost() == post) {
+					int index = fileJson.get("index").getAsInt();
+					boolean isEmbedded = fileJson.get("isEmbedded").getAsBoolean();
+					if(postFile.getIndex()!= index) {
+						postFile.setIndex(index);
+					}
+					if(postFile.getIsEmbedded()!=isEmbedded) {
+						postFile.setIsEmbedded(isEmbedded);
+					}
+					Signal.emit(PostFile.SIGNAL_EDITED, new DomainObjectEvent<>(postFile));
+				}
+			}
+		}
+
 	}
-      }
-    }
 
 
     private boolean canPublish(Post post) {

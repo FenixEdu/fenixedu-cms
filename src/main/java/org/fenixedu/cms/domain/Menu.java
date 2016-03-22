@@ -48,6 +48,9 @@ import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, Comparable<Menu>{
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.menu.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.menu.deleted";
+    public static final String SIGNAL_EDITED = "fenixedu.cms.menu.edited";
+
 
     public Menu(Site site, LocalizedString name) {
         if (Authenticate.getUser() == null) {
@@ -64,7 +67,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, 
 
         this.setOrder(site.getMenusSet().size());
 
-        Signal.emit(Menu.SIGNAL_CREATED, new DomainObjectEvent<Menu>(this));
+        Signal.emit(Menu.SIGNAL_CREATED, new DomainObjectEvent<>(this));
     }
 
     @Override
@@ -74,6 +77,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, 
 
     @Atomic
     public void delete() {
+        Signal.emit(Menu.SIGNAL_DELETED, new DomainObjectEvent<>(this));
         Sets.newHashSet(getItemsSet()).stream().distinct().forEach(MenuItem::delete);
         this.setCreatedBy(null);
         this.setSite(null);

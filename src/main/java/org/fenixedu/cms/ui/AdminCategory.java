@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
@@ -122,6 +124,7 @@ public class AdminCategory {
             c.setPrivileged(privileged);
             c.setName(name);
         });
+        Signal.emit(Category.SIGNAL_EDITED, new DomainObjectEvent<>(c));
         return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);
     }
 

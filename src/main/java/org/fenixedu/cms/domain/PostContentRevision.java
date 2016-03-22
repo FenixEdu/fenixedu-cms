@@ -1,21 +1,30 @@
 package org.fenixedu.cms.domain;
 
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
+
 import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 public class PostContentRevision extends PostContentRevision_Base implements Cloneable {
 
+
+    public static final String SIGNAL_CREATED = "fenixedu.cms.postContentRevision.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.postContentRevision.deleted";
+
+
     public PostContentRevision() {
         super();
+        Signal.emit(SIGNAL_CREATED, new DomainObjectEvent<>(this));
     }
 
     public void delete() {
+        Signal.emit(SIGNAL_DELETED, this.getOid());
         setNext(null);
         setPrevious(null);
         setPost(null);
         setIsLastestRevision(null);
         setCreatedBy(null);
         deleteDomainObject();
-
     }
 
     /**

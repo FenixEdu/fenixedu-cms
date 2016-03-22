@@ -82,12 +82,16 @@ public class TestSiteImportExportIntegration extends TestCMS {
         assertEqualSites(site, importedSite);
     }
 
+    @Test
     private void assertEqualSites(Site site, Site importedSite) {
         assertNotNull(importedSite);
         Assert.assertEquals(importedSite.getName(), site.getName());
-        Assert.assertEquals(importedSite.getCanAdminGroup(), site.getCanAdminGroup());
+        assertTrue(importedSite.getRolesSet().stream()
+                .allMatch(role -> site.getRolesSet().stream()
+                        .anyMatch(r -> r.getGroup().expression().equals(role.getGroup().expression())
+                                && r.getRoleTemplate().getExternalId().equals(role.getRoleTemplate().getExternalId()))));
+
         Assert.assertEquals(importedSite.getCanViewGroup(), site.getCanViewGroup());
-        Assert.assertEquals(importedSite.getCanPostGroup(), site.getCanPostGroup());
         Assert.assertNotEquals(importedSite.getExternalId(), site.getExternalId());
         Assert.assertEquals(importedSite.getThemeType(), site.getThemeType());
         Assert.assertFalse(importedSite.getPublished());
@@ -123,9 +127,10 @@ public class TestSiteImportExportIntegration extends TestCMS {
 
         Assert.assertEquals(importedSite.getMenusSet().size(), site.getMenusSet().size());
         for (Menu originalMenu : site.getMenusSet()) {
-            Menu importedMenu = site.menuForSlug(originalMenu.getSlug());
+            Menu importedMenu = importedSite.menuForSlug(originalMenu.getSlug());
             assertNotNull(importedMenu);
             Assert.assertEquals(importedMenu.getName(), originalMenu.getName());
+            Assert.assertEquals(importedMenu.getOrder(), originalMenu.getOrder());
             Assert.assertEquals(importedMenu.getToplevelItemsSet().size(), originalMenu.getToplevelItemsSet().size());
 
             Assert.assertEquals(importedMenu.getItemsSet().size(), originalMenu.getItemsSet().size());
@@ -184,6 +189,7 @@ public class TestSiteImportExportIntegration extends TestCMS {
         }
     }
 
+    @Test
     private Site exportAndImport(Site site) {
         try {
             ByteArrayOutputStream exportedSite = new SiteExporter(site).export();

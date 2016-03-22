@@ -51,6 +51,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
 import org.fenixedu.cms.domain.CMSTheme;
@@ -541,6 +543,7 @@ public class AdminThemes {
             theme.setPreviewImage(newthumbnail);
             theme.setPreviewImagePath(null);
         }
+        Signal.emit(CMSTheme.SIGNAL_EDITED, new DomainObjectEvent<>(theme));
     }
 
     @RequestMapping(value = "{type}/deleteDir", method = RequestMethod.POST)

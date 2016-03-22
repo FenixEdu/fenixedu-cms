@@ -9,6 +9,8 @@ import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.json.adapters.DateTimeViewer;
 import org.fenixedu.bennu.core.json.adapters.LocalizedStringViewer;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.commons.i18n.LocalizedString;
 
@@ -38,6 +40,7 @@ public class CategoryAdapter implements JsonAdapter<Category> {
             category.setSlug(jObj.get("slug").getAsString());
         }
 
+        Signal.emit(Category.SIGNAL_EDITED, new DomainObjectEvent<>(category));
         return category;
     }
 

@@ -64,6 +64,9 @@ import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 final public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.site.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.site.deleted";
+    public static final String SIGNAL_EDITED = "fenixedu.cms.site.edited";
+
     public static final Comparator<Site> NAME_COMPARATOR = Comparator.comparing(Site::getName);
     public static final Comparator<Site> CREATION_DATE_COMPARATOR = Comparator.comparing(Site::getCreationDate);
     /**
@@ -375,6 +378,8 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
 
     @Atomic
     public void delete() {
+        Signal.emit(SIGNAL_DELETED, this.getOid());
+
         MenuFunctionality mf = getFunctionality();
         setFunctionality(null);
         setFolder(null);

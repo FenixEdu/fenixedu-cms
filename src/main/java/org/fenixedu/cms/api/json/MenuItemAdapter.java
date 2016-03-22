@@ -10,6 +10,8 @@ import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.json.adapters.DateTimeViewer;
 import org.fenixedu.bennu.core.json.adapters.LocalizedStringViewer;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.commons.i18n.LocalizedString;
 
@@ -47,6 +49,7 @@ public class MenuItemAdapter implements JsonAdapter<MenuItem> {
             menuItem.setFolder(jObj.get("folder").getAsBoolean());
         }
 
+        Signal.emit(MenuItem.SIGNAL_EDITED, new DomainObjectEvent<>(menuItem));
         return menuItem;
     }
 

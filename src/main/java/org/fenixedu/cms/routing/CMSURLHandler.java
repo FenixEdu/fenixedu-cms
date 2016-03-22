@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLStreamException;
 
+import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
@@ -87,7 +88,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
     public void handleRequest(Site site, HttpServletRequest req, HttpServletResponse res, String pageSlug) throws IOException,
             ServletException {
 
-        if (site.getCanViewGroup().isMember(Authenticate.getUser())) {
+        if (site.getCanViewGroup().isMember(Authenticate.getUser()) || DynamicGroup.get("managers").isMember(Authenticate.getUser())) {
             if (site.getPublished()) {
                 try {
                     String baseUrl = "/" + site.getBaseUrl();

@@ -21,16 +21,22 @@ package org.fenixedu.cms.domain;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.portal.domain.MenuContainer;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.commons.i18n.LocalizedString;
 
 import pt.ist.fenixframework.Atomic;
 
 public class CMSFolder extends CMSFolder_Base {
 
+    public static final String SIGNAL_CREATED = "fenixedu.cms.folder.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.folder.deleted";
+
     public CMSFolder(MenuContainer parent, String path, LocalizedString description) {
         super();
         setBennu(Bennu.getInstance());
         setFunctionality(new MenuFunctionality(parent, false, path, "cms", "anyone", description, description, path));
+        Signal.emit(SIGNAL_CREATED,new DomainObjectEvent<>(this));
     }
 
     public Site resolveSite(String url) {
@@ -47,6 +53,7 @@ public class CMSFolder extends CMSFolder_Base {
 
     @Atomic
     public void delete() {
+        Signal.emit(SIGNAL_DELETED, this.getOid());
         MenuFunctionality functionality = getFunctionality();
         setFunctionality(null);
         functionality.delete();

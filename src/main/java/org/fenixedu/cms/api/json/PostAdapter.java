@@ -5,6 +5,8 @@ import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.json.adapters.DateTimeViewer;
 import org.fenixedu.bennu.core.json.adapters.LocalizedStringViewer;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.ui.AdminPosts;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -77,6 +79,7 @@ public class PostAdapter implements JsonAdapter<Post> {
             }
         }
 
+        Signal.emit(Post.SIGNAL_EDITED, new DomainObjectEvent<>(post));
         return post;
     }
 

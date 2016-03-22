@@ -48,6 +48,9 @@ import pt.ist.fenixframework.Atomic;
 public class Category extends Category_Base implements Wrappable, Sluggable, Cloneable {
     private static final long NUM_RECENT = 10;
     public static final String SIGNAL_CREATED = "fenixedu.cms.category.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.category.deleted";
+    public static final String SIGNAL_EDITED = "fenixedu.cms.category.edited";
+
     public static final Comparator<? super Category> CATEGORY_NAME_COMPARATOR = Comparator.comparing(Category::getName);
 
     /**
@@ -109,6 +112,7 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
 
     @Atomic
     public void delete() {
+        Signal.emit(SIGNAL_DELETED, this.getOid());
         this.setCreatedBy(null);
         this.setSite(null);
         this.getComponentsSet().stream().forEach(Component::delete);

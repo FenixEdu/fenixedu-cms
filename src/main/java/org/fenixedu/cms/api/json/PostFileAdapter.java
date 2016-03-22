@@ -12,6 +12,8 @@ import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.PostFile;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 
@@ -48,6 +50,7 @@ public class PostFileAdapter implements JsonAdapter<PostFile> {
             postFile.getFiles().setAccessGroup(Group.parse(jObj.get("accessGroup").getAsString()));
         }
 
+        Signal.emit(PostFile.SIGNAL_EDITED, new DomainObjectEvent<>(postFile));
         return postFile;
     }
 

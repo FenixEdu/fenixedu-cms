@@ -48,6 +48,9 @@ import pt.ist.fenixframework.Atomic;
 public class Page extends Page_Base implements Sluggable, Cloneable {
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.page.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.page.deleted";
+    public static final String SIGNAL_EDITED = "fenixedu.cms.page.edited";
+
     public static final Comparator<Page> CREATION_DATE_COMPARATOR = Comparator.comparing(Page::getCreationDate).reversed();
     public static Comparator<Page> PAGE_NAME_COMPARATOR = Comparator.comparing(Page::getName);
 
@@ -124,6 +127,8 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
 
     @Atomic
     public void delete() {
+        Signal.emit(SIGNAL_DELETED, this.getOid());
+
         for (Component component : getComponentsSet()) {
             removeComponents(component);
             component.delete();

@@ -23,10 +23,16 @@ import java.util.Comparator;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
 
 public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wrappable, Cloneable {
+
+    public static final String SIGNAL_CREATED = "fenixedu.cms.postFile.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.postFile.deleted";
+    public static final String SIGNAL_EDITED = "fenixedu.cms.postFile.edited";
 
     public static final Comparator<PostFile> NAME_COMPARATOR =
             Comparator.comparing(postFile->postFile.getFiles().getDisplayName());
@@ -37,6 +43,7 @@ public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wra
         setFiles(file);
         setIsEmbedded(isEmbedded);
         setIndex(index);
+        Signal.emit(SIGNAL_CREATED,new DomainObjectEvent<>(this));
     }
 
     @Override
@@ -62,6 +69,7 @@ public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wra
     }
 
     public void delete() {
+        Signal.emit(SIGNAL_DELETED, this.getOid());
         setSite(null);
         setPost(null);
         setFiles(null);

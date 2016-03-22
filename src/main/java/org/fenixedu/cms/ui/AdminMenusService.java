@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.cms.domain.Page;
@@ -105,78 +107,81 @@ public class AdminMenusService {
     }
 
     void processMenuChanges(Menu menu, JsonObject menuJson) {
-      ensureCanDoThis(menu.getSite(), Permission.EDIT_MENU);
+        ensureCanDoThis(menu.getSite(), Permission.EDIT_MENU);
 
-      if(menu.getPrivileged()) {
-	ensureCanDoThis(menu.getSite(), Permission.EDIT_PRIVILEGED_MENU);
-      }
+        if(menu.getPrivileged()) {
+            ensureCanDoThis(menu.getSite(), Permission.EDIT_PRIVILEGED_MENU);
+        }
 
-      if(menuJson.get("privileged") != null) {
-	boolean newIsPrivileged = menuJson.get("privileged").getAsBoolean();
-	if(newIsPrivileged != menu.getPrivileged()) {
-	  ensureCanDoThis(menu.getSite(), Permission.EDIT_PRIVILEGED_MENU);
-	  if(newIsPrivileged) {
-	    ensureCanDoThis(menu.getSite(), Permission.CREATE_PRIVILEGED_MENU);
-	  } else {
-	    ensureCanDoThis(menu.getSite(), Permission.DELETE_PRIVILEGED_MENU);
-	  }
-	  menu.setPrivileged(newIsPrivileged);
+        if(menuJson.get("privileged") != null) {
+            boolean newIsPrivileged = menuJson.get("privileged").getAsBoolean();
+            if(newIsPrivileged != menu.getPrivileged()) {
+                ensureCanDoThis(menu.getSite(), Permission.EDIT_PRIVILEGED_MENU);
+                if(newIsPrivileged) {
+                    ensureCanDoThis(menu.getSite(), Permission.CREATE_PRIVILEGED_MENU);
+                } else {
+                    ensureCanDoThis(menu.getSite(), Permission.DELETE_PRIVILEGED_MENU);
+                }
+                menu.setPrivileged(newIsPrivileged);
+            }
+        }
+
+        LocalizedString newName = LocalizedString.fromJson(menuJson.get("name"));
+        if(!menu.getName().equals(newName)) {
+            menu.setName(newName);
+        }
+
+        allDeletedItems(menu, menuJson).forEach(MenuItem::delete);
+
+        if(menuJson.get("children")!=null && menuJson.get("children").isJsonArray()) {
+            JsonArray children = menuJson.get("children").getAsJsonArray();
+            for (int newPosition = 0; newPosition < children.size(); ++newPosition) {
+                processMenuItemChanges(menu, null, children.get(newPosition).getAsJsonObject(), newPosition);
+            }
+        }
+        Signal.emit(Menu.SIGNAL_EDITED, new DomainObjectEvent<>(menu));
+
 	}
-      }
-
-      LocalizedString newName = LocalizedString.fromJson(menuJson.get("name"));
-      if(!menu.getName().equals(newName)) {
-	  menu.setName(newName);
-      }
-
-      allDeletedItems(menu, menuJson).forEach(MenuItem::delete);
-
-      if(menuJson.get("children")!=null && menuJson.get("children").isJsonArray()) {
-	  JsonArray children = menuJson.get("children").getAsJsonArray();
-	  for (int newPosition = 0; newPosition < children.size(); ++newPosition) {
-	      processMenuItemChanges(menu, null, children.get(newPosition).getAsJsonObject(), newPosition);
-	  }
-      }
-    }
 
     void processMenuItemChanges(Menu menu, MenuItem parent, JsonObject menuItemJson, int newPosition) {
-	LocalizedString newName = LocalizedString.fromJson(menuItemJson.get("name"));
-      	String key = menuItemJson.get("key").getAsString();
+        LocalizedString newName = LocalizedString.fromJson(menuItemJson.get("name"));
+        String key = menuItemJson.get("key").getAsString();
 
-	MenuItem menuItem = menuItemForOid(menu.getSite(), key).orElseGet(()-> {
-	  ensureCanDoThis(menu.getSite(), Permission.CREATE_MENU_ITEM);
-	  return new MenuItem(menu);
-	});
+        MenuItem menuItem = menuItemForOid(menu.getSite(), key).orElseGet(()-> {
+            ensureCanDoThis(menu.getSite(), Permission.CREATE_MENU_ITEM);
+            return new MenuItem(menu);
+        });
 
-	menuItem.setName(newName);
+        menuItem.setName(newName);
 
-	if (parent != null) {
-	  parent.putAt(menuItem, newPosition);
-	} else {
-	  menu.putAt(menuItem, newPosition);
-	}
+        if (parent != null) {
+            parent.putAt(menuItem, newPosition);
+        } else {
+            menu.putAt(menuItem, newPosition);
+        }
 
-	switch (menuItemJson.get("use").getAsString()) {
-	  case "page":
-	    setMenuItemPage(menuItem, menuItemJson);
-	    break;
-	  case "url":
-	    setMenuItemUrl(menuItem, menuItemJson);
-	    break;
-	  default:
-	    setMenuItemFolder(menuItem, menuItemJson);
-	    break;
-	}
+        switch (menuItemJson.get("use").getAsString()) {
+            case "page":
+                setMenuItemPage(menuItem, menuItemJson);
+                break;
+            case "url":
+                setMenuItemUrl(menuItem, menuItemJson);
+                break;
+            default:
+                setMenuItemFolder(menuItem, menuItemJson);
+                break;
+        }
 
-	if (menuItemJson.get("children") != null && menuItemJson.get("children").isJsonArray()) {
-	  JsonArray children = menuItemJson.get("children").getAsJsonArray();
-	  for (int newChildrenPosition = 0; newChildrenPosition < children.size();
-	       ++newChildrenPosition) {
-	    processMenuItemChanges(menu, menuItem,
-				   children.get(newChildrenPosition).getAsJsonObject(),
-				   newChildrenPosition);
-	  }
-	}
+        if (menuItemJson.get("children") != null && menuItemJson.get("children").isJsonArray()) {
+            JsonArray children = menuItemJson.get("children").getAsJsonArray();
+            for (int newChildrenPosition = 0; newChildrenPosition < children.size();
+                 ++newChildrenPosition) {
+                processMenuItemChanges(menu, menuItem,
+                        children.get(newChildrenPosition).getAsJsonObject(),
+                        newChildrenPosition);
+            }
+        }
+        Signal.emit(MenuItem.SIGNAL_EDITED, new DomainObjectEvent<>(menuItem));
     }
 
     private void setMenuItemFolder(MenuItem menuItem, JsonObject menuItemJson) {

@@ -37,6 +37,8 @@ import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.CMSConfigurationManager;
 import org.joda.time.DateTime;
 
@@ -50,12 +52,18 @@ import pt.ist.fenixframework.Atomic.TxMode;
 
 public class CMSTheme extends CMSTheme_Base {
 
+
+	public static final String SIGNAL_CREATED = "fenixedu.cms.theme.created";
+	public static final String SIGNAL_DELETED = "fenixedu.cms.theme.deleted";
+	public static final String SIGNAL_EDITED = "fenixedu.cms.theme.edited";
+
 	/**
 	 * The logged {@link User} creates a new instance of a {@link CMSTheme}
 	 */
 	public CMSTheme() {
 		this.setCreatedBy(Authenticate.getUser());
 		this.setCreationDate(new DateTime());
+		Signal.emit(SIGNAL_CREATED, new DomainObjectEvent<>(this));
 	}
 
 	/**
@@ -188,28 +196,29 @@ public class CMSTheme extends CMSTheme_Base {
 					"Themes depend of this theme. Can't delete");
 		}
 
+		Signal.emit(SIGNAL_DELETED, new DomainObjectEvent<>(this));
 		this.setPrimaryBennu(null);
 		this.setBennu(null);
 
 		for(Site site : getSitesSet()){
 			site.setTheme(null);
 		}
-		
-		if (Bennu.getInstance().getCMSThemesSet().size() == 0) {
-			Bennu.getInstance().setDefaultCMSTheme(null);
-		} else {
-			Bennu.getInstance().setDefaultCMSTheme(
-					Bennu.getInstance().getCMSThemesSet().iterator().next());
+
+		if(this.isDefault()) {
+			if (Bennu.getInstance().getCMSThemesSet().size() == 0) {
+				Bennu.getInstance().setDefaultCMSTheme(null);
+			} else {
+				Bennu.getInstance().setDefaultCMSTheme(
+						Bennu.getInstance().getCMSThemesSet().iterator().next());
+			}
 		}
 
 		this.setCreatedBy(null);
 		this.setExtended(null);
 
-		for (CMSTemplate template : this.getTemplatesSet()) {
-			template.delete();
-		}
+		this.getTemplatesSet().forEach(CMSTemplate::delete);
+
 		if (getPreviewImage() != null){
-		
 			GroupBasedFile f = getPreviewImage();
 			setPreviewImage(null);
 			f.delete();

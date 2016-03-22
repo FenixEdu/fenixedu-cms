@@ -27,6 +27,8 @@ import java.util.Objects;
 
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.CMSTemplate;
 import org.fenixedu.cms.domain.CMSTheme;
@@ -146,6 +148,7 @@ public class AdminPagesAdvanced {
             PermissionEvaluation.canDoThis(s, Permission.PUBLISH_PAGES);
             p.setCanViewGroup(canView);
         }
+        Signal.emit(Page.SIGNAL_EDITED, new DomainObjectEvent<>(p));
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)

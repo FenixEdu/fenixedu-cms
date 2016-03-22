@@ -9,6 +9,8 @@ import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.json.adapters.DateTimeViewer;
 import org.fenixedu.bennu.core.json.adapters.LocalizedStringViewer;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.commons.i18n.LocalizedString;
 
@@ -41,6 +43,7 @@ public class PageAdapter implements JsonAdapter<Page> {
             page.setPublished(jObj.get("published").getAsBoolean());
         }
 
+        Signal.emit(Page.SIGNAL_EDITED, new DomainObjectEvent<>(page));
         return page;
     }
 

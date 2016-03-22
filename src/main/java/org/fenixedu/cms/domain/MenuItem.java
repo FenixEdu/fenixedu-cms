@@ -50,6 +50,8 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     public static final Comparator<MenuItem> CREATION_DATE_COMPARATOR = Comparator.comparing(MenuItem::getCreationDate);
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.menuItem.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.menuItem.deleted";
+    public static final String SIGNAL_EDITED = "fenixedu.cms.menuItem.edited";
 
     /**
      * The logged {@link User} creates a new MenuItem.
@@ -169,6 +171,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     @Atomic
     public void delete() {
+        Signal.emit(MenuItem.SIGNAL_CREATED, new DomainObjectEvent<>(this.getMenu()));
         List<MenuItem> items = Lists.newArrayList(getChildrenSet());
         removeFromParent();
         items.forEach(i -> remove(i));

@@ -9,6 +9,8 @@ import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.json.adapters.DateTimeViewer;
 import org.fenixedu.bennu.core.json.adapters.LocalizedStringViewer;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.commons.i18n.LocalizedString;
 
@@ -39,6 +41,7 @@ public class MenuAdapter implements JsonAdapter<Menu> {
             menu.setName(LocalizedString.fromJson(jObj.get("name")));
         }
 
+        Signal.emit(Menu.SIGNAL_EDITED, new DomainObjectEvent<>(menu));
         return menu;
     }
 

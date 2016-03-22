@@ -59,6 +59,9 @@ import pt.ist.fenixframework.Atomic;
 public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
     public static final String SIGNAL_CREATED = "fenixedu.cms.post.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.post.deleted";
+    public static final String SIGNAL_EDITED = "fenixedu.cms.post.edited";
+
 
     public static final Comparator<Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate).reversed();
 
@@ -131,6 +134,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
     @Atomic
     public void delete() {
+        Signal.emit(SIGNAL_DELETED, this.getOid());
+
         setCreatedBy(null);
         setSite(null);
         setViewGroup(null);
@@ -140,6 +145,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         getComponentSet().stream().forEach(Component::delete);
         getCategoriesSet().stream().forEach(category -> category.removePosts(this));
         getRevisionsSet().stream().forEach(PostContentRevision::delete);
+
 
         deleteDomainObject();
     }
