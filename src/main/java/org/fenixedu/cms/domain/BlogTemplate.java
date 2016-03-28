@@ -19,12 +19,7 @@
 package org.fenixedu.cms.domain;
 
 import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.cms.domain.component.Component;
-import org.fenixedu.cms.domain.component.ListCategoryPosts;
-import org.fenixedu.cms.domain.component.ListOfCategories;
-import org.fenixedu.cms.domain.component.ListPosts;
-import org.fenixedu.cms.domain.component.StaticPost;
-import org.fenixedu.cms.domain.component.ViewPost;
+import org.fenixedu.cms.domain.component.*;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 

@@ -18,7 +18,13 @@
  */
 package org.fenixedu.cms.domain.component;
 
-import static java.util.stream.Collectors.toList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.primitives.Ints;
+import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.wraps.Wrap;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,14 +32,7 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.Post;
-import org.fenixedu.cms.domain.wraps.Wrap;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.primitives.Ints;
+import static java.util.stream.Collectors.toList;
 
 public class PostsPresentationBean {
     private static final int FIRST_PAGE_INDEX = 1;

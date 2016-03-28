@@ -18,15 +18,11 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
+
+import java.util.*;
 
 public class DefaultRoles {
 
@@ -86,6 +82,7 @@ public class DefaultRoles {
     permissions.add(Permission.EDIT_PAGE);
     permissions.add(Permission.EDIT_POSTS);
     permissions.add(Permission.EDIT_POSTS_PUBLISHED);
+    permissions.add(Permission.EDIT_SITE_INFORMATION);
     permissions.add(Permission.LIST_CATEGORIES);
     permissions.add(Permission.EDIT_CATEGORY);
     permissions.add(Permission.DELETE_CATEGORY);

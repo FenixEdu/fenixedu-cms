@@ -18,25 +18,20 @@
  */
 package org.fenixedu.cms.domain;
 
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuContainer;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.domain.MenuItem;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.CMSConfigurationManager;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ListCategoryPosts;
@@ -52,14 +47,16 @@ import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 final public class Site extends Site_Base implements Wrappable, Sluggable, Cloneable {
 
@@ -134,7 +131,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
         setCreatedBy(Authenticate.getUser());
         setCreationDate(new DateTime());
 
-        setCanViewGroup(AnyoneGroup.get());
+        setCanViewGroup(Group.anyone());
         // TODO: Set Default Permissions
         setBennu(Bennu.getInstance());
 
@@ -147,7 +144,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
         setPublished(false);
         setAnalytics(new SiteAnalytics());
 
-        Signal.emit(Site.SIGNAL_CREATED, new DomainObjectEvent<Site>(this));
+        Signal.emit(Site.SIGNAL_CREATED, new DomainObjectEvent<>(this));
     }
 
     /**
@@ -202,8 +199,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * searches for a {@link Page} by slug on this {@link Site}.
      *
      * @param slug the slug of the {@link Page} wanted.
-     * @return the {@link Page} with the given slug if it exists on this site,
-     *         or null otherwise.
+     * @return the {@link Page} with the given slug if it exists on this site
      */
     public Page pageForSlug(String slug) {
         return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElseThrow(() ->  CmsDomainException.notFound());
@@ -224,8 +220,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * searches for a {@link Post} by slug on this {@link Site}.
      *
      * @param slug the slug of the {@link Post} wanted.
-     * @return the {@link Post} with the given slug if it exists on this site,
-     *         or null otherwise.
+     * @return the {@link Post} with the given slug if it exists on this site
      */
     public Post postForSlug(String slug) {
         return getPostSet().stream().filter(post -> slug.equals(post.getSlug())).findAny().orElse(null);

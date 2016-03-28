@@ -18,17 +18,16 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Sets;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 
-import com.google.common.collect.Sets;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Created by borgez-dsi on 08-09-2015.
@@ -36,13 +35,13 @@ import com.google.common.collect.Sets;
 public class PermissionEvaluation {
 
     public static boolean canAccess(User user, Site site) {
-        return Group.parse("#managers").isMember(user)
+        return Group.managers().isMember(user)
                 || site.getRolesSet().stream().filter(x -> x.getGroup().isMember(user)).findAny().isPresent();
     }
 
     public static boolean canDoThis(User user, Site site, Permission... permissions) {
         HashSet<Permission> requiredPerms = Sets.newHashSet(permissions);
-        if (Group.parse("#managers").isMember(user)) {
+        if (Group.managers().isMember(user)) {
             return true;
         }
 

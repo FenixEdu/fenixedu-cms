@@ -18,25 +18,22 @@
  */
 package org.fenixedu.cms.api.json;
 
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_PAGE;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_POSTS;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.SEE_PAGES;
-
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
-import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
+import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.cms.domain.PostFile;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.*;
 
 @DefaultJsonAdapter(PostFile.class)
 public class PostFileAdapter implements JsonAdapter<PostFile> {

@@ -18,29 +18,27 @@
  */
 package org.fenixedu.cms.rss;
 
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.joining;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.regex.Pattern;
+import org.fenixedu.bennu.portal.domain.PortalConfiguration;
+import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.Site;
+import org.fenixedu.commons.i18n.LocalizedString;
+import pt.ist.fenixframework.core.Project;
+import pt.ist.fenixframework.core.exception.ProjectException;
 
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Collection;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
-import org.fenixedu.bennu.portal.domain.PortalConfiguration;
-import org.fenixedu.cms.domain.Category;
-import org.fenixedu.cms.domain.Post;
-import org.fenixedu.cms.domain.Site;
-import org.fenixedu.commons.i18n.LocalizedString;
-
-import pt.ist.fenixframework.core.Project;
-import pt.ist.fenixframework.core.exception.ProjectException;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
 
 /**
  * Service that generates an RSS Feed from either a {@link Site} (in which case the feed info is that of the site, and all the

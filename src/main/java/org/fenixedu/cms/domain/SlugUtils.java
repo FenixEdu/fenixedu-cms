@@ -18,11 +18,10 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.UUID;
-
+import com.google.common.base.Joiner;
 import org.fenixedu.commons.StringNormalizer;
 
-import com.google.common.base.Joiner;
+import java.util.UUID;
 
 public class SlugUtils {
     static String makeSlug(Sluggable element, String slug){

@@ -18,12 +18,12 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.Locale;
-import java.util.function.Function;
-
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
+
+import java.util.Locale;
+import java.util.function.Function;
 
 public class Sanitization {
 
