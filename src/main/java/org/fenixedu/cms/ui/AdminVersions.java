@@ -18,8 +18,7 @@
  */
 package org.fenixedu.cms.ui;
 
-import static java.util.Optional.ofNullable;
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import pt.ist.fenixframework.FenixFramework;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
@@ -36,7 +35,8 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.gson.JsonObject;
 
-import pt.ist.fenixframework.FenixFramework;
+import static java.util.Optional.ofNullable;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/versions")

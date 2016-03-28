@@ -18,40 +18,26 @@
  */
 package org.fenixedu.cms.api.resource;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.cms.api.json.CategoryAdapter;
-import org.fenixedu.cms.api.json.MenuAdapter;
-import org.fenixedu.cms.api.json.PageAdapter;
-import org.fenixedu.cms.api.json.PostAdapter;
-import org.fenixedu.cms.api.json.SiteAdapter;
+import org.fenixedu.cms.api.json.*;
 import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.commons.i18n.LocalizedString;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Path("/cms/sites")
 public class SiteResource extends BennuRestResource {
@@ -60,7 +46,7 @@ public class SiteResource extends BennuRestResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String listAllSites() {
+    public JsonElement listAllSites() {
         return view(getAdminSites(), SiteAdapter.class);
     }
 
@@ -71,19 +57,19 @@ public class SiteResource extends BennuRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String createSite(String json) {
+    public JsonElement createSite(JsonElement json) {
         CmsSettings.getInstance().ensureCanManageSettings();
         return view(createSiteFromJson(json));
     }
 
-    private Site createSiteFromJson(String json) {
+    private Site createSiteFromJson(JsonElement json) {
         return create(json, Site.class);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String listSite(@PathParam("oid") Site site) {
+    public JsonElement listSite(@PathParam("oid") Site site) {
         return view(site, SiteAdapter.class);
     }
 
@@ -99,18 +85,18 @@ public class SiteResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String updateSite(@PathParam("oid") Site site, String json) {
+    public JsonElement updateSite(@PathParam("oid") Site site, JsonElement json) {
         return updateSiteFromJson(site, json);
     }
 
-    private String updateSiteFromJson(Site site, String json) {
+    private JsonElement updateSiteFromJson(Site site, JsonElement json) {
         return view(update(json, site, SiteAdapter.class));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/posts")
-    public String listSitePosts(@PathParam("oid") Site site, @QueryParam("category") final Set<Category> categories) {
+    public JsonElement listSitePosts(@PathParam("oid") Site site, @QueryParam("category") final Set<Category> categories) {
         Set<Post> posts = site.getPostSet();
 
         if (categories != null && !categories.isEmpty()) {
@@ -125,7 +111,7 @@ public class SiteResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/posts")
-    public String createPost(@PathParam("oid") Site site, JsonObject json) {
+    public JsonElement createPost(@PathParam("oid") Site site, JsonObject json) {
         return view(createPostFromJson(site, json));
     }
 
@@ -158,7 +144,7 @@ public class SiteResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/pages")
-    public String listSitePages(@PathParam("oid") Site site) {
+    public JsonElement listSitePages(@PathParam("oid") Site site) {
         return view(site.getPagesSet(), PageAdapter.class);
     }
 
@@ -166,7 +152,7 @@ public class SiteResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/pages")
-    public String createPage(@PathParam("oid") Site site, JsonObject json) {
+    public JsonElement createPage(@PathParam("oid") Site site, JsonObject json) {
         return view(createPageFromJson(site, json));
     }
 
@@ -192,7 +178,7 @@ public class SiteResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/categories")
-    public String listSiteCategories(@PathParam("oid") Site site) {
+    public JsonElement listSiteCategories(@PathParam("oid") Site site) {
         return view(site.getCategoriesSet(), CategoryAdapter.class);
     }
 
@@ -200,7 +186,7 @@ public class SiteResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/categories")
-    public String createCategory(@PathParam("oid") Site site, JsonObject json) {
+    public JsonElement createCategory(@PathParam("oid") Site site, JsonObject json) {
         return view(createCategoryFromJson(site, json));
     }
 
@@ -222,7 +208,7 @@ public class SiteResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/menus")
-    public String listSiteMenus(@PathParam("oid") Site site) {
+    public JsonElement listSiteMenus(@PathParam("oid") Site site) {
         return view(site.getOrderedMenusSet(), MenuAdapter.class);
     }
 
@@ -230,7 +216,7 @@ public class SiteResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}/menus")
-    public String createMenu(@PathParam("oid") Site site, JsonObject json) {
+    public JsonElement createMenu(@PathParam("oid") Site site, JsonObject json) {
         return view(createMenuFromJson(site, json));
     }
 

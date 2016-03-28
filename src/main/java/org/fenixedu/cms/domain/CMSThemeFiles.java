@@ -18,6 +18,13 @@
  */
 package org.fenixedu.cms.domain;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.hash.Hashing;
+import com.google.common.io.ByteStreams;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,13 +36,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.hash.Hashing;
-import com.google.common.io.ByteStreams;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 public class CMSThemeFiles {
 

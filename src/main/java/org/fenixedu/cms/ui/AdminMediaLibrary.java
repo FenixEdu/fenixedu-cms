@@ -18,8 +18,7 @@
  */
 package org.fenixedu.cms.ui;
 
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.ui.SearchUtils.searchFiles;
+import pt.ist.fenixframework.FenixFramework;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -39,7 +38,8 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import com.google.common.base.Strings;
 
-import pt.ist.fenixframework.FenixFramework;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.ui.SearchUtils.searchFiles;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/media")

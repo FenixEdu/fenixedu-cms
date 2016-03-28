@@ -18,18 +18,17 @@
  */
 package org.fenixedu.cms.rendering;
 
-import java.util.Set;
-
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
-
 import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.RegisterSiteTemplate;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ComponentType;
+
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.HandlesTypes;
+import java.util.Set;
 
 @HandlesTypes({ ComponentType.class, RegisterSiteTemplate.class })
 public class CMSInitializer implements ServletContainerInitializer {

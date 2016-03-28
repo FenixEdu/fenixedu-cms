@@ -18,22 +18,21 @@
  */
 package org.fenixedu.cms.api.json;
 
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_CATEGORY;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.LIST_CATEGORIES;
-
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
+import org.fenixedu.bennu.core.api.json.DateTimeViewer;
+import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
 import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
-import org.fenixedu.bennu.core.json.adapters.DateTimeViewer;
-import org.fenixedu.bennu.core.json.adapters.LocalizedStringViewer;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.commons.i18n.LocalizedString;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_CATEGORY;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.LIST_CATEGORIES;
 
 @DefaultJsonAdapter(Category.class)
 public class CategoryAdapter implements JsonAdapter<Category> {

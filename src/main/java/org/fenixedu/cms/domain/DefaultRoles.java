@@ -18,15 +18,11 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
+
+import java.util.*;
 
 public class DefaultRoles {
 

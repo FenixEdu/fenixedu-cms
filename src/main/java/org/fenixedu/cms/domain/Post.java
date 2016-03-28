@@ -18,26 +18,13 @@
  */
 package org.fenixedu.cms.domain;
 
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.collect.ImmutableList;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.StaticPost;
@@ -48,10 +35,13 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-
-import com.google.common.collect.ImmutableList;
-
 import pt.ist.fenixframework.Atomic;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * A post models a given content to be presented to the user.
@@ -81,10 +71,10 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         setCreationDate(now);
         setModificationDate(now);
         setActive(false);
-        setCanViewGroup(AnyoneGroup.get());
+        setCanViewGroup(Group.anyone());
         setSite(site);
 
-        Signal.emit(Post.SIGNAL_CREATED, new DomainObjectEvent<Post>(this));
+        Signal.emit(Post.SIGNAL_CREATED, new DomainObjectEvent<>(this));
     }
 
     @Override
@@ -208,11 +198,11 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     @Atomic
     public void setCanViewGroup(Group group) {
         super.setViewGroup(group.toPersistentGroup());
-        Set<User> groupMembers = group.getMembers().stream().collect(Collectors.toSet());
+        Set<User> groupMembers = group.getMembers().collect(Collectors.toSet());
         getEmbeddedFilesSorted().forEach(postFile -> postFile.getFiles().setAccessGroup(group));
         //if the new group is more restricted then the attachment group is updated
         getAttachmentFilesSorted().map(PostFile::getFiles)
-                .filter(file -> !file.getAccessGroup().getMembers().stream().allMatch(groupMembers::contains))
+                .filter(file -> !file.getAccessGroup().getMembers().allMatch(groupMembers::contains))
                 .forEach(file -> file.setAccessGroup(group));
     }
 

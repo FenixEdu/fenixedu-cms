@@ -18,11 +18,11 @@
  */
 package org.fenixedu.cms.domain.component;
 
-import java.util.HashMap;
-
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.rendering.TemplateContext;
+
+import java.util.HashMap;
 
 /**
  * Component that lists all the non-static {@link Post}

@@ -18,10 +18,20 @@
  */
 package org.fenixedu.cms.ui;
 
-import static java.util.Optional.ofNullable;
-import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_ADVANCED_PAGES;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
+import org.fenixedu.cms.domain.Menu;
+import org.fenixedu.cms.domain.MenuItem;
+import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
+import org.fenixedu.cms.domain.Site;
+import org.fenixedu.commons.i18n.LocalizedString;
+import org.springframework.stereotype.Service;
+import pt.ist.fenixframework.Atomic;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -29,23 +39,10 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
-import org.fenixedu.cms.domain.Menu;
-import org.fenixedu.cms.domain.MenuItem;
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.PermissionsArray.Permission;
-import org.fenixedu.cms.domain.Site;
-import org.fenixedu.cms.domain.component.StaticPost;
-import org.fenixedu.commons.i18n.LocalizedString;
-import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-
-import pt.ist.fenixframework.Atomic;
+import static java.util.Optional.ofNullable;
+import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_ADVANCED_PAGES;
 
 /**
  * Created by borgez on 03-08-2015.

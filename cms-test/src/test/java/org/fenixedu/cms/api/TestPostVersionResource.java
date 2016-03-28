@@ -1,11 +1,8 @@
 package org.fenixedu.cms.api;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.json.PostRevisionAdapter;
 import org.fenixedu.cms.domain.CmsTestUtils;
@@ -19,9 +16,11 @@ import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+
+import static org.junit.Assert.assertTrue;
 
 @RunWith(FenixFrameworkRunner.class)
 public class TestPostVersionResource extends TestCmsApi {

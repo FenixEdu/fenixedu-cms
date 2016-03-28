@@ -18,13 +18,12 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.Base64;
-
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.apache.tika.Tika;
 import org.joda.time.DateTime;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import java.util.Base64;
 
 public class CMSThemeFile {
 

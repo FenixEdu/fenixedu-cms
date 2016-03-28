@@ -167,7 +167,6 @@ ${portal.angularToolkit()}
 <link href="${pageContext.request.contextPath}/static/css/skin-awesome/ui.fancytree.css" rel="stylesheet" type="text/css">
 <script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/jquery.js" type="text/javascript"></script>
-<script src="${pageContext.request.contextPath}/static/js/bennu-angular.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/js/fancytree-directive.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload-shim.js" type="text/javascript" charset="utf-8"></script>
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload.js" type="text/javascript" charset="utf-8"></script>

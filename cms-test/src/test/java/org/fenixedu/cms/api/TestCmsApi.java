@@ -1,51 +1,27 @@
 package org.fenixedu.cms.api;
 
-import java.util.stream.Stream;
-
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Application;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import org.fenixedu.bennu.core.groups.ManualGroupRegister;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.rest.DomainExceptionMapper;
 import org.fenixedu.bennu.core.rest.DomainObjectParamConverter;
 import org.fenixedu.bennu.core.rest.JsonAwareResource;
 import org.fenixedu.bennu.core.rest.JsonBodyReaderWriter;
-import org.fenixedu.cms.api.json.CategoryAdapter;
-import org.fenixedu.cms.api.json.MenuAdapter;
-import org.fenixedu.cms.api.json.MenuItemAdapter;
-import org.fenixedu.cms.api.json.PageAdapter;
-import org.fenixedu.cms.api.json.PostAdapter;
-import org.fenixedu.cms.api.json.PostRevisionAdapter;
-import org.fenixedu.cms.api.json.SiteAdapter;
-import org.fenixedu.cms.api.json.ThemeAdapter;
-import org.fenixedu.cms.api.resource.CategoryResource;
-import org.fenixedu.cms.api.resource.MenuItemResource;
-import org.fenixedu.cms.api.resource.MenuResource;
-import org.fenixedu.cms.api.resource.PageResource;
-import org.fenixedu.cms.api.resource.PostResource;
-import org.fenixedu.cms.api.resource.RevisionResource;
-import org.fenixedu.cms.api.resource.SiteResource;
-import org.fenixedu.cms.api.resource.ThemeResource;
-import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.Category;
-import org.fenixedu.cms.domain.Menu;
-import org.fenixedu.cms.domain.MenuItem;
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.Post;
-import org.fenixedu.cms.domain.PostContentRevision;
-import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.api.json.*;
+import org.fenixedu.cms.api.resource.*;
+import org.fenixedu.cms.domain.*;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Application;
+import java.util.stream.Stream;
 
 public class TestCmsApi extends JerseyTest {
 

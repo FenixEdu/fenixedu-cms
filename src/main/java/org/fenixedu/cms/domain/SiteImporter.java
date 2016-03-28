@@ -18,9 +18,21 @@
  */
 package org.fenixedu.cms.domain;
 
-import static java.util.Optional.ofNullable;
-import static org.apache.tika.io.FilenameUtils.normalize;
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+import com.google.common.collect.Maps;
+import com.google.common.io.ByteStreams;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.io.domain.GroupBasedFile;
+import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
+import org.fenixedu.cms.domain.component.CMSComponent;
+import org.fenixedu.cms.domain.component.Component;
+import org.fenixedu.cms.domain.component.ComponentDescriptor;
+import org.fenixedu.cms.domain.component.ListCategoryPosts;
+import org.fenixedu.commons.i18n.LocalizedString;
+import org.joda.time.DateTime;
+import pt.ist.fenixframework.Atomic;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,23 +43,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.io.domain.GroupBasedFile;
-import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
-import org.fenixedu.cms.domain.component.CMSComponent;
-import org.fenixedu.cms.domain.component.Component;
-import org.fenixedu.cms.domain.component.ComponentDescriptor;
-import org.fenixedu.cms.domain.component.ListCategoryPosts;
-import org.fenixedu.commons.i18n.LocalizedString;
-import org.joda.time.DateTime;
-
-import com.google.common.collect.Maps;
-import com.google.common.io.ByteStreams;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import pt.ist.fenixframework.Atomic;
+import static java.util.Optional.ofNullable;
+import static org.apache.tika.io.FilenameUtils.normalize;
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * Created by borgez-dsi on 24-06-2015.

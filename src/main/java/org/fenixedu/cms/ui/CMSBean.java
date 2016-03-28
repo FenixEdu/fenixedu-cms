@@ -18,15 +18,15 @@
  */
 package org.fenixedu.cms.ui;
 
-import java.text.DecimalFormat;
-import java.util.Date;
-
 import org.fenixedu.bennu.io.domain.GenericFile;
-import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
+import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
 import org.fenixedu.commons.i18n.I18N;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.ocpsoft.prettytime.PrettyTime;
+
+import java.text.DecimalFormat;
+import java.util.Date;
 
 public class CMSBean {
 

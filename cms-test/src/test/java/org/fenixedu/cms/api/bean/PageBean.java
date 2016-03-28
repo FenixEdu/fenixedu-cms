@@ -1,10 +1,9 @@
 package org.fenixedu.cms.api.bean;
 
-import org.fenixedu.bennu.core.json.JsonBuilder;
-import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
-import org.fenixedu.commons.i18n.LocalizedString;
-
 import com.google.gson.JsonObject;
+import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
+import org.fenixedu.bennu.core.json.JsonBuilder;
+import org.fenixedu.commons.i18n.LocalizedString;
 
 public class PageBean {
     private LocalizedString name;

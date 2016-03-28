@@ -18,8 +18,6 @@
  */
 package org.fenixedu.bennu;
 
-import javax.annotation.PostConstruct;
-
 import org.fenixedu.bennu.portal.servlet.PortalBackendRegistry;
 import org.fenixedu.bennu.spring.BennuSpringModule;
 import org.fenixedu.cms.routing.CMSBackend;
@@ -27,6 +25,8 @@ import org.fenixedu.cms.routing.CMSEmbeddedBackend;
 import org.fenixedu.cms.routing.CMSURLHandler;
 import org.fenixedu.cms.ui.CMSBean;
 import org.springframework.context.annotation.Bean;
+
+import javax.annotation.PostConstruct;
 
 @BennuSpringModule(basePackages = "org.fenixedu.cms", bundles = "CmsResources")
 public class CMSConfiguration {

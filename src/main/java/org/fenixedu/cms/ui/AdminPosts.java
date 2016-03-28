@@ -18,42 +18,30 @@
  */
 package org.fenixedu.cms.ui;
 
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.ui.SearchUtils.searchPosts;
+import com.google.common.base.Strings;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.spring.portal.BennuSpringController;
+import org.fenixedu.cms.domain.*;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
+import org.fenixedu.commons.i18n.LocalizedString;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.view.RedirectView;
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.FenixFramework;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.Category;
-import org.fenixedu.cms.domain.PermissionEvaluation;
-import org.fenixedu.cms.domain.PermissionsArray.Permission;
-import org.fenixedu.cms.domain.Post;
-import org.fenixedu.cms.domain.PostFile;
-import org.fenixedu.cms.domain.PostMetadata;
-import org.fenixedu.cms.domain.Site;
-import org.fenixedu.cms.domain.SiteActivity;
-import org.fenixedu.commons.i18n.LocalizedString;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.view.RedirectView;
-
-import com.google.common.base.Strings;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.FenixFramework;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.ui.SearchUtils.searchPosts;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/posts")

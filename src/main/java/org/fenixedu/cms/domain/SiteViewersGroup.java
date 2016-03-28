@@ -18,11 +18,6 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
 import org.fenixedu.bennu.core.annotation.GroupArgument;
 import org.fenixedu.bennu.core.annotation.GroupArgumentParser;
 import org.fenixedu.bennu.core.annotation.GroupOperator;
@@ -32,6 +27,9 @@ import org.fenixedu.bennu.core.groups.ArgumentParser;
 import org.fenixedu.bennu.core.groups.CustomGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.joda.time.DateTime;
+
+import java.util.*;
+import java.util.stream.Stream;
 
 @GroupOperator("siteViewers")
 public class SiteViewersGroup extends CustomGroup {
@@ -84,15 +82,15 @@ public class SiteViewersGroup extends CustomGroup {
     }
 
     @Override
-    public Set<User> getMembers() {
+    public Stream<User> getMembers() {
         if (!site.getPublished()) {
-            return new HashSet<User>();
+            return Stream.empty();
         }
         return site.getCanViewGroup().getMembers();
     }
 
     @Override
-    public Set<User> getMembers(DateTime when) {
+    public Stream<User> getMembers(DateTime when) {
         return getMembers();
     }
 

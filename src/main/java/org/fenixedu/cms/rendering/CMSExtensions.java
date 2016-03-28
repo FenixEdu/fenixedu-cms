@@ -18,33 +18,21 @@
  */
 package org.fenixedu.cms.rendering;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.*;
+import com.mitchellbosecke.pebble.extension.AbstractExtension;
+import com.mitchellbosecke.pebble.extension.Filter;
+import com.mitchellbosecke.pebble.extension.Function;
+import com.mitchellbosecke.pebble.extension.Test;
+import com.mitchellbosecke.pebble.tokenParser.TokenParser;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
 import org.fenixedu.bennu.portal.servlet.LazyForTokenParser;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ContiguousSet;
-import com.google.common.collect.DiscreteDomain;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Range;
-import com.google.common.collect.Sets;
-import com.mitchellbosecke.pebble.extension.AbstractExtension;
-import com.mitchellbosecke.pebble.extension.Filter;
-import com.mitchellbosecke.pebble.extension.Function;
-import com.mitchellbosecke.pebble.extension.Test;
-import com.mitchellbosecke.pebble.tokenParser.TokenParser;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class CMSExtensions extends AbstractExtension {
     public class LengthFilter implements Filter {

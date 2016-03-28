@@ -1,13 +1,7 @@
 package org.fenixedu.cms.api;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Locale;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.api.bean.PageBean;
 import org.fenixedu.cms.domain.CmsTestUtils;
@@ -21,8 +15,12 @@ import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import java.util.Locale;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(FenixFrameworkRunner.class)
 public class TestPageResource extends TestCmsApi {

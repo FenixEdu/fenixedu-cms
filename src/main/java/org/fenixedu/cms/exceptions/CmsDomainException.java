@@ -18,9 +18,9 @@
  */
 package org.fenixedu.cms.exceptions;
 
-import javax.ws.rs.core.Response;
-
 import org.fenixedu.bennu.core.domain.exceptions.DomainException;
+
+import javax.ws.rs.core.Response;
 
 /**
  * Created by nurv on 22/08/14.

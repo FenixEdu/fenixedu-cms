@@ -1,14 +1,12 @@
 package org.fenixedu.cms.domain;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.fenixedu.bennu.core.domain.User;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.FenixFrameworkRunner;
+
+import static org.junit.Assert.*;
 
 @RunWith(FenixFrameworkRunner.class)
 public class TestPost extends TestCMS {

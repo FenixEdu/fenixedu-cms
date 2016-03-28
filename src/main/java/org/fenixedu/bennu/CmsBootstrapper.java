@@ -24,7 +24,6 @@ import org.fenixedu.bennu.core.bootstrap.annotations.Bootstrapper;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.cms.domain.CmsSettings;
 import org.fenixedu.cms.domain.DefaultRoles;
-
 import pt.ist.fenixframework.FenixFramework;
 
 @Bootstrapper(bundle = "resources.CmsResources", name = "application.title.cms.bootstrapper", after = AdminUserBootstrapper.class,

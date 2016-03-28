@@ -18,19 +18,11 @@
  */
 package org.fenixedu.cms.routing;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.Optional;
-
-import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.stream.XMLStreamException;
-
+import com.google.common.base.Strings;
+import com.mitchellbosecke.pebble.PebbleEngine;
+import com.mitchellbosecke.pebble.error.PebbleException;
+import com.mitchellbosecke.pebble.loader.StringLoader;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
@@ -49,11 +41,17 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.error.PebbleException;
-import com.mitchellbosecke.pebble.loader.StringLoader;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.Optional;
 
 public final class CMSURLHandler implements SemanticURLHandler {
 
@@ -209,8 +207,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
             return;
         } else if (req.getMethod().equals("POST")) {
             if (CoreConfiguration.getConfiguration().developmentMode()) {
-                PebbleEngine engine = new PebbleEngine(new StringLoader());
-                engine.addExtension(new CMSExtensions());
+                PebbleEngine engine = new PebbleEngine.Builder().loader(new StringLoader()).extension(new CMSExtensions()).build();
                 PebbleTemplate compiledTemplate =
                         engine.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
                 res.setStatus(500);

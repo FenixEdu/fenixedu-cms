@@ -18,16 +18,15 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.io.StringWriter;
-
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.ui.SiteActivityRender;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.io.StringWriter;
 
 public class SiteActivity extends SiteActivity_Base {
 

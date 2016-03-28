@@ -18,12 +18,11 @@
  */
 package org.fenixedu.cms;
 
+import com.google.common.base.Strings;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.commons.configuration.ConfigurationInvocationHandler;
 import org.fenixedu.commons.configuration.ConfigurationManager;
 import org.fenixedu.commons.configuration.ConfigurationProperty;
-
-import com.google.common.base.Strings;
 
 public class CMSConfigurationManager {
     @ConfigurationManager(description = "General CMS Configuration")
