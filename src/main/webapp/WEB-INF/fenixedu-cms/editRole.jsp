@@ -61,7 +61,7 @@ ${portal.toolkit()}
         </dl>
       </div>
     </div>
-    <c:if test="${permissions:canDoThis(role.site, 'MANAGE_ROLES')}">
+    <c:if test="${cmsSettings.canManageRoles()}">
       <div class="panel panel-danger">
         <div class="panel-heading">Danger Zone</div>
         <div class="panel-body">

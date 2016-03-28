@@ -68,7 +68,7 @@ ${portal.angularToolkit()}
 						<span class="glyphicon glyphicon-cog"></span> Metadata
 					</button>
 				</c:if>
-				<a ng-class="{disabled: !post.active || !post.address}" target="_blank" href="{{ post.address }}" class="btn btn-default">
+				<a ng-class="{disabled: !post.published || !post.address}" target="_blank" href="{{ post.address }}" class="btn btn-default">
 					<span class="glyphicon glyphicon-link"></span> Link
 				</a>
 			</div>
@@ -98,8 +98,8 @@ ${portal.angularToolkit()}
 			            <dl class="dl-horizontal">
 			                <dt>Published</dt>
 			                <dd>
-	                                <input type="checkbox" ng-model="post.active" id="success">
-	                                <label for="success">Privileged</label>
+	                                <input type="checkbox" ng-model="post.published" id="success">
+	                                <label for="success">Published</label>
 			                </dd>
 			                <dt>Publication Begin</dt>
 			                <dd><input class="form-control" bennu-date-time="post.publicationBegin"></dd>
