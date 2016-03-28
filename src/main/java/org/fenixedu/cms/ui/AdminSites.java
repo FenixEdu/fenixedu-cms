@@ -48,20 +48,8 @@ import org.fenixedu.bennu.social.domain.api.GoogleAPI;
 import org.fenixedu.bennu.social.domain.user.GoogleUser;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
-import org.fenixedu.cms.domain.CMSFolder;
-import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.CloneCache;
-import org.fenixedu.cms.domain.CmsSettings;
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.PermissionEvaluation;
-import org.fenixedu.cms.domain.PermissionsArray;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
-import org.fenixedu.cms.domain.Role;
-import org.fenixedu.cms.domain.RoleTemplate;
-import org.fenixedu.cms.domain.Site;
-import org.fenixedu.cms.domain.SiteActivity;
-import org.fenixedu.cms.domain.SiteExporter;
-import org.fenixedu.cms.domain.SiteImporter;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.slf4j.Logger;
@@ -391,8 +379,8 @@ public class AdminSites {
                           Site s, String viewGroup, String folder, String analyticsCode, String accountId, Page initialPage) {
 
         if (PermissionEvaluation.canDoThis(s, Permission.EDIT_SITE_INFORMATION)) {
-            s.setName(name);
-            s.setDescription(description);
+            s.setName(Post.sanitize(name));
+            s.setDescription(Post.sanitize(description));
         }
 
         if (PermissionEvaluation.canDoThis(s, Permission.CHANGE_THEME)) {
