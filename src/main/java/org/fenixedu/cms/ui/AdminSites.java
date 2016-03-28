@@ -1,37 +1,33 @@
 /**
  * Copyright © 2014 Instituto Superior Técnico
- *
+ * <p>
  * This file is part of FenixEdu CMS.
- *
+ * <p>
  * FenixEdu CMS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * FenixEdu CMS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU Lesser General Public License
  * along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.fenixedu.cms.ui;
 
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static org.fenixedu.cms.domain.PermissionEvaluation.canAccess;
 import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
@@ -102,71 +98,104 @@ public class AdminSites {
     protected static final Logger LOGGER = LoggerFactory.getLogger(AdminSites.class);
     private static final int ITEMS_PER_PAGE = 10;
     private static final int ITEMS_PER_FOLDER_HOME = 5;
+
     @RequestMapping
-    public String list(Model model,@RequestParam(required = false, defaultValue = "1") int page,
-                       @RequestParam(required = false) String query, @RequestParam(required = false) String tag) {
+    public String list(Model model) {
+        Map<CMSFolder, List<Site>> sitesByFolders = Bennu.getInstance().getCmsFolderSet().stream()
+                .collect(Collectors.toMap(Function.identity(), folder -> folder.getSiteSet().stream()
+                                .filter(site -> PermissionEvaluation.canAccess(Authenticate.getUser(), site))
+                                .sorted(Comparator.comparing(Site::getCreationDate).reversed())
+                                .limit(ITEMS_PER_FOLDER_HOME)
+                                .collect(toList()), (u, v) -> {
+                            throw new IllegalStateException(String.format("Duplicate key %s", u));
+                        },
+                        () -> new TreeMap<>(Comparator.comparing(folder -> folder.getFunctionality().getTitle()))));
+
+        AtomicLong sitesWithoutFolderCount = new AtomicLong();
+
+        List<Site> sitesWithoutFolder = Bennu.getInstance().getSitesSet().stream()
+                .filter(site -> site.getFolder() == null)
+                .filter(site -> PermissionEvaluation.canAccess(Authenticate.getUser(), site))
+                .peek(site -> sitesWithoutFolderCount.incrementAndGet())
+                .sorted(Comparator.comparing(Site::getCreationDate).reversed())
+                .limit(ITEMS_PER_FOLDER_HOME).collect(toList());
+
+
+        List<CMSFolder> foldersSorter = sitesByFolders.keySet().stream().sorted((o1, o2) -> {
+            if (o1 == null) {
+                return Integer.MIN_VALUE;
+            }
+            if (o2 == null) {
+                return Integer.MAX_VALUE;
+            }
+            return o1.getFunctionality().getTitle().getContent().compareTo(o2.getFunctionality().getTitle().getContent());
+        }).collect(Collectors.toList());
+
+        model.addAttribute("foldersSorted",foldersSorter);
+        model.addAttribute("sitesByFolders", sitesByFolders);
+        model.addAttribute("sitesWithoutFolder", sitesWithoutFolder);
+        model.addAttribute("sitesWithoutFolderCount", sitesWithoutFolderCount);
+
+        model.addAttribute("roles", Bennu.getInstance().getRoleTemplatesSet().stream().sorted(Comparator.comparing(x -> x.getDescription().getContent())).collect(Collectors.toSet()));
+        model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet().stream().sorted(Comparator.comparing(x -> x.getFunctionality().getTitle().getContent())).collect(Collectors.toList()));
+
+        model.addAttribute("allPermissions", PermissionsArray.all());
+        model.addAttribute("cmsSettings", CmsSettings.getInstance());
+        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(
+                Authenticate.getUser()));
+        model.addAttribute("templates", Site.getTemplates());
+        model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
+                .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
+        return "fenixedu-cms/manage";
+    }
+
+    @RequestMapping("/search")
+    public String search(Model model, @RequestParam(required = false, defaultValue = "1") int page,
+                         @RequestParam(required = false) String query, @RequestParam(required = false) String tag) {
+        if((tag== null || tag.equals("") )&& query ==null){
+            return list(model);
+        }
+
         CMSFolder selectedFolder = null;
-        if (tag != null){
-            if (tag.equals("â\u009C\u0098") || tag.equals("")){
-                model.addAttribute("folder", "no-folder");
-            }else{
+        if (tag != null && !tag.equals("")){
+            if (!(tag.equals("\u2718") ||  tag.equals("u" +
+                    "ntagged"))) {
                 selectedFolder = Bennu.getInstance().getCmsFolderSet().stream().filter(x -> x.getFunctionality().getPath().equals(tag)).findAny().orElseThrow(CmsDomainException::notFound);
                 model.addAttribute("folder", selectedFolder);
             }
-        }
-
-        List<Site> allSites = getSites().stream().sorted(Site.NAME_COMPARATOR).collect(Collectors.toList());
-
-        HashMap<CMSFolder, List<Site>> sitesByFolders = new HashMap<>();
-        HashMap<CMSFolder, Integer> folderCount = new HashMap<>();
-        List<Site> results = new ArrayList<>();
-
-        for (Site site : allSites) {
-            List<Site> list;
-            CMSFolder folder = site.getFolder();
-            if (!sitesByFolders.containsKey(folder)) {
-                list = new ArrayList<>();
-                sitesByFolders.put(folder, list);
-                folderCount.put(folder, 0);
-            } else {
-                list = sitesByFolders.get(folder);
-            }
-
-            if (list.size() < ITEMS_PER_FOLDER_HOME) {
-                list.add(site);
-            }
-
-            folderCount.put(folder, folderCount.get(folder) + 1);
-
-            if (!(Strings.isNullOrEmpty(query) && Strings.isNullOrEmpty(tag))) {
-                if (tag != null && site.getFolder() != selectedFolder){
-                    continue;
-                }
-                if (query == null || (query != null && SearchUtils.matches(site, query.toLowerCase()))){
-                    results.add(site);
-                }
+            if(selectedFolder == null){
+                model.addAttribute("folder", null);
             }
         }
 
-        model.addAttribute("foldersSorted", sitesByFolders.keySet().stream().sorted(new Comparator<CMSFolder>() {
-            @Override
-            public int compare(CMSFolder o1, CMSFolder o2) {
-                if (o1 == null) {
-                    return Integer.MIN_VALUE;
-                }
 
-                if (o2 == null) {
-                    return Integer.MAX_VALUE;
-                }
+        final CMSFolder finalSelectedFolder = selectedFolder;
+        List<Site> results = Bennu.getInstance().getSitesSet().stream()
+                .filter(site -> tag==null || site.getFolder() == finalSelectedFolder)
+                .filter(site -> PermissionEvaluation.canAccess(Authenticate.getUser(), site))
+                .filter(site -> query==null || SearchUtils.matches(site, query.toLowerCase()))
+                .sorted(Comparator.comparing(Site::getCreationDate).reversed())
+                .collect(toList());
 
-                return o1.getFunctionality().getTitle().getContent().compareTo(o2.getFunctionality().getTitle().getContent());
+        List<CMSFolder> folderList = Bennu.getInstance().getCmsFolderSet().stream().filter(folder -> folder.getSiteSet().stream().anyMatch(site ->
+                PermissionEvaluation.canAccess(Authenticate.getUser(), site))).sorted((o1, o2) -> {
+            if (o1 == null) {
+                return Integer.MIN_VALUE;
             }
-        }).collect(Collectors.toList()));
+            if (o2 == null) {
+                return Integer.MAX_VALUE;
+            }
+            return o1.getFunctionality().getTitle().getContent().compareTo(o2.getFunctionality().getTitle().getContent());
+        }).collect(Collectors.toList());
 
-        model.addAttribute("sitesByFolders", sitesByFolders);
-        model.addAttribute("foldersCount", folderCount);
+        if(Bennu.getInstance().getSitesSet().stream().filter(site -> site.getFolder() ==null).anyMatch(site ->
+                PermissionEvaluation.canAccess(Authenticate.getUser(), site))) {
+            folderList.add(null);
+        }
 
-        SearchUtils.Partition<Site> partition = new SearchUtils.Partition<>(results, Site.NAME_COMPARATOR, ITEMS_PER_PAGE, page);
+        model.addAttribute("foldersSorted", folderList);
+
+        SearchUtils.Partition<Site> partition = new SearchUtils.Partition<>(results, Comparator.comparing(Site::getCreationDate).reversed(),ITEMS_PER_PAGE, page);
         model.addAttribute("partition", partition);
         model.addAttribute("sites", partition.getItems());
         model.addAttribute("query",query);
@@ -178,11 +207,11 @@ public class AdminSites {
         model.addAttribute("allPermissions",PermissionsArray.all());
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
         model.addAttribute("isManager", DynamicGroup.get("managers").isMember(
-            Authenticate.getUser()));
+                Authenticate.getUser()));
         model.addAttribute("templates", Site.getTemplates());
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
-            .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
-        return "fenixedu-cms/manage";
+                .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
+        return "fenixedu-cms/manageSearch";
     }
 
     @RequestMapping("/{slug}")
@@ -196,7 +225,9 @@ public class AdminSites {
     }
 
     @RequestMapping(value = "/{slug}/analytics", method = RequestMethod.GET, produces = JSON)
-    public @ResponseBody String viewSiteAnalyticsData(@PathVariable String slug) {
+    public
+    @ResponseBody
+    String viewSiteAnalyticsData(@PathVariable String slug) {
         Site site = Site.fromSlug(slug);
         ensureCanDoThis(site, Permission.MANAGE_ANALYTICS);
         canEdit(site);
@@ -253,10 +284,10 @@ public class AdminSites {
         return getSites(Bennu.getInstance().getSitesSet());
     }
 
-    private List<Site> getSites(Collection<Site> sites){
+    private List<Site> getSites(Collection<Site> sites) {
         User user = Authenticate.getUser();
 
-        return sites.stream().filter(x -> PermissionEvaluation.canAccess(user, x)).sorted(Site.CREATION_DATE_COMPARATOR)
+        return sites.stream().filter(x -> PermissionEvaluation.canAccess(user, x)).sorted(Comparator.comparing(Site::getCreationDate).reversed())
                 .collect(toList());
     }
 
@@ -272,12 +303,12 @@ public class AdminSites {
 
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
     public RedirectView edit(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
-            @RequestParam LocalizedString description, @RequestParam(required = false) String theme, @RequestParam(
-                    required = false) String newSlug, @RequestParam(required = false, defaultValue = "") String initialPageSlug,
-            @RequestParam(required = false, defaultValue = "false") Boolean published,
-            @RequestParam(required = false) String viewGroup, @RequestParam(required = false) String folder, @RequestParam(
-                    required = false) String analyticsCode, @RequestParam(required = false) String accountId,
-            RedirectAttributes redirectAttributes) {
+                             @RequestParam LocalizedString description, @RequestParam(required = false) String theme, @RequestParam(
+            required = false) String newSlug, @RequestParam(required = false, defaultValue = "") String initialPageSlug,
+                             @RequestParam(required = false, defaultValue = "false") Boolean published,
+                             @RequestParam(required = false) String viewGroup, @RequestParam(required = false) String folder, @RequestParam(
+            required = false) String analyticsCode, @RequestParam(required = false) String accountId,
+                             RedirectAttributes redirectAttributes) {
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
@@ -293,7 +324,7 @@ public class AdminSites {
     }
 
     public void editSiteInfo(Site site, Model model) {
-        if(PermissionEvaluation.canDoThis(site, Permission.EDIT_SITE_INFORMATION)) {
+        if (PermissionEvaluation.canDoThis(site, Permission.EDIT_SITE_INFORMATION)) {
             if (CmsSettings.getInstance().canManageThemes()) {
                 model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
             }
@@ -307,30 +338,30 @@ public class AdminSites {
                 model.addAttribute("google", GoogleAPI.getInstance());
 
                 GoogleAPI.getInstance().getAuthenticatedUser(Authenticate.getUser())
-                    .ifPresent(googleUser -> {
-                        Analytics analytics = getUserAnalytics();
-                        List<GoogleAccountBean> googleAccountBeans = new ArrayList<>();
-                        try {
-                            Accounts accounts = analytics.management().accounts().list().execute();
-                            for (Account account : accounts.getItems()) {
-                                Webproperties
-                                    properties =
-                                    analytics.management().webproperties().list(account.getId())
-                                        .execute();
-                                googleAccountBeans.add(new GoogleAccountBean(account, properties));
+                        .ifPresent(googleUser -> {
+                            Analytics analytics = getUserAnalytics();
+                            List<GoogleAccountBean> googleAccountBeans = new ArrayList<>();
+                            try {
+                                Accounts accounts = analytics.management().accounts().list().execute();
+                                for (Account account : accounts.getItems()) {
+                                    Webproperties
+                                            properties =
+                                            analytics.management().webproperties().list(account.getId())
+                                                    .execute();
+                                    googleAccountBeans.add(new GoogleAccountBean(account, properties));
+                                }
+                                model.addAttribute("googleUser", googleUser);
+                                model.addAttribute("accounts", googleAccountBeans);
+                            } catch (GoogleJsonResponseException e) {
+                                LOGGER.error("Error loading analytics properties", e);
+                                if (e.getDetails().getCode() == 401) {
+                                    //Invalid credentials -> remove invalid user
+                                    FenixFramework.atomic(() -> googleUser.delete());
+                                }
+                            } catch (IOException e) {
+                                LOGGER.error("Error loading analytics properties", e);
                             }
-                            model.addAttribute("googleUser", googleUser);
-                            model.addAttribute("accounts", googleAccountBeans);
-                        } catch (GoogleJsonResponseException e) {
-                            LOGGER.error("Error loading analytics properties", e);
-                            if (e.getDetails().getCode() == 401) {
-                                //Invalid credentials -> remove invalid user
-                                FenixFramework.atomic(() -> googleUser.delete());
-                            }
-                        } catch (IOException e) {
-                            LOGGER.error("Error loading analytics properties", e);
-                        }
-                    });
+                        });
             }
         }
     }
@@ -354,7 +385,7 @@ public class AdminSites {
 
     @Atomic(mode = TxMode.WRITE)
     private void editSite(LocalizedString name, LocalizedString description, String theme, String slug, Boolean published,
-            Site s, String viewGroup, String folder, String analyticsCode, String accountId, Page initialPage) {
+                          Site s, String viewGroup, String folder, String analyticsCode, String accountId, Page initialPage) {
 
         if (PermissionEvaluation.canDoThis(s, Permission.EDIT_SITE_INFORMATION)) {
             s.setName(name);
@@ -419,7 +450,7 @@ public class AdminSites {
                                      @RequestParam(required = false) String foldersManagers, @RequestParam(required = false) String settingsManagers) {
         FenixFramework.atomic(() -> {
             if (Bennu.getInstance().getDefaultSite() == null || !Bennu.getInstance()
-                .getDefaultSite().getSlug().equals(slug)) {
+                    .getDefaultSite().getSlug().equals(slug)) {
                 Site s = Site.fromSlug(slug);
 
                 CmsSettings.getInstance().ensureCanManageSettings();
@@ -440,7 +471,7 @@ public class AdminSites {
 
     private static PersistentGroup group(String expression) {
         Group group = Group.parse(expression);
-        if(!group.isMember(Authenticate.getUser())) {
+        if (!group.isMember(Authenticate.getUser())) {
             CmsDomainException.forbiden();
         }
         return group.toPersistentGroup();

@@ -27,10 +27,9 @@ ${portal.toolkit()}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.js"></script>
 
 <c:set var="locale" value="<%= org.fenixedu.commons.i18n.I18N.getLocale() %>"/>
-
 	<div class="page-header">
 	    <h1>${site.name.content}
-	        <c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION')}">
+			<c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION') || permissions:canDoThis(site, 'MANAGE_ROLES')}">
 	          	<button type="button" data-toggle="modal" data-target="#site-settings" class="btn btn-link"><i class="glyphicon glyphicon-wrench"></i></button>
 	        </c:if>
 	        <small>
@@ -112,7 +111,16 @@ ${portal.toolkit()}
 
                 <dt>Homepage</dt>
             	<c:choose>
-            		<c:when test="${site.initialPage != null}"><dd><a href="${site.initialPage.editUrl}">${site.initialPage.name.content}</a></dd></c:when>
+            		<c:when test="${site.initialPage != null}">
+						<dd>
+							<c:if test="${site.initialPage.isStaticPage() || permissions:canDoThis(site, 'EDIT_ADVANCED_PAGES') }">
+								<a href="${site.initialPage.editUrl}">${site.initialPage.name.content}</a>
+							</c:if>
+							<c:if test="${not (site.initialPage.isStaticPage() || permissions:canDoThis(site, 'EDIT_ADVANCED_PAGES')) }">
+								<a target="_blank" href="${site.initialPage.address}">${site.initialPage.name.content}</a>
+							</c:if>
+						</dd>
+					</c:when>
             		<c:otherwise><dd><span class="label label-warning">None</span></dd></c:otherwise>
             	</c:choose>
 
@@ -162,7 +170,7 @@ ${portal.toolkit()}
 		    </c:choose>
 		</div>
 
-		<c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION')}">
+		<c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION') || permissions:canDoThis(site, 'MANAGE_ROLES')  }">
 
 			<div class="modal fade" id="site-settings" tabindex="-1" role="dialog" aria-hidden="true">
 				<div class="modal-dialog">
@@ -179,20 +187,28 @@ ${portal.toolkit()}
 							</div>
 					    	<div class="modal-body">
 							    <div role="tabpanel">
-							        <p>
-							            <ul class="nav nav-tabs" role="tablist">
-							                <li role="presentation" class="active"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">General</a></li>
-							                <c:if test="${permissions:canDoThis(site, 'MANAGE_ROLES')}">
-							                	<li role="presentation"><a href="#roles" aria-controls="roles" role="tab" data-toggle="tab">Roles</a></li>
-							                </c:if>
-							                <c:if test="${permissions:canDoThis(site, 'MANAGE_ANALYTICS')}">
-							                    <li role="presentation"><a href="#connections" aria-controls="connections" role="tab" data-toggle="tab">Connections</a></li>
-							                </c:if>
+									<p>
+										<ul class="nav nav-tabs" role="tablist">
+											<c:choose>
+												<c:when test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION')}">
+													<li role="presentation" class="active"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">General</a></li>
+													<li role="presentation" ><a href="#roles" aria-controls="roles" role="tab" data-toggle="tab">Roles</a></li>
+													<li role="presentation"><a href="#connections" aria-controls="connections" role="tab" data-toggle="tab">Connections</a></li>
+												</c:when>
+												<c:when test="${permissions:canDoThis(site, 'MANAGE_ROLES')}">
+													<li role="presentation" class="active"><a href="#roles" aria-controls="roles" role="tab" data-toggle="tab">Roles</a></li>
+													<li role="presentation"><a href="#connections" aria-controls="connections" role="tab" data-toggle="tab">Connections</a></li>
+												</c:when>
+												<c:when test="${permissions:canDoThis(site, 'MANAGE_ANALYTICS')}">
+													<li role="presentation" class="active">><a href="#connections" aria-controls="connections" role="tab" data-toggle="tab">Connections</a></li>
+												</c:when>
+											</c:choose>
 							            </ul>
 							        </p>
 							    </div>
 							    <div class="tab-content">
-							        <div role="tabpanel" class="tab-pane active form-horizontal" id="settings">
+									<c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION')}">
+										<div role="tabpanel" class="tab-pane active form-horizontal" id="settings">
 				                        <div class="${emptyName ? "form-group has-error" : "form-group"}">
 				                            <label for="site-name" class="col-sm-2 control-label"><spring:message code="site.edit.label.name"/></label>
 
@@ -292,12 +308,19 @@ ${portal.toolkit()}
 				                            </div>
 				                        </div>
 							        </div>
-
+									</c:if>
 						            <c:if test="${permissions:canDoThis(site, 'MANAGE_ROLES')}">
-								        <div role="tabpanel" class="tab-pane form-horizontal" id="roles">
+										<c:choose>
+											<c:when test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION')}">
+												<div role="tabpanel" class="tab-pane form-horizontal" id="roles"
+											</c:when>
+											<c:otherwise>
+												<div role="tabpanel" class="tab-pane active form-horizontal" id="roles">
+											</c:otherwise>
+										</c:choose>
 								            <ul class="list-group">
 							                	<table class="table">
-							                		<thead><tr><th colspan="2">Role Name</th></tr></theader>
+							                		<thead><tr><th colspan="2">Role Name</th></tr></thead>
 							                		<tbody>
 										                <c:forEach var="role" items="${site.roles}">
 								                			<tr>
@@ -332,6 +355,14 @@ ${portal.toolkit()}
 							        </c:if>
 
 							        <c:if test="${permissions:canDoThis(site, 'MANAGE_ANALYTICS')}">
+										<c:choose>
+											<c:when test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION') || permissions:canDoThis(site, 'MANAGE_ROLES')}">
+												<div role="tabpanel" class="tab-pane form-horizontal" id="connections">
+											</c:when>
+											<c:otherwise>
+												<div role="tabpanel" class="tab-pane active form-horizontal" id="connections">
+											</c:otherwise>
+										</c:choose>
 							            <div role="tabpanel" class="tab-pane form-horizontal" id="connections">
 							                <c:if test="${google.isConfigured()}">
 							                    <h3>Google</h3>
@@ -409,7 +440,9 @@ ${portal.toolkit()}
 						    <div class="modal-footer">
 								<div class="form-group">
 							        <div class="col-sm-12">
+										<c:if test="${cmsSettings.canManageRoles()}">
 							        	<button type="button" data-toggle="modal" data-target="#confirmDeleteModal" class="btn btn-danger pull-left">Delete</button>
+										</c:if>
 							            <button type="submit" class="btn btn-default btn-primary"><spring:message code="action.save"/></button>
 							            <a href="${pageContext.request.contextPath}/cms/sites/${site.slug}" class="btn btn-default">
 							            	<spring:message code="action.cancel"/>

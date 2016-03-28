@@ -31,7 +31,9 @@ ${portal.toolkit()}
           <small>
 
               <ol class="breadcrumb">
-
+                  <c:if test="${not empty query}">
+                      <li><c:out value="${query}"/></li>
+                  </c:if>
               </ol>
           </small>
     </h1>
@@ -98,25 +100,27 @@ ${portal.toolkit()}
          <span class="caret"></span></button>
         <ul class="dropdown-menu">
           <c:if test="${not empty tag}">
-            <li><a href="${pageContext.request.contextPath}/cms/sites/">All</a></li>
+            <li><a class="search-tag" href="" data-val="">Any</a></li>
           </c:if>
           <c:forEach var="f" items="${foldersSorted}">
+            <c:if test="${f == null}">
+              <li><a class="search-tag" href="#" data-val="untagged">Untagged</a></li>
+            </c:if>
             <c:if test="${f != null}">
-              <li><a href="${pageContext.request.contextPath}/cms/sites/search?tag=${f.functionality.path}">${f.functionality.title.content}</a></li>
+                <li><a class="search-tag" href="#" data-val="${f.functionality.path}">${f.functionality.title.content}</a></li>
             </c:if>
           </c:forEach>
-            <c:if test="${not sitesWithoutFolders.isEmpty()}">
-                <li><a href="${pageContext.request.contextPath}/cms/sites/search?tag=untagged">Untagged</a></li>
-            </c:if>
         </ul>
       </div><!-- /btn-group -->
-      <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="" autofocus>
+      <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}" autofocus>
     </div><!-- /input-group -->
   </div>
   </div>
 
+
+<c:if test="${not empty query or not empty tag}">
 <c:choose>
-    <c:when test="${sitesByFolders.isEmpty() && sitesWithoutFolders.isEmpty()}">
+    <c:when test="${sites.size() == 0}">
         <div class="panel panel-default">
           <div class="panel-body">
             <spring:message code="site.manage.label.emptySites"/>
@@ -135,67 +139,9 @@ ${portal.toolkit()}
     </tr>
   </thead>
   <tbody>
-      <c:if test="${not sitesWithoutFolder.isEmpty()}">
-
-  <tr>
-      <td colspan="3" class="folder">
-          <i class="glyphicon glyphicon-wrench"></i>
-          <a href="${pageContext.request.contextPath}/cms/sites/search?tag= '&#10008;'"><h5>Untagged<span class="badge">${sitesWithoutFolderCount}</span></h5></a>
-      </td>
-  </tr>
-  <c:forEach var="i" items="${sitesWithoutFolder}" >
-      <tr>
-          <td class="col-md-9 site">
-
-              <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a>
-
-              <c:if test="${i.getEmbedded()}">
-                  <span class="label label-info">Embedded</span></c:if><c:if test="${i.isDefault()}"><span class="label label-success"><spring:message code="site.manage.label.default"/></span>
-          </c:if>
-
-          </td>
-          <td class="col-md-2">${cms.prettyDate(i.creationDate)}</td>
-          <td class="col-md-1">
-              <i class="glyphicon glyphicon-ok"></i>
-              <div class="dropdown pull-right">
-                  <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                      <span class="glyphicon glyphicon-option-vertical"></span>
-                  </a>
-                  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                      <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}#settings">View details</a></li>
-                      <c:if test="${i.published}">
-                          <li><a href="${i.fullUrl}">Visit public URL</a></li>
-                      </c:if>
-                      <c:if test="${permissions:canDoThis(i, 'MANAGE_ROLES')}">
-                          <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/roles">View roles</a></li>
-                      </c:if>
-                  </ul>
-              </div>
-          </td>
-      </tr>
-  </c:forEach>
-      </c:if>
-
-
-    <c:forEach var="entry" items="${sitesByFolders}">
-        <c:set var="f" value="${entry.key}" />
-        <c:set var="sites" value="${entry.value}" />
-        <c:if test="${not sites.isEmpty()}">
-      <tr>
-        <td colspan="3" class="folder">
-        <i class="glyphicon glyphicon-wrench"></i>
-
-       <a href="${pageContext.request.contextPath}/cms/sites/search/?tag=${f.functionality.path}">
-           <h5>${f.functionality.title.content}
-               <span class="badge">${folderCount.get(f)}</span>
-           </h5>
-       </a>
-        </td>
-      </tr>
-
        <c:forEach var="i" items="${sites}" >
       <tr>
-        <td class="col-md-9 site">
+        <td class="col-md-8 site">
 
         <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a>
 
@@ -205,14 +151,17 @@ ${portal.toolkit()}
 
         </td>
         <td class="col-md-2">${cms.prettyDate(i.creationDate)}</td>
-        <td class="col-md-1">
-            <i class="glyphicon glyphicon-ok"></i>
+        <td class="col-md-2"><p>
+         <span class="glyphicon glyphicon-option-vertical"></span>
+              <input type="checkbox" ng-model="post.active" id="success" class="ng-pristine ng-valid">
+              <label for="success">Published</label>
+              </p>
             <div class="dropdown pull-right">
               <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 <span class="glyphicon glyphicon-option-vertical"></span>
               </a>
               <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}#settings">View details</a></li>
+                <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/edit">View details</a></li>
                 <c:if test="${i.published}">
                   <li><a href="${i.fullUrl}">Visit public URL</a></li>
                 </c:if>
@@ -224,11 +173,24 @@ ${portal.toolkit()}
         </td>
       </tr>
       </c:forEach>
-    </c:if>
-    </c:forEach>
   </tbody>
 </table>
-
+    <c:if test="${partition.getNumPartitions() > 1}">
+      <nav class="text-center">
+        <ul class="pagination">
+          <li ${partition.isFirst() ? 'class="disabled"' : ''}>
+            <a href="#" onclick="goToPage(${partition.getNumber() - 1})">&laquo;</a>
+          </li>
+          <li class="disabled"><a>${partition.getNumber()} / ${partition.getNumPartitions()}</a></li>
+          <li ${partition.isLast() ? 'class="disabled"' : ''}>
+            <a href="#" onclick="goToPage(${partition.getNumber() + 1})">&raquo;</a>
+          </li>
+        </ul>
+      </nav>
+    </c:if>
   </c:otherwise>
 </c:choose>
+</c:if>
+
+
 <jsp:include page="manageModals.jsp" />
