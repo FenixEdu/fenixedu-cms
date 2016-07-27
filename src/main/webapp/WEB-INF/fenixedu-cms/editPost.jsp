@@ -43,7 +43,7 @@ ${portal.angularToolkit()}
       		<ol class="breadcrumb">
                 <li><a href="${pageContext.request.contextPath}/cms/sites">Content Management</a></li>
                 <li><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></li>
-                <li><a href="${pageContext.request.contextPath}/cms/sites/posts/${site.slug}">Posts</a></li>
+                <li><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}">Posts</a></li>
             </ol>
         </small>
     </h1>
