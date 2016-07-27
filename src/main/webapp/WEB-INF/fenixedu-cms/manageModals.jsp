@@ -1,4 +1,4 @@
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:if test="${cmsSettings.canManageSettings()}">
     <div class="modal fade" id="sites-settings">
         <div class="modal-dialog">
@@ -7,209 +7,212 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal"><span class="sr-only">Close</span></button>
-                        <h3 class="modal-title">Settings</h3>
-                        <small>Costumize your content managment system</small>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <h3 class="modal-title">Settings</h3>
+                                <small>Costumize your content managment system</small>
+                            </div>
+                            <div class="col-sm-12">
+                                <div role="tabpanel">
+                                    <!-- Nav tabs -->
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li role="presentation" class="active">
+                                            <a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a>
+                                        </li>
+                                        <c:if test="${cmsSettings.canManageFolders()}">
+                                            <li role="presentation">
+                                                <a href="#tags" aria-controls="tags" role="tab" data-toggle="tab">Tags</a>
+                                            </li>
+                                        </c:if>
+                                        <c:if test="${cmsSettings.canManageRoles()}">
+                                            <li role="presentation">
+                                                <a href="#roles" aria-controls="roles" role="tab" data-toggle="tab">Roles</a>
+                                            </li>
+                                        </c:if>
+
+                                        <c:if test="${isManager}">
+                                            <li role="presentation">
+                                                <a href="#acl" aria-controls="acl" role="tab" data-toggle="tab">Access Control</a>
+                                            </li>
+                                        </c:if>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-body">
-                        <div role="tabpanel">
-                            <!-- Nav tabs -->
-                            <ul class="nav nav-tabs" role="tablist">
-                                <li role="presentation" class="active">
-                                    <a href="#general" aria-controls="general" role="tab" data-toggle="tab">General</a>
-                                </li>
-                                <c:if test="${cmsSettings.canManageFolders()}">
-                                    <li role="presentation">
-                                        <a href="#tags" aria-controls="tags" role="tab" data-toggle="tab">Tags</a>
-                                    </li>
-                                </c:if>
-                                <c:if test="${cmsSettings.canManageRoles()}">
-                                    <li role="presentation">
-                                        <a href="#roles" aria-controls="roles" role="tab" data-toggle="tab">Roles</a>
-                                    </li>
-                                </c:if>
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="general">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">Default Site</label>
 
-                                <c:if test="${isManager}">
-                                    <li role="presentation">
-                                        <a href="#acl" aria-controls="acl" role="tab" data-toggle="tab">Access Control</a>
-                                    </li>
-                                </c:if>
-                            </ul>
-                            <!-- Tab panes -->
-                            <div class="tab-content">
-                                <div role="tabpanel" class="tab-pane active" id="general">
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label">Default Site</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" name="slug">
+                                            <option value="**null**">-</option>
+                                            <c:forEach var="i" items="${sites}">
+                                                <option ${i.isDefault() ? 'selected' : ''}  value="${i.slug}">${i.name.content}</option>
+                                            </c:forEach>
+                                        </select>
+                                        <p class="help-block">The Default Site is the site that is used when you visit the root of the server.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <c:if test="${cmsSettings.canManageFolders()}">
+                                <div role="tabpanel" class="tab-pane" id="tags">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#newFolderModal">
+                                                <span class="glyphicon glyphicon-plus"></span>&nbsp;New</a>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <c:choose>
+                                        <c:when test="${folders.size() == 0}">
+                                            <div class="panel panel-default">
+                                                <div class="panel-body">
+                                                    There are no tags.
+                                                </div>
+                                            </div>
+                                        </c:when>
 
-                                        <div class="col-sm-9">
-                                            <select class="form-control" name="slug">
-                                                <option value="**null**">-</option>
-                                                <c:forEach var="i" items="${sites}">
-                                                    <option ${i.isDefault() ? 'selected' : ''}  value="${i.slug}">${i.name.content}</option>
+                                        <c:otherwise>
+                                            <table class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Path</th>
+                                                    <th>Websites</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <c:forEach var="f" items="${folders}">
+                                                    <tr>
+                                                        <td class="col-md-8">${f.functionality.title.content}</td>
+                                                        <td class="col-md-3">/${f.functionality.path}</td>
+                                                        <td class="col-md-1">
+                                                                ${f.siteSet.size()}
+                                                            <div class="dropdown pull-right">
+                                                                <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                                                    <span class="glyphicon glyphicon-option-vertical"></span>
+                                                                </a>
+                                                                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                                                                    <li><a href="${pageContext.request.contextPath}/cms/folders/resolver/${f.externalId}">Edit custom resolver</a></li>
+                                                                    <c:if test="${f.siteSet.size() == 0}">
+                                                                        <li><a class="delete-tag-link" data-id="${f.externalId}" href="#"><spring:message code="action.delete"/></a></li>
+                                                                    </c:if>
+                                                                </ul>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
                                                 </c:forEach>
-                                            </select>
-                                            <p class="help-block">The Default Site is the site that is used when you visit the root of the server.</p>
+                                                </tbody>
+                                            </table>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </c:if>
+
+                            <c:if test="${cmsSettings.canManageRoles()}">
+                                <div role="tabpanel" class="tab-pane" id="roles">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#create-role-modal">
+                                                <span class="glyphicon glyphicon-plus"></span>&nbsp;New</a>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <c:choose>
+                                        <c:when test="${folders.size() == 0}">
+                                            <div class="panel panel-default">
+                                                <div class="panel-body">
+                                                    There are no roles.
+                                                </div>
+                                            </div>
+                                        </c:when>
+
+                                        <c:otherwise>
+                                            <table class="table">
+                                                <thead>
+                                                <tr>
+                                                    <th>Role Name</th>
+                                                    <th>Websites</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                <c:forEach var="role" items="${roles}">
+                                                    <tr>
+                                                        <td class="col-md-10">
+                                                                ${role.description.content}
+                                                            <a href="#" data-id="${role.externalId}" class="edit-permissions-link btn btn-small btn-default pull-right">Edit</a>
+                                                        </td>
+                                                        <td class="col-md-2">
+                                                                ${role.roles.size()}
+                                                            <div class="dropdown pull-right">
+                                                                <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                                                    <span class="glyphicon glyphicon-option-vertical"></span>
+                                                                </a>
+                                                                <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                                                                    <li><a class="edit-permissions-link" data-id="${role.externalId}" href="#">Edit permissions</a></li>
+                                                                    <li><a class="connect-site-link" data-id="${role.externalId}" href="#">Add to website</a></li>
+                                                                    <li><a class="delete-role-link" data-id="${role.externalId}" href="#">Delete</a></li>
+                                                                </ul>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </c:forEach>
+                                                </tbody>
+                                            </table>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </c:if>
+
+                            <c:if test="${isManager}">
+                                <div role="tabpanel" class="tab-pane" id="acl">
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-3">Themes managers:</label>
+                                        <div class="col-sm-9">
+                                            <input bennu-group allow="public,users,managers,custom" name="themesManagers" type="text" value='${cmsSettings.themesManagers.toGroup().expression}'/>
+                                            <p class="help-block">Users that are allowed to manage <a href="${pageContext.request.contextPath}/cms/themes">themes</a>.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label">Roles managers:</label>
+                                        <div class="col-sm-9">
+                                            <input bennu-group allow="public,users,managers,custom" name="rolesManagers" type="text" value='${cmsSettings.rolesManagers.toGroup().expression}'/>
+                                            <p class="help-block">Users that are allowed to manage <a href="${pageContext.request.contextPath}/cms/permissions">roles</a>.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label">Folders managers:</label>
+                                        <div class="col-sm-9">
+                                            <input bennu-group allow="public,users,managers,custom" name="foldersManagers" type="text" value='${cmsSettings.foldersManagers.toGroup().expression}'/>
+                                            <p class="help-block">Users that are allowed to manage <a href="${pageContext.request.contextPath}/cms/folders">folders</a>.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label">Global Settings:</label>
+                                        <div class="col-sm-9">
+                                            <input bennu-group allow="public,users,managers,custom" name="settingsManagers" type="text" value='${cmsSettings.settingsManagers.toGroup().expression}'/>
+                                            <p class="help-block">Users that are allowed to global settings such setting the <a href="${pageContext.request.contextPath}/cms/sites">default site</a> or <a href="#create-site">create new sites</a></p>
                                         </div>
                                     </div>
                                 </div>
-                                <c:if test="${cmsSettings.canManageFolders()}">
-                                    <div role="tabpanel" class="tab-pane" id="tags">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#newFolderModal">
-                                                    <span class="glyphicon glyphicon-plus"></span>&nbsp;New</a>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <c:choose>
-                                            <c:when test="${folders.size() == 0}">
-                                                <div class="panel panel-default">
-                                                    <div class="panel-body">
-                                                        There are no tags.
-                                                    </div>
-                                                </div>
-                                            </c:when>
-
-                                            <c:otherwise>
-                                                <table class="table">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>Name</th>
-                                                        <th>Path</th>
-                                                        <th>Websites</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <c:forEach var="f" items="${folders}">
-                                                        <tr>
-                                                            <td class="col-md-8">${f.functionality.title.content}</td>
-                                                            <td class="col-md-3">/${f.functionality.path}</td>
-                                                            <td class="col-md-1">
-                                                                    ${f.siteSet.size()}
-                                                                <div class="dropdown pull-right">
-                                                                    <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                                                        <span class="glyphicon glyphicon-option-vertical"></span>
-                                                                    </a>
-                                                                    <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                                                                        <li><a href="${pageContext.request.contextPath}/cms/folders/resolver/${f.externalId}">Edit custom resolver</a></li>
-                                                                        <c:if test="${f.siteSet.size() == 0}">
-                                                                            <li><a class="delete-tag-link" data-id="${f.externalId}" href="#"><spring:message code="action.delete"/></a></li>
-                                                                        </c:if>
-                                                                    </ul>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </c:forEach>
-                                                    </tbody>
-                                                </table>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                </c:if>
-
-                                <c:if test="${cmsSettings.canManageRoles()}">
-                                    <div role="tabpanel" class="tab-pane" id="roles">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#create-role-modal">
-                                                    <span class="glyphicon glyphicon-plus"></span>&nbsp;New</a>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <c:choose>
-                                            <c:when test="${folders.size() == 0}">
-                                                <div class="panel panel-default">
-                                                    <div class="panel-body">
-                                                        There are no roles.
-                                                    </div>
-                                                </div>
-                                            </c:when>
-
-                                            <c:otherwise>
-                                                <table class="table">
-                                                    <thead>
-                                                    <tr>
-                                                        <th>Role Name</th>
-                                                        <th>Websites</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-
-                                                    <c:forEach var="role" items="${roles}">
-                                                        <tr>
-                                                            <td class="col-md-10">
-                                                                    ${role.description.content}
-                                                                <a href="#" data-id="${role.externalId}" class="edit-permissions-link btn btn-small btn-default pull-right">Edit</a>
-                                                            </td>
-                                                            <td class="col-md-2">
-                                                                    ${role.roles.size()}
-                                                                <div class="dropdown pull-right">
-                                                                    <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                                                        <span class="glyphicon glyphicon-option-vertical"></span>
-                                                                    </a>
-                                                                    <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                                                                        <li><a class="edit-permissions-link" data-id="${role.externalId}" href="#">Edit permissions</a></li>
-                                                                        <li><a class="connect-site-link" data-id="${role.externalId}" href="#">Add to website</a></li>
-                                                                        <li><a class="delete-role-link" data-id="${role.externalId}" href="#">Delete</a></li>
-                                                                    </ul>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </c:forEach>
-                                                    </tbody>
-                                                </table>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                </c:if>
-
-                                <c:if test="${isManager}">
-                                    <div role="tabpanel" class="tab-pane" id="acl">
-                                        <div class="form-group">
-                                            <label class="control-label col-sm-3">Themes managers:</label>
-                                            <div class="col-sm-9">
-                                                <input bennu-group allow="public,users,managers,custom" name="themesManagers" type="text" value='${cmsSettings.themesManagers.toGroup().expression}'/>
-                                                <p class="help-block">Users that are allowed to manage <a href="${pageContext.request.contextPath}/cms/themes">themes</a>.</p>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label">Roles managers:</label>
-                                            <div class="col-sm-9">
-                                                <input bennu-group allow="public,users,managers,custom" name="rolesManagers" type="text" value='${cmsSettings.rolesManagers.toGroup().expression}'/>
-                                                <p class="help-block">Users that are allowed to manage <a href="${pageContext.request.contextPath}/cms/permissions">roles</a>.</p>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label">Folders managers:</label>
-                                            <div class="col-sm-9">
-                                                <input bennu-group allow="public,users,managers,custom" name="foldersManagers" type="text" value='${cmsSettings.foldersManagers.toGroup().expression}'/>
-                                                <p class="help-block">Users that are allowed to manage <a href="${pageContext.request.contextPath}/cms/folders">folders</a>.</p>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label">Global Settings:</label>
-                                            <div class="col-sm-9">
-                                                <input bennu-group allow="public,users,managers,custom" name="settingsManagers" type="text" value='${cmsSettings.settingsManagers.toGroup().expression}'/>
-                                                <p class="help-block">Users that are allowed to global settings such setting the <a href="${pageContext.request.contextPath}/cms/sites">default site</a> or <a href="#create-site">create new sites</a></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </c:if>
-
-                            </div>
+                            </c:if>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Done</button>
                     </div>
+                </div>
             </form>
-
         </div>
-
-    </div>
     </div>
 </c:if>
 
