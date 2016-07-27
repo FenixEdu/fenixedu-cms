@@ -20,7 +20,8 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
+<%@ taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
+<%@ taglib uri="http://fenixedu.org/taglib/intersection" prefix="modular" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 ${portal.toolkit()}
 
@@ -86,50 +87,6 @@ ${portal.toolkit()}
 					<li class="list-group-item"><a href="${pageContext.request.contextPath}/cms/menus/${site.slug}">Menus<span class="badge pull-right">${site.menusSet.size()}</span></a></li>
 				</c:if>
 			</ul>
-
-			<h3>Properties</h3>
-            <dl class="dl-horizontal">
-                <dt>Theme</dt>
-            	<c:choose>
-            		<c:when test="${site.theme != null && cmsSettings.canManageThemes()}"><dd><a href="${pageContext.request.contextPath}/cms/themes/${site.theme.type}/see">${site.theme.name}</a></dd></c:when>
-            		<c:when test="${site.theme != null && !cmsSettings.canManageThemes()}"><dd>${site.theme.name}</dd></c:when>
-            		<c:otherwise><dd><span class="label label-warning">None</span></dd></c:otherwise>
-            	</c:choose>
-
-                <dt>Visibility</dt>
-				<dd>${site.canViewGroup}</dd>
-
-                <dt>Published</dt>
-                <dd>
-                    <c:if test="${site.published}">
-                        <i class="glyphicon glyphicon-ok"></i>
-                    </c:if>
-                    <c:if test="${!site.published}">
-                        <i class="glyphicon glyphicon-remove"></i>
-                    </c:if>
-                </dd>
-
-                <dt>Homepage</dt>
-            	<c:choose>
-            		<c:when test="${site.initialPage != null}">
-						<dd>
-							<c:if test="${site.initialPage.isStaticPage() || permissions:canDoThis(site, 'EDIT_ADVANCED_PAGES') }">
-								<a href="${site.initialPage.editUrl}">${site.initialPage.name.content}</a>
-							</c:if>
-							<c:if test="${not (site.initialPage.isStaticPage() || permissions:canDoThis(site, 'EDIT_ADVANCED_PAGES')) }">
-								<a target="_blank" href="${site.initialPage.address}">${site.initialPage.name.content}</a>
-							</c:if>
-						</dd>
-					</c:when>
-            		<c:otherwise><dd><span class="label label-warning">None</span></dd></c:otherwise>
-            	</c:choose>
-
-                <dt>Author</dt>
-                <dd>${site.createdBy.profile.displayName}</dd>
-                <dt>Created</dt>
-                <dd>${cms.prettyDate(site.creationDate)}</dd>
-            </dl>
-
 		</div>
 		<div class="col-sm-6">
     		<div class="graph" style="display: none;">
@@ -169,6 +126,58 @@ ${portal.toolkit()}
 				</c:otherwise>
 		    </c:choose>
 		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-6">
+			<h3>Properties</h3>
+			<dl class="dl-horizontal">
+				<dt>Theme</dt>
+				<c:choose>
+					<c:when test="${site.theme != null && cmsSettings.canManageThemes()}"><dd><a href="${pageContext.request.contextPath}/cms/themes/${site.theme.type}/see">${site.theme.name}</a></dd></c:when>
+					<c:when test="${site.theme != null && !cmsSettings.canManageThemes()}"><dd>${site.theme.name}</dd></c:when>
+					<c:otherwise><dd><span class="label label-warning">None</span></dd></c:otherwise>
+				</c:choose>
+
+				<dt>Visibility</dt>
+				<dd>${site.canViewGroup}</dd>
+
+				<dt>Published</dt>
+				<dd>
+					<c:if test="${site.published}">
+						<i class="glyphicon glyphicon-ok"></i>
+					</c:if>
+					<c:if test="${!site.published}">
+						<i class="glyphicon glyphicon-remove"></i>
+					</c:if>
+				</dd>
+
+				<dt>Homepage</dt>
+				<c:choose>
+					<c:when test="${site.initialPage != null}">
+						<dd>
+							<c:if test="${site.initialPage.isStaticPage() || permissions:canDoThis(site, 'EDIT_ADVANCED_PAGES') }">
+								<a href="${site.initialPage.editUrl}">${site.initialPage.name.content}</a>
+							</c:if>
+							<c:if test="${not (site.initialPage.isStaticPage() || permissions:canDoThis(site, 'EDIT_ADVANCED_PAGES')) }">
+								<a target="_blank" href="${site.initialPage.address}">${site.initialPage.name.content}</a>
+							</c:if>
+						</dd>
+					</c:when>
+					<c:otherwise><dd><span class="label label-warning">None</span></dd></c:otherwise>
+				</c:choose>
+
+				<dt>Author</dt>
+				<dd>${site.createdBy.profile.displayName}</dd>
+				<dt>Created</dt>
+				<dd>${cms.prettyDate(site.creationDate)}</dd>
+			</dl>
+		</div>
+		<div class="col-sm-6">
+			<modular:intersect location="site.manage" position="extra.properties">
+				<arg key="site" value="${site}"></arg>
+			</modular:intersect>
+		</div>
+	</div>
 
 		<c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION') || permissions:canDoThis(site, 'MANAGE_ROLES')  }">
 
