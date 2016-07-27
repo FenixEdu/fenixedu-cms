@@ -479,7 +479,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         Set<Permission> required = new HashSet<>();
         required.add(Permission.DELETE_POSTS);
         if (!Authenticate.getUser().equals(getCreatedBy())) {
-            required.add(Permission.DELETE_POSTS);
+            required.add(Permission.DELETE_OTHERS_POSTS);
         }
         if (isVisible()) {
             required.add(Permission.DELETE_POSTS_PUBLISHED);

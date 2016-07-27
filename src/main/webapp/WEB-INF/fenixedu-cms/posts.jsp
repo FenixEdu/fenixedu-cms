@@ -120,7 +120,7 @@ ${portal.toolkit()}
                         </c:if>
                         <div class="dropdown pull-right">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="glyphicon glyphicon-option-vertical"></span>
+                                <span class="fa fa-bars"></span>
                             </a>
                             <ul class="dropdown-menu">
                                 <c:if test="${post.canEdit()}">
