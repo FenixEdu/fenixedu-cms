@@ -4,6 +4,7 @@ import java.io.StringWriter;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.ui.SiteActivityRender;
+import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
 import com.google.gson.JsonElement;
@@ -68,6 +69,32 @@ public class SiteActivity extends SiteActivity_Base {
         makeActivity(post.getSite(), object);
     }
 
+    public static void editedPost(Post post, User user) {
+        JsonObject object = new JsonObject();
+
+        object.addProperty("type","postEdited");
+        object.addProperty("post",post.getExternalId());
+        object.add("postName", post.getName().json());
+        object.addProperty("postSlug", post.getSlug());
+        object.addProperty("user", user.getUsername());
+        object.addProperty("userName", user.getProfile().getDisplayName());
+
+        makeActivity(post.getSite(),object);
+    }
+
+    public static void deletedPost(Post post, Site site, User user){
+        JsonObject object = new JsonObject();
+
+        object.addProperty("type","postDeleted");
+        object.addProperty("post", (String) null);
+        object.add("pageName", post.getName().json());
+        object.addProperty("pageSluΩg",(String) null);
+        object.addProperty("user", user.getUsername());
+        object.addProperty("userNaßme", user.getProfile().getDisplayName());
+
+        makeActivity(site,object);
+    }
+
     public static void createdPage(Page page, User user) {
         JsonObject object = new JsonObject();
 
@@ -80,6 +107,35 @@ public class SiteActivity extends SiteActivity_Base {
 
         makeActivity(page.getSite(), object);
     }
+
+
+    public static void editedPage(Page page, User user) {
+        JsonObject object = new JsonObject();
+
+        object.addProperty("type","pageEdited");
+        object.addProperty("post",page.getExternalId());
+        object.add("pageName", page.getName().json());
+        object.addProperty("pageSlug", page.getSlug());
+        object.addProperty("user", user.getUsername());
+        object.addProperty("userName", user.getProfile().getDisplayName());
+
+        makeActivity(page.getSite(),object);
+    }
+
+    public static void deletedPage(Page page, Site site, User user){
+        JsonObject object = new JsonObject();
+
+        object.addProperty("type","pageDeleted");
+        object.addProperty("post", (String) null);
+        object.add("pageName", page.getName().json());
+        object.addProperty("pageSlug",(String) null);
+        object.addProperty("user", user.getUsername());
+        object.addProperty("userName", user.getProfile().getDisplayName());
+
+        makeActivity(site,object);
+    }
+
+
 
     public void delete() {
         setPrevious(null);

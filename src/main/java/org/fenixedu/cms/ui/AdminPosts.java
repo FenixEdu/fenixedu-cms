@@ -144,6 +144,7 @@ public class AdminPosts {
 
     @RequestMapping(value = "{slugSite}/{slugPost}/delete", method = RequestMethod.POST)
     public RedirectView delete(@PathVariable String slugSite, @PathVariable String slugPost) {
+
         FenixFramework.atomic(() -> {
             Site s = Site.fromSlug(slugSite);
             AdminSites.canEdit(s);
@@ -156,6 +157,7 @@ public class AdminPosts {
             if(!Authenticate.getUser().equals(post.getCreatedBy())) {
                 ensureCanDoThis(s, Permission.DELETE_OTHERS_POSTS);
             }
+            SiteActivity.deletedPost(post, Site.fromSlug(slugSite), Authenticate.getUser());
             post.delete();
         });
         return new RedirectView("/cms/posts/" + slugSite + "", true);
@@ -199,6 +201,7 @@ public class AdminPosts {
             PermissionEvaluation.ensureCanDoThis(s, Permission.SEE_METADATA, Permission.EDIT_METADATA);
             post.setMetadata(PostMetadata.internalize(metadata));
         });
+        SiteActivity.editedPost(post, Authenticate.getUser());
         return new RedirectView("/cms/posts/" + s.getSlug() + "/" + post.getSlug() + "/metadata", true);
     }
 

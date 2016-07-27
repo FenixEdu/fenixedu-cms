@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
 
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
@@ -34,6 +35,7 @@ import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostMetadata;
 import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,6 +154,8 @@ public class AdminPages {
                 throw CmsDomainException.forbiden();
             }
             page.getStaticPost().ifPresent(Post::delete);
+            SiteActivity.deletedPage(page,s, Authenticate.getUser());
+
             page.delete();
         });
         return allPagesRedirect(s);

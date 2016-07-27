@@ -72,6 +72,7 @@ public class AdminPagesService {
 						menuJson.getAsJsonObject());
 			});
 		}
+		SiteActivity.editedPage(page,Authenticate.getUser());
 		Signal.emit(Page.SIGNAL_EDITED, new DomainObjectEvent<>(page));
 	}
 

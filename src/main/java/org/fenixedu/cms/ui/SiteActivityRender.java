@@ -35,9 +35,13 @@ public class SiteActivityRender {
     public static void init() {
         attachRenderer("siteCreated", SiteActivityRender::siteCreated);
         attachRenderer("postCreated", SiteActivityRender::postCreated);
+        attachRenderer("postEdited",SiteActivityRender::postEdited);
+        attachRenderer("postDeleted",SiteActivityRender::postDeleted);
         attachRenderer("siteImported", SiteActivityRender::siteImported);
         attachRenderer("siteCloned", SiteActivityRender::siteCloned);
         attachRenderer("pageCreated", SiteActivityRender::pageCreated);
+        attachRenderer("pageEdited",SiteActivityRender::pageEdited);
+        attachRenderer("pageDeleted",SiteActivityRender::pageDeleted);
     }
 
     private static void siteImported(SiteActivity activity, Writer writer) {
@@ -68,12 +72,43 @@ public class SiteActivityRender {
         write(writer, obj.get("user").getAsString(), "created", postName);
     }
 
+    private static void postEdited(SiteActivity activity, Writer writer) {
+        JsonElement el = activity.getContent();
+        JsonObject obj = el.getAsJsonObject();
+        String postName = LocalizedString.fromJson(obj.get("postName")).getContent();
+        write(writer, obj.get("user").getAsString(), "edited", postName);
+    }
+
+    private static void postDeleted(SiteActivity activity, Writer writer) {
+        JsonElement el = activity.getContent();
+        JsonObject obj = el.getAsJsonObject();
+        String postName = LocalizedString.fromJson(obj.get("postName")).getContent();
+        write(writer, obj.get("user").getAsString(), "deleted", postName);
+    }
+
+
     private static void pageCreated(SiteActivity activity, Writer writer) {
         JsonElement el = activity.getContent();
         JsonObject obj = el.getAsJsonObject();
         String postName = LocalizedString.fromJson(obj.get("pageName")).getContent();
         write(writer, obj.get("user").getAsString(), "created", postName);
     }
+
+
+    private static void pageEdited(SiteActivity activity, Writer writer) {
+        JsonElement el = activity.getContent();
+        JsonObject obj = el.getAsJsonObject();
+        String postName = LocalizedString.fromJson(obj.get("pageName")).getContent();
+        write(writer, obj.get("user").getAsString(), "edited", postName);
+    }
+
+    private static void pageDeleted(SiteActivity activity, Writer writer) {
+        JsonElement el = activity.getContent();
+        JsonObject obj = el.getAsJsonObject();
+        String postName = LocalizedString.fromJson(obj.get("pageName")).getContent();
+        write(writer, obj.get("user").getAsString(), "deleted", postName);
+    }
+
 
     private static void write(Writer writer, String username, String action, String content) {
         try {
