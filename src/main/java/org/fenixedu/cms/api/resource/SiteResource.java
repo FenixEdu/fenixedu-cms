@@ -22,12 +22,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.fenixedu.bennu.core.domain.Bennu;
+
+import org.fenixedu.bennu.core.domain.exceptions.DomainException;
 import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.api.json.*;
 import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.component.Component;
+import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
@@ -171,8 +174,7 @@ public class SiteResource extends BennuRestResource {
             }
             return page;
         }
-
-        return null;
+        throw CmsDomainException.badRequest("page.missing.name");
     }
 
     @GET
@@ -202,7 +204,7 @@ public class SiteResource extends BennuRestResource {
             return category;
         }
 
-        return null;
+        throw CmsDomainException.badRequest("category.missing.name");
     }
 
     @GET
@@ -237,7 +239,7 @@ public class SiteResource extends BennuRestResource {
 
         }
 
-        return null;
+        throw CmsDomainException.badRequest("menu.missing.name");
     }
 
     @GET

@@ -38,7 +38,7 @@ public class PermissionsArray implements Serializable {
     private static final JsonParser JSON_PARSER = new JsonParser();
     private final EnumSet<Permission> permissions;
 
-    public PermissionsArray(EnumSet<Permission> permissions) {
+    public  PermissionsArray(EnumSet<Permission> permissions) {
         this.permissions = permissions;
     }
 

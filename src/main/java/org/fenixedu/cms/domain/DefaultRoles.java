@@ -82,6 +82,7 @@ public class DefaultRoles {
     permissions.add(Permission.EDIT_PAGE);
     permissions.add(Permission.EDIT_POSTS);
     permissions.add(Permission.EDIT_POSTS_PUBLISHED);
+    permissions.add(Permission.EDIT_SITE_INFORMATION);
     permissions.add(Permission.LIST_CATEGORIES);
     permissions.add(Permission.EDIT_CATEGORY);
     permissions.add(Permission.DELETE_CATEGORY);

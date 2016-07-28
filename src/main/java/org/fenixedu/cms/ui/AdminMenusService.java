@@ -29,6 +29,7 @@ import org.fenixedu.cms.domain.MenuItem;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.stereotype.Service;
 import pt.ist.fenixframework.Atomic;
@@ -235,7 +236,12 @@ public class AdminMenusService {
       Site site = menuItem.getMenu().getSite();
       Optional.ofNullable(menuItemJson).map(json -> json.get("page"))
 	  .filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString)
-	  .map(pageSlug->site.pageForSlug(pageSlug)).filter(page -> page != menuItem.getPage())
+	  .map(pageSlug->{
+	      try{ return site.pageForSlug(pageSlug); }
+	      catch(CmsDomainException e){
+	          return null;
+	      }})
+          .filter(page -> page != menuItem.getPage())
 	  .ifPresent(page -> {
 	    menuItem.setPage(page);
 	    menuItem.setFolder(false);

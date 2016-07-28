@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.FenixFramework;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.util.HashSet;
@@ -80,21 +81,49 @@ public class TestSiteMenuResource extends TestCmsApi {
     }
 
     @Test
-    public void createMinMenu() {
+    public void createMenuNoName() {
         // prepare
-        User user = CmsTestUtils.createAuthenticatedUser("createMinMenu");
+        User user = CmsTestUtils.createAuthenticatedUser("createMenuNoName");
 
-        Site site = CmsTestUtils.createSite(user, "createMinMenu");
+        Site site = CmsTestUtils.createSite(user, "createMenuNoName");
 
         MenuBean menuBean = new MenuBean();
 
         DateTime creationDate = new DateTime();
 
         // execute
-        String response =
-                getSiteMenusTarget(site).request().post(Entity.entity(menuBean.toJson(), MediaType.APPLICATION_JSON),
-                        String.class);
-        LOGGER.debug("createMinMenu: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
+        LOGGER.debug("createMenuNoName: sending = " + menuBean.toJson().replaceAll("(\\r|\\n|\\t)", " "));
+
+        try {
+            String response =
+                getSiteMenusTarget(site).request().post(Entity.entity(menuBean.toJson(), MediaType.APPLICATION_JSON), String.class);
+            fail();
+        } catch (BadRequestException ex) {
+            LOGGER.debug(ex.getMessage());
+        }
+
+    }
+        @Test
+        public void createMinMenu() {
+            // prepare
+            User user = CmsTestUtils.createAuthenticatedUser("createMinMenu");
+
+            Site site = CmsTestUtils.createSite(user, "createMinMenu");
+
+            MenuBean menuBean = new MenuBean();
+            LocalizedString name = new LocalizedString(Locale.UK, "createMinMenu-name-uk").with(Locale.US, "createMinMenu-name-us");
+            menuBean.setName(name);
+
+            DateTime creationDate = new DateTime();
+
+            // execute
+            LOGGER.debug("createMinMenu: sending = " + menuBean.toJson().replaceAll("(\\r|\\n|\\t)", " "));
+
+
+                String response =
+                    getSiteMenusTarget(site).request().post(Entity.entity(menuBean.toJson(), MediaType.APPLICATION_JSON), String.class);
+
+            LOGGER.debug("createMinMenu: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
 
         // test
         JsonObject jsonResponse = new JsonParser().parse(response).getAsJsonObject();
@@ -123,9 +152,13 @@ public class TestSiteMenuResource extends TestCmsApi {
         JsonArray menuItems = jsonResponse.get("menuItems").getAsJsonArray();
         assertEquals("response menuItems should be empty", 0, menuItems.size());
 
-        assertFalse("response category should not contain slug", jsonResponse.has("slug"));
-        assertFalse("response category should not contain name", jsonResponse.has("name"));
-    }
+        assertTrue("response category should contain slug", jsonResponse.has("slug"));
+
+        assertTrue("response category should contain name", jsonResponse.has("name"));
+        assertEquals("response category name should be equal to name sent on bean", menuBean.getName(),
+            LocalizedString.fromJson(jsonResponse.get("name")));
+
+        }
 
     @Test
     public void createFullMenu() {

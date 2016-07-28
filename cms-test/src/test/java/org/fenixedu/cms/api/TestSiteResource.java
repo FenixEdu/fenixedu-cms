@@ -1,5 +1,6 @@
 package org.fenixedu.cms.api;
 
+import com.flickr4java.flickr.auth.Auth;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -10,7 +11,13 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.api.bean.SiteBean;
 import org.fenixedu.cms.api.json.SiteAdapter;
 import org.fenixedu.cms.domain.CMSTheme;
+import org.fenixedu.cms.domain.CmsSettings;
 import org.fenixedu.cms.domain.CmsTestUtils;
+import org.fenixedu.cms.domain.DefaultRoles;
+import org.fenixedu.cms.domain.PermissionsArray;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
+import org.fenixedu.cms.domain.Role;
+import org.fenixedu.cms.domain.RoleTemplate;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -25,6 +32,8 @@ import pt.ist.fenixframework.FenixFramework;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -61,7 +70,8 @@ public class TestSiteResource extends TestCmsApi {
     public void listUserSingleSites() {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("listUserSingleSites");
-
+        CmsTestUtils.setUserAsManager(user);
+        
         Site site = CmsTestUtils.createSite(user, "listUserSingleSites");
 
         // execute
@@ -114,7 +124,9 @@ public class TestSiteResource extends TestCmsApi {
     public void createErrorSiteWithoutName() {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createErrorSiteWithoutName");
-
+        CmsTestUtils.setUserAsManager(user);
+        Authenticate.mock(user);
+        
         LocalizedString description =
                 new LocalizedString(Locale.UK, "createErrorSiteWithoutName-description-uk").with(Locale.US,
                         "createErrorSiteWithoutName-description-us");
@@ -131,7 +143,9 @@ public class TestSiteResource extends TestCmsApi {
     public void createErrorSiteWithoutDescription() {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createErrorSiteWithoutDescription");
-
+        CmsTestUtils.setUserAsManager(user);
+        Authenticate.mock(user);
+        
         LocalizedString name =
                 new LocalizedString(Locale.UK, "createErrorSiteWithoutDescription-name-uk").with(Locale.US,
                         "createErrorSiteWithoutDescription-name-us");
@@ -149,7 +163,9 @@ public class TestSiteResource extends TestCmsApi {
     public void createMinSite() {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createMinSite");
-
+        CmsTestUtils.setUserAsManager(user);
+        Authenticate.mock(user);
+        
         LocalizedString name = new LocalizedString(Locale.UK, "createMinSite-name-uk").with(Locale.US, "createMinSite-name-us");
         LocalizedString description =
                 new LocalizedString(Locale.UK, "createMinSite-description-uk").with(Locale.US, "createMinSite-description-us");
@@ -206,7 +222,9 @@ public class TestSiteResource extends TestCmsApi {
     public void createFullSite() {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createFullSite");
-
+        CmsTestUtils.setUserAsManager(user);
+        Authenticate.mock(user);
+        
         CMSTheme theme = new CMSTheme();
         theme.setType("createFullSite-theme-type");
 
@@ -215,10 +233,11 @@ public class TestSiteResource extends TestCmsApi {
                 new LocalizedString(Locale.UK, "createFullSite-description-uk").with(Locale.US, "createFullSite-description-us");
         SiteBean siteBean = new SiteBean(name, description);
         siteBean.setEmbedded(true);
+        LOGGER.debug("Theme Id "+  theme.getExternalId());
         siteBean.setTheme(theme.getExternalId());
 
         DateTime creationDate = new DateTime();
-
+        LOGGER.debug("submitting "+ siteBean.toJson());
         // execute
         String response =
                 getSitesTarget().request().post(Entity.entity(siteBean.toJson(), MediaType.APPLICATION_JSON), String.class);
@@ -292,9 +311,18 @@ public class TestSiteResource extends TestCmsApi {
     public void editSite() {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("editSite");
-
+        CmsTestUtils.setUserAsManager(user);
+        Authenticate.mock(user);
+        
         Site site = CmsTestUtils.createSite(user, "editSite");
-
+    
+        RoleTemplate adminRoleTemplate = DefaultRoles.getInstance().getAdminRole();
+        EnumSet<Permission> defaultPermissions = adminRoleTemplate.getPermissions().get();
+        defaultPermissions.add(Permission.CHANGE_THEME);
+        adminRoleTemplate.setPermissions(new PermissionsArray(defaultPermissions));
+        Role role = new Role(adminRoleTemplate,site);
+        role.setGroup(user.groupOf().toPersistentGroup());
+        
         LocalizedString nameEdit =
                 new LocalizedString(Locale.UK, "site name uk nameEdit").with(Locale.US, "site name us nameEdit");
         LocalizedString descriptionEdit =
@@ -311,6 +339,8 @@ public class TestSiteResource extends TestCmsApi {
         siteBean.setPublished(true);
 
         // execute
+        LOGGER.debug("editSite: " + site.getFullUrl() + "  " + site.getOid() + "  " + siteBean.toJson(), " ");
+
         String response =
                 getSiteTarget(site).request().put(Entity.entity(siteBean.toJson(), MediaType.APPLICATION_JSON), String.class);
         // test

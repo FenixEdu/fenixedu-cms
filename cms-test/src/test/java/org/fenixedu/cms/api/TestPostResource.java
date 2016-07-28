@@ -216,6 +216,7 @@ public class TestPostResource extends TestCmsApi {
         PostBean postBean = new PostBean();
         postBean.setName(nameEdit);
         postBean.setBody(bodyEdit);
+        postBean.setExcerpt(bodyEdit);
         postBean.setSlug("editPost slug");
         postBean.setPublished(false);
         postBean.setPublicationBegin("2014-10-05T23:14");

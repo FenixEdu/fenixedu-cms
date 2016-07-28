@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.FenixFramework;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.util.HashSet;
@@ -80,6 +81,27 @@ public class TestSiteCategoryResource extends TestCmsApi {
     }
 
     @Test
+    public void createNoNameCategory() {
+        // prepare
+        User user = CmsTestUtils.createAuthenticatedUser("createNoNameCategory");
+
+        Site site = CmsTestUtils.createSite(user, "createNoNameCategory");
+
+        CategoryBean categoryBean = new CategoryBean();
+
+        DateTime creationDate = new DateTime();
+
+        // execute
+        try {
+            String response = getSiteCategoriesTarget(site).request()
+                .post(Entity.entity(categoryBean.toJson(), MediaType.APPLICATION_JSON), String.class);
+        } catch (BadRequestException ex) {
+            LOGGER.debug(ex.getMessage());
+        }
+    }
+
+
+    @Test
     public void createMinCategory() {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createMinCategory");
@@ -87,14 +109,15 @@ public class TestSiteCategoryResource extends TestCmsApi {
         Site site = CmsTestUtils.createSite(user, "createMinCategory");
 
         CategoryBean categoryBean = new CategoryBean();
+        LocalizedString name =
+            new LocalizedString(Locale.UK, "createFullCategory-name-uk").with(Locale.US, "createFullCategory-name-us");
+        categoryBean.setName(name);
 
         DateTime creationDate = new DateTime();
 
         // execute
-        String response =
-                getSiteCategoriesTarget(site).request().post(Entity.entity(categoryBean.toJson(), MediaType.APPLICATION_JSON),
-                        String.class);
-        LOGGER.debug("createMinCategory: response = " + response.replaceAll("(\\r|\\n|\\t)", " "));
+        String response = getSiteCategoriesTarget(site).request()
+            .post(Entity.entity(categoryBean.toJson(), MediaType.APPLICATION_JSON), String.class);
 
         // test
         JsonObject jsonResponse = new JsonParser().parse(response).getAsJsonObject();
@@ -116,8 +139,11 @@ public class TestSiteCategoryResource extends TestCmsApi {
         assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(), jsonResponse
                 .get("createdBy").getAsString());
 
-        assertFalse("response category should not contain slug", jsonResponse.has("slug"));
-        assertFalse("response category should not contain name", jsonResponse.has("name"));
+        assertTrue("response category should  contain slug", jsonResponse.has("slug"));
+
+        assertTrue("response category should  contain name", jsonResponse.has("name"));
+        assertEquals("name response should be equal to expected name", name,
+            LocalizedString.fromJson(jsonResponse.get("name").getAsJsonObject()));
     }
 
     @Test

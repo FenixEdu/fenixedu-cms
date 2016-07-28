@@ -4,11 +4,13 @@ import com.google.gson.JsonObject;
 import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.commons.i18n.LocalizedString;
+import org.springframework.cglib.core.Local;
 
 public class PostBean {
     private LocalizedString name;
     private String slug;
     private LocalizedString body;
+    private LocalizedString excerpt;
     private Boolean published;
     private String publicationBegin;
     private String publicationEnd;
@@ -22,6 +24,7 @@ public class PostBean {
 
         json.add("name", new JsonBuilder().view(getName(), LocalizedStringViewer.class));
         json.add("body", new JsonBuilder().view(getBody(), LocalizedStringViewer.class));
+        json.add("excerpt", new JsonBuilder().view(getExcerpt(), LocalizedStringViewer.class));
 
         if (getSlug() != null) {
             json.addProperty("slug", getSlug());
@@ -56,6 +59,14 @@ public class PostBean {
 
     public void setBody(LocalizedString body) {
         this.body = body;
+    }
+
+    public void setExcerpt(LocalizedString excerpt) {
+        this.excerpt = excerpt;
+    }
+
+    public LocalizedString getExcerpt() {
+        return excerpt;
     }
 
     public String getSlug() {

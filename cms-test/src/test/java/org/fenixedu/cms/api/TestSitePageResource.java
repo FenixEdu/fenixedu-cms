@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.FenixFramework;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import java.util.HashSet;
@@ -79,6 +80,31 @@ public class TestSitePageResource extends TestCmsApi {
                 && expectedJsonPages.contains(jsonResponseArray.get(1)));
     }
 
+
+    @Test
+    public void createNoNamePage() {
+        // prepare
+        User user = CmsTestUtils.createAuthenticatedUser("createNoNamePage");
+
+        Site site = CmsTestUtils.createSite(user, "createNoNamePage");
+
+        PageBean pageBean = new PageBean();
+
+        DateTime creationDate = new DateTime();
+
+        // execute
+
+        try {
+            String response =
+                getSitePagesTarget(site).request().post(Entity.entity(pageBean.toJson(), MediaType.APPLICATION_JSON),
+                    String.class);
+            fail();
+        } catch (BadRequestException ex) {
+            LOGGER.debug(ex.getMessage());
+        }
+    }
+
+
     @Test
     public void createMinPage() {
         // prepare
@@ -87,6 +113,8 @@ public class TestSitePageResource extends TestCmsApi {
         Site site = CmsTestUtils.createSite(user, "createMinPage");
 
         PageBean pageBean = new PageBean();
+        LocalizedString name = new LocalizedString(Locale.UK, "createMinPage-name-uk").with(Locale.US, "createMinPage-name-us");
+        pageBean.setName(name);
 
         DateTime creationDate = new DateTime();
 
@@ -124,8 +152,12 @@ public class TestSitePageResource extends TestCmsApi {
         assertEquals("createdBy response should be equal to expected createdBy", user.getUsername(), jsonResponse
                 .get("createdBy").getAsString());
 
-        assertFalse("response page should not contain slug", jsonResponse.has("slug"));
-        assertFalse("response page should not contain name", jsonResponse.has("name"));
+        assertTrue("response page should contain slug", jsonResponse.has("slug"));
+        assertTrue("response page should contain name", jsonResponse.has("name"));
+
+        assertEquals("name response should be equal to expected name", name,
+            LocalizedString.fromJson(jsonResponse.get("name").getAsJsonObject()));
+
     }
 
     @Test

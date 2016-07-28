@@ -82,7 +82,6 @@ public class TestSiteImportExportIntegration extends TestCMS {
         assertEqualSites(site, importedSite);
     }
 
-    @Test
     private void assertEqualSites(Site site, Site importedSite) {
         assertNotNull(importedSite);
         Assert.assertEquals(importedSite.getName(), site.getName());
@@ -189,7 +188,6 @@ public class TestSiteImportExportIntegration extends TestCMS {
         }
     }
 
-    @Test
     private Site exportAndImport(Site site) {
         try {
             ByteArrayOutputStream exportedSite = new SiteExporter(site).export();

@@ -199,8 +199,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * searches for a {@link Page} by slug on this {@link Site}.
      *
      * @param slug the slug of the {@link Page} wanted.
-     * @return the {@link Page} with the given slug if it exists on this site,
-     *         or null otherwise.
+     * @return the {@link Page} with the given slug if it exists on this site
      */
     public Page pageForSlug(String slug) {
         return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElseThrow(() ->  CmsDomainException.notFound());
@@ -221,8 +220,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * searches for a {@link Post} by slug on this {@link Site}.
      *
      * @param slug the slug of the {@link Post} wanted.
-     * @return the {@link Post} with the given slug if it exists on this site,
-     *         or null otherwise.
+     * @return the {@link Post} with the given slug if it exists on this site
      */
     public Post postForSlug(String slug) {
         return getPostSet().stream().filter(post -> slug.equals(post.getSlug())).findAny().orElse(null);

@@ -85,6 +85,10 @@ public class CmsSettings extends CmsSettings_Base {
     }
 
     public static CmsSettings getInstance() {
+        if(Bennu.getInstance().getCmsSettings()==null){
+            Bennu.getInstance().setCmsSettings(new CmsSettings());
+        }
+        
         return Bennu.getInstance().getCmsSettings();
     }
 

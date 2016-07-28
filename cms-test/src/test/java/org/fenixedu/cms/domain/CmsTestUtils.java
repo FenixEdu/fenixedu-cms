@@ -3,15 +3,27 @@ package org.fenixedu.cms.domain;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.domain.UserProfile;
+import org.fenixedu.bennu.core.domain.groups.PersistentGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 
 import java.util.Locale;
 
-public class CmsTestUtils {
+import static junit.framework.TestCase.assertNotNull;
 
+public class CmsTestUtils {
+    
+      public static void setUserAsManager(User user){
+          CmsSettings settings = CmsSettings.getInstance();
+          assertNotNull(settings); // If you know what I know, this assert seems perfectly sane
+          PersistentGroup pgroup = Group.users(user).toPersistentGroup();
+          assertNotNull(pgroup);
+          settings.setSettingsManagers(pgroup);
+    }
+    
     public static LocalizedString createLocalizedString(String base) {
         return new LocalizedString(I18N.getLocale(), base);
     }
@@ -35,7 +47,9 @@ public class CmsTestUtils {
 
         Site site = new Site(siteName, siteDescription);
 
-        site.setCanAdminGroup(Group.users(user));
+        Role adminRole = new Role(DefaultRoles.getInstance().getAdminRole(), site);
+        adminRole.setGroup(Group.users(user).toPersistentGroup());
+
         return site;
     }
 

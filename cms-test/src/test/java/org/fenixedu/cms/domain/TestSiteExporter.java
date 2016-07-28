@@ -37,18 +37,6 @@ public class TestSiteExporter extends TestCMS {
         assertEquals(json.get("description"), site.getDescription().json());
         assertTrue(LocalizedString.fromJson(json.get("description")).equals(site.getDescription()));
 
-        assertTrue(json.has("canViewGroup"));
-        assertEquals(json.get("canViewGroup").getAsString(), site.getCanViewGroup().getExpression());
-        assertTrue(Group.parse(json.get("canViewGroup").getAsString()).equals(site.getCanViewGroup()));
-
-        assertTrue(json.has("canAdminGroup"));
-        assertEquals(json.get("canAdminGroup").getAsString(), site.getCanAdminGroup().getExpression());
-        assertTrue(Group.parse(json.get("canAdminGroup").getAsString()).equals(site.getCanAdminGroup()));
-
-        assertTrue(json.has("canPostGroup"));
-        assertEquals(json.get("canPostGroup").getAsString(), site.getCanAdminGroup().getExpression());
-        assertTrue(Group.parse(json.get("canPostGroup").getAsString()).equals(site.getCanAdminGroup()));
-
         assertTrue(json.has("themeType"));
         assertTrue(json.get("themeType").isJsonNull());
 

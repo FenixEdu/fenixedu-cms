@@ -30,6 +30,7 @@ import org.fenixedu.cms.domain.component.CMSComponent;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ComponentDescriptor;
 import org.fenixedu.cms.domain.component.ListCategoryPosts;
+import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 import pt.ist.fenixframework.Atomic;
@@ -40,6 +41,7 @@ import java.io.Reader;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -104,13 +106,18 @@ public class SiteImporter {
     }
 
     private Page importPage(Site site, String pageSlug, JsonObject jsonObject) {
-        return ofNullable(site.pageForSlug(pageSlug)).orElseGet(() -> {
+    
+        try{
+            return site.pageForSlug(pageSlug);
+        } catch(CmsDomainException e){
+    
             Page page = new Page(site, fromJson(jsonObject.get("name")));
             page.setSlug(jsonObject.get("slug").getAsString());
             page.setCanViewGroup(Group.parse(jsonObject.get("canViewGroup").getAsString()));
             if (jsonObject.has("templateType") && !jsonObject.get("templateType").isJsonNull()) {
                 page.setTemplateType(jsonObject.get("templateType").getAsString());
             }
+            
             page.setPublished(jsonObject.get("published").getAsBoolean());
             for (JsonElement el : jsonObject.get("components").getAsJsonArray()) {
                 Component component = importComponent(el.getAsJsonObject());
@@ -118,8 +125,9 @@ public class SiteImporter {
                     page.addComponents(component);
                 }
             }
+            
             return page;
-        });
+        }
     }
 
     private Component importComponent(JsonObject jsonObject) {
