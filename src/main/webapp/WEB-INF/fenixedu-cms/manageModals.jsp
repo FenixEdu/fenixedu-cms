@@ -466,18 +466,20 @@
                             <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.create.label.name"/></label>
 
                             <div class="col-sm-10">
+                                <spring:message code='site.create.label.name' var="create.label.name"/>
                                 <input bennu-localized-string required-any type="text" name="name" class="form-control" id="inputEmail3"
-                                       placeholder="<spring:message code="site.create.label.name"/>">
-                                <c:if test="${emptyName !=null }"><p class="text-danger"><spring:message code="site.create.error.emptyName"/></p>
+                                       placeholder="${create.label.name}">
+                                <c:if test="${emptyName !=null }"><p class="text-danger"><spring:message code='site.create.error.emptyName'/></p>
                                 </c:if>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="site.create.label.description"/></label>
-
+                                <spring:message code="site.create.label.description" var="create.label.description"/>
                             <div class="col-sm-10">
-                                <input bennu-localized-string name="description" placeholder="<spring:message code="site.create.label.description"/>" class="form-control" \>
+                                <input bennu-localized-string name="description" placeholder="${create.label.description}"
+                                       class="form-control" \>
                             </div>
                         </div>
 
