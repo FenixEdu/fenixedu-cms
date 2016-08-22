@@ -149,9 +149,10 @@ public class AdminSites {
 
         CMSFolder selectedFolder = null;
         if (tag != null && !tag.equals("")){
-            if (!(tag.equals("\u2718") ||  tag.equals("u" +
-                    "ntagged"))) {
-                selectedFolder = Bennu.getInstance().getCmsFolderSet().stream().filter(x -> x.getFunctionality().getPath().equals(tag)).findAny().orElseThrow(CmsDomainException::notFound);
+            if (!(tag.equals("\u2718") ||  tag.equals("untagged"))) {
+                selectedFolder = Bennu.getInstance().getCmsFolderSet().stream()
+                    .filter(x -> x.getFunctionality().getPath().equals(tag))
+                    .findAny().orElseThrow(CmsDomainException::notFound);
                 model.addAttribute("folder", selectedFolder);
             }
             if(selectedFolder == null){

@@ -87,10 +87,10 @@ public class SiteActivity extends SiteActivity_Base {
 
         object.addProperty("type","postDeleted");
         object.addProperty("post", (String) null);
-        object.add("pageName", post.getName().json());
-        object.addProperty("pageSluΩg",(String) null);
+        object.add("postName", post.getName().json());
+        object.addProperty("pageSlug",(String) null);
         object.addProperty("user", user.getUsername());
-        object.addProperty("userNaßme", user.getProfile().getDisplayName());
+        object.addProperty("userName", user.getProfile().getDisplayName());
 
         makeActivity(site,object);
     }

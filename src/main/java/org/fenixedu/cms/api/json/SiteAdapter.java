@@ -57,6 +57,7 @@ public class SiteAdapter implements JsonAdapter<Site> {
         JsonObject jObj = json.getAsJsonObject();
 
         if (jObj.has("slug") && !jObj.get("slug").isJsonNull()) {
+            site.isValidSlug(jObj.get("slug").getAsString());
             site.setSlug(jObj.get("slug").getAsString());
         }
 

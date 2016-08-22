@@ -42,7 +42,7 @@ ${portal.angularToolkit()}
     <div class="page-header">
         <h1>${site.name.content}</h1>
 
-        <h2><small><a href="${pageContext.request.contextPath}/cms/pages/${site.slug}">Edit Page - ${post.name.content}</small></a></h2>
+        <h2><small><a href="${pageContext.request.contextPath}/cms/pages/${site.slug}">Edit Page - {{post.name | i18n }}</a></small></h2>
 
         <div class="row">
             <div class="col-sm-12">

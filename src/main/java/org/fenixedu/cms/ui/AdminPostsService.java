@@ -76,7 +76,7 @@ public class AdminPostsService {
 		if(!post.getName().equals(name)) {
 			post.setName(name);
 		}
-		if(!post.getBody().equals(body) || !post.getExcerpt().equals(excerpt)) {
+		if(!post.getBody().equals(body) || (  post.getExcerpt()==null && excerpt!=null ) || !post.getExcerpt().equals(excerpt)) {
 			post.setBodyAndExcerpt(body, excerpt);
 		}
 		if(!post.getSlug().equals(slug)) {
