@@ -174,7 +174,7 @@ ${portal.toolkit()}
 		</div>
 		<div class="col-sm-6">
 			<modular:intersect location="site.manage" position="extra.properties">
-				<arg key="site" value="${site}"></arg>
+				<modular:arg key="site" value="${site}"></modular:arg>
 			</modular:intersect>
 		</div>
 	</div>
