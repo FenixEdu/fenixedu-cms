@@ -21,28 +21,86 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<h1>
-	Resolver - ${folder.functionality.title.content}
-</h1>
-
-<p>
-	<a href="${pageContext.request.contextPath}/cms/folders" class="btn btn-default">« <spring:message code="action.back"/></a>
-	<button class="btn btn-success" id="saveBtn"><spring:message code="action.save" /></button>
-</p>
-
-<p class="alert alert-danger" id="error" style="display: none">
-</p>
-
-<p>
-    <pre id="editor"><c:out value="${folder.resolver.code}"></c:out></pre>
-</p>
-
+${portal.toolkit()}
 <script src="${pageContext.request.contextPath}/static/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 
+<div class="page-header">
+    <h1>${folder.functionality.description.content}
+          <small>
+              <ol class="breadcrumb">
+                    <li><a href="${pageContext.request.contextPath}/cms">Sites</a></li>
+                    <li><a href="${pageContext.request.contextPath}/cms">Tags</a></li>
+                </ol>
+          </small>
+    </h1>
+</div>
+
+<div class="editor-content">
+    <p>
+        <div class="btn-toolbar" style="background:white" role="toolbar">
+            <button class="btn btn-primary" id="saveBtn"><spring:message code="action.save" /></button>
+            <div class="pull-right">
+                <div class="btn-group">
+                    <button class="btn btn-fullscreen btn-default"><i class="glyphicon glyphicon-fullscreen"></i></button>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="theme-msg">Theme</span> <span class="caret"></span></button>
+                    <ul class="dropdown-menu themes" role="menu">
+                        <li><a data-theme="ambiance" href="#">Ambiance</a></li>
+                        <li><a data-theme="chaos" href="#">Chaos</a></li>
+                        <li><a data-theme="chrome" href="#">Chrome</a></li>
+                        <li><a data-theme="clouds" href="#">Clouds</a></li>
+                        <li><a data-theme="clouds_midnight" href="#">Clouds Midnight</a></li>
+                        <li><a data-theme="cobalt" href="#">Cobalt</a></li>
+                        <li><a data-theme="crimson_editor" href="#">Crimson Editor</a></li>
+                        <li><a data-theme="dawn" href="#">Dawn</a></li>
+                        <li><a data-theme="dreamweaver" href="#">Dreamweaver</a></li>
+                        <li><a data-theme="eclipse" href="#">Eclipse</a></li>
+                        <li><a data-theme="github" href="#">GitHub</a></li>
+                        <li><a data-theme="solarized_dark" href="#">Solarized Dark</a></li>
+                        <li><a data-theme="solarized_light" href="#">Solarized Light</a></li>
+                        <li><a data-theme="terminal" href="#">Terminal</a></li>
+                        <li><a data-theme="textmate" href="#">TextMate</a></li>
+                        <li><a data-theme="xcode" href="#">XCode</a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </p>
+
+    <p class="alert alert-danger" id="error" style="display: none"></p>
+
+    <div id="folder-code-full"></div>
+
+    <div class="row" id="folder-container">
+        <div class="col-md-12" id="folder-code-default">
+            <pre id="editor"><c:out value="${folder.resolver.code}"/></pre>
+        </div>
+    </div>
+</div>
+
 <style>
+    #folder-code-full {
+        display: initial;
+    }
 	#editor {
-		height: 400px;
+		height: 512px;
 	}
+    .fullscreen{
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        height: 100%;
+        width: 100%;
+        z-index: 999999999;
+        background: white;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    .fullscreen #editor{
+        height:90%;
+    }
 </style>
 
 <script>
@@ -56,7 +114,7 @@
              { data: editor.getValue(), type: 'PUT' }).always(function () {
                 $("#saveBtn").attr('disabled', false); $("#saveBtn").html('<spring:message code="action.save" />');
              }).error(function (data) {
-				$("#error").show(); $("#error").html(data.responseText);
+				$("#error").show(); $("#error").text(data.responseText);
              });
     };
 
@@ -70,7 +128,35 @@
         bindKey: {win: 'Ctrl-S',  mac: 'Command-S'},
         exec: submit
     });
+    var theme;
 
+    if(typeof(Storage) !== "undefined") {
+      theme = localStorage.getItem("cmsThemeEditorTheme") || "clouds";
+    }
+    editor.setTheme("ace/theme/" + theme);
+
+    $(".theme-msg").html($("a[data-theme='" + theme + "']").html())
+
+    $(".themes a").on("click", function (e){
+      e = $(e.target);
+      editor.setTheme("ace/theme/" + e.data("theme"));
+      localStorage.setItem("cmsThemeEditorTheme", e.data("theme"));
+      $(".theme-msg").html($("a[data-theme='" + e.data("theme") + "']").html())
+    });
+
+    $(".btn-fullscreen").on("click",function() {
+      if($(".btn-fullscreen").hasClass("active")) {
+        $("#editor").detach().appendTo('#folder-code-default');
+        $('#folder-container').show();
+        $(".editor-content").removeClass("fullscreen");
+        $(".btn-fullscreen").removeClass("active");
+      } else {
+        $("#editor").detach().appendTo('#folder-code-full');
+        $('#folder-container').hide();
+        $(".editor-content").addClass("fullscreen");
+        $(".btn-fullscreen").addClass("active");
+      }
+    })
 
     $('#saveBtn').on('click', submit);
 </script>

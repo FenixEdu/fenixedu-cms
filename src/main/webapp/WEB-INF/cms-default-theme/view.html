@@ -17,19 +17,23 @@
     {% endfor %}
     </span>
     </p>
-
+    
+    <p>
+        {{post.excerpt.content | raw}}
+    </p>
+    <hr/>
     <p>
         {{post.body.content | raw}}
     </p>
 
-    {% if post.attachments.size != 0%}
+    {% if post.attachements is not empty %}
     <p>
-    <h4>Attachments</h4>
-    <ul>
-        {% for file in post.attachments %}
-        <li><a href="{{file.url}}">{{file.name}}</a></li>
-        {% endfor %}
-    </ul>
+        <h4>Attachments</h4>
+        <ul>
+            {% for file in post.attachements %}
+                <li><a href="{{file.url}}">{{file.name}}</a></li>
+            {% endfor %}
+        </ul>
     </p>
     {% endif %}
 

@@ -18,6 +18,8 @@
  */
 package org.fenixedu.cms.domain;
 
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -26,22 +28,30 @@ import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
 /**
  * Models the items of a {@link Menu}
  */
-public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wrappable {
+public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wrappable, Cloneable {
+
+    public static final Comparator<MenuItem> CREATION_DATE_COMPARATOR = Comparator.comparing(MenuItem::getCreationDate);
+
+    public static final String SIGNAL_CREATED = "fenixedu.cms.menuItem.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.menuItem.deleted";
+    public static final String SIGNAL_EDITED = "fenixedu.cms.menuItem.edited";
 
     /**
      * The logged {@link User} creates a new MenuItem.
@@ -55,6 +65,8 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         this.setCreationDate(new DateTime());
         this.setFolder(false);
         this.setMenu(menu);
+
+        Signal.emit(MenuItem.SIGNAL_CREATED, new DomainObjectEvent<MenuItem>(this));
     }
 
     @Override
@@ -65,7 +77,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     /**
      * Adds a children at a given position and shifts the existing items.
      *
-     * @param item the {@link MenuItem} to be added.
+     * @param item     the {@link MenuItem} to be added.
      * @param position the position where the item should be added.
      */
     public void putAt(MenuItem item, int position) {
@@ -118,14 +130,14 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
      * </p>
      */
     public void removeFromParent() {
-        if (this.getTop() != null) {
-            this.getTop().remove(this);
-            this.setTop(null);
+        if (getTop() != null) {
+            getTop().remove(this);
         }
-        if (this.getParent() != null) {
-            this.getParent().remove(this);
-            this.setParent(null);
+        if (getParent() != null) {
+            getParent().remove(this);
         }
+        setTop(null);
+        setParent(null);
     }
 
     /**
@@ -159,16 +171,14 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     @Atomic
     public void delete() {
+        Signal.emit(MenuItem.SIGNAL_CREATED, new DomainObjectEvent<>(this.getMenu()));
         List<MenuItem> items = Lists.newArrayList(getChildrenSet());
         removeFromParent();
-
         items.forEach(i -> remove(i));
-
-        this.setCreatedBy(null);
-        this.setMenu(null);
-        this.setPage(null);
-
-        this.deleteDomainObject();
+        setCreatedBy(null);
+        setMenu(null);
+        setPage(null);
+        deleteDomainObject();
     }
 
     @Override
@@ -183,7 +193,6 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     public static void fixOrder(List<MenuItem> sortedItems) {
         for (int i = 0; i < sortedItems.size(); ++i) {
-
             sortedItems.get(i).setPosition(i);
         }
     }
@@ -203,6 +212,22 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         return menuItem;
     }
 
+    @Override
+    public MenuItem clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            MenuItem clone = new MenuItem(null);
+            cloneCache.setClone(MenuItem.this, clone);
+            clone.setName(getName() != null ? fromJson(getName().json()) : null);
+            clone.setPosition(getPosition());
+            clone.setFolder(getFolder());
+            clone.setUrl(getUrl());
+            clone.setPage(getPage() != null ? getPage().clone(cloneCache) : null);
+            clone.setParent(getParent() != null ? getParent().clone(cloneCache) : null);
+            clone.setTop(getTop() != null ? getTop().clone(cloneCache) : null);
+            return clone;
+        });
+    }
+
     public class MenuItemWrap extends Wrap {
         private final boolean active;
         private final boolean open;
@@ -211,7 +236,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
         public MenuItemWrap() {
             children =
                     MenuItem.this.getChildrenSorted().stream().filter(MenuItem::isVisible).map((menuItem) -> menuItem.makeWrap())
-                            .collect(Collectors.toList());
+                    .collect(Collectors.toList());
             active = false;
             open = false;
         }
@@ -264,6 +289,6 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     }
 
     public boolean isVisible() {
-        return getPage() == null || getPage().isPublished();
+        return getPage() == null || getPage().getPublished();
     }
 }

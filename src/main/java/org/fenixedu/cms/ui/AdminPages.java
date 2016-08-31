@@ -18,158 +18,196 @@
  */
 package org.fenixedu.cms.ui;
 
-import java.util.Objects;
+import static java.util.stream.Collectors.toList;
+import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.ui.SearchUtils.searchPages;
+
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.Optional;
 
-import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.CMSTemplate;
+import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
+import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.PostMetadata;
 import org.fenixedu.cms.domain.Site;
-import org.fenixedu.cms.domain.component.Component;
-import org.fenixedu.commons.i18n.I18N;
+import org.fenixedu.cms.domain.SiteActivity;
+import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.LocalizedString;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
-
 import com.google.common.base.Strings;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
-import static java.util.Optional.ofNullable;
+import pt.ist.fenixframework.FenixFramework;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/pages")
 public class AdminPages {
 
-    @RequestMapping(value = "{slug}", method = RequestMethod.GET)
-    public String pages(Model model, @PathVariable(value = "slug") String slug) {
-        Site site = Site.fromSlug(slug);
+    private static final int PER_PAGE = 10;
+    private static final String JSON = "application/json;charset=utf-8";
+    private static final JsonParser JSON_PARSER = new JsonParser();
 
+    @Autowired
+    AdminPagesService service;
+
+    @RequestMapping(value = "{slug}", method = RequestMethod.GET)
+    public String pages(Model model, @PathVariable String slug, @RequestParam(required = false) String query,
+                    @RequestParam(required = false, defaultValue = "1") int currentPage) {
+        Site site = Site.fromSlug(slug);
         AdminSites.canEdit(site);
+        ensureCanDoThis(site, Permission.SEE_PAGES);
+        Collection<Page> allPages = Strings.isNullOrEmpty(query) ? getStaticPages(site) : searchPages(getStaticPages(site), query);
+        SearchUtils.Partition<Page> partition =
+                        new SearchUtils.Partition<>(allPages, Page.CREATION_DATE_COMPARATOR, PER_PAGE, currentPage);
 
         model.addAttribute("site", site);
-        model.addAttribute("pages", site.getPagesSet());
+        model.addAttribute("query", query);
+        model.addAttribute("partition", partition);
+        model.addAttribute("pages", partition.getItems());
         return "fenixedu-cms/pages";
     }
 
-    @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
-    public String createPage(Model model, @PathVariable(value = "slug") String slug) {
-        Site s = Site.fromSlug(slug);
-
-        AdminSites.canEdit(s);
-
-        model.addAttribute("site", s);
-        return "fenixedu-cms/createPage";
-    }
-
-    @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
-    public RedirectView createPage(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
-            RedirectAttributes redirectAttributes) {
-        if (Strings.isNullOrEmpty(name)) {
-            redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/pages/" + slug + "/create", true);
-        } else {
-            Site s = Site.fromSlug(slug);
-
-            AdminSites.canEdit(s);
-
-            Page page = createPage(name, s);
-            return new RedirectView("/cms/pages/" + s.getSlug() + "/" + page.getSlug() + "/edit", true);
-        }
-    }
-
-    @Atomic
-    private Page createPage(String name, Site s) {
-        Page p = new Page(s);
-        p.setName(new LocalizedString(I18N.getLocale(), name));
-        return p;
-    }
-
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.GET)
-    public String edit(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPage") String slugPage) {
-        Site s = Site.fromSlug(slugSite);
-
-        AdminSites.canEdit(s);
-
-        if (slugPage.equals("--**--")) {
-            slugPage = "";
+    public String edit(Model model, @PathVariable String slugSite, @PathVariable String slugPage) {
+        Site site = Site.fromSlug(slugSite);
+        AdminSites.canEdit(site);
+        ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE);
+        Page page = site.pageForSlug(slugPage);
+        if(!page.isStaticPage()) {
+            throw CmsDomainException.forbiden();
         }
-
-        Page p = s.pageForSlug(slugPage);
-        model.addAttribute("site", s);
-        model.addAttribute("page", p);
-        model.addAttribute("availableComponents", Component.availableComponents(s));
-
+        model.addAttribute("site", site);
+        model.addAttribute("page", page);
+        model.addAttribute("post", page.getStaticPost().get());
         return "fenixedu-cms/editPage";
     }
 
-    @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST)
-    public RedirectView edit(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPage") String slugPage, @RequestParam LocalizedString name, @RequestParam String slug,
-            @RequestParam String template, @RequestParam(required = false) Boolean published, @RequestParam String viewGroup,
-            RedirectAttributes redirectAttributes) {
-        if (name != null && name.isEmpty()) {
-            redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage + "/edit", true);
+    @RequestMapping(value = "{slugSite}/{slugPage}/data", method = RequestMethod.GET, produces = JSON)
+    public @ResponseBody String data(@PathVariable String slugSite, @PathVariable String slugPage) {
+        Site site = Site.fromSlug(slugSite);
+        AdminSites.canEdit(site);
+        ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE);
+        Page page = site.pageForSlug(slugPage);
+        if(!page.isStaticPage()) {
+            throw CmsDomainException.forbiden();
         }
-        Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
-        Page p = s.pageForSlug(slugPage.equals("--**--") ? "" : slugPage);
-        editPage(name, slug, template, s, p, ofNullable(published).orElse(false), Group.parse(viewGroup));
-        return new RedirectView("/cms/pages/" + slugSite + "/" + slugPage + "/edit", true);
+        JsonObject data = new JsonObject();
+        JsonArray menus = new JsonArray();
+        if(canDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU)) {
+            boolean canEditPrivilegedMenu = canDoThis(site, Permission.EDIT_PRIVILEGED_MENU);
+            site.getOrderedMenusSet().stream()
+                .filter(menu->!menu.getPrivileged() || canEditPrivilegedMenu)
+                .map(service::serializeMenu).forEach(menus::add);
+        }
+        data.add("post", service.serializePage(page));
+        data.add("menus", menus);
+        return data.toString();
     }
 
-    @Atomic(mode = TxMode.WRITE)
-    private void editPage(LocalizedString name, String slug, String template, Site s, Page p, boolean published, Group canView) {
-        p.setName(name);
-        if (!Objects.equals(slug, p.getSlug())) {
-            p.setSlug(slug);
+    @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
+    public RedirectView createPage(@PathVariable String slug, @RequestParam LocalizedString name) {
+        Site site = Site.fromSlug(slug);
+        AdminSites.canEdit(site);
+        ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE, Permission.CREATE_PAGE);
+        Page page = service.createPageAndPost(name, site);
+        return pageRedirect(page);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.POST, consumes = JSON, produces = JSON)
+    public @ResponseBody String edit(@PathVariable String slugSite, @PathVariable String slugPage, HttpEntity<String> httpEntity) {
+        Site site = Site.fromSlug(slugSite);
+        ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE);
+        JsonObject editData = JSON_PARSER.parse(httpEntity.getBody()).getAsJsonObject();
+        Page page = site.pageForSlug(slugPage);
+        if(!page.isStaticPage()) {
+            throw CmsDomainException.forbiden();
         }
-        if (s != null && s.getTheme() != null) {
-            CMSTemplate t = s.getTheme().templateForType(template);
-            p.setTemplate(t);
-        }
-        if(p.getPublished() != published) {
-            p.setPublished(published);
-        }
-        if(!p.getCanViewGroup().equals(canView)) {
-            p.setCanViewGroup(canView);
-        }
+        service.processChanges(site, page, editData);
+        return data(site.getSlug(), page.getSlug());
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)
-    public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite,
-            @PathVariable(value = "slugPage") String slugPage) {
+    public RedirectView delete(@PathVariable String slugSite, @PathVariable String slugPage) {
         Site s = Site.fromSlug(slugSite);
-
         AdminSites.canEdit(s);
+        Page page = s.pageForSlug(slugPage);
+        FenixFramework.atomic(() -> {
+            ensureCanDoThis(page.getSite(), Permission.EDIT_PAGE, Permission.DELETE_PAGE);
+            if(!page.isStaticPage()) {
+                throw CmsDomainException.forbiden();
+            }
+            page.getStaticPost().ifPresent(Post::delete);
+            SiteActivity.deletedPage(page,s, Authenticate.getUser());
 
-        s.pageForSlug(slugPage).delete();
-        return new RedirectView("/cms/pages/" + s.getSlug() + "", true);
+            page.delete();
+        });
+        return allPagesRedirect(s);
     }
 
-    @RequestMapping(value = "{type}/defaultPage", method = RequestMethod.POST)
-    public RedirectView moveFile(Model model, @PathVariable String type, @RequestParam String page) {
-        Site s = Site.fromSlug(type);
-
+    @RequestMapping(value = "{slugSite}/{slugPage}/metadata", method = RequestMethod.GET)
+    public String viewEditMetadata(Model model, @PathVariable String slugSite, @PathVariable String slugPage) {
+        Site s = Site.fromSlug(slugSite);
         AdminSites.canEdit(s);
-
-        setInitialPage(page, s);
-
-        return new RedirectView("/cms/pages/" + type, true);
+        ensureCanDoThis(s, Permission.EDIT_PAGE, Permission.SEE_METADATA, Permission.EDIT_METADATA);
+        Page page  = s.pageForSlug(slugPage);
+        if(!page.isStaticPage()) {
+            throw CmsDomainException.forbiden();
+        }
+        Post post = page.getStaticPost().get();
+        model.addAttribute("site", s);
+        model.addAttribute("page", page);
+        model.addAttribute("post", post);
+        model.addAttribute("metadata", Optional.ofNullable(post.getMetadata()).map(PostMetadata::json).map(
+            JsonElement::toString).orElseGet(()->new JsonObject().toString()));
+        return "fenixedu-cms/editMetadata";
     }
 
-    @Atomic
-    private void setInitialPage(String page, Site s) {
-        s.setInitialPage(s.pageForSlug(page));
+    @RequestMapping(value = "{slugSite}/{slugPage}/metadata", method = RequestMethod.POST)
+    public RedirectView editMetadata(@PathVariable String slugSite,
+                                         @PathVariable String slugPage,
+                                         @RequestParam String metadata) {
+        Site s = Site.fromSlug(slugSite);
+        Page page = s.pageForSlug(slugPage);
+        if(!page.isStaticPage()) {
+            throw CmsDomainException.forbiden();
+        }
+        FenixFramework.atomic(()-> {
+            AdminSites.canEdit(s);
+            ensureCanDoThis(s, Permission.EDIT_PAGE, Permission.SEE_METADATA, Permission.EDIT_METADATA);
+            page.getStaticPost().ifPresent(
+                post -> post.setMetadata(PostMetadata.internalize(metadata)));
+        });
+        return new RedirectView("/cms/pages/" + s.getSlug() + "/" + page.getSlug() + "/metadata", true);
+    }
+
+    private Collection<Page> getStaticPages(Site site) {
+        return site.getPagesSet().stream().filter(Page::isStaticPage).sorted(Page.PAGE_NAME_COMPARATOR)
+                .collect(toList());
+    }
+
+    public RedirectView allPagesRedirect(Site site) {
+        return new RedirectView("/cms/pages/" + site.getSlug() + "", true);
+    }
+
+    public RedirectView pageRedirect(Page page) {
+        return new RedirectView("/cms/pages/" + page.getSite().getSlug() + "/" + page.getSlug() + "/edit", true);
     }
 
 }

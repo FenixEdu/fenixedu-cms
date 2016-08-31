@@ -23,6 +23,7 @@
 <h1><spring:message code="site.manage.label.newTheme"/></h1>
 
 <form class="form-horizontal" enctype="multipart/form-data" action="" method="post" role="form">
+    ${csrf.field()}
     <div class="form-group">
         <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.new.label.type"/>:</label>
         <div class="col-sm-10">

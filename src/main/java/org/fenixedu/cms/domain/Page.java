@@ -18,13 +18,23 @@
  */
 package org.fenixedu.cms.domain;
 
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ListCategoryPosts;
+import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -35,23 +45,33 @@ import pt.ist.fenixframework.Atomic;
 /**
  * Model for a page on a given Site.
  */
-public class Page extends Page_Base implements Sluggable {
+public class Page extends Page_Base implements Sluggable, Cloneable {
+
+    public static final String SIGNAL_CREATED = "fenixedu.cms.page.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.page.deleted";
+    public static final String SIGNAL_EDITED = "fenixedu.cms.page.edited";
+
+    public static final Comparator<Page> CREATION_DATE_COMPARATOR = Comparator.comparing(Page::getCreationDate).reversed();
+    public static Comparator<Page> PAGE_NAME_COMPARATOR = Comparator.comparing(Page::getName);
 
     /**
      * the logged {@link User} creates a new Page.
      */
-    public Page(Site site) {
+    public Page(Site site, LocalizedString name) {
         super();
         DateTime now = new DateTime();
-        this.setCreationDate(now);
-        this.setModificationDate(now);
+        setCreationDate(now);
+        setModificationDate(now);
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
         }
-        this.setCreatedBy(Authenticate.getUser());
-        this.setCanViewGroup(AnyoneGroup.get());
-        this.setSite(site);
-        this.setPublished(true);
+        setCreatedBy(Authenticate.getUser());
+        setCanViewGroup(AnyoneGroup.get());
+        setSite(site);
+        setPublished(false);
+        setName(name);
+
+        Signal.emit(Page.SIGNAL_CREATED, new DomainObjectEvent<Page>(this));
     }
 
     @Override
@@ -64,7 +84,7 @@ public class Page extends Page_Base implements Sluggable {
         LocalizedString prevName = getName();
         super.setName(name);
 
-        this.setModificationDate(new DateTime());
+        setModificationDate(new DateTime());
         if (prevName == null) {
             setSlug(StringNormalizer.slugify(name.getContent()));
         }
@@ -76,7 +96,8 @@ public class Page extends Page_Base implements Sluggable {
     }
 
     /**
-     * A slug is valid if there are no other page on that site that have the same slug.
+     * A slug is valid if there are no other page on that site that have the
+     * same slug.
      *
      * @param slug
      * @return true if it is a valid slug.
@@ -92,8 +113,8 @@ public class Page extends Page_Base implements Sluggable {
      *
      * @param oid
      *            the oid of the {@link Component} to be searched.
-     * @return
-     *         the {@link Component} with the given oid if it is a component of this page and null otherwise.
+     * @return the {@link Component} with the given oid if it is a component of
+     *         this page and null otherwise.
      */
     public Component componentForOid(String oid) {
         for (Component c : getComponentsSet()) {
@@ -106,20 +127,20 @@ public class Page extends Page_Base implements Sluggable {
 
     @Atomic
     public void delete() {
+        Signal.emit(SIGNAL_DELETED, this.getOid());
+
         for (Component component : getComponentsSet()) {
-            this.removeComponents(component);
+            removeComponents(component);
             component.delete();
         }
 
-        for (MenuItem mi : getMenuItemsSet()) {
-            mi.delete();
-        }
+        getMenuItemsSet().stream().forEach(MenuItem::delete);
 
-        this.setTemplate(null);
-        this.setSite(null);
-        this.setCreatedBy(null);
-        this.setViewGroup(null);
-        this.deleteDomainObject();
+        setTemplate(null);
+        setSite(null);
+        setCreatedBy(null);
+        setViewGroup(null);
+        deleteDomainObject();
     }
 
     /**
@@ -132,8 +153,7 @@ public class Page extends Page_Base implements Sluggable {
     /**
      * returns the group of people who can view this site.
      *
-     * @return group
-     *         the access group for this site
+     * @return group the access group for this site
      */
     public Group getCanViewGroup() {
         return getViewGroup().toGroup();
@@ -152,14 +172,13 @@ public class Page extends Page_Base implements Sluggable {
 
     public static Page create(Site site, Menu menu, MenuItem parent, LocalizedString name, boolean published, String template,
             User creator, Component... components) {
-        Page page = new Page(site);
-        page.setSite(site);
-        page.setName(name);
+        Page page = new Page(site, name);
         if (components != null && components.length > 0) {
             for (Component component : components) {
                 page.addComponents(component);
             }
         }
+
         page.setTemplate(site.getTheme().templateForType(template));
         if (creator == null) {
             page.setCreatedBy(site.getCreatedBy());
@@ -174,7 +193,7 @@ public class Page extends Page_Base implements Sluggable {
     }
 
     @Override
-    public void setPublished(Boolean published) {
+    public void setPublished(boolean published) {
         setModificationDate(new DateTime());
         super.setPublished(published);
     }
@@ -183,10 +202,15 @@ public class Page extends Page_Base implements Sluggable {
     public void setTemplate(CMSTemplate template) {
         setModificationDate(new DateTime());
         super.setTemplate(template);
+        if (template != null) {
+            setTemplateType(template.getType());
+        } else {
+            setTemplateType(null);
+        }
     }
 
     public boolean isPublished() {
-        return getPublished() != null ? getPublished().booleanValue() : false;
+        return getPublished();
     }
 
     public String getRssUrl() {
@@ -199,5 +223,74 @@ public class Page extends Page_Base implements Sluggable {
             }
         }
         return null;
+    }
+
+    public String getEditUrl() {
+        if (isStaticPage()) {
+            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/" + getSite().getSlug() + "/" + getSlug()
+                    + "/edit";
+        } else {
+            return CoreConfiguration.getConfiguration().applicationUrl() + "/cms/pages/advanced/" + getSite().getSlug() + "/"
+                    + getSlug() + "/edit";
+        }
+    }
+
+    @Override
+    public CMSTemplate getTemplate() {
+        String templateType = getTemplateType();
+        if (templateType == null) {
+            return null;
+        }
+        CMSTemplate template = super.getTemplate();
+        CMSTheme theme = getSite().getTheme();
+        if (templateType != null) {
+            if (template != null && template.getTheme() == theme && template.getType().equals(templateType)) {
+                return template;
+            }
+
+            if (theme != null) {
+                template = theme.templateForType(templateType);
+                if (template != null) {
+                    return template;
+                }
+            }
+
+            if (theme.getDefaultTemplate() != null) {
+                return theme.getDefaultTemplate();
+            }
+
+            return CMSTheme.getDefaultTheme().getDefaultTemplate();
+
+        } else {
+            return null;
+        }
+    }
+
+    public boolean isStaticPage() {
+        return getComponentsSet().stream().filter(component -> StaticPost.class.isInstance(component)).findAny().isPresent();
+    }
+
+    public Optional<Post> getStaticPost() {
+        return getComponentsSet().stream().filter(component -> StaticPost.class.isInstance(component))
+                .map(component -> ((StaticPost) component).getPost()).findFirst();
+    }
+
+    @Override
+    public Page clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            Set<Component> components = new HashSet<>(getComponentsSet());
+            LocalizedString name = getName() != null ? fromJson(getName().json()) : null;
+            Page clone = new Page(getSite(), name);
+            cloneCache.setClone(Page.this, clone);
+            clone.setCanViewGroup(getCanViewGroup());
+            clone.setPublished(getPublished());
+            clone.setCreatedBy(getCreatedBy());
+            clone.setModificationDate(getModificationDate());
+            clone.setCreationDate(getCreationDate());
+            clone.setTemplateType(getTemplateType());
+            clone.setViewGroup(getViewGroup());
+            components.stream().map(c -> c.clone(cloneCache)).forEach(clone::addComponents);
+            return clone;
+        });
     }
 }

@@ -18,11 +18,17 @@
  */
 package org.fenixedu.cms.domain;
 
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
 import org.fenixedu.cms.exceptions.CmsDomainException;
@@ -30,17 +36,23 @@ import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
-import pt.ist.fenixframework.Atomic;
-
 import com.google.common.collect.Sets;
+
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.FenixFramework;
+import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
 /**
  * Model of a Menu for a given {@link Page}
  */
-public class Menu extends Menu_Base implements Wrappable, Sluggable {
+public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, Comparable<Menu>{
 
-    public Menu(Site site) {
-        super();
+    public static final String SIGNAL_CREATED = "fenixedu.cms.menu.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.menu.deleted";
+    public static final String SIGNAL_EDITED = "fenixedu.cms.menu.edited";
+
+
+    public Menu(Site site, LocalizedString name) {
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
         }
@@ -49,6 +61,13 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
         setSite(site);
         setTopMenu(false);
+
+        this.setName(name);
+        this.setPrivileged(false);
+
+        this.setOrder(site.getMenusSet().size());
+
+        Signal.emit(Menu.SIGNAL_CREATED, new DomainObjectEvent<>(this));
     }
 
     @Override
@@ -58,7 +77,8 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     @Atomic
     public void delete() {
-        Sets.newHashSet(getItemsSet()).forEach(i -> i.delete());
+        Signal.emit(Menu.SIGNAL_DELETED, new DomainObjectEvent<>(this));
+        Sets.newHashSet(getItemsSet()).stream().distinct().forEach(MenuItem::delete);
         this.setCreatedBy(null);
         this.setSite(null);
         this.deleteDomainObject();
@@ -96,7 +116,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     /**
      * Puts a {@link MenuItem} at a given position, shifting the existing ones to the right.
-     * 
+     *
      * @param item
      *            The {@link MenuItem} to be added.
      * @param position
@@ -127,7 +147,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     /**
      * Removes a given {@link MenuItem} from the Menu.
-     * 
+     *
      * @param mi
      *            the {@link MenuItem} to be removed.
      */
@@ -141,7 +161,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     /**
      * Adds a given {@link MenuItem} as the last item.
-     * 
+     *
      * @param mi
      *            the {@link MenuItem} to be added.
      */
@@ -155,6 +175,29 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     public Stream<MenuItem> getItemsSorted() {
         return getItemsSet().stream().sorted();
+    }
+
+    @Override
+    public Menu clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            Collection<MenuItem> menuItems = new HashSet<>(getItemsSet());
+            LocalizedString name = getName() != null ? fromJson(getName().json()) : null;
+
+            Menu clone = new Menu(getSite(), name);
+            cloneCache.setClone(Menu.this, clone);
+            clone.setName(name);
+            clone.setOrder(getOrder());
+            for (MenuItem menuItem : menuItems) {
+                menuItem.clone(cloneCache).setMenu(clone);
+            }
+
+            return clone;
+        });
+    }
+
+    @Override
+    public int compareTo(Menu o) {
+        return getOrder().compareTo(o.getOrder());
     }
 
     @SuppressWarnings("unused")
@@ -187,6 +230,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
         public Boolean getTopMenu() {
             return Menu.this.getTopMenu();
         }
+
     }
 
     @Override
@@ -196,5 +240,18 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable {
 
     public Wrap makeWrap(Page page) {
         return new MenuWrap(page);
+    }
+
+    public MenuItem menuItemForOid(String menuItemOid) {
+        MenuItem menuItem = FenixFramework.getDomainObject(menuItemOid);
+        if(menuItem != null && FenixFramework.isDomainObjectValid(menuItem) && menuItem.getMenu() == this) {
+            return menuItem;
+        }
+        return null;
+    }
+
+    @ConsistencyPredicate
+    public boolean checkMenuOrder(){
+        return getOrder() != null && !(getOrder()<0);
     }
 }

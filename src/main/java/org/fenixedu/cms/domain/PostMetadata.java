@@ -102,6 +102,10 @@ public class PostMetadata implements Serializable, Wrappable {
         return metadata.toString();
     }
 
+    public JsonElement json() {
+        return metadata;
+    }
+
     public static PostMetadata internalize(String json) {
         return new PostMetadata(new Gson().fromJson(json, JsonElement.class).getAsJsonObject());
     }
@@ -124,5 +128,15 @@ public class PostMetadata implements Serializable, Wrappable {
     @Override
     public String toString() {
         return externalize();
+    }
+
+    @Override
+    public PostMetadata clone() {
+        return new PostMetadata(metadata);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return PostMetadata.class.isInstance(object) && ((PostMetadata) object).json().equals(json());
     }
 }

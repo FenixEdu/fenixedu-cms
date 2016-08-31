@@ -21,8 +21,11 @@ package org.fenixedu.cms.domain.component;
 import java.util.Objects;
 
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.cms.domain.CloneCache;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.rendering.TemplateContext;
+
+import com.google.gson.JsonObject;
 
 public final class StrategyBasedComponent extends StrategyBasedComponent_Base {
 
@@ -38,8 +41,20 @@ public final class StrategyBasedComponent extends StrategyBasedComponent_Base {
     }
 
     @Override
+    public StrategyBasedComponent clone(CloneCache cloneCache) {
+        return this;
+    }
+
+    @Override
     public Class<?> componentType() {
         return getComponent().getClass();
+    }
+
+    @Override
+    public JsonObject json() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", getType());
+        return json;
     }
 
     static Component componentForType(Class<? extends CMSComponent> type) {

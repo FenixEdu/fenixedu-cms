@@ -21,374 +21,116 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<h1><spring:message code="theme.view.title"/></h1>
+<div class="page-header">
+    <h1><c:out value="${theme.name}" />
+          <small>
 
-<b>${theme.name} <c:if test="${theme.isDefault()}"><span class="label label-success"><spring:message
-        code="site.manage.label.default"/></span></c:if></b>
+              <ol class="breadcrumb">
+                    <li><a href="${pageContext.request.contextPath}/cms/sites">Sites</a></li>
+                    <li><a href="${pageContext.request.contextPath}/cms/themes">Themes</a></li>
+              </ol>
+          </small>
+    </h1>
+</div>
 
-<p><c:if test="${theme.extended != null}"> Extends: <b><a
-        href="../${theme.extended.type}/see">${theme.extended.name}</a></b></c:if></p>
-
-<p>${theme.description}</p>
-
-<div>Type:<code>${theme.type}</code></div>
 <p>
-<ul class="nav nav-tabs">
-    <li class="active"><a href="#file" data-toggle="tab">Files <span class="badge">${cms.prettySize(theme.files.totalSize)}</span></a>
-    </li>
-    <li><a href="#templates" data-toggle="tab">Templates</a></li>
-</ul>
+    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/edit" class="btn btn-primary"><i class="glyphicon glyphicon-edit"></i> Edit</a>
+
+    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/export" target="_blank" download="${theme.type}.zip" class="btn btn-default"><i class="glyphicon glyphicon-cloud-download"></i> Export</a>
 </p>
-<div class="tab-content">
 
-    <div class="row tab-pane active" id="file">
-        <div class="col-sm-12">
+<div class="row">
+    <div class="col-md-8 col-sm-12">
+        <c:choose>
+            <c:when test="${theme.previewImage == null}">
+               <div class="thumbnail" style="min-height:500px; background:#efefef;">
+                    <h5 style="display:table;margin: 0 auto; margin-top:220px;">No thumbnail available</h5>
+               </div>
+            </c:when>
+            <c:otherwise>
+                <div class="thumbnail">
+                    <a href="${pageContext.request.contextPath}/cms/themes/${theme.type}/edit">
+                        <img src="${cms.downloadUrl(theme.previewImage)}">
+                    </a>
+                </div>
+            </c:otherwise>
+        </c:choose>
 
-            <p>
-
-            <div class="btn-group">
-                <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#fileNewModal">New File</button>
-                <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#fileImport">Import</button>
-            </div>
-            </p>
-
-            <c:choose>
-            <c:when test="${theme.files.files.size() > 0}">
-            <table class="table table-striped table-bordered">
-                <thead>
-                <tr>
-                    <th><spring:message code="theme.view.label.path"/></th>
-                    <th><spring:message code="theme.view.label.size"/></th>
-                    <th><spring:message code="theme.view.label.last.modification"/></th>
-                    <th>&nbsp;</th>
-                </tr>
-                </thead>
-                <tbody>
-                <c:forEach var="i" items="${theme.files.files}">
-                    <tr>
-                        <td><code title="${i.contentType}">${i.fullPath}</code></td>
-                        <td>${cms.prettySize(i.fileSize)}</td>
-                        <td>${i.lastModified.toString('dd-MM-YYYY HH:mm:ss')}</td>
-                        <td>
-                            <button class="btn btn-danger btn-sm" data-toggle="modal" data-file="${i.fullPath}"
-                                    data-target="#fileDeleteModal">
-                                <span class="glyphicon glyphicon-trash"></span>
-                            </button>
-                            <button class="btn btn-default btn-sm" data-toggle="modal" data-file="${i.fullPath}"
-                                    data-target="#moveFile">
-                                Move
-                            </button>
-                            <c:if test="${supportedTypes.contains(i.contentType)}">
-                                <a href="editFile/${i.fullPath}" class="btn btn-default btn-sm"><spring:message
-                                        code="action.edit"/></a>
-                            </c:if>
-                        </td>
-                    </tr>
-                </c:forEach>
-                </c:when>
-                <c:otherwise>
-                    <i>Theme has no files</i>
-                </c:otherwise>
-                </c:choose>
-                </tbody>
-            </table>
-        </div>
+        <c:if test="${not empty sites}">
+          <h4>Some sites using this theme</h4>
+          <div class="row">
+              <c:forEach var="site" items="${sites}">
+                <div class="col-sm-6 col-md-6">
+                  <div class="thumbnail">
+                    <div class="caption">
+                      <h5><a href="${site.editUrl}">${site.name.content}</a></h3>
+                      <p>${site.description.content}</p>
+                    </div>
+                  </div>
+                </div>
+              </c:forEach>
+          </div>
+          <p>
+              <a href="${pageContext.request.contextPath}/cms/sites" class="btn btn-xs btn-default">View all</a>
+          </p>
+        </c:if>
     </div>
+    <div class="col-md-4 col-sm-12">
+        <div class="panel panel-primary">
+          <div class="panel-heading">Details</div>
+          <div class="panel-body">
+            <dl class="dl-horizontal">
+                <dt>Type</dt>
+                <dd><samp><c:out value="${theme.type}" /></samp></dd>
+                
+                <dt>Description</dt>
+                <dd><samp><c:out value="${theme.description}" /></samp></dd>
 
-    <div class="row tab-pane" id="templates">
-        <div class="col-sm-12">
-            <c:if test="${theme.files.files.size() > 0}">
-                <p>
-                    <button class="btn btn-sm btn-default" data-toggle="modal" data-target="#templateNewModal">Create New
-                        Template
-                    </button>
-                </p>
-            </c:if>
-            <c:choose>
-                <c:when test="${theme.templatesSet.size() > 0}">
-                    <table class="table table-striped table-bordered">
-                        <thead>
-                        <tr>
-                            <th class="col-md-6"><spring:message code="theme.view.label.name"/></th>
-                            <th><spring:message code="theme.view.label.type"/></th>
-                            <th><spring:message code="theme.view.label.path"/></th>
-                            <th>&nbsp;</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <c:forEach var="template" items="${theme.templatesSet}">
-                            <tr>
-                                <td>
-                                    <h5>${template.name}</h5>
+                <c:if test="${theme.extended != null}">
+                  <dt>Extends</dt>
+                  <dd><a href="../${theme.extended.type}/see">${theme.extended.name}</a></dd>
+                </c:if>
+                
+                <dt>Size</dt>
+                <dd>${cms.prettySize(theme.files.totalSize)}</dd>
 
-                                    <div>
-                                        <small>${template.description}</small>
-                                    </div>
-                                </td>
-                                <td><code>${template.type}</code></td>
-                                <td><code>${template.filePath}</code></td>
-                                <td>
-                                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#templateDeleteModal"
-                                            data-file="${template.type}"><span class="glyphicon glyphicon-trash"></span></button>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        </tbody>
-                    </table>
-                </c:when>
-                <c:otherwise>
-                    <i>Theme has no templates</i>
-                </c:otherwise>
-            </c:choose>
+                <c:if test="${theme.isDefault()}">
+                  <dt>Default</dt>
+                  <dd><span class="label label-success">Yes</span></dd>
+                </c:if>
+
+            </dl>
+          </div>
         </div>
+        <c:if test="${not theme.isDefault()}">
+        <div class="panel panel-danger">
+          <div class="panel-heading">Danger Zone</div>
+          <div class="panel-body">
+            <p class="help-block">Once you delete a theme, there is no going back. Please be certain.</p>
+            <button data-toggle="modal" data-target="#deleteModal" class="btn btn-danger">Delete this Theme</button>
+          </div>
+        </div>
+        </c:if>
     </div>
 </div>
 
-<div class="modal fade" id="fileDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                        class="sr-only">Close</span></button>
-                <h4><spring:message code="action.delete"/></h4>
-            </div>
-            <div class="modal-body">
-                <spring:message code="theme.view.label.delete.confirmation"/> <code id="fileName"></code>?
-            </div>
-            <div class="modal-footer">
-                <form action="deleteFile" id="fileDeleteForm" method="POST">
-                    <input type="hidden" name="path"/>
-                    <button type="submit" class="btn btn-danger"><spring:message code="label.yes"/></button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="label.no"/></button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="modal fade" id="deleteModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Are you sure?</h4>
+      </div>
+      <div class="modal-body">
+        <p>You are about to delete the theme '<c:out value="${theme.name}" />'. There is no way to rollback this opeartion. Are you sure? </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+        <button type="button" onclick="$('#deleteThemeForm').submit();" class="btn btn-danger">Yes</button>
+        <form action="delete" method="post" id="deleteThemeForm">${csrf.field()}</form> 
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
-<div class="modal fade" id="templateDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                        class="sr-only">Close</span></button>
-                <h4><spring:message code="action.deleteTemplate"/></h4>
-            </div>
-            <div class="modal-body">
-                <spring:message code="theme.view.label.delete.confirmation"/> <code id="templateType"></code>?
-            </div>
-            <div class="modal-footer">
-                <form action="deleteTemplate" id="templateDeleteForm" method="POST">
-                    <input type="hidden" name="type"/>
-                    <button type="submit" class="btn btn-danger"><spring:message code="label.yes"/></button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal"><spring:message code="label.no"/></button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="modal fade" id="fileNewModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <form action="newFile" class="form-horizontal" method="post">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                            class="sr-only">Close</span></button>
-                    <h4><spring:message code="action.new"/></h4>
-                </div>
-                <div class="modal-body">
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                                code="theme.view.fileName"/>:</label>
-
-                        <div class="col-sm-10">
-                            <input type="text" name="filename" class="form-control">
-
-                            <p class="help-block">Use the full path, with directories, here.</p>
-                        </div>
-
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary"><spring:message code="label.make"/></button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-
-<div class="modal fade" id="templateNewModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <form action="newTemplate" class="form-horizontal" method="post">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                            class="sr-only">Close</span></button>
-                    <h4><spring:message code="action.newTemplate"/></h4>
-                </div>
-                <div class="modal-body">
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                                code="theme.new.label.type"/>:</label>
-
-                        <div class="col-sm-10">
-                            <input type="text" name="type" class="form-control" placeholder="Type">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                                code="theme.new.label.name"/>:</label>
-
-                        <div class="col-sm-10">
-                            <input type="text" name="name" class="form-control" placeholder="Name">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                                code="theme.new.label.description"/>:</label>
-
-                        <div class="col-sm-10">
-                            <textarea name="description" class="form-control" placeholder="Description">
-
-                            </textarea>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                                code="theme.new.label.file"/>:</label>
-
-                        <div class="col-sm-10">
-                            <select class="form-control" name="filename" id="">
-                                <c:forEach var="i" items="${theme.files.files}">
-                                    <option value="${i.fullPath}">${i.fullPath}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary"><spring:message code="label.make"/></button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-
-<div class="modal fade" id="fileImport" tabindex="-1" role="dialog" aria-hidden="true">
-    <form action="importFile" enctype="multipart/form-data" class="form-horizontal" method="post">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                            class="sr-only">Close</span></button>
-                    <h4><spring:message code="action.import"/></h4>
-                </div>
-                <div class="modal-body">
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                                code="theme.view.fileName"/>:</label>
-
-                        <div class="col-sm-10">
-                            <input type="text" name="filename" class="form-control">
-
-                            <p class="help-block">Use the full path, with directories, here.</p>
-                        </div>
-
-                    </div>
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                                code="theme.add.label.file"/>:</label>
-
-                        <div class="col-sm-10">
-                            <input type="file" name="uploadedFile" class="form-control" id="inputEmail3" placeholder="Name">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary"><spring:message code="label.import"/></button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-
-<div class="modal fade" id="moveFile" tabindex="-1" role="dialog" aria-hidden="true">
-    <form action="moveFile" class="form-horizontal" method="post">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                            class="sr-only">Close</span></button>
-                    <h4><spring:message code="action.move"/></h4>
-                </div>
-                <div class="modal-body">
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                                code="theme.view.orig.filename"/>:</label>
-
-                        <div class="col-sm-10">
-                            <input type="hidden" name="origFilename" class="form-control">
-                            <pre></pre>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message
-                                code="theme.view.fileName"/>:</label>
-
-                        <div class="col-sm-10">
-                            <input type="text" name="filename" class="form-control">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary"><spring:message code="label.move"/></button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-
-<script>
-    $("button[data-target='#fileDeleteModal']").on('click', function (event) {
-        var fileName = $(event.target).closest("[data-file]").attr('data-file');
-        $('#fileName').html(fileName);
-        $('#fileDeleteForm')[0].path.value = fileName;
-    });
-</script>
-
-<script>
-    $("button[data-target='#templateDeleteModal']").on('click', function (event) {
-        var fileName = $(event.target).closest("[data-file]").attr('data-file');
-        $('#templateType').html(fileName);
-        $('#templateDeleteForm')[0].type.value = fileName;
-    });
-</script>
-
-<script>
-    $("button[data-target='#moveFile']").on('click', function (event) {
-        var fileName = $(event.target).closest("[data-file]").attr('data-file');
-        $('#moveFile pre').html(fileName);
-        $('#moveFile input').val(fileName);
-    });
-</script>
-
-<script>
-
-</script>
-
-<script>
-    if (window.location.hash === "#templates") {
-        $("[href='#templates']").tab('show')
-    }
-</script>

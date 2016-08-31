@@ -20,113 +20,215 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
+${portal.toolkit()}
 
-<h1><spring:message code="site.manage.title" /></h1>
+<div class="page-header">
+    <h1>Content Managment
+          <c:if test="${cmsSettings.canManageSettings()}">
+          <button type="button" class="btn btn-link" data-target="#sites-settings" data-toggle="modal"><i class="glyphicon glyphicon-wrench"></i></button>
+          </c:if>
+          <small>
 
-<c:if test="${isManager}">
-    <p>
-        <a href="#" data-toggle="modal" data-target="#defaultSite" class="btn btn-default">Default site</a>
-    </p>
-</c:if>
+              <ol class="breadcrumb">
+
+              </ol>
+          </small>
+    </h1>
+</div>
+
+
+<style>
+  .site{
+    padding-left: 24px !important;
+  }
+</style>
+
+<style>
+  .folder{
+    padding-top: 20px !important;
+  }
+  .folder i{
+    float:left;
+    color: #888;
+    padding-right: 5px;
+  }
+
+  .folder h5{
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 0px;
+    margin-top: 0px;
+  }
+  .modal .modal-header h3{ text-transform: uppercase; }
+</style>
+<p>
+
+<div class="row">
+  <div class="col-sm-8">
+    <c:if test="${cmsSettings.canManageSettings()}">
+      <div class="btn-group">
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create-site"><i class="glyphicon glyphicon-plus"></i> New</button>
+      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
+      <ul class="dropdown-menu">
+        <li><a href="#" onclick="$('#import-button').click();">Import</a></li>
+        <form id="import-form" method="post" action="${pageContext.request.contextPath}/cms/sites/import" enctype='multipart/form-data'>
+            ${csrf.field()}
+            <input id="import-button" class="hidden" type="file" name="attachment" onchange="$('#import-form').submit();" />
+        </form>
+      </ul>
+      </div>
+    </c:if>
+
+    <c:if test="${cmsSettings.canManageThemes()}">
+      <a href="${pageContext.request.contextPath}/cms/themes" class="btn btn-default"><i class="glyphicon glyphicon-wrench"></i> Themes</a>
+    </c:if>
+
+  </div>
+  <div class="col-sm-4">
+  <div class="input-group">
+      <div class="input-group-btn">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <c:if test="${folder != null and folder != 'no-folder'}">${folder.functionality.title.content}</c:if>
+          <c:if test="${folder != null and folder == 'no-folder'}">Untagged</c:if>
+          <c:if test="${folder == null}">Tag</c:if>
+         <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <c:if test="${not empty tag}">
+            <li><a href="${pageContext.request.contextPath}/cms/sites/">All</a></li>
+          </c:if>
+          <c:forEach var="f" items="${foldersSorted}">
+            <c:if test="${f != null}">
+              <li><a href="${pageContext.request.contextPath}/cms/sites/search?tag=${f.functionality.path}">${f.functionality.title.content}</a></li>
+            </c:if>
+          </c:forEach>
+            <c:if test="${not sitesWithoutFolders.isEmpty()}">
+                <li><a href="${pageContext.request.contextPath}/cms/sites/search?tag=untagged">Untagged</a></li>
+            </c:if>
+        </ul>
+      </div><!-- /btn-group -->
+      <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="" autofocus>
+    </div><!-- /input-group -->
+  </div>
+  </div>
 
 <c:choose>
-  <c:when test="${sites.size() == 0}">
-    <em><spring:message code="site.manage.label.emptySites" /></em>
-  </c:when>
+    <c:when test="${sitesByFolders.isEmpty() && sitesWithoutFolders.isEmpty()}">
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <spring:message code="site.manage.label.emptySites"/>
+          </div>
+        </div>
+    </c:when>
 
   <c:otherwise>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th class="col-md-6"><spring:message code="site.manage.label.name" /></th>
-          <th class="text-center"><spring:message code="site.manage.label.status" /></th>
-          <th><spring:message code="site.manage.label.creationDate" /></th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-      <c:forEach var="i" items="${sites}">
-        <tr>
-          <td>
-            <c:choose>
-              <c:when test="${i.getInitialPage()!=null}">
-                <h5><a href="${i.getInitialPage().getAddress()}" target="_blank">${i.getName().getContent()}</a>
-                    <c:if test="${i.isDefault()}">
-                        <span class="label label-success"><spring:message code="site.manage.label.default"/></span>
-                    </c:if>
-                </h5>
-              </c:when>
-              <c:otherwise>
-                <h5>${i.getName().getContent()}</h5>
-              </c:otherwise>
-            </c:choose>
-            <div><small>Url: <code>${i.baseUrl}</code></small></div>
-          </td>
-          <td class="text-center">
-              <c:choose>
-                  <c:when test="${ i.published }">
-                      <span class="label label-primary">Available</span>
-                  </c:when>
-                  <c:otherwise>
-                      <span class="label label-default">Unavailable</span>
-                  </c:otherwise>
-              </c:choose>
+
+    <table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Created</th>
+      <th>Published</th>
+    </tr>
+  </thead>
+  <tbody>
+      <c:if test="${not sitesWithoutFolder.isEmpty()}">
+
+  <tr>
+      <td colspan="3" class="folder">
+          <i class="glyphicon glyphicon-wrench"></i>
+          <a href="${pageContext.request.contextPath}/cms/sites/search?tag=untagged"><h5>Untagged<span class="badge">${sitesWithoutFolderCount}</span></h5></a>
+      </td>
+  </tr>
+  <c:forEach var="i" items="${sitesWithoutFolder}" >
+      <tr>
+          <td class="col-md-9 site">
+
+              <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a>
+
               <c:if test="${i.getEmbedded()}">
-                  <p><span class="label label-info">Embedded</span></p>
-              </c:if>
+                  <span class="label label-info">Embedded</span></c:if><c:if test="${i.isDefault()}"><span class="label label-success"><spring:message code="site.manage.label.default"/></span>
+          </c:if>
+
           </td>
-          <td>${i.creationDate.toString('MMM dd, yyyy')}</td>
-          <td>
-            <div class="btn-group">
-              <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}" class="btn btn-sm btn-default"><spring:message code="action.manage"/></a>
+          <td class="col-md-2">${cms.prettyDate(i.creationDate)}</td>
+          <td class="col-md-1">
+              <i class="glyphicon glyphicon-ok"></i>
+              <div class="dropdown pull-right">
+                  <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                      <span class="glyphicon glyphicon-option-vertical"></span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                      <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}#settings">View details</a></li>
+                      <c:if test="${i.published}">
+                          <li><a href="${i.fullUrl}">Visit public URL</a></li>
+                      </c:if>
+                      <c:if test="${permissions:canDoThis(i, 'MANAGE_ROLES')}">
+                          <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/roles">View roles</a></li>
+                      </c:if>
+                  </ul>
+              </div>
+          </td>
+      </tr>
+  </c:forEach>
+      </c:if>
+
+
+    <c:forEach var="entry" items="${sitesByFolders}">
+        <c:set var="f" value="${entry.key}" />
+        <c:set var="sites" value="${entry.value}" />
+        <c:if test="${not sites.isEmpty()}">
+      <tr>
+        <td colspan="3" class="folder">
+        <i class="glyphicon glyphicon-wrench"></i>
+
+       <a href="${pageContext.request.contextPath}/cms/sites/search/?tag=${f.functionality.path}">
+           <h5>${f.functionality.title.content}
+               <span class="badge">${folderCount.get(f)}</span>
+           </h5>
+       </a>
+        </td>
+      </tr>
+
+       <c:forEach var="i" items="${sites}" >
+      <tr>
+        <td class="col-md-9 site">
+
+        <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a>
+
+        <c:if test="${i.getEmbedded()}">
+          <span class="label label-info">Embedded</span></c:if><c:if test="${i.isDefault()}"><span class="label label-success"><spring:message code="site.manage.label.default"/></span>
+        </c:if>
+
+        </td>
+        <td class="col-md-2">${cms.prettyDate(i.creationDate)}</td>
+        <td class="col-md-1">
+            <i class="glyphicon glyphicon-ok"></i>
+            <div class="dropdown pull-right">
+              <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                <span class="glyphicon glyphicon-option-vertical"></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}#settings">View details</a></li>
+                <c:if test="${i.published}">
+                  <li><a href="${i.fullUrl}">Visit public URL</a></li>
+                </c:if>
+                <c:if test="${permissions:canDoThis(i, 'MANAGE_ROLES')}">
+                  <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/roles">View roles</a></li>
+                </c:if>
+              </ul>
             </div>
-          </td>
-        </tr>
+        </td>
+      </tr>
       </c:forEach>
-      </tbody>
-    </table>
-    <c:if test="${numberOfPages != 1}">
-    <div class="row">
-        <div class="col-md-2 col-md-offset-5">
-            <ul class="pagination">
-                <li class="${currentPage <= 0 ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page - 1}">«</a></li>
-                <li class="disabled"><a href="#">${currentPage + 1} / ${numberOfPages}</a></li>
-                <li class="${currentPage + 1 >= numberOfPages ? 'disabled' : 'active'}"><a href="${pageContext.request.contextPath}/cms/sites/manage/${page + 1}">»</a></li>
-            </ul>
-        </div>
-    </div>
     </c:if>
-    </c:otherwise>
+    </c:forEach>
+  </tbody>
+</table>
+
+  </c:otherwise>
 </c:choose>
-
-<div class="modal fade" id="defaultSite" tabindex="-1" role="dialog" aria-hidden="true">
-    <form action="${pageContext.request.contextPath}/cms/sites/default" class="form-horizontal" method="post">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                            class="sr-only">Close</span></button>
-                    <h4><spring:message code="action.set.default.site"/></h4>
-                </div>
-                <div class="modal-body">
-
-                    <div class="form-group">
-                        <label for="inputEmail3" class="col-sm-2 control-label"><spring:message code="theme.site"/>:</label>
-                        <div class="col-sm-10">
-                            <select class="form-control" name="slug">
-                                <option value="">-</option>
-                                <c:forEach var="i"  items="${sites}">
-                                    <option value="${i.slug}">${i.name.content}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary"><spring:message code="label.save"/></button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
+<jsp:include page="manageModals.jsp" />

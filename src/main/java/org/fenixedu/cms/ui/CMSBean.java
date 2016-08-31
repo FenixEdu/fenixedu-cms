@@ -19,9 +19,14 @@
 package org.fenixedu.cms.ui;
 
 import java.text.DecimalFormat;
+import java.util.Date;
 
 import org.fenixedu.bennu.io.domain.GenericFile;
 import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
+import org.fenixedu.commons.i18n.I18N;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.ocpsoft.prettytime.PrettyTime;
 
 public class CMSBean {
 
@@ -32,6 +37,14 @@ public class CMSBean {
         final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
         int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+    }
+
+    public String prettyDate(DateTime date){
+        long time = date.toDate().getTime();
+
+        Date javaUtilDate = date.toDateTime(DateTimeZone.UTC).toDate();
+
+        return new PrettyTime(I18N.getLocale()).format(javaUtilDate);
     }
 
     public String downloadUrl(GenericFile file) {

@@ -24,6 +24,8 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
@@ -32,18 +34,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ClassUtils;
 
-import pt.ist.fenixframework.DomainObject;
-import pt.ist.fenixframework.FenixFramework;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import pt.ist.fenixframework.DomainObject;
+import pt.ist.fenixframework.FenixFramework;
 
 /**
  * Describes a {@link Component}, containing all the necessary information to
  * dynamically instantiate them.
- * 
- * @author João Carvalho (joao.pedro.carvalho@tecnico.ulisboa.pt)
  *
+ * @author João Carvalho (joao.pedro.carvalho@tecnico.ulisboa.pt)
  */
 public class ComponentDescriptor {
 
@@ -54,6 +55,7 @@ public class ComponentDescriptor {
     private final boolean stateless;
     private final Map<String, ComponentParameterDescriptor> parameters = new HashMap<>();
     private final Constructor<?> ctor;
+    private final Constructor<?> jsonCtor;
     private final Method filter;
 
     ComponentDescriptor(Class<?> type) {
@@ -64,21 +66,32 @@ public class ComponentDescriptor {
         this.filter = ClassUtils.getMethodIfAvailable(type, "supportsSite", Site.class);
         if (!this.stateless) {
             this.ctor = getCustomCtor(type);
+            this.jsonCtor = getJsonCtor(type);
             for (Parameter param : ctor.getParameters()) {
                 parameters.put(param.getName(), new ComponentParameterDescriptor(param));
             }
         } else {
             this.ctor = null;
+            this.jsonCtor = null;
         }
     }
 
     private Constructor<?> getCustomCtor(Class<?> type) {
         for (Constructor<?> ctor : type.getDeclaredConstructors()) {
-            if (ctor.isAnnotationPresent(DynamicComponent.class)) {
+            if (ctor.isAnnotationPresent(DynamicComponent.class) && !isJsonConstructor(ctor)) {
                 return ctor;
             }
         }
         return ClassUtils.getConstructorIfAvailable(type);
+    }
+
+    private Constructor<?> getJsonCtor(Class<?> type) {
+        return Stream.of(type.getDeclaredConstructors()).filter(this::isJsonConstructor).findFirst().orElse(null);
+    }
+
+    private boolean isJsonConstructor(Constructor<?> constructor) {
+        return constructor.isAnnotationPresent(DynamicComponent.class) && Stream.of(constructor.getParameterTypes())
+                .filter(parameterType -> JsonObject.class.isAssignableFrom(parameterType)).findAny().isPresent();
     }
 
     public Class<?> getType() {
@@ -202,7 +215,7 @@ public class ComponentDescriptor {
             }
 
             @Override
-            @SuppressWarnings({ "unchecked", "rawtypes" })
+            @SuppressWarnings({"unchecked", "rawtypes"})
             public Object coerce(Class<?> type, String value) {
                 return Enum.valueOf((Class) type, value);
             }
@@ -222,7 +235,9 @@ public class ComponentDescriptor {
 
         public String stringify(Object object) {
             return String.valueOf(object);
-        };
+        }
+
+        ;
 
         public Object coerce(Class<?> type, String value) throws Exception {
             return value;
@@ -261,6 +276,13 @@ public class ComponentDescriptor {
             arguments[i] = coercedValue;
         }
         return (Component) ctor.newInstance(arguments);
+    }
+
+    public Component fromJson(JsonObject jsonObject) throws Exception {
+        Optional.ofNullable(jsonCtor)
+                .orElseThrow(() -> new RuntimeException("Components of type '" + getType() + "' don't have a JSON constructor"));
+        jsonCtor.setAccessible(true);
+        return (Component) jsonCtor.newInstance(jsonObject);
     }
 
 }

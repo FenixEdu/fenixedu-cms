@@ -24,11 +24,16 @@ public class CMSTemplate extends CMSTemplate_Base {
         super();
     }
 
+    public boolean isDefault() {
+    	return getDefaultTemplateTheme() != null;
+	}
+    
     public void delete() {
         for (Page page : getPagesSet()) {
             page.setTemplate(null);
         }
         this.setTheme(null);
+        this.setDefaultTemplateTheme(null);
         this.deleteDomainObject();
     }
 

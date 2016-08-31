@@ -1,0 +1,83 @@
+    <div class="row tab-pane active" id="file">
+        <div class="col-sm-12">
+            
+            <div>
+
+            <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#new-file-modal"><i class="glyphicon glyphicon-plus"></i> New</button>
+
+            <button class="btn btn-sm btn-default" data-toggle="modal" href='#templates-modal'>Templates</button>
+
+            <button class="btn btn-sm btn-default" data-toggle="modal" href='#settings-modal'>Settings</button>
+
+            </div>
+    
+            <ol class="breadcrumb">
+                <li><a href="#/">{{ theme }}</a></li>
+                <li ng-repeat="dir in node.getPath()">
+                    <a href="#{{dir.path}}">{{dir.name}}</a>
+                </li>
+              
+            </ol>
+            
+              <table ng-hide="loading" ng-if="node.getFiles().length != 0" class="table faded">
+                  <thead>
+                  <tr>
+                      <th>Name</th>
+                      <th><spring:message code="theme.view.label.size"/></th>
+                      <th>Modified</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                        <tr ngf-drop ng-model="$parent.$parent.files" ngf-drag-over-class="dragover" ngf-multiple="true" ngf-allow-dir="true" context-menu="contextFor(file)" data-target="menu" ng-repeat="file in node.getFiles()">
+                            <td>
+                                <i style="color:#3399FF;" class="fileicon {{file.contentType | fileIcon }}"></i> 
+                                <a style="color:#020202" ng-click="open(file)">{{ file.name }}</a>
+                            </td>
+                            <td>{{file.size | bytes }}</td>
+                            <td>{{ file.modified | fuzzy }}</td>
+                        </tr>
+                  </tbody>
+
+              </table>
+
+              <div ng-if="node.getFiles().length == 0">
+                <style type="text/css">
+                  .drop-box{
+                    height:500px;
+                  }
+                </style>
+                <div class="drop-box" ngf-drop ng-model="$parent.files" ngf-drag-over-class="dragover" ngf-multiple="true" ngf-allow-dir="true">
+                  <p><span>Drag and drop files</span>Upload files to this directory</p>
+                </div>
+              </div>
+            <div class="dropdown position-fixed" id="menu">
+            <ul class="dropdown-menu" role="menu" id="context-menu">
+              <li>
+                <a class="pointer directory" role="menuitem" tabindex="1">
+                   <i class="glyphicon glyphicon-open"></i> Open
+                </a>
+              </li>
+              <li>
+                <a class="pointer directory" ng-click="deleteDirectory()" role="menuitem" tabindex="1">
+                   <i class="glyphicon glyphicon-trash"></i> Delete folder
+                </a>
+              </li>
+              <li>
+                <a class="pointer file edit" ng-click="editFile()" role="menuitem" tabindex="1">
+                   <i class="glyphicon glyphicon-edit"></i> Edit
+                </a>
+              </li>
+              <li>
+                <a class="pointer file template" ng-click="makeTemplate()" role="menuitem" tabindex="1">
+                    <i class="glyphicon glyphicon-heart-empty"></i> Make a template
+                </a>
+              </li>
+               <li>
+                <a class="pointer file" ng-click="deleteContextFile()" class="pointer" role="menuitem" tabindex="1">
+                    <i class="glyphicon glyphicon-trash"></i> Delete this file
+                </a>
+              </li>
+            </ul>
+            </div>
+        </div>
+    </div>

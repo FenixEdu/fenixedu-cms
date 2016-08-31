@@ -18,76 +18,142 @@
  */
 package org.fenixedu.cms.ui;
 
+import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.signals.DomainObjectEvent;
+import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
+import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.Site;
-import org.fenixedu.commons.i18n.I18N;
+import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import pt.ist.fenixframework.Atomic;
-
-import com.google.common.base.Strings;
+import pt.ist.fenixframework.FenixFramework;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/categories")
 public class AdminCategory {
+
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
     public String categories(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
-
         AdminSites.canEdit(site);
-
+        ensureCanDoThis(site, Permission.LIST_CATEGORIES);
         model.addAttribute("site", site);
-        model.addAttribute("categories", site.getCategoriesSet());
+        model.addAttribute("categories", getCategories(site));
         return "fenixedu-cms/categories";
     }
 
-    @RequestMapping(value = "{slug}/create", method = RequestMethod.GET)
-    public String createCategory(Model model, @PathVariable(value = "slug") String slug) {
-        Site s = Site.fromSlug(slug);
-
-        AdminSites.canEdit(s);
-
-        model.addAttribute("site", s);
-        return "fenixedu-cms/createCategory";
-    }
-
-    @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
-    public RedirectView createCategory(Model model, @PathVariable(value = "slug") String slug, @RequestParam String name,
-            RedirectAttributes redirectAttributes) {
-        if (Strings.isNullOrEmpty(name)) {
-            redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/cms/categories/" + slug + "/create", true);
-        }
-        Site s = Site.fromSlug(slug);
-
-        AdminSites.canEdit(s);
-
-        createCategory(s, name);
-        return new RedirectView("/cms/categories/" + s.getSlug() + "", true);
-    }
-
-    @Atomic
-    private void createCategory(Site site, String name) {
-        Category p = new Category(site);
-        p.setName(new LocalizedString(I18N.getLocale(), name));
-    }
-
-    @RequestMapping(value = "{slugSite}/{slugCategories}/delete", method = RequestMethod.POST)
-    public RedirectView delete(Model model, @PathVariable(value = "slugSite") String slugSite, @PathVariable(
-            value = "slugCategories") String slugCategories) {
+    @RequestMapping(value = "{slugSite}/create", method = RequestMethod.POST)
+    public RedirectView createCategory(@PathVariable String slugSite, @RequestParam LocalizedString name) {
         Site s = Site.fromSlug(slugSite);
-
         AdminSites.canEdit(s);
+        Category c = createCategory(s, name);
+        return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);
+    }
 
-        s.categoryForSlug(slugCategories).delete();
-        return new RedirectView("/cms/categories/" + s.getSlug() + "", true);
+    @RequestMapping(value = "{slugSite}/{slugCategory}/delete", method = RequestMethod.POST)
+    public RedirectView delete(@PathVariable String slugSite, @PathVariable String slugCategory) {
+        FenixFramework.atomic(() -> {
+            Site s = Site.fromSlug(slugSite);
+            AdminSites.canEdit(s);
+            ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY, Permission.DELETE_CATEGORY);
+
+            Category category = s.categoryForSlug(slugCategory);
+            if(category.getPrivileged()) {
+                ensureCanDoThis(s, Permission.EDIT_PRIVILEGED_CATEGORY);
+            }
+
+            category.delete();
+        });
+        return new RedirectView("/cms/categories/" + slugSite, true);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugCategory}/createCategoryPost", method = RequestMethod.POST)
+    public RedirectView  createCategoryPost(@PathVariable String slugSite,
+                                            @PathVariable String slugCategory,
+                                            @RequestParam LocalizedString name) {
+        Site s = Site.fromSlug(slugSite);
+        AdminSites.canEdit(s);
+        Category c = s.categoryForSlug(slugCategory);
+        createPost(s, c, name);
+        return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugCategory}", method = RequestMethod.GET)
+    public String viewCategory(Model model, @PathVariable String slugSite, @PathVariable String slugCategory) {
+        Site s = Site.fromSlug(slugSite);
+        AdminSites.canEdit(s);
+        ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY);
+        Category category = s.categoryForSlug(slugCategory);
+        if(category.getPrivileged()) {
+            ensureCanDoThis(s, Permission.USE_PRIVILEGED_CATEGORY);
+        }
+        model.addAttribute("site", s);
+        model.addAttribute("category", category);
+        return "fenixedu-cms/editCategory";
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugCategory}", method = RequestMethod.POST)
+    public RedirectView editCategory(@PathVariable String slugSite, @PathVariable String slugCategory,
+                                     @RequestParam LocalizedString name,
+                                     @RequestParam(required = false, defaultValue = "false") boolean privileged) {
+        Site s = Site.fromSlug(slugSite);
+        AdminSites.canEdit(s);
+        Category c = s.categoryForSlug(slugCategory);
+        FenixFramework.atomic(()->{
+            AdminSites.canEdit(s);
+            ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY);
+            if(c.getPrivileged()) {
+                ensureCanDoThis(s, Permission.USE_PRIVILEGED_CATEGORY, Permission.EDIT_PRIVILEGED_CATEGORY);
+            }
+            c.setPrivileged(privileged);
+            c.setName(name);
+        });
+        Signal.emit(Category.SIGNAL_EDITED, new DomainObjectEvent<>(c));
+        return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);
+    }
+
+    @Atomic(mode = Atomic.TxMode.WRITE)
+    private Category createCategory(Site site, LocalizedString name) {
+        ensureCanDoThis(site, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY, Permission.CREATE_CATEGORY);
+        return new Category(site, name);
+    }
+
+    @Atomic(mode = Atomic.TxMode.WRITE)
+    private Post createPost(Site site, Category category, LocalizedString name) {
+        ensureCanDoThis(site, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY, Permission.CREATE_POST);
+        if(category.getPrivileged()) {
+            ensureCanDoThis(site, Permission.USE_PRIVILEGED_CATEGORY);
+        }
+        Post p = new Post(site);
+        p.setName(Post.sanitize(name));
+        p.setBodyAndExcerpt(new LocalizedString(), new LocalizedString());
+        p.setCanViewGroup(site.getCanViewGroup());
+        p.setActive(false);
+        p.addCategories(category);
+        SiteActivity.createdPost(p, Authenticate.getUser());
+        return p;
+    }
+
+    public List<Category> getCategories(Site site) {
+        boolean canUsePrivileged = canDoThis(site, Permission.USE_PRIVILEGED_CATEGORY);
+        return site.getCategoriesSet().stream()
+            .filter(category->!category.getPrivileged() || canUsePrivileged)
+            .sorted(Category.CATEGORY_NAME_COMPARATOR).collect(Collectors.toList());
     }
 }

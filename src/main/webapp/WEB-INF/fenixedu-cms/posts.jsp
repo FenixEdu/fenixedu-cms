@@ -20,98 +20,242 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
 
-<h2 class="page-header" style="margin-top: 0">
-  <spring:message code="post.manage.title" />
-  <small><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a> </small>
-</h2>
-<p>
-<a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/create" class="btn btn-default btn-primary"><spring:message code="page.manage.label.createPost" /></a>
-</p>
+${portal.toolkit()}
 
-<c:choose>
-      <c:when test="${posts.size() == 0}">
-      <p><spring:message code="page.manage.label.emptyPosts" /></p>
-      </c:when>
+    <div class="page-header">
+        <h1>Posts
+            <small>
+                <ol class="breadcrumb">
+                    <li><a href="${pageContext.request.contextPath}/cms/sites">Content Management</a></li>
+                    <li><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}">${site.name.content}</a></li>
+                </ol>
+            </small>
+        </h1>
+    </div>
 
-      <c:otherwise>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th><spring:message code="page.manage.label.name" /></th>
-              <th><spring:message code="page.manage.label.creationDate" /></th>
-              <th><spring:message code="site.manage.label.categories"/></th>
-              <th><spring:message code="page.manage.label.operations" /></th>
-            </tr>
-          </thead>
-          <tbody>
-          <c:forEach var="post" items="${posts}">
-            <tr>
-              <td>
-                <h5><a href="${post.address}" target="_blank">${post.name.content}</a></h5>
-                <div><small><spring:message code="page.manage.label.url" />:<code>${post.slug}</code></small></div>
-              </td>
-              <td>${post.creationDate.toString('dd MMMM yyyy, HH:mm', locale)} <small>- ${post.createdBy.name}</small></td>
-              <td>
-                <c:forEach var="cat" items="${post.categoriesSet}">
-                  <a href="${pageContext.request.contextPath}/cms/categories/${site.slug}" class="badge">${cat.name.content}</a>
-                </c:forEach></td>
-              <td>
+
+<div class="row">
+    <div class="col-sm-5">
+        <c:choose>
+            <c:when test="${permissions:canDoThis(site, 'CREATE_POST')}">
+                <button type="button" data-toggle="modal" data-target="#create-post" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> New</button>
+            </c:when>
+            <c:otherwise>
+                <button type="button" class="btn btn-primary disabled"><i class="glyphicon glyphicon-plus"></i> New</button>
+            </c:otherwise>
+        </c:choose>
+    </div>
+    <div class="col-sm-7">
+        <div class="pull-right">
+            <div class="form-inline">
                 <div class="btn-group">
-                  <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit" class="btn btn-sm btn-default"><spring:message code="action.edit" /></a>
-                  <a href="#" class="btn btn-danger btn-sm" data-post="${post.slug}"><spring:message
-                                    code="action.delete"/></a>
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                        <c:choose>
+                            <c:when test="${category!=null}">${category.name.content}</c:when>
+                            <c:otherwise>Category</c:otherwise>
+                        </c:choose>
+                        <span class="caret"></span>
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                        <li><a href="#" class="category-item" data-category-slug="">All</a></li>
+                        <c:forEach var="cat" items="${site.categories}">
+                            <li><a href="#" class="category-item" data-category-slug="${cat.slug}">${cat.name.content}</a></li>
+                        </c:forEach>
+                    </ul>
                 </div>
-
-              </td>
-            </tr>
-          </c:forEach>
-          </tbody>
-        </table>
-        <c:if test="${pages > 1}">
-            <nav class="text-center">
-                <ul class="pagination">
-                    <li ${currentPage == 1 ? 'class="disabled"' : ''}>
-                        <a href="?page=${currentPage - 1}">&laquo;</a>
-                    </li>
-                    <li class="disabled"><a>${currentPage} / ${pages}</a></li>
-                    <li ${currentPage == pages ? 'class="disabled"' : ''}>
-                        <a href="?page=${currentPage + 1}">&raquo;</a>
-                    </li>
-                </ul>
-            </nav>
-        </c:if>
-      </c:otherwise>
-</c:choose>
-
-
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
-                        class="sr-only">Close</span></button>
-                <h4><spring:message code="post.manage.label.delete.post"/></h4>
-            </div>
-            <div class="modal-body">
-                <p><spring:message code="post.manage.label.delete.post.message"/></p>
-            </div>
-            <div class="modal-footer">
-                <form id="deleteForm" method="POST">
-                    <button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
-                    <a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
-                </form>
+                <div class="form-group">
+                    <input id="search-query" type="text" class="form-control" placeholder="Search for..." value="${query}" autofocus> 
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-(function () {
-    $("a[data-post]").on('click', function(el) {
-        var postSlug = el.target.getAttribute('data-post');
-        $('#deleteForm').attr('action', '${pageContext.request.contextPath}/cms/posts/${site.slug}/' + postSlug + '/delete');
-        $('#deleteModal').modal('show');
-    });
-})();
+<p></p>
+
+<c:choose>
+    <c:when test="${posts.size() == 0}">
+    <div class="panel panel-default">
+        <div class="panel-body">
+           <spring:message code="page.manage.label.emptyPosts"/>
+        </div>
+    </div>
+    </c:when>
+
+    <c:otherwise>
+        <table class="table">
+            <thead>
+            <tr>
+                <th><spring:message code="page.manage.label.name"/></th>
+                <th><spring:message code="page.manage.label.creationDate"/></th>
+                <th><spring:message code="site.manage.label.categories"/></th>
+                <th>Published</th>
+            </tr>
+            </thead>
+            <tbody>
+            <c:forEach var="post" items="${posts}">
+                <tr>
+                    <td class="col-md-6">
+                        <c:choose>
+                            <c:when test="${post.canEdit()}">
+                                <h5><a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit">${post.name.content}</a></h5>
+                            </c:when>
+                            <c:otherwise>
+                                <h5>${post.name.content}</h5>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
+                    <td class="col-md-2">${cms.prettyDate(post.creationDate)}</td>
+                    <td class="col-md-3">
+                        <c:forEach var="cat" items="${post.categoriesSet}" end="3">
+                            <a href="${cat.getEditUrl()}" class="badge">${cat.name.content}</a>
+                        </c:forEach>
+                    </td>
+                    <td class="col-md-1">
+                        <c:if test="${post.active}">
+                            <i class="glyphicon glyphicon-check"></i>
+                        </c:if>
+                        <div class="dropdown pull-right">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="fa fa-bars"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <c:if test="${post.canEdit()}">
+                                    <li>
+                                        <a href="${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/edit">
+                                            <i class="glyphicon glyphicon-edit"></i> Edit
+                                        </a>
+                                    </li>
+                                </c:if>
+                                <li><a href="${post.address}"><i class="glyphicon glyphicon-link"></i> Link</a></li>
+                                <c:if test="${post.canDelete()}">
+                                    <li><a href="#" data-post="${post.slug}"><i class="glyphicon glyphicon-trash"></i> Delete</a></li>
+                                </c:if>
+                            </ul>
+                        </div>
+					</td>
+				</tr>
+			</c:forEach>
+			</tbody>
+		</table>
+
+        <!-- Pagination -->
+        <c:if test="${partition.getNumPartitions() > 1}">
+            <nav class="pull-right">
+              <ul class="pagination">
+                <li ${partition.isFirst() ? 'class="disabled"' : ''}>
+                    <a href="#" onclick="goToPage(${partition.getNumber() - 1})">&laquo;</a>
+                </li>
+                <li class="disabled"><a>${partition.getNumber()} / ${partition.getNumPartitions()}</a></li>
+                <li ${partition.isLast() ? 'class="disabled"' : ''}>
+                    <a href="#" onclick="goToPage(${partition.getNumber() + 1})">&raquo;</a>
+                </li>
+              </ul>
+            </nav>
+        </c:if>
+	</c:otherwise>
+</c:choose>
+
+<c:if test="${permissions:canDoThis(site, 'DELETE_POSTS')}">
+    <div class="modal fade" id="delete-post" tabindex="-1" role="dialog" aria-hidden="true">
+    	<div class="modal-dialog">
+    		<div class="modal-content">
+    			<div class="modal-header">
+    				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+    						class="sr-only">Close</span></button>
+    				<h4><spring:message code="post.manage.label.delete.post"/></h4>
+    			</div>
+    			<div class="modal-body">
+    				<p><spring:message code="post.manage.label.delete.post.message"/></p>
+    			</div>
+    			<div class="modal-footer">
+    				<form id="delete-form" method="POST">
+                        ${csrf.field()}
+    					<button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
+    					<a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
+    				</form>
+    			</div>
+    		</div>
+    	</div>
+    </div>
+    <script type="application/javascript">
+        $(document).ready(function(){
+            $("a[data-post]").on('click', function (el) {
+                var postSlug = el.target.getAttribute('data-post');
+                $('#delete-form').attr('action', '${pageContext.request.contextPath}/cms/posts/${site.slug}/' + postSlug + '/delete');
+                $('#delete-post').modal('show');
+            });    
+        })
+    </script>
+</c:if>
+
+<c:if test="${permissions:canDoThis(site, 'CREATE_POST')}">
+    <div class="modal fade" id="create-post" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="form-horizontal" action="${pageContext.request.contextPath}/cms/posts/${site.slug}/create" method="post" role="form">
+                ${csrf.field()}
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> </button>
+                    <h3 class="modal-title">New Post</h3>
+                    <small>This could be the start of something great!</small>
+                </div>
+                <div class="modal-body">
+                    <div class="${emptyName ? "form-group has-error" : "form-group"}">
+                        <label class="col-sm-2 control-label"><spring:message code="post.create.label.name"/></label>
+
+                        <div class="col-sm-10">
+                            <input bennu-localized-string required-any name="name" placeholder="<spring:message code="post.create.label.name" />">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="Submit" class="btn btn-primary">Make</button>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+</c:if>
+
+<script type="application/javascript">
+    function getParameterByName(name) {
+        var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+        return match && decodeURIComponent(match[1].replace(/\+/g, ' ')) || "";
+    }
+
+    function goToPage(pageNumber) {
+        searchPosts({page: pageNumber});
+    }
+
+    function searchPosts(options) {
+        var searchQueryObj = {
+            category: typeof(options.categorySlug) === "string" ? options.categorySlug : getParameterByName('category'),
+            page: options.page || getParameterByName('page'),
+            query: typeof(options.query) === "string" ? options.query : getParameterByName('query')
+        };
+        window.location.search = $.param(searchQueryObj);
+    }
+
+    $(document).ready(function(){
+		$('#search-query').keypress(function (e) {
+			if (e.which == 13) {
+				searchPosts({ query: $('#search-query').val(), page: 1});
+			}
+		});
+
+		$('.category-item').on('click', function (e) {
+			e.preventDefault();
+			searchPosts({ categorySlug: $(e.target).data('category-slug') });
+		});
+        setTimeout(function() {
+            if(window.location.hash === '#new') {
+                $('#create-post').modal();
+            }
+        });
+	});
 </script>

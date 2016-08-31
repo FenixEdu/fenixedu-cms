@@ -18,8 +18,9 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.fenixedu.bennu.core.annotation.GroupArgument;
@@ -85,7 +86,7 @@ public class SiteViewersGroup extends CustomGroup {
     @Override
     public Set<User> getMembers() {
         if (!site.getPublished()) {
-            return Collections.emptySet();
+            return new HashSet<User>();
         }
         return site.getCanViewGroup().getMembers();
     }
@@ -97,7 +98,7 @@ public class SiteViewersGroup extends CustomGroup {
 
     @Override
     public boolean isMember(User user) {
-        if (site.getPublished()) {
+        if (Optional.ofNullable(site.getPublished()).orElse(false)) {
             return site.getCanViewGroup().isMember(user);
         }
         return false;

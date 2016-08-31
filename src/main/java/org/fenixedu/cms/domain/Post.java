@@ -18,10 +18,19 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
-import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
@@ -29,9 +38,9 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
-import org.fenixedu.bennu.io.domain.GroupBasedFile;
-import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.component.Component;
+import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.cms.domain.wraps.UserWrap;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
@@ -40,21 +49,21 @@ import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
-import pt.ist.fenixframework.Atomic;
-
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+
+import pt.ist.fenixframework.Atomic;
 
 /**
  * A post models a given content to be presented to the user.
  */
-public class Post extends Post_Base implements Wrappable, Sluggable {
+public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
-    public static final Comparator<? super Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate)
-            .reversed();
-    
     public static final String SIGNAL_CREATED = "fenixedu.cms.post.created";
+    public static final String SIGNAL_DELETED = "fenixedu.cms.post.deleted";
+    public static final String SIGNAL_EDITED = "fenixedu.cms.post.edited";
+
+
+    public static final Comparator<Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate).reversed();
 
     /**
      * The logged {@link User} creates a new Post.
@@ -64,14 +73,14 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         if (Authenticate.getUser() == null) {
             throw CmsDomainException.forbiden();
         }
-        this.setCreatedBy(Authenticate.getUser());
+        setCreatedBy(Authenticate.getUser());
         DateTime now = new DateTime();
-        this.setCreationDate(now);
-        this.setModificationDate(now);
-        this.setActive(true);
-        this.setCanViewGroup(AnyoneGroup.get());
-        this.setSite(site);
-        
+        setCreationDate(now);
+        setModificationDate(now);
+        setActive(false);
+        setCanViewGroup(AnyoneGroup.get());
+        setSite(site);
+
         Signal.emit(Post.SIGNAL_CREATED, new DomainObjectEvent<Post>(this));
     }
 
@@ -87,7 +96,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     public void setName(LocalizedString name) {
         LocalizedString prevName = getName();
         super.setName(name);
-        this.setModificationDate(new DateTime());
+        setModificationDate(new DateTime());
         if (prevName == null) {
             String slug = StringNormalizer.slugify(name.getContent());
             setSlug(slug);
@@ -100,7 +109,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     }
 
     /**
-     * A slug is valid if there are no other page on that site that have the same slug.
+     * A slug is valid if there are no other page on that site that have the
+     * same slug.
      *
      * @param slug
      * @return true if it is a valid slug.
@@ -115,45 +125,29 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
      * @return the URL link to the slug's page.
      */
     public String getAddress() {
-        Page page = this.getSite().getViewPostPage();
-        if (page == null && !this.getComponentSet().isEmpty()) {
-            page = this.getComponentSet().iterator().next().getPage();
+        if (isStaticPost()) {
+            return getStaticPage().get().getAddress();
+        } else {
+            return Optional.ofNullable(getSite().getViewPostPage()).map(page -> page.getAddress() + "/" + getSlug()).orElse(null);
         }
-        if (page != null) {
-            return page.getAddress() + "/" + this.getSlug();
-        }
-        return null;
     }
 
     @Atomic
     public void delete() {
-        for (Component c : this.getComponentSet()) {
-            c.delete();
-        }
-        for (Category c : this.getCategoriesSet()) {
-            removeCategories(c);
-        }
+        Signal.emit(SIGNAL_DELETED, this.getOid());
 
-        this.setCreatedBy(null);
-        this.setSite(null);
-        this.setViewGroup(null);
-        this.getAttachments().delete();
-        this.getPostFiles().delete();
-        this.deleteDomainObject();
+        setCreatedBy(null);
+        setSite(null);
+        setViewGroup(null);
+        deleteFiles();
+        setLatestRevision(null);
 
-    }
+        getComponentSet().stream().forEach(Component::delete);
+        getCategoriesSet().stream().forEach(category -> category.removePosts(this));
+        getRevisionsSet().stream().forEach(PostContentRevision::delete);
 
-    public void removeCategories() {
-        DateTime now = new DateTime();
-        new HashSet<>(getCategoriesSet()).forEach(c -> {
-            removeCategories(c);
-            c.getComponentsSet().forEach(component -> {
-                if (component.getPage() != null) {
-                    component.getPage().setModificationDate(now);
-                }
-            });
-        });
-        setModificationDate(now);
+
+        deleteDomainObject();
     }
 
     public boolean hasPublicationPeriod() {
@@ -173,8 +167,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     /**
      * returns the group of people who can view this site.
      *
-     * @return group
-     *         the access group for this site
+     * @return group the access group for this site
      */
     public Group getCanViewGroup() {
         return getViewGroup().toGroup();
@@ -187,19 +180,20 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
      */
     @Atomic
     public void setCanViewGroup(Group group) {
-        setViewGroup(group.toPersistentGroup());
-
-        for (GroupBasedFile file : getFilesSet()) {
-            file.setAccessGroup(group);
-        }
+        super.setViewGroup(group.toPersistentGroup());
+        Set<User> groupMembers = group.getMembers().stream().collect(Collectors.toSet());
+        getEmbeddedFilesSorted().forEach(postFile -> postFile.getFiles().setAccessGroup(group));
+        //if the new group is more restricted then the attachment group is updated
+        getAttachmentFilesSorted().map(PostFile::getFiles)
+                .filter(file -> !file.getAccessGroup().getMembers().stream().allMatch(groupMembers::contains))
+                .forEach(file -> file.setAccessGroup(group));
     }
 
-    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, Category category,
-            boolean active, User creator) {
+    public static Post create(Site site, Page page, LocalizedString name, LocalizedString body, LocalizedString excerpt, Category category, boolean active,
+                              User creator) {
         Post post = new Post(site);
-        post.setSite(site);
         post.setName(name);
-        post.setBody(body);
+        post.setBodyAndExcerpt(body, excerpt);
         post.setCreationDate(new DateTime());
         if (creator == null) {
             post.setCreatedBy(page.getCreatedBy());
@@ -213,110 +207,70 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     }
 
     public String getEditUrl() {
-        return this.getSite().getEditUrl() + "/" + this.getSlug() + "/edit";
+        return getStaticPage().map(Page::getEditUrl).orElse(CoreConfiguration.getConfiguration().applicationUrl() + "/cms/posts/"
+                + getSite().getSlug() + "/" + getSlug() + "/edit");
     }
 
-    private void fixOrder(List<PostFile> sortedItems) {
+    public void fixOrder(List<PostFile> sortedItems) {
         for (int i = 0; i < sortedItems.size(); ++i) {
             sortedItems.get(i).setIndex(i);
         }
     }
 
-    public class PostFiles {
-        private PostFiles() {
-        }
-
-        public List<GroupBasedFile> getFiles() {
-            return ImmutableList.copyOf(getFilesSet());
-        }
-
-        public void putFile(GroupBasedFile file) {
-            Post.this.getFilesSet().add(file);
-            file.setAccessGroup(Post.this.getCanViewGroup());
-        }
-
-        public void removeFile(GroupBasedFile file) {
-            Post.this.getFilesSet().remove(file);
-        }
-
-        public boolean contains(GroupBasedFile file) {
-            return Post.this.getFilesSet().contains(file);
-        }
-
-        public void delete() {
-            Post.this.getFilesSet().forEach((a) -> {
-                a.setPost(null);
-                a.delete();
-            });
-        }
+    @Override
+    public Post clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            Collection<Category> categories = new HashSet<>(getCategoriesSet());
+            List<PostFile> files = new ArrayList<>(getFilesSorted());
+            Post clone = new Post(getSite());
+            cloneCache.setClone(Post.this, clone);
+            clone.setBodyAndExcerpt(getBody() != null ? fromJson(getBody().json()) : null, getExcerpt() != null ? fromJson(getExcerpt().json()) : null);
+            clone.setName(getName() != null ? fromJson(getName().json()) : null);
+            clone.setBodyAndExcerpt(getBody() != null ? fromJson(getBody().json()) : null, getExcerpt() != null ? fromJson(getExcerpt().json()) : null);
+            clone.setLocation(getLocation() != null ? fromJson(getLocation().json()) : null);
+            clone.setMetadata(getMetadata() != null ? getMetadata().clone() : null);
+            clone.setCanViewGroup(getCanViewGroup());
+            clone.setPublicationBegin(getPublicationBegin());
+            clone.setPublicationEnd(getPublicationEnd());
+            clone.setCreatedBy(getCreatedBy());
+            clone.setCreationDate(getCreationDate());
+            clone.setViewGroup(getViewGroup());
+            categories.stream().map(category -> category.clone(cloneCache)).forEach(clone::addCategories);
+            files.stream().map(file -> file.clone(cloneCache)).forEach(clone::addFiles);
+            return clone;
+        });
     }
 
-    public class Attachments {
-
-        private Attachments() {
-        }
-
-        public List<GroupBasedFile> getFiles() {
-            return Post.this.getAttachementsSet().stream().sorted().map(x -> x.getFiles()).collect(Collectors.toList());
-        }
-
-        public void putFile(GroupBasedFile item, int position) {
-
-            if (position < 0) {
-                position = 0;
-            } else if (position > Post.this.getAttachementsSet().size()) {
-                position = Post.this.getAttachementsSet().size();
-            }
-
-            PostFile postFile = new PostFile();
-            postFile.setIndex(position);
-            postFile.setFiles(item);
-
-            List<PostFile> list = Post.this.getAttachementsSet().stream().sorted().collect(Collectors.toList());
-            list.add(position, postFile);
-            fixOrder(list);
-
-            Post.this.getAttachementsSet().add(postFile);
-        }
-
-        public GroupBasedFile removeFile(int position) {
-            PostFile pf =
-                    Post.this.getAttachementsSet().stream().filter(x -> x.getIndex() == position).findAny()
-                            .orElseThrow(() -> new RuntimeException("Invalid Position"));
-            GroupBasedFile f = pf.getFiles();
-
-            pf.setFiles(null);
-            pf.setPost(null);
-            pf.delete();
-
-            List<PostFile> list = Post.this.getAttachementsSet().stream().sorted().collect(Collectors.toList());
-            fixOrder(list);
-
-            return f;
-        }
-
-        public void move(int orig, int dest) {
-            Set<PostFile> files = Post.this.getAttachementsSet();
-            Preconditions.checkPositionIndex(orig, files.size(), "Origin outside index bounds");
-            Preconditions.checkPositionIndex(dest, files.size(), "Destiny outside index bounds");
-
-            putFile(removeFile(orig), dest);
-        }
-
-        public void delete() {
-            Post.this.getAttachementsSet().forEach((a) -> {
-                a.setPost(null);
-                a.delete();
-            });
-        }
+    public Stream<PostFile> getAttachmentFilesSorted() {
+        return getFilesSet().stream().filter(pf -> !pf.getIsEmbedded()).sorted();
     }
 
-    public Attachments getAttachments() {
-        return new Attachments();
+    public Stream<PostFile> getEmbeddedFilesSorted() {
+        return getFilesSet().stream().filter(pf -> pf.getIsEmbedded()).sorted();
     }
 
-    public PostFiles getPostFiles() {
-        return new PostFiles();
+    private void deleteFiles() {
+        ImmutableList.copyOf(getFilesSet()).forEach(PostFile::delete);
+    }
+
+    public List<PostFile> getFilesSorted() {
+        return getFilesSet().stream().sorted().collect(Collectors.toList());
+    }
+
+    @Override
+    public void addFiles(PostFile postFile) {
+        List<PostFile> list = getFilesSorted();
+        list.add(postFile.getIndex(), postFile);
+        fixOrder(list);
+        super.addFiles(postFile);
+    }
+
+    @Override
+    public void removeFiles(PostFile files) {
+        List<PostFile> list = getFilesSorted();
+        list.remove(files);
+        fixOrder(list);
+        super.removeFiles(files);
     }
 
     @Override
@@ -332,15 +286,49 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     }
 
     @Override
-    public void setActive(Boolean active) {
+    public void setActive(boolean active) {
         super.setActive(active);
         setModificationDate(new DateTime());
     }
 
-    @Override
     public void setBody(LocalizedString body) {
-        super.setBody(body);
+        setBodyAndExcerpt(body, null);
+    }
+
+    public void setBodyAndExcerpt(LocalizedString body, LocalizedString excerpt) {
+        PostContentRevision pcr = new PostContentRevision();
+        pcr.setBody(body);
+        pcr.setExcerpt(excerpt);
+        pcr.setCreatedBy(Authenticate.getUser());
+        pcr.setPrevious(getLatestRevision());
+        pcr.setPost(this);
+        pcr.setRevisionDate(new DateTime());
+
+        setLatestRevision(pcr);
+
         setModificationDate(new DateTime());
+    }
+
+    public LocalizedString getExcerpt() {
+        PostContentRevision pcr = getLatestRevision();
+        if (pcr == null) {
+            return new LocalizedString();
+        } else {
+            return pcr.getExcerpt();
+        }
+    }
+
+    public LocalizedString getBody() {
+        PostContentRevision pcr = getLatestRevision();
+        if (pcr == null) {
+            return new LocalizedString();
+        } else {
+            return pcr.getBody();
+        }
+    }
+
+    public LocalizedString getPresentationBody() {
+        return getBody();
     }
 
     @Override
@@ -362,12 +350,22 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     }
 
     public String getCategories() {
-        return this.getCategoriesSet().stream().map(x -> x.getName().getContent()).reduce((x, y) -> x + "," + y).orElse("");
+        return getCategoriesSet().stream().map(x -> x.getName().getContent()).reduce((x, y) -> x + "," + y).orElse("");
     }
 
     public String getCategoriesString() {
-        return this.getCategoriesSet().stream().map(x -> x.getName().getContent()).reduce((x, y) -> x + "," + y).orElse("");
+        return getCategoriesSet().stream().map(x -> x.getName().getContent()).reduce((x, y) -> x + "," + y).orElse("");
     }
+
+    public Optional<Page> getStaticPage() {
+        return getComponentSet().stream().filter(component -> StaticPost.class.isInstance(component))
+                .map(component -> component.getPage()).findFirst();
+    }
+
+    public boolean isStaticPost() {
+        return getComponentSet().stream().filter(component -> StaticPost.class.isInstance(component)).findAny().isPresent();
+    }
+
 
     public class PostWrap extends Wrap {
 
@@ -380,11 +378,15 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         }
 
         public boolean isVisible() {
-            return Post.this.getCanViewGroup().isMember(Authenticate.getUser());
+            return getCanViewGroup().isMember(Authenticate.getUser());
         }
 
         public String getVisibilityGroup() {
-            return Post.this.getCanViewGroup().toPersistentGroup().getPresentationName();
+            return getCanViewGroup().toPersistentGroup().getPresentationName();
+        }
+
+        public LocalizedString getExcerpt() {
+            return Post.this.getExcerpt();
         }
 
         public LocalizedString getBody() {
@@ -425,25 +427,11 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         }
 
         public List<Wrap> getCategories() {
-            return Post.this.getCategoriesSet().stream().map(Wrap::make).collect(Collectors.toList());
+            return getCategoriesSet().stream().map(Wrap::make).collect(Collectors.toList());
         }
 
-        public List<ImmutableMap<String, Object>> getAttachments() {
-            return Post.this
-                    .getAttachments()
-                    .getFiles()
-                    .stream()
-                    .map((f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType", (Object) f.getContentType(),
-                            "url", FileDownloadServlet.getDownloadUrl(f))).collect(Collectors.toList());
-        }
-
-        public List<ImmutableMap<String, Object>> getPostFiles() {
-            return Post.this
-                    .getPostFiles()
-                    .getFiles()
-                    .stream()
-                    .map((f) -> ImmutableMap.of("name", (Object) f.getDisplayName(), "contentType", (Object) f.getContentType(),
-                            "url", FileDownloadServlet.getDownloadUrl(f))).collect(Collectors.toList());
+        public List<Wrap> getAttachments() {
+            return getAttachmentFilesSorted().map(PostFile::makeWrap).collect(Collectors.toList());
         }
 
     }
@@ -465,4 +453,49 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         return Sanitization.sanitize(original);
     }
 
+    private static final Object NONE = new Object();
+
+    public Iterator<PostContentRevision> getRevisionsIterator() {
+        return new Iterator<PostContentRevision>() {
+            PostContentRevision t = (PostContentRevision) NONE;
+
+            @Override
+            public boolean hasNext() {
+                return t.getNext() != null;
+            }
+
+            @Override
+            public PostContentRevision next() {
+                return t = t == NONE ? getLatestRevision() : t.getNext();
+            }
+        };
+    }
+
+    public Iterable<PostContentRevision> getRevisions() {
+        return () -> getRevisionsIterator();
+    }
+
+    public boolean canDelete() {
+        Set<Permission> required = new HashSet<>();
+        required.add(Permission.DELETE_POSTS);
+        if (!Authenticate.getUser().equals(getCreatedBy())) {
+            required.add(Permission.DELETE_OTHERS_POSTS);
+        }
+        if (isVisible()) {
+            required.add(Permission.DELETE_POSTS_PUBLISHED);
+        }
+        return PermissionEvaluation.canDoThis(getSite(), required.toArray(new Permission[] {}));
+    }
+
+    public boolean canEdit() {
+        ArrayList<Permission> permissions = new ArrayList<>();
+        permissions.add(Permission.EDIT_POSTS);
+        if (!Authenticate.getUser().equals(getCreatedBy())) {
+            permissions.add(Permission.EDIT_OTHERS_POSTS);
+        }
+        if (isVisible()) {
+            permissions.add(Permission.EDIT_POSTS_PUBLISHED);
+        }
+        return PermissionEvaluation.canDoThis(getSite(), permissions.toArray(new Permission[] {}));
+    }
 }

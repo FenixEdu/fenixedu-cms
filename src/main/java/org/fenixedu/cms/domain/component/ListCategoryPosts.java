@@ -21,13 +21,18 @@ package org.fenixedu.cms.domain.component;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.CloneCache;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Post;
+import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.rendering.TemplateContext;
+
+import com.google.gson.JsonObject;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
@@ -44,6 +49,11 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
     public ListCategoryPosts(
             @ComponentParameter(provider = CategoriesForSite.class, value = "Category", required = false) Category cat) {
         setCategory(cat);
+    }
+
+    @DynamicComponent
+    private ListCategoryPosts(JsonObject json) {
+        this(Site.fromSlug(json.get("site").getAsString()).categoryForSlug(json.get("category").getAsString()));
     }
 
     @Override
@@ -65,10 +75,30 @@ public class ListCategoryPosts extends ListCategoryPosts_Base {
     }
 
     @Override
+    public Component clone(CloneCache cloneCache) {
+        return cloneCache.getOrClone(this, obj -> {
+            ListCategoryPosts clone = new ListCategoryPosts((Category) null);
+            cloneCache.setClone(ListCategoryPosts.this, clone);
+            clone.setCategory(getCategory().clone(cloneCache));
+            return clone;
+        });
+    }
+
+    @Override
     @Atomic(mode = TxMode.WRITE)
     public void delete() {
         this.setCategory(null);
         super.delete();
+    }
+
+    @Override
+    public JsonObject json() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", getType());
+        jsonObject.addProperty("category", getCategory().getSlug());
+        jsonObject.addProperty("site", getCategory().getSite().getSlug());
+        jsonObject.addProperty("page", Optional.ofNullable(getPage()).map(Page::getSlug).orElse(null));
+        return jsonObject;
     }
 
     @Override
