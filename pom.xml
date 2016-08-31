@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>org.fenixedu</groupId>
 			<artifactId>bennu-modular-rendering</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.fenixedu</groupId>
@@ -134,7 +134,7 @@
         <dependency>
             <groupId>org.fenixedu</groupId>
             <artifactId>bennu-social</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
 		<dependency>
 			<groupId>com.google.apis</groupId>
