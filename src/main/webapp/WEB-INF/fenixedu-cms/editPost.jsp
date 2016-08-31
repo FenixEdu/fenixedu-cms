@@ -68,7 +68,8 @@ ${portal.angularToolkit()}
 						<span class="glyphicon glyphicon-cog"></span> Metadata
 					</button>
 				</c:if>
-				<a ng-class="{disabled: !post.published || !post.address}" target="_blank" href="{{ post.address }}" class="btn btn-default">
+				<a ng-class="{disabled: !post.active || !post.address}" target="_blank" href="{{ post.address }}"
+				   class="btn btn-default">
 					<span class="glyphicon glyphicon-link"></span> Link
 				</a>
 			</div>
@@ -89,11 +90,13 @@ ${portal.angularToolkit()}
 						<div class="panel-heading">Body</div>
 						<textarea bennu-localized-html-editor="post.body" on-image-added="onImageAdded"></textarea>
 					</div>
+
 					<div class="form-group">
 						<div class="panel-heading">Excerpt</div>
 						<textarea bennu-localized-html-editor="post.excerpt" on-image-added="onImageAdded"></textarea>
 					</div>
-		        </div>
+
+				</div>
 			    </div>
 			<!-- PUBLISHED -->
 			<c:if test="${permissions:canDoThis(site, 'PUBLISH_POSTS')}">
@@ -103,7 +106,7 @@ ${portal.angularToolkit()}
 			            <dl class="dl-horizontal">
 			                <dt>Published</dt>
 			                <dd>
-	                                <input type="checkbox" ng-model="post.published" id="success">
+	                                <input type="checkbox" ng-model="post.active" id="success">
 	                                <label for="success">Published</label>
 			                </dd>
 			                <dt>Publication Begin</dt>
