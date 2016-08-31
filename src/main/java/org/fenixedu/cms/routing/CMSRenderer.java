@@ -53,6 +53,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 /**
  * Created by diutsu on 01/03/16.
@@ -169,11 +170,10 @@ public class CMSRenderer {
         context.put("devMode", CoreConfiguration.getConfiguration().developmentMode());
     }
 
-    private Map<String, Object> makeMenuWrapper(Site site, Page page) {
-        HashMap<String, Object> result = new HashMap<String, Object>();
-        for (Menu menu : site.getMenusSet()) {
-            result.put(menu.getSlug(), page == null ? menu.makeWrap() : menu.makeWrap(page));
-        }
+    private List<Object> makeMenuWrapper(Site site, Page page) {
+        ArrayList<Object> result =
+            site.getOrderedMenusSet().stream().map(menu -> page == null ? menu.makeWrap() : menu.makeWrap(page))
+                .collect(Collectors.toCollection(ArrayList::new));
         return result;
     }
 

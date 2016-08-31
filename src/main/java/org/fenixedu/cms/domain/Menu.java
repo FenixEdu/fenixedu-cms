@@ -219,6 +219,10 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, 
             return children;
         }
 
+        public int getOrder(){
+            return Menu.this.getOrder();
+        }
+
         public LocalizedString getName() {
             return Menu.this.getName();
         }
