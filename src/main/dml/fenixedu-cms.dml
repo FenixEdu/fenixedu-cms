@@ -342,7 +342,7 @@ relation PostHasPostFiles{
 
 relation FilePostFile{
   .org.fenixedu.bennu.io.domain.GroupBasedFile playsRole files{
-    multiplicity 0..1;
+    multiplicity 1..1;
   }
 
   PostFile playsRole postFile{
