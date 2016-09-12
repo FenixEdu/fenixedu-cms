@@ -442,13 +442,13 @@ public class AdminSites {
     public RedirectView editSettings(@RequestParam String slug, @RequestParam(required = false) String themesManagers, @RequestParam(required = false) String rolesManagers,
                                      @RequestParam(required = false) String foldersManagers, @RequestParam(required = false) String settingsManagers) {
         FenixFramework.atomic(() -> {
-            if (Bennu.getInstance().getDefaultSite() == null || !Bennu.getInstance()
-                    .getDefaultSite().getSlug().equals(slug)) {
-                Site s = Site.fromSlug(slug);
-
-                CmsSettings.getInstance().ensureCanManageSettings();
-
-                Bennu.getInstance().setDefaultSite(s);
+            Site defaultSite = Bennu.getInstance().getDefaultSite();
+            if (defaultSite == null || !defaultSite.getSlug().equals(slug)) {
+                Site site = Site.fromSlug(slug);
+                if (site != null) {
+                    CmsSettings.getInstance().ensureCanManageSettings();
+                    Bennu.getInstance().setDefaultSite(site);
+                }
             }
             if (DynamicGroup.get("managers").isMember(Authenticate.getUser())) {
                 CmsSettings settings = CmsSettings.getInstance().getInstance();

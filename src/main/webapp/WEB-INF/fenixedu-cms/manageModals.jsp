@@ -71,8 +71,19 @@
                                     <div class="col-sm-9">
                                         <select class="form-control" name="slug">
                                             <option value="**null**">-</option>
-                                            <c:forEach var="i" items="${sites}">
-                                                <option ${i.isDefault() ? 'selected' : ''}  value="${i.slug}">${i.name.content}</option>
+                                            <c:if test="${sitesWithoutFolderCount.get() > 0}">
+                                                <option value="**null**" disabled>-- Untagged --</option>
+                                                <c:forEach var="i" items="${sitesWithoutFolder}">
+                                                    <option ${i.isDefault() ? 'selected' : ''}  value="${i.slug}">${i.name.content}</option>
+                                                </c:forEach>
+                                            </c:if>
+                                            <c:forEach var="entry" items="${sitesByFolders}">
+                                                <c:if test="${! entry.value.isEmpty()}">
+                                                    <option value="**null**" disabled>-- ${entry.key.functionality.title.content} --</option>
+                                                    <c:forEach var="site" items="${entry.value}">
+                                                        <option ${site.isDefault() ? 'selected' : ''}  value="${site.slug}">${site.name.content}</option>
+                                                    </c:forEach>
+                                                </c:if>
                                             </c:forEach>
                                         </select>
                                         <p class="help-block">The Default Site is the site that is used when you visit the root of the server.</p>
