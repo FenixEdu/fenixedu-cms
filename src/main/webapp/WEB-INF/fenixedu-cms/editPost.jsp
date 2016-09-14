@@ -27,7 +27,142 @@
 <script src="${pageContext.request.contextPath}/static/js/jquery.jsonview.js"></script>
 
 ${portal.angularToolkit()}
+<script>
+	// monkey patch until bennu 4
+	Bennu = Bennu || {};
 
+	Bennu.utils = Bennu.utils || {};
+	Bennu.utils.hasAttr = function(obj,attr){
+		var val = $(obj).attr(attr);
+		return (typeof val !== typeof undefined && val !== false);
+	}
+
+	function dateOptions(e, options){
+		if (Bennu.utils.hasAttr(e, "min-date")) {
+			options.minDate = new Date(e.attr("min-date"));
+		}
+
+		if (Bennu.utils.hasAttr(e, "max-date")) {
+			options.maxDate = new Date(e.attr("max-date"));
+		}
+
+		if (Bennu.utils.hasAttr(e, "requires-future")) {
+			options.minDate = new moment();
+		}
+
+		if (Bennu.utils.hasAttr(e, "requires-past")) {
+			options.maxDate = new moment();
+		}
+
+		if (Bennu.utils.hasAttr(e, "requires-future") && Bennu.utils.hasAttr(e, "requires-past")) {
+			throw "Error: Due to limitations on the space-time continuum, choosing dates of past and future would break the causality principle."
+		}
+
+		if (Bennu.utils.hasAttr(e, "unavailable-dates")) {
+
+			var dates = e.attr("unavailable-dates").split(",")
+			var result = [];
+			for (var i = 0; i < dates.length; i++) {
+				result.add(new Date(dates[i]));
+			}
+			options.disabledDates = result;
+		}
+
+		if (Bennu.utils.hasAttr(e, "available-dates")) {
+			var dates = e.attr("available-dates").split(",")
+			var result = [];
+			for (var i = 0; i < dates.length; i++) {
+				result.add(new Date(dates[i]));
+			}
+			options.enabledDates = result;
+		}
+
+		return
+	};
+
+	function timeOptions(e, options){
+		if (Bennu.utils.hasAttr(e,"minute-stepping")) {
+			options.minuteStepping = parseInt(e.attr("minute-stepping"));
+		}
+	}
+
+	Bennu.datetime = Bennu.datetime || {};
+
+	Bennu.datetime.createDateTimeWidget = function (e) {
+		e = $(e);
+		var widget = $('<div class="bennu-datetime-input-group input-group date"><span class="input-group-addon">' +
+				'<span class="glyphicon glyphicon-calendar"></span></span><input data-date-format="DD/MM/YYYY HH:mm:ss" type="text" class="bennu-datetime-input form-control"/></div>');
+
+		var currentDate = e.val();
+
+		if (currentDate && currentDate.trim() != "") {
+			currentDate = new Date(currentDate);
+			e.val(moment(currentDate).format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+		}
+
+		var options = {
+			sideBySide: true,
+			language: Bennu.lang,
+			pickDate: true,
+			pickTime: true,
+			useSeconds: true,
+			showToday: true,
+		};
+
+		if(currentDate){
+			options['defaultDate'] = currentDate;
+		}
+
+		dateOptions(e,options);
+		timeOptions(e,options);
+
+		$("input", widget).on("change", function (x) {
+			x = $(x.target);
+			var value = x.val().trim()
+			if (value == ""){
+				if ("" !== e.val()){
+					e.val("");
+					e.trigger("change");
+				}
+			}else{
+				var r = moment(value, "DD/MM/YYYY HH:mm:ss").format("YYYY-MM-DDTHH:mm:ss.SSSZ");
+				if (r !== e.val()){
+					e.val(r);
+					e.trigger("change");
+				}
+			}
+		}).datetimepicker(options);
+
+		e.after(widget);
+		e.data("input");
+		widget.data("related", e);
+
+		e.on("change.bennu", function(ev){
+			var data = $(e).val();
+
+			if (data.trim() == "") {
+				e.val("");
+				$(".bennu-datetime-input", widget).data("DateTimePicker").setDate("");
+			} else {
+				data = new Date(data);
+
+				e.val(moment(data).format("YYYY-MM-DDTHH:mm:ss.SSSZ"));
+				var r = $(".bennu-datetime-input", widget).data("DateTimePicker").getDate()
+				if (r) { r=r.format("DD/MM/YYYY HH:mm:ss"); }
+				var t = moment(data).format("DD/MM/YYYY HH:mm:ss");
+
+				if (r !== t){
+					$(".bennu-datetime-input", widget).data("DateTimePicker").setDate(t);
+				}
+
+			}
+
+			e.data("handler").trigger();
+		});
+		return Bennu.widgetHandler.makeFor(e);
+	}
+
+</script>
 <script src="${pageContext.request.contextPath}/bennu-admin/fancytree/jquery-ui.min.js"></script>
 <link href="${pageContext.request.contextPath}/static/css/skin-awesome/ui.fancytree.css" rel="stylesheet" type="text/css">
 <script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.js" type="text/javascript"></script>
