@@ -115,7 +115,7 @@
                                                                 ${f.siteSet.size()}
                                                             <div class="dropdown pull-right">
                                                                 <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                                                    <span class="glyphicon glyphicon-option-vertical"></span>
+                                                                    <span class="caret"></span>
                                                                 </a>
                                                                 <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
                                                                     <li><a href="${pageContext.request.contextPath}/cms/folders/resolver/${f.externalId}">Edit custom resolver</a></li>
@@ -172,7 +172,7 @@
                                                                 ${role.roles.size()}
                                                             <div class="dropdown pull-right">
                                                                 <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                                                    <span class="glyphicon glyphicon-option-vertical"></span>
+                                                                    <span class="caret"></span>
                                                                 </a>
                                                                 <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
                                                                     <li><a class="edit-permissions-link" data-id="${role.externalId}" href="#">Edit permissions</a></li>
