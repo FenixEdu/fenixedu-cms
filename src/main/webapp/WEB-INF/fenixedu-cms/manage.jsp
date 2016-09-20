@@ -159,7 +159,7 @@ ${portal.toolkit()}
               <i class="glyphicon glyphicon-ok"></i>
               <div class="dropdown pull-right">
                   <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                      <span class="glyphicon glyphicon-option-vertical"></span>
+                      <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
                       <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}#settings">View details</a></li>
@@ -209,7 +209,7 @@ ${portal.toolkit()}
             <i class="glyphicon glyphicon-ok"></i>
             <div class="dropdown pull-right">
               <a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                <span class="glyphicon glyphicon-option-vertical"></span>
+                <span class="caret"></span>
               </a>
               <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
                 <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}#settings">View details</a></li>
