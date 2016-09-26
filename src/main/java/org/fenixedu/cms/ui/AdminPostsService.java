@@ -65,6 +65,7 @@ public class AdminPostsService {
 	post.setName(Post.sanitize(name));
 	post.setBodyAndExcerpt(new LocalizedString(), new LocalizedString() );
 	post.setCanViewGroup(site.getCanViewGroup());
+	post.setPublicationBegin(new DateTime());
 	post.setActive(false);
 	return post;
     }
@@ -186,13 +187,13 @@ public class AdminPostsService {
 
 	      DateTime publicationBegin = ofNullable(postJson.get("publicationBegin"))
 		  .filter(JsonElement::isJsonPrimitive)
-		    .map(JsonElement::getAsString)
+		    .map(JsonElement::getAsString).filter(x -> !x.isEmpty())
 		    .map(DateTime::parse)
 		    .orElse(null);
 
 	    DateTime publicationEnds = ofNullable(postJson.get("publicationEnd"))
 		.filter(JsonElement::isJsonPrimitive)
-		    .map(JsonElement::getAsString)
+		    .map(JsonElement::getAsString).filter(x -> !x.isEmpty())
 		    .map(DateTime::parse)
 		    .orElse(null);
 
