@@ -138,7 +138,7 @@
                                 <div role="tabpanel" class="tab-pane" id="roles">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#create-role-modal">
+                                            <a class="edit-permissions-link btn btn-primary" href="#">
                                                 <span class="glyphicon glyphicon-plus"></span>&nbsp;New</a>
                                             </a>
                                         </div>
@@ -399,6 +399,15 @@
     </div>
 
     <script>
+        var roles = [
+                <c:forEach var="role" items="${roles}">
+                    {
+                        description:<c:out value="${role.description.json()}" escapeXml="false"></c:out>,
+                        externalId:<c:out value="${role.externalId}"></c:out>,
+                        permissions:<c:out  value="${role.permissions.json()}" escapeXml="false"></c:out>
+                    },
+                </c:forEach>
+            ];
         function connectSiteModal(e){
             $("#connect-site-modal form").attr("action", "${pageContext.request.contextPath}/cms/permissions/" + $(e.target).data("id") + "/addSite");
 
@@ -416,61 +425,42 @@
         $(".delete-role-link").on("click", deleteRoleModal);
 
         function editPermissionsModal(e){
-            $("#edit-role-permissions form").attr("action", "${pageContext.request.contextPath}/cms/permissions/" + $(e.target).data("id") + "/edit");
+            var permissions
+            if($(e.target).data("id")){
+                $("#edit-role-permissions form").attr("action", "${pageContext.request.contextPath}/cms/permissions/" + $(e.target).data("id") + "/edit");
+                permissions = roles.filter(function(r){return r.externalId == $(e.target).data("id");})[0];
+
+                $("#permission-description").val(JSON.stringify(permissions.description));
+                $("#permission-description").trigger('change')
+
+
+                permissions= permissions.permissions;
+                $('.permissions-inputs input[type="checkbox"]').each(function() {
+                    if (permissions.includes($(this).data("permission-name"))) {
+                       $(this).prop('checked', true);
+                    } else {
+                        $(this).prop('checked', false);
+
+                    }
+                });
+            } else {
+                $("#edit-role-permissions form").attr("action", "${pageContext.request.contextPath}/cms/permissions/create");
+                $("#permission-description").val('');
+                $("#permission-description").trigger('change')
+
+
+                $('.permissions-inputs input[type="checkbox"]').each(function(){
+                    $(this).prop('checked',false);
+                })
+            }
+            $('#permissions-json').val(JSON.stringify(permissions));
+
 
             $("#edit-role-permissions").modal("show");
         }
 
         $(".edit-permissions-link").on("click", editPermissionsModal);
     </script>
-
-    <div class="modal fade" id="create-role-modal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form method="POST" action="${pageContext.request.contextPath}/cms/permissions/create">
-                        ${csrf.field()}
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><spanclass="sr-only"></span></button>
-                        <h3>Create</h3>
-                        <small>Create a new Role that can be used by other sites</small>
-                    </div>
-
-
-                    <div class="modal-body">
-
-                        <div class="form-group" id="role-description">
-                            <label class="col-sm-2 control-label">Description</label>
-                            <div class="col-sm-10">
-                                <input bennu-localized-string required-any name="description" placeholder="Enter a description for this role template.">
-                            </div>
-                        </div>
-                        <input type="text" name="permissions" id="permissions-json" class="hidden">
-
-                        <c:forEach var="permission" items="${allPermissions}">
-                            <div class="form-group permissions-inputs">
-                                <div class="col-sm-12">
-                                    <div class="checkbox">
-                                        <input type="checkbox" data-permission-name="${permission.name()}" />
-                                        <label class="control-label">${permission.localizedName.content}</label>
-                                    </div>
-                                </div>
-                                <p class="help-block">${permission.localizedDescription.content}</p>
-                            </div>
-                        </c:forEach>
-
-                    </div>
-
-
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary"><spring:message code="action.create"/></button>
-                        <button type="reset" class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></button>
-                    </div>
-                </form>
-
-            </div>
-
-        </div>
-    </div>
 
     <div class="modal fade" id="create-site" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog">
@@ -585,173 +575,42 @@
     <div class="modal fade" id="edit-role-permissions">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><spanclass="sr-only"></span></button>
-                    <h3>Permissions</h3>
-                    <small>Customize the permissions on all websites with the role</small>
-                </div>
-                <div class="modal-body">
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th class="col-sm-6">Name</th>
-                            <th class="col-sm-1">View</th>
-                            <th class="col-sm-1">Create</th>
-                            <th class="col-sm-1">Edit</th>
-                            <th class="col-sm-1">Delete</th>
-                            <th class="col-sm-1">Publish</th>
-                            <th class="col-sm-1">Review</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td colspan="7" class="folder">
-                                <i class="glyphicon glyphicon-folder-open"></i>
+                <form method="POST">
+                        ${csrf.field()}
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><spanclass="sr-only"></span></button>
+                        <h4>Update</h4>
+                        <small>Change the permissions of this role</small>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group" id="role-description">
+                            <label class="col-sm-2 control-label">Description</label>
+                            <div class="col-sm-10">
+                                <input id="permission-description" bennu-localized-string
+                                       required-any name="description" placeholder="Enter a description for this role template." >
+                            </div>
+                        </div>
 
-                                <h5>Posts</h5>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td colspan="7" class="folder">
-                                <i class="glyphicon glyphicon-folder-open"></i>
-
-                                <h5>Posts</h5>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        <tr>
-                            <td>Post</td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td><input type="checkbox" class="form-control"></td>
-                            <td>&mdash;</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
+                        <input type="text" name="permissions" id="permissions-json" class="hidden">
+                        <c:forEach var="permission" items="${allPermissions}">
+                            <div class="form-group permissions-inputs">
+                                <div class="col-sm-12">
+                                    <div class="checkbox">
+                                        <input type="checkbox" data-permission-name="${permission.name()}" ${roleTemplate.permissions.get().contains(permission) ? 'checked' : ''}/>
+                                        <label class="control-label">${permission.localizedName.content}</label>
+                                    </div>
+                                    <small class="help-block">
+                                    ${permission.localizedDescription.content}</small>
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></button>
+                        <button type="submit" class="btn btn-primary"><spring:message code="action.save"/></button>
+                    </div>
+                </form>
             </div>
-        </div>
+        </div>allPermissions
     </div>
 </c:if>
