@@ -122,6 +122,7 @@ public class AdminSites {
             return o1.getFunctionality().getTitle().getContent().compareTo(o2.getFunctionality().getTitle().getContent());
         }).collect(Collectors.toList());
 
+        model.addAttribute("defaultSite", Bennu.getInstance().getDefaultSite());
         model.addAttribute("foldersSorted",foldersSorter);
         model.addAttribute("sitesByFolders", sitesByFolders);
         model.addAttribute("sitesWithoutFolder", sitesWithoutFolder);
@@ -185,6 +186,7 @@ public class AdminSites {
             folderList.add(null);
         }
 
+        model.addAttribute("defaultSite", Bennu.getInstance().getDefaultSite());
         model.addAttribute("foldersSorted", folderList);
 
         SearchUtils.Partition<Site> partition = new SearchUtils.Partition<>(results, Comparator.comparing(Site::getCreationDate).reversed(),ITEMS_PER_PAGE, page);
@@ -439,17 +441,9 @@ public class AdminSites {
     }
 
     @RequestMapping(value = "cmsSettings", method = RequestMethod.POST)
-    public RedirectView editSettings(@RequestParam String slug, @RequestParam(required = false) String themesManagers, @RequestParam(required = false) String rolesManagers,
+    public RedirectView editSettings(@RequestParam(required = false) String themesManagers, @RequestParam(required = false) String rolesManagers,
                                      @RequestParam(required = false) String foldersManagers, @RequestParam(required = false) String settingsManagers) {
         FenixFramework.atomic(() -> {
-            if (Bennu.getInstance().getDefaultSite() == null || !Bennu.getInstance()
-                    .getDefaultSite().getSlug().equals(slug)) {
-                Site s = Site.fromSlug(slug);
-
-                CmsSettings.getInstance().ensureCanManageSettings();
-
-                Bennu.getInstance().setDefaultSite(s);
-            }
             if (DynamicGroup.get("managers").isMember(Authenticate.getUser())) {
                 CmsSettings settings = CmsSettings.getInstance().getInstance();
                 settings.ensureCanManageGlobalPermissions();
@@ -457,6 +451,20 @@ public class AdminSites {
                 settings.setRolesManagers(group(rolesManagers));
                 settings.setFoldersManagers(group(foldersManagers));
                 settings.setSettingsManagers(group(settingsManagers));
+            }
+        });
+        return new RedirectView("/cms/sites", true);
+    }
+
+    @RequestMapping(value = "defaultSite", method = RequestMethod.POST)
+    public RedirectView editDefaultSite(@RequestParam String slug) {
+        FenixFramework.atomic(() -> {
+            if (Bennu.getInstance().getDefaultSite() == null || !Bennu.getInstance().getDefaultSite().getSlug().equals(slug)) {
+                CmsSettings.getInstance().ensureCanManageSettings();
+                Site s = Site.fromSlug(slug);
+                if (s != null) {
+                    Bennu.getInstance().setDefaultSite(s);
+                }
             }
         });
         return new RedirectView("/cms/sites", true);
