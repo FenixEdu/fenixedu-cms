@@ -43,9 +43,6 @@ import com.google.common.collect.Lists;
  */
 public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wrappable {
 
-    /**
-     * The logged {@link User} creates a new MenuItem.
-     */
     public MenuItem(Menu menu) {
         super();
         if (Authenticate.getUser() == null) {

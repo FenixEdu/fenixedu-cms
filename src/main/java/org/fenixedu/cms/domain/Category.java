@@ -72,7 +72,7 @@ public class Category extends Category_Base implements Wrappable, Sluggable {
     /**
      * A slug is valid if there are no other category on that site that have the same slug.
      *
-     * @param slug
+     * @param slug slug
      * @return true if it is a valid slug.
      */
     @Override

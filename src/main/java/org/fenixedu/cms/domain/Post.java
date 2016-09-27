@@ -57,9 +57,6 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     
     public static final String SIGNAL_CREATED = "fenixedu.cms.post.created";
 
-    /**
-     * The logged {@link User} creates a new Post.
-     */
     public Post(Site site) {
         super();
         if (Authenticate.getUser() == null) {
@@ -81,9 +78,6 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
         return super.getSite();
     }
 
-    /**
-     * saves the name of the post and creates a new slug for the post.
-     */
     @Override
     public void setName(LocalizedString name) {
         LocalizedString prevName = getName();
@@ -103,7 +97,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable {
     /**
      * A slug is valid if there are no other page on that site that have the same slug.
      *
-     * @param slug
+     * @param slug slug
      * @return true if it is a valid slug.
      */
     @Override

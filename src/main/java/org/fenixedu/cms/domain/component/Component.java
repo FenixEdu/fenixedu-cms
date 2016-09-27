@@ -40,8 +40,6 @@ public abstract class Component extends Component_Base {
     /**
      * Registers a new class has a component.
      * 
-     * @param type
-     *            the type of the component. It must be unique for the application.
      * @param c
      *            the class being registered as a component.
      */

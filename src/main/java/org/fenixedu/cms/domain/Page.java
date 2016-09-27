@@ -36,9 +36,6 @@ import pt.ist.fenixframework.Atomic;
  */
 public class Page extends Page_Base implements Sluggable {
 
-    /**
-     * the logged {@link User} creates a new Page.
-     */
     public Page(Site site) {
         super();
         DateTime now = new DateTime();
@@ -77,7 +74,7 @@ public class Page extends Page_Base implements Sluggable {
     /**
      * A slug is valid if there are no other page on that site that have the same slug.
      *
-     * @param slug
+     * @param slug slug
      * @return true if it is a valid slug.
      */
     @Override

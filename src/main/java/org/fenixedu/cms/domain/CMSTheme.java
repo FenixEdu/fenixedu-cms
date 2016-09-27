@@ -70,14 +70,6 @@ public class CMSTheme extends CMSTheme_Base {
         return null;
     }
 
-    /**
-     * Searches for a {@link CMSTemplate} with a given type on this theme.
-     * 
-     * @param t
-     *            the type of the wanted {@link CMSTemplate}.
-     * @return
-     *         the {@link CMSTemplate} with the given type if it exists, or null otherwise.
-     */
     public CMSTemplate templateForType(String type) {
         CMSTemplate found =
                 getTemplatesSet().stream().filter(template -> template.getType().equals(type)).findFirst().orElse(null);
