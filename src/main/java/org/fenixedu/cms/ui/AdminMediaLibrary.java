@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
+import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostFile;
 import org.fenixedu.cms.domain.Site;
 import org.springframework.ui.Model;
@@ -74,8 +75,12 @@ public class AdminMediaLibrary {
         Site site = Site.fromSlug(siteSlug);
         AdminSites.canEdit(site);
         PostFile postFile = FenixFramework.getDomainObject(postFileId);
+        Post post = postFile.getPost();
         if(site.equals(postFile.getSite())) {
-            FenixFramework.atomic(()->postFile.delete());
+            FenixFramework.atomic(()-> {
+                postFile.delete();
+                post.fixOrder(post.getFilesSorted());
+            });
         }
         return mediaLibraryRedirect(site);
     }
