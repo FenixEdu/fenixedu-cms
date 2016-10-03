@@ -21,6 +21,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
+<%@ taglib uri="http://fenixedu.org/taglib/intersection" prefix="modular" %>
 ${portal.toolkit()}
 
 <div class="page-header">
@@ -79,6 +80,8 @@ ${portal.toolkit()}
             ${csrf.field()}
             <input id="import-button" class="hidden" type="file" name="attachment" onchange="$('#import-form').submit();" />
         </form>
+        <modular:intersect location="sites.manage" position="creation.templates">
+        </modular:intersect>
       </ul>
       </div>
     </c:if>
