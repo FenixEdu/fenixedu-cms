@@ -513,7 +513,7 @@ ${portal.angularToolkit()}
     var createPostFilesUrl = '${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/files';
 
     angular.module('editPostApp', ['bennuToolkit', 'fancyTreeDirective', 'ngFileUpload'])
-        .controller('PostCtrl', ['$scope', '$http','Upload', function($scope, $http, Upload){
+        .controller('PostCtrl', ['$scope', '$http','Upload', '$timeout', function($scope, $http, Upload, $timeout){
 
             function init(data) {
                 function treeFind(node, predicate) {
@@ -542,12 +542,10 @@ ${portal.angularToolkit()}
                     $scope.newFile = {};
                     addClassToSelectedMenuItem();
                     $scope.useMenu = findMenuItem() !== undefined;
-                    setTimeout(function(){
+                    $timeout(function(){
                         $scope.$watch('useMenu', function(useMenu) {
                             if(useMenu) {
                                 createNewMenuItem();
-                            } else {
-                                removeMenuItem();
                             }
                         });
                     });
@@ -595,7 +593,7 @@ ${portal.angularToolkit()}
                         var menuItem = findMenuItem();
                         var menuItemParent = findMenuItemParent(menuItem);
                         if(menuItem && menuItemParent && menuItemParent.children) {
-                            menuItemParent.children.splice(menuItemParent.children.indexOf(menuItem));
+                            menuItemParent.children.splice(menuItemParent.children.indexOf(menuItem), 1);
                             menuItemParent.children = menuItemParent.children.concat(menuItem.children || []);
                             $scope.useMenu = findMenuItem() !== undefined;
                         }
@@ -619,6 +617,9 @@ ${portal.angularToolkit()}
                 });
 
                 $scope.update = function() {
+                    if(typeof $scope.useMenu === 'boolean' && $scope.useMenu === false){
+                        removeMenuItem();
+                    }
                     var data = {post: $scope.post, menus: $scope.menus};
                     $http.post(updatePostUrl, angular.toJson(data)).success(init);
                 };
