@@ -114,10 +114,19 @@ public final class CMSURLHandler implements SemanticURLHandler {
                     renderer.errorPage(req, res, site, 500);
                 }
             } else {
-                res.sendError(404);
+                if (Authenticate.isLogged()) {
+                    renderer.errorPage(req, res, site, 403);
+                } else {
+                    renderer.errorPage(req, res, site, 401);
+                }
+                return;
             }
         } else {
-            res.sendError(404);
+            if (Authenticate.isLogged()) {
+                renderer.errorPage(req, res, site, 403);
+            } else {
+                renderer.errorPage(req, res, site, 401);
+            }
             return;
         }
     }

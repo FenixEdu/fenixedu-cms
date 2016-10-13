@@ -116,7 +116,11 @@ public class CMSRenderer {
         if (page == null || page.getTemplate() == null) {
             errorPage(req, res, sites, 404);
         } else if (!page.getPublished() || !page.getCanViewGroup().isMember(Authenticate.getUser())) {
-            errorPage(req, res, sites, 404);
+            if (Authenticate.isLogged()) {
+                errorPage(req, res, sites, 403);
+            } else {
+                errorPage(req, res, sites, 401);
+            }
         } else {
             try {
                 renderPage(req, pageSlug, res, sites, page, parts);
