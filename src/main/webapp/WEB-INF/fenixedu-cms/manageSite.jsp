@@ -33,6 +33,7 @@ ${portal.toolkit()}
 			<c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION') || permissions:canDoThis(site, 'MANAGE_ROLES')}">
 	          	<button type="button" data-toggle="modal" data-target="#site-settings" class="btn btn-link"><i class="glyphicon glyphicon-wrench"></i></button>
 	        </c:if>
+			<br/><small><modular:intersect location="site.extra" position="description"><modular:arg key="site" value="${site}"></modular:arg></modular:intersect></small>
 	        <small>
           		<ol class="breadcrumb">
                     <li><a href="${pageContext.request.contextPath}/cms/sites">Content Management</a></li>
