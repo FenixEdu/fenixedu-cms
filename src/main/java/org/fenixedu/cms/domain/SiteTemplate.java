@@ -25,7 +25,7 @@ public interface SiteTemplate {
     /**
      * Creates the basic structure for the given site and populates it with some initial information.
      * 
-     * @param site
+     * @param site site
      */
     public void makeIt(Site site);
 }

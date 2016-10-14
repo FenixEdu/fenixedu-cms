@@ -56,6 +56,8 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
 
     /**
      * the logged {@link User} creates a new Page.
+     * @param site site
+     * @param name name
      */
     public Page(Site site, LocalizedString name) {
         super();
@@ -99,7 +101,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
      * A slug is valid if there are no other page on that site that have the
      * same slug.
      *
-     * @param slug
+     * @param slug slug
      * @return true if it is a valid slug.
      */
     @Override

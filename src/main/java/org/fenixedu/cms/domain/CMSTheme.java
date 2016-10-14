@@ -104,7 +104,7 @@ public class CMSTheme extends CMSTheme_Base {
 	/**
 	 * Searches for a {@link CMSTemplate} with a given type on this theme.
 	 * 
-	 * @param t
+	 * @param type type
 	 *            the type of the wanted {@link CMSTemplate}.
 	 * @return the {@link CMSTemplate} with the given type if it exists, or null
 	 *         otherwise.

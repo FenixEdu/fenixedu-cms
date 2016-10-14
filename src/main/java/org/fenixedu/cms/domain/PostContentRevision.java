@@ -49,7 +49,6 @@ public class PostContentRevision extends PostContentRevision_Base implements Clo
      * recursively clones the current and all the next elements of the chain
      *
      * @return a clone of the post content revision with the same content and metadata
-     * @throws CloneNotSupportedException
      */
     @Override
     public PostContentRevision clone(CloneCache cloneCache) {
