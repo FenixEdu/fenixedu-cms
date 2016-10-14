@@ -123,6 +123,8 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
 
     /**
      * the logged {@link User} creates a new {@link Site}.
+     * @param name name
+     * @param description description
      */
     public Site(LocalizedString name, LocalizedString description) {
         super();
