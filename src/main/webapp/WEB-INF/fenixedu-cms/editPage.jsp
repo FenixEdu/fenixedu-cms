@@ -361,7 +361,7 @@ ${portal.angularToolkit()}
 
                     <p ng-hide="useMenu" class="text-info"><i>This page will not be shown on the menu.</i></p>
                     <p ng-show="useMenu" class="text-info"><i>Use drag and drop to change the position of this page on the menu.</i></p>
-                    <div ng-show="useMenu"><fancy-tree items="menus" selected="selected"></fancy-tree></div>
+                    <div ng-show="useMenu"><fancy-tree items="menus" selected="selected" drag-only-one></fancy-tree></div>
                 </div>
             </div>
         </c:if>
@@ -515,7 +515,23 @@ ${portal.angularToolkit()}
     angular.module('editPostApp', ['bennuToolkit', 'fancyTreeDirective', 'ngFileUpload'])
         .controller('PostCtrl', ['$scope', '$http','Upload', '$timeout', function($scope, $http, Upload, $timeout){
 
-            function init(data) {
+
+            function findMenuItem() {
+                function isMenuItemPagePredicate(menuItem) {
+                    return menuItem && menuItem.use && menuItem.use == 'page' && menuItem.page && menuItem.page == $scope.post.slug;
+                }
+                return findMenus($scope.menus, isMenuItemPagePredicate);
+            }
+
+            function findMenuItemParent(mi) {
+                function isMenuItemPageParentPredicate(menuItem) {
+                    return menuItem && menuItem.children && menuItem.children.length && menuItem.children.indexOf(mi) !== -1;
+                }
+                return findMenus($scope.menus, isMenuItemPageParentPredicate);
+            }
+
+            function findMenus(menus, predicate) {
+
                 function treeFind(node, predicate) {
                     if(predicate(node)) {
                         return node;
@@ -527,43 +543,35 @@ ${portal.angularToolkit()}
                     }
                 }
 
-                function findMenus(menus, predicate) {
-                    for(var i = 0; i < menus.length; ++i) {
-                        var found = treeFind(menus[i], predicate);
-                        if(found) return found;
-                    }
+                for(var i = 0; i < menus.length; ++i) {
+                    var found = treeFind(menus[i], predicate);
+                    if(found) return found;
                 }
+            }
+
+
+            function init(data) {
 
                 function initMenus() {
-
                     $scope.menus = data.menus;
                     $scope.post = data.post;
                     $scope.newCategory = {};
                     $scope.newFile = {};
                     addClassToSelectedMenuItem();
-                    $scope.useMenu = findMenuItem() !== undefined;
+                    $scope.menuItem = findMenuItem();
+                    $scope.useMenu =  $scope.menuItem !== undefined;
+                    if ($scope.useMenu) {
+                        $scope.menuItem.draggable = true;
+                    }
                     $timeout(function(){
                         $scope.$watch('useMenu', function(useMenu) {
                             if(useMenu) {
                                 createNewMenuItem();
+                                $scope.menuItem = findMenuItem();
+                                $scope.menuItem.draggable =true;
                             }
                         });
                     });
-
-
-                    function findMenuItem() {
-                        function isMenuItemPagePredicate(menuItem) {
-                            return menuItem && menuItem.use && menuItem.use == 'page' && menuItem.page && menuItem.page == $scope.post.slug;
-                        }
-                        return findMenus($scope.menus, isMenuItemPagePredicate);
-                    }
-
-                    function findMenuItemParent(mi) {
-                        function isMenuItemPageParentPredicate(menuItem) {
-                            return menuItem && menuItem.children && menuItem.children.length && menuItem.children.indexOf(mi) !== -1;
-                        }
-                        return findMenus($scope.menus, isMenuItemPageParentPredicate);
-                    }
 
                     function addClassToSelectedMenuItem() {
                         var menuItem = findMenuItem();
@@ -584,18 +592,9 @@ ${portal.angularToolkit()}
                                 title: Bennu.localizedString.getContent($scope.post.name),
                                 use: 'page',
                                 page: $scope.post.slug,
+                                key: $scope.post.slug,
                                 extraClasses: "page-item"
                             });
-                        }
-                    }
-
-                    function removeMenuItem() {
-                        var menuItem = findMenuItem();
-                        var menuItemParent = findMenuItemParent(menuItem);
-                        if(menuItem && menuItemParent && menuItemParent.children) {
-                            menuItemParent.children.splice(menuItemParent.children.indexOf(menuItem), 1);
-                            menuItemParent.children = menuItemParent.children.concat(menuItem.children || []);
-                            $scope.useMenu = findMenuItem() !== undefined;
                         }
                     }
 
@@ -617,10 +616,19 @@ ${portal.angularToolkit()}
                 });
 
                 $scope.update = function() {
+                    var menuItem = findMenuItem();
                     if(typeof $scope.useMenu === 'boolean' && $scope.useMenu === false){
-                        removeMenuItem();
+                        menuItem.remove=true
+                    } else {
+                        var parent = findMenuItemParent(menuItem)
+                        if(parent.root){
+                            menuItem.menuKey=parent.key;
+                        }
+                        menuItem.parentId=parent.key;
                     }
-                    var data = {post: $scope.post, menus: $scope.menus};
+
+
+                    var data = {post: $scope.post, menuItem: menuItem};
                     $http.post(updatePostUrl, angular.toJson(data)).success(init);
                 };
 

@@ -202,6 +202,28 @@ public class AdminMenusService {
         Signal.emit(MenuItem.SIGNAL_EDITED, new DomainObjectEvent<>(menuItem));
     }
 
+
+    void deleteMenuItem(MenuItem menuItem){
+        Site site= menuItem.getMenu().getSite();
+        ensureCanDoThis(site, Permission.DELETE_MENU_ITEM);
+        if(menuItem.getMenu().getPrivileged()) {
+            ensureCanDoThis(site, Permission.EDIT_PRIVILEGED_MENU);
+        }
+        menuItem.delete();
+    }
+
+    Menu findFirstMenu(Site site) {
+        Menu menu;
+        menu = site.getMenusSet().stream()
+                .filter(m -> m.getPrivileged())
+                .findFirst()
+                .orElseGet(() -> {
+                    ensureCanDoThis(site, Permission.EDIT_PRIVILEGED_MENU);
+                    return site.getMenusSet().stream().findFirst().get();
+                });
+        return menu;
+    }
+
     private void setMenuItemFolder(MenuItem menuItem, JsonObject menuItemJson) {
 	if(!menuItem.getFolder()) {
 	    menuItem.setFolder(true);
@@ -242,6 +264,7 @@ public class AdminMenusService {
 	}
 	return keys;
     }
+
 
     public Stream<MenuItem> allDeletedItems(Menu menu, JsonObject rootJson) {
 	Set<String> allJsonKeys = allJsonKeys(rootJson);
