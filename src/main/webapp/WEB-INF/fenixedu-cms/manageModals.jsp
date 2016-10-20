@@ -20,7 +20,11 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@ taglib uri="http://fenixedu.org/taglib/intersection" prefix="modular" %>
+
 <c:if test="${cmsSettings.canManageSettings()}">
+    <modular:intersect location="sites.manage" position="creation.modals">
+    </modular:intersect>
     <div class="modal fade" id="sites-settings">
         <div class="modal-dialog">
             <form method="post" class="form-horizontal" action="${pageContext.request.contextPath}/cms/sites/cmsSettings">
@@ -69,13 +73,14 @@
                                     <label class="col-sm-3 control-label">Default Site</label>
 
                                     <div class="col-sm-9">
-                                        <select class="form-control" name="slug">
-                                            <option value="**null**">-</option>
-                                            <c:forEach var="i" items="${sites}">
-                                                <option ${i.isDefault() ? 'selected' : ''}  value="${i.slug}">${i.name.content}</option>
-                                            </c:forEach>
-                                        </select>
-                                        <p class="help-block">The Default Site is the site that is used when you visit the root of the server.</p>
+                                        <a href="${pageContext.request.contextPath}/cms/sites/${defaultSite.slug}#settings">
+                                            ${defaultSite.name.content}
+                                        </a>
+                                        <p class="help-block">
+                                            The Default Site is the site that is used when you visit the root of the server.
+                                            To change it, search for the new default site, click the arrow on the right side
+                                            and then click "Make Default Site".
+                                        </p>
                                     </div>
                                 </div>
                             </div>

@@ -55,6 +55,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     /**
      * The logged {@link User} creates a new MenuItem.
+     * @param menu menu
      */
     public MenuItem(Menu menu) {
         super();
@@ -163,6 +164,7 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     /**
      * A MenuItem can not be linked with a {@link Menu} and a {@link MenuItem} at the same time
+     * @return if is parent or top
      */
     @ConsistencyPredicate
     public boolean parentOrTop() {

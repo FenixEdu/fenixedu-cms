@@ -21,13 +21,8 @@ package org.fenixedu.cms.ui;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
-import org.fenixedu.cms.domain.Menu;
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
-import org.fenixedu.cms.domain.Post;
-import org.fenixedu.cms.domain.Site;
-import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +32,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.FenixFramework;
+
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 /**
  * Created by borgez on 03-08-2015.
@@ -66,7 +64,7 @@ public class AdminPagesService {
     @Atomic(mode = Atomic.TxMode.WRITE)
     public void processChanges(Site site, Page page, JsonObject editData) {
 		JsonObject pageJson = editData.get("post").getAsJsonObject();
-		JsonArray menusJson = editData.get("menus").getAsJsonArray();
+		JsonObject menuJson = editData.get("menuItem").getAsJsonObject();
 
 		Post post = page.getStaticPost().get();
 		postsService.processPostChanges(site, page.getStaticPost().get(), pageJson);
@@ -84,17 +82,37 @@ public class AdminPagesService {
 			page.setPublished(true);
 		}
 		if(PermissionEvaluation.canDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU)) {
-			menusJson.forEach(jsonElement -> {
-				JsonObject menuJson = jsonElement.getAsJsonObject();
-				menusService.processMenuChanges(site.menuForSlug(menuJson.get("key").getAsString()),
-						menuJson.getAsJsonObject());
-			});
+			if(menuJson.has("remove")&& menuJson.get("remove").getAsBoolean()){
+				MenuItem menuItem = FenixFramework.getDomainObject(menuJson.get("key").getAsString());
+				if(menuItem!=null) {
+					menusService.deleteMenuItem(menuItem);
+				}
+			} else {
+				Menu menu = null;
+				if (menuJson.has("menuKey")) {
+					menu = site.menuForSlug(menuJson.get("menuKey").getAsString());
+				}
+				if (menu == null) {
+					menu = menusService.findFirstMenu(site);
+				}
+
+				MenuItem parent = null;
+				if (menuJson.has("parentId")) {
+					parent = FenixFramework.getDomainObject(menuJson.get("parentId").getAsString());
+				}
+
+				int position = 0;
+				if (menuJson.has("position")) {
+					position = menuJson.get("position").getAsInt();
+				}
+				menusService.processMenuItemChanges(menu, parent, menuJson, position);
+			}
 		}
 		SiteActivity.editedPage(page,Authenticate.getUser());
 		Signal.emit(Page.SIGNAL_EDITED, new DomainObjectEvent<>(page));
 	}
 
-    public JsonObject serializePage(Page page) {
+	public JsonObject serializePage(Page page) {
 	return postsService.serializePost(page.getStaticPost().get());
     }
 

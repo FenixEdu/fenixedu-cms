@@ -21,6 +21,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://fenixedu.com/cms/permissions" prefix="permissions" %>
+<%@ taglib uri="http://fenixedu.org/taglib/intersection" prefix="modular" %>
 ${portal.toolkit()}
 
 <div class="page-header">
@@ -79,6 +80,8 @@ ${portal.toolkit()}
             ${csrf.field()}
             <input id="import-button" class="hidden" type="file" name="attachment" onchange="$('#import-form').submit();" />
         </form>
+        <modular:intersect location="sites.manage" position="creation.templates">
+        </modular:intersect>
       </ul>
       </div>
     </c:if>
@@ -169,11 +172,15 @@ ${portal.toolkit()}
                       <c:if test="${permissions:canDoThis(i, 'MANAGE_ROLES')}">
                           <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/roles">View roles</a></li>
                       </c:if>
+                      <c:if test="${cmsSettings.canManageSettings()}">
+                          <li><a href="#makeDefault" data-slug="${i.slug}">Make default site</a></li>
+                      </c:if>
                   </ul>
               </div>
           </td>
       </tr>
   </c:forEach>
+
       </c:if>
 
 
@@ -219,6 +226,9 @@ ${portal.toolkit()}
                 <c:if test="${permissions:canDoThis(i, 'MANAGE_ROLES')}">
                   <li><a href="${pageContext.request.contextPath}/cms/sites/${i.slug}/roles">View roles</a></li>
                 </c:if>
+                  <c:if test="${cmsSettings.canManageSettings()}">
+                      <li><a href="#makeDefault" data-slug="${i.slug}">Make default site</a></li>
+                  </c:if>
               </ul>
             </div>
         </td>
@@ -228,7 +238,16 @@ ${portal.toolkit()}
     </c:forEach>
   </tbody>
 </table>
-
+      <form id="defaultSiteForm" class="hidden" action="${pageContext.request.contextPath}/cms/sites/defaultSite" method="post">
+          <input type="hidden" name="slug"/>
+      </form>
+      <script>
+          $("a[data-slug]").click(function(e) {
+              e.preventDefault()
+              $("#defaultSiteForm input").val($(this).data('slug'))
+              $("#defaultSiteForm").submit()
+          })
+      </script>
   </c:otherwise>
 </c:choose>
 <jsp:include page="manageModals.jsp" />

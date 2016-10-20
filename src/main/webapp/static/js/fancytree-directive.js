@@ -24,6 +24,7 @@ angular.module('fancyTreeDirective', []).directive('fancyTree', function($timeou
         };
         var canDrop = attrs.canDrop ? scope.$eval(attrs.canDrop) : function() {return true;};
         var dataSource = function() { return attrs.items ? scope.$eval(attrs.items) : []; };
+        var dragOnlyOne = ('dragOnlyOne' in attrs);
         var toItems = function (el) {
             return el.toDict(false, function(node) {
                 for(var prop in node.data) { 
@@ -52,6 +53,7 @@ angular.module('fancyTreeDirective', []).directive('fancyTree', function($timeou
         };
         var onDrop = function(node, destiny, hitMode, data) {
             data.otherNode.moveTo(node, data.hitMode);
+            data.otherNode.data.position=data.otherNode.getIndex();
             scope.items = toItems(tree);
             $timeout(function() {
                 scope.selected = searchTree(data.otherNode.key);
@@ -77,7 +79,7 @@ angular.module('fancyTreeDirective', []).directive('fancyTree', function($timeou
                     preventRecursiveMoves: true,
                     autoExpandMS: 400,
                     dragStart: function (node, data) {
-                        return !node.data.root;
+                        return !node.data.root && (!dragOnlyOne || node.data.draggable==true);
                     },
                     dragEnter: function (node, data) {
                         return true;

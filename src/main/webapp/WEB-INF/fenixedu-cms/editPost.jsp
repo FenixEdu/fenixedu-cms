@@ -561,10 +561,12 @@ ${portal.angularToolkit()}
 
 				    $scope.updatePosition = function(postFile, offset) {
 				    	var swapFiles = function(position1, position2) {
-			    			var buffer = $scope.post.files[position1].index;
-			    			$scope.post.files[position1].index = $scope.post.files[position2].index;
-			    			$scope.post.files[position2].index = buffer;
-			    			$scope.post.files = $scope.post.files.sort(function(pf1, pf2) { return pf1.index - pf2.index});
+							var buffer = $scope.post.files[position1].index;
+							$scope.post.files[position1].index = $scope.post.files[position2].index;
+							$scope.post.files[position2].index = buffer;
+							for (var i = 0; i < $scope.post.files.size; i++) {
+								$scope.post.files[i].index = i;
+							}
 				    	};
 			    		var currentPosition = $scope.post.files.indexOf(postFile);
 			    		var newPosition = currentPosition + offset;

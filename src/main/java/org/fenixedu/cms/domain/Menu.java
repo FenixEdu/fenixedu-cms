@@ -92,7 +92,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, 
     /**
      * A slug is valid if there are no other page on that site that have the same slug.
      *
-     * @param slug
+     * @param slug slug
      * @return true if it is a valid slug.
      */
     @Override
@@ -162,8 +162,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, 
     /**
      * Adds a given {@link MenuItem} as the last item.
      *
-     * @param mi
-     *            the {@link MenuItem} to be added.
+     * @param mi the {@link MenuItem} to be added.
      */
     public void add(MenuItem mi) {
         this.putAt(mi, getToplevelItemsSet().size());
