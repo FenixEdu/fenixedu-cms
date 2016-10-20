@@ -20,7 +20,11 @@
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@ taglib uri="http://fenixedu.org/taglib/intersection" prefix="modular" %>
+
 <c:if test="${cmsSettings.canManageSettings()}">
+    <modular:intersect location="sites.manage" position="creation.modals">
+    </modular:intersect>
     <div class="modal fade" id="sites-settings">
         <div class="modal-dialog">
             <form method="post" class="form-horizontal" action="${pageContext.request.contextPath}/cms/sites/cmsSettings">
