@@ -55,6 +55,8 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
 
     /**
      * The logged {@link User} creates a new instance of a {@link Category}
+     * @param site site
+     * @param name name
      */
     public Category(Site site, LocalizedString name) {
         super();
@@ -92,7 +94,7 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
     /**
      * A slug is valid if there are no other category on that site that have the same slug.
      *
-     * @param slug
+     * @param slug slug
      * @return true if it is a valid slug.
      */
     @Override

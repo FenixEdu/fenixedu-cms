@@ -67,6 +67,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
     /**
      * The logged {@link User} creates a new Post.
+     * @param site site
      */
     public Post(Site site) {
         super();
@@ -112,7 +113,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
      * A slug is valid if there are no other page on that site that have the
      * same slug.
      *
-     * @param slug
+     * @param slug slug
      * @return true if it is a valid slug.
      */
     @Override
