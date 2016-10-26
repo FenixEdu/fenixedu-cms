@@ -232,9 +232,10 @@ ${portal.toolkit()}
 
 				                        <div class="form-group">
 				                            <label for="site-description" class="col-sm-2 control-label"><spring:message code="site.edit.label.description"/></label>
-
 				                            <div class="col-sm-10">
-				                                <input id="site-description" bennu-localized-string name="description" class="form-control" value='${site.description.json()}' \>
+				                                <textarea id="site-description" bennu-localized-string bennu-html-editor
+														  name="description" class="form-control">
+														  <c:out value="${site.description.json()}"/></textarea>
 				                            </div>
 				                        </div>
 
