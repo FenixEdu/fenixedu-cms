@@ -47,7 +47,7 @@ public class Sanitization {
             .allowAttributes("scope").onElements("th").allowAttributes("width").onElements("th").allowAttributes("type")
             .onElements("ul").allowAttributes("class", "color").globally().toFactory();
 
-    private static Function<String, String> sanitizer = (origin) -> CMS_SANITIZER.sanitize(origin);
+    private static PolicyFactory STRICT_SANITIZER = new HtmlPolicyBuilder().toFactory();
 
     public static LocalizedString sanitize(LocalizedString origin) {
         LocalizedString result = new LocalizedString();
@@ -57,8 +57,20 @@ public class Sanitization {
         return result;
     }
 
+    public static LocalizedString strictSanitize(LocalizedString origin) {
+        LocalizedString result = new LocalizedString();
+        for (Locale l : origin.getLocales()) {
+            result = result.with(l, sanitize(origin.getContent(l)));
+        }
+        return result;
+    }
+
     public static String sanitize(String original) {
-        return sanitizer.apply(original);
+        return CMS_SANITIZER.sanitize(original);
+    }
+
+    public static String strictSanitize(String original) {
+        return STRICT_SANITIZER.sanitize(original);
     }
 
 }
