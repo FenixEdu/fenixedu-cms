@@ -1,0 +1,12 @@
+{% extends "cms-default-theme/base.html" %}
+
+{% block content %}
+	<div class="jumbotron">
+		<h1>Oops, forbidden!</h1>
+
+		<p>This is embarrassing, but you can't access this page.</p>
+		<p>If you feel that this is and error, contact this site admin.</p>
+
+		<p><a href="{{site.fullUrl}}" class="btn btn-primary btn-lg" role="button"><span class="glyphicon glyphicon-home"></span> Home</a></p>
+	</div>
+{% endblock content %}

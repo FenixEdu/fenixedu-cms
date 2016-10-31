@@ -1,0 +1,11 @@
+{% extends "cms-default-theme/base.html" %}
+
+{% block content %}
+	<div class="jumbotron">
+		<h1>Oops, authorization required!</h1>
+
+		<p>This is embarrassing, but you need authorization to access this page, try login</p>
+
+		<p><a href="{{site.fullUrl}}" class="btn btn-primary btn-lg" role="button"><span class="glyphicon glyphicon-home"></span> Home</a></p>
+	</div>
+{% endblock content %}
