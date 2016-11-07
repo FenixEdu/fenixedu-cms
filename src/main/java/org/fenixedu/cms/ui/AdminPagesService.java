@@ -58,7 +58,6 @@ public class AdminPagesService {
     @Atomic(mode = Atomic.TxMode.WRITE)
     public void processChanges(Site site, Page page, JsonObject editData) {
 		JsonObject pageJson = editData.get("post").getAsJsonObject();
-		JsonObject menuJson = editData.get("menuItem").getAsJsonObject();
 
 		Post post = page.getStaticPost().get();
 		postsService.processPostChanges(site, page.getStaticPost().get(), pageJson);
@@ -75,31 +74,36 @@ public class AdminPagesService {
 		if(!page.getPublished() && post.getActive()) {
 			page.setPublished(true);
 		}
-		if(PermissionEvaluation.canDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU)) {
-			if(menuJson.has("remove")&& menuJson.get("remove").getAsBoolean()){
-				MenuItem menuItem = FenixFramework.getDomainObject(menuJson.get("key").getAsString());
-				if(menuItem!=null) {
-					menusService.deleteMenuItem(menuItem);
+		
+		if( editData.has("menuItem")){
+		JsonObject menuJson = editData.get("menuItem").getAsJsonObject();
+			if(PermissionEvaluation.canDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU)) {
+				if(menuJson.has("remove")&& menuJson.get("remove").getAsBoolean()){
+					MenuItem menuItem = FenixFramework.getDomainObject(menuJson.get("key").getAsString());
+					if(menuItem!=null) {
+						menusService.deleteMenuItem(menuItem);
+					}
+				} else {
+					Menu menu = null;
+					if (menuJson.has("menuKey")) {
+						menu = site.menuForSlug(menuJson.get("menuKey").getAsString());
+					}
+	
+					MenuItem parent = null;
+					if (menuJson.has("parentId")) {
+						parent = FenixFramework.getDomainObject(menuJson.get("parentId").getAsString());
+					}
+	
+					if (menu == null) {
+						menu = parent.getMenu();
+					}
+	
+					int position = 0;
+					if (menuJson.has("position")) {
+						position = menuJson.get("position").getAsInt();
+					}
+					menusService.processMenuItemChanges(menu, parent, menuJson, position);
 				}
-			} else {
-				Menu menu = null;
-				if (menuJson.has("menuKey")) {
-					menu = site.menuForSlug(menuJson.get("menuKey").getAsString());
-				}
-				if (menu == null) {
-					menu = menusService.findFirstMenu(site);
-				}
-
-				MenuItem parent = null;
-				if (menuJson.has("parentId")) {
-					parent = FenixFramework.getDomainObject(menuJson.get("parentId").getAsString());
-				}
-
-				int position = 0;
-				if (menuJson.has("position")) {
-					position = menuJson.get("position").getAsInt();
-				}
-				menusService.processMenuItemChanges(menu, parent, menuJson, position);
 			}
 		}
 		SiteActivity.editedPage(page,Authenticate.getUser());

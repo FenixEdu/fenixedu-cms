@@ -170,10 +170,15 @@ public class AdminMenusService {
         });
 
         menuItem.setName(newName);
-
         if (parent != null) {
+            if(parent.getMenu().getPrivileged()){
+                ensureCanDoThis(parent.getMenu().getSite(),Permission.EDIT_PRIVILEGED_MENU);
+            }
             parent.putAt(menuItem, newPosition);
         } else {
+            if(menu.getPrivileged()){
+                ensureCanDoThis(menu.getSite(),Permission.EDIT_PRIVILEGED_MENU);
+            }
             menu.putAt(menuItem, newPosition);
         }
 
@@ -209,18 +214,6 @@ public class AdminMenusService {
             ensureCanDoThis(site, Permission.EDIT_PRIVILEGED_MENU);
         }
         menuItem.delete();
-    }
-
-    Menu findFirstMenu(Site site) {
-        Menu menu;
-        menu = site.getMenusSet().stream()
-                .filter(m -> m.getPrivileged())
-                .findFirst()
-                .orElseGet(() -> {
-                    ensureCanDoThis(site, Permission.EDIT_PRIVILEGED_MENU);
-                    return site.getMenusSet().stream().findFirst().get();
-                });
-        return menu;
     }
 
     private void setMenuItemFolder(MenuItem menuItem, JsonObject menuItemJson) {

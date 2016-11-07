@@ -617,16 +617,17 @@ ${portal.angularToolkit()}
 
                 $scope.update = function() {
                     var menuItem = findMenuItem();
-                    if(typeof $scope.useMenu === 'boolean' && $scope.useMenu === false){
-                        menuItem.remove=true
-                    } else {
-                        var parent = findMenuItemParent(menuItem)
-                        if(parent.root){
-                            menuItem.menuKey=parent.key;
+                    if(menuItem != null) {
+                        if (typeof $scope.useMenu === 'boolean' && $scope.useMenu === false) {
+                            menuItem.remove = true
+                        } else {
+                            var parent = findMenuItemParent(menuItem)
+                            if (parent.root) {
+                                menuItem.menuKey = parent.key;
+                            }
+                            menuItem.parentId = parent.key;
                         }
-                        menuItem.parentId=parent.key;
                     }
-
 
                     var data = {post: $scope.post, menuItem: menuItem};
                     $http.post(updatePostUrl, angular.toJson(data)).success(init);
