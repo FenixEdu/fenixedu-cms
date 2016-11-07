@@ -24,13 +24,7 @@ import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.groups.UserGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.CMSFolder;
-import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.CmsSettings;
-import org.fenixedu.cms.domain.DefaultRoles;
-import org.fenixedu.cms.domain.Role;
-import org.fenixedu.cms.domain.Site;
-import org.fenixedu.cms.domain.SiteActivity;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -57,7 +51,7 @@ public class CreateSite {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/sites/new", true);
         } else {
-            createSite(name, description, false, template, folder, embedded, theme);
+            createSite(Sanitization.strictSanitize(name), Sanitization.sanitize(name), false, template, folder, embedded, theme);
             return new RedirectView("/cms/sites/", true);
         }
     }
