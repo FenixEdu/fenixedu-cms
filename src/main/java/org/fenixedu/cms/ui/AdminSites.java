@@ -382,8 +382,8 @@ public class AdminSites {
                           Site s, String viewGroup, String folder, String analyticsCode, String accountId, Page initialPage) {
 
         if (PermissionEvaluation.canDoThis(s, Permission.EDIT_SITE_INFORMATION)) {
-            s.setName(Post.sanitize(name));
-            s.setDescription(Post.sanitize(description));
+            s.setName(Sanitization.strictSanitize(name));
+            s.setDescription(Sanitization.sanitize(description));
         }
 
         if (PermissionEvaluation.canDoThis(s, Permission.CHANGE_THEME)) {
