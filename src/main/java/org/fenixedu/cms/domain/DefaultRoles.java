@@ -102,6 +102,8 @@ public class DefaultRoles {
     permissions.add(Permission.EDIT_MENU_ITEM);
     permissions.add(Permission.CHANGE_PATH_PAGES);
     permissions.add(Permission.CHOOSE_PATH_AND_FOLDER);
+    permissions.add(Permission.EDIT_SITE_INFORMATION);
+    permissions.add(Permission.CHOOSE_DEFAULT_PAGE);
     return permissions;
   }
 
