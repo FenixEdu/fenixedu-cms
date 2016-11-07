@@ -204,7 +204,11 @@ ${portal.toolkit()}
       <tr>
         <td class="col-md-9 site">
 
-        <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}</a>
+        <a href="${pageContext.request.contextPath}/cms/sites/${i.slug}">${i.getName().getContent()}
+            <modular:intersect location="site.extra" position="description">
+                <modular:arg key="site" value="${i}"></modular:arg>
+            </modular:intersect>
+        </a>
 
         <c:if test="${i.getEmbedded()}">
           <span class="label label-info">Embedded</span></c:if><c:if test="${i.isDefault()}"><span class="label label-success"><spring:message code="site.manage.label.default"/></span>
