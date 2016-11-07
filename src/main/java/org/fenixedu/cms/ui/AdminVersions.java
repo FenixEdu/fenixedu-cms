@@ -19,8 +19,10 @@
 package org.fenixedu.cms.ui;
 
 import static java.util.Optional.ofNullable;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostContentRevision;
 import org.fenixedu.cms.domain.Site;
@@ -47,7 +49,7 @@ public class AdminVersions {
                          @PathVariable String slugPost) {
 
     Site site = Site.fromSlug(slugSite);
-    AdminSites.canEdit(site);
+    ensureCanDoThis(site, Permission.EDIT_POSTS);
     Post post = site.postForSlug(slugPost);
 
     if(post.isStaticPost()) {
@@ -65,7 +67,7 @@ public class AdminVersions {
                             @PathVariable String slugPost,
                             @RequestParam(required = false) PostContentRevision revision) {
     Site site = Site.fromSlug(slugSite);
-    AdminSites.canEdit(site);
+    ensureCanDoThis(site, Permission.EDIT_POSTS);
     Post post = site.postForSlug(slugPost);
 
     if (revision == null) {
@@ -98,8 +100,8 @@ public class AdminVersions {
                                @PathVariable String slugPost,
                                @RequestParam PostContentRevision revision) {
     Site site = Site.fromSlug(slugSite);
-    AdminSites.canEdit(site);
     Post post = site.postForSlug(slugPost);
+    ensureCanDoThis(site, Permission.EDIT_POSTS);
 
     if (revision.getPost() != post) {
       throw new RuntimeException("Invalid Revision");

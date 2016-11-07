@@ -60,7 +60,6 @@ public class AdminMenu {
     @RequestMapping(value = "{siteSlug}", method = RequestMethod.GET)
     public String menus(Model model, @PathVariable String siteSlug) {
         Site site = Site.fromSlug(siteSlug);
-        AdminSites.canEdit(site);
         ensureCanDoThis(site, Permission.LIST_MENUS);
         boolean canManagePrivileged = canDoThis(site, EDIT_PRIVILEGED_MENU);
         model.addAttribute("site", site);
@@ -82,7 +81,6 @@ public class AdminMenu {
     public RedirectView delete(@PathVariable String slugSite, @PathVariable String slugMenu) {
         FenixFramework.atomic(() -> {
             Site site = Site.fromSlug(slugSite);
-            AdminSites.canEdit(site);
             ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU,
                             Permission.DELETE_MENU);
             Menu menu = site.menuForSlug(slugMenu);
@@ -98,7 +96,6 @@ public class AdminMenu {
     public RedirectView moveMenuUp(Model model, @PathVariable String slugSite, @PathVariable String slugMenu) {
         FenixFramework.atomic(() -> {
             Site site = Site.fromSlug(slugSite);
-            AdminSites.canEdit(site);
             ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
             Menu menu = site.menuForSlug(slugMenu);
             if(menu.getPrivileged()) {
@@ -119,7 +116,6 @@ public class AdminMenu {
     public RedirectView moveMenuDown(Model model, @PathVariable String slugSite, @PathVariable String slugMenu) {
         FenixFramework.atomic(() -> {
             Site site = Site.fromSlug(slugSite);
-            AdminSites.canEdit(site);
             ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
             Menu menu = site.menuForSlug(slugMenu);
             if(menu.getPrivileged()) {
@@ -139,7 +135,6 @@ public class AdminMenu {
     @RequestMapping(value = "{slugSite}/{slugMenu}/edit", method = RequestMethod.GET)
     public String viewEditMenu(Model model, @PathVariable String slugSite, @PathVariable String slugMenu) {
         Site site = Site.fromSlug(slugSite);
-        AdminSites.canEdit(site);
         ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
         Menu menu = site.menuForSlug(slugMenu);
         if(menu.getPrivileged()) {
@@ -157,7 +152,6 @@ public class AdminMenu {
     @RequestMapping(value = "{slugSite}/{slugMenu}/data", method = RequestMethod.GET, produces = JSON)
     public @ResponseBody String menuData(@PathVariable String slugSite, @PathVariable String slugMenu) {
         Site site = Site.fromSlug(slugSite);
-        AdminSites.canEdit(site);
         ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
         Menu menu = site.menuForSlug(slugMenu);
         if(menu.getPrivileged()) {
@@ -179,7 +173,6 @@ public class AdminMenu {
             ensureCanDoThis(site, Permission.LIST_MENUS, Permission.EDIT_MENU);
             JsonObject json = JSON_PARSER.parse(http.getBody()).getAsJsonObject();
             service.processMenuChanges(site.menuForSlug(slugMenu), json);
-            AdminSites.canEdit(site);
         });
         return menuData(slugSite, slugMenu);
     }

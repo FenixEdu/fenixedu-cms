@@ -73,8 +73,7 @@ public class AdminPosts {
                     @RequestParam(required = false, defaultValue = "false") boolean showAll) {
 
         Site site = Site.fromSlug(slug);
-        AdminSites.canEdit(site);
-
+        ensureCanDoThis(site,Permission.SEE_POSTS);
         Collection<Post> posts = site.getPostSet();
         if (!Strings.isNullOrEmpty(category)) {
             Category cat = site.categoryForSlug(category);
@@ -104,7 +103,6 @@ public class AdminPosts {
     @RequestMapping(value = "{slugSite}/{slugPost}/data", method = RequestMethod.GET, produces = JSON)
     public @ResponseBody String data(@PathVariable String slugSite, @PathVariable String slugPost) {
         Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
         Post post = s.postForSlug(slugPost);
         ensureCanEditPost(post);
         JsonObject data = new JsonObject();
@@ -115,7 +113,6 @@ public class AdminPosts {
     @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
     public RedirectView createPost(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name) {
         Site s = Site.fromSlug(slug);
-        AdminSites.canEdit(s);
         Post post = createPost(s, name);
         return new RedirectView("/cms/posts/" + s.getSlug() + "/" + post.getSlug() + "/edit", true);
     }
@@ -123,7 +120,6 @@ public class AdminPosts {
     @RequestMapping(value = "{siteSlug}/{postSlug}/edit", method = RequestMethod.GET)
     public String viewEditPost(Model model, @PathVariable String siteSlug, @PathVariable String postSlug) {
         Site site = Site.fromSlug(siteSlug);
-        AdminSites.canEdit(site);
         Post post = site.postForSlug(postSlug);
         ensureCanEditPost(post);
         model.addAttribute("site", site);
@@ -147,7 +143,6 @@ public class AdminPosts {
 
         FenixFramework.atomic(() -> {
             Site s = Site.fromSlug(slugSite);
-            AdminSites.canEdit(s);
             Post post = s.postForSlug(slugPost);
             ensureCanEditPost(post);
             ensureCanDoThis(s, Permission.DELETE_POSTS);
@@ -168,7 +163,6 @@ public class AdminPosts {
     public @ResponseBody String addFile(@PathVariable String slugSite, @PathVariable String slugPost,
                     @RequestParam String name, @RequestParam boolean embedded, @RequestParam MultipartFile file) {
         Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
         Post p = s.postForSlug(slugPost);
         ensureCanEditPost(p);
         PostFile postFile = service.createFile(p, name, embedded, p.getCanViewGroup(), file);
@@ -178,7 +172,6 @@ public class AdminPosts {
     @RequestMapping(value = "{slugSite}/{slugPost}/metadata", method = RequestMethod.GET)
     public String viewEditMetadata(Model model, @PathVariable String slugSite, @PathVariable String slugPost) {
         Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
         Post post = s.postForSlug(slugPost);
         ensureCanEditPost(post);
         PermissionEvaluation.ensureCanDoThis(s, Permission.SEE_METADATA, Permission.EDIT_METADATA);
@@ -196,7 +189,6 @@ public class AdminPosts {
         Site s = Site.fromSlug(slugSite);
         Post post = s.postForSlug(slugPost);
         FenixFramework.atomic(()-> {
-            AdminSites.canEdit(s);
             ensureCanEditPost(post);
             PermissionEvaluation.ensureCanDoThis(s, Permission.SEE_METADATA, Permission.EDIT_METADATA);
             post.setMetadata(PostMetadata.internalize(metadata));

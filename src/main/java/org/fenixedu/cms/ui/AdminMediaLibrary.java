@@ -18,6 +18,7 @@
  */
 package org.fenixedu.cms.ui;
 
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 import static org.fenixedu.cms.ui.SearchUtils.searchFiles;
 
 import java.util.Collection;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
+import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.Post;
 import org.fenixedu.cms.domain.PostFile;
 import org.fenixedu.cms.domain.Site;
@@ -47,7 +49,7 @@ public class AdminMediaLibrary {
     public String media(Model model, @PathVariable String siteSlug, @RequestParam(required = false) String query,
                     @RequestParam(required = false, defaultValue = "1") int page) {
         Site site = Site.fromSlug(siteSlug);
-        AdminSites.canEdit(site);
+        ensureCanDoThis(site, PermissionsArray.Permission.SEE_POSTS);
         Collection<PostFile> allFiles = Strings.isNullOrEmpty(query) ? site.getFilesSet() : searchFiles(site.getFilesSet(), query);
         SearchUtils.Partition<PostFile> partition = new SearchUtils.Partition<>(allFiles, PostFile.NAME_COMPARATOR, 10, page);
 
@@ -61,7 +63,7 @@ public class AdminMediaLibrary {
     @RequestMapping(value = "{siteSlug}/{postFileId}/edit", method = RequestMethod.GET)
     public String postFile(Model model, @PathVariable String siteSlug, @PathVariable String postFileId) {
         Site site = Site.fromSlug(siteSlug);
-        AdminSites.canEdit(site);
+        ensureCanDoThis(site, PermissionsArray.Permission.SEE_POSTS);
         PostFile postFile = FenixFramework.getDomainObject(postFileId);
         if(site.equals(postFile.getSite())) {
             model.addAttribute("site", site);
@@ -73,7 +75,7 @@ public class AdminMediaLibrary {
     @RequestMapping(value = "{siteSlug}/{postFileId}/delete", method = RequestMethod.POST)
     public RedirectView delete(@PathVariable String siteSlug, @PathVariable String postFileId) {
         Site site = Site.fromSlug(siteSlug);
-        AdminSites.canEdit(site);
+        ensureCanDoThis(site, PermissionsArray.Permission.EDIT_POSTS);
         PostFile postFile = FenixFramework.getDomainObject(postFileId);
         Post post = postFile.getPost();
         if(site.equals(postFile.getSite())) {
@@ -90,7 +92,7 @@ public class AdminMediaLibrary {
                                      @RequestParam String filename, @RequestParam String displayName,
                                      @RequestParam(required = false) String accessGroup) {
         Site site = Site.fromSlug(siteSlug);
-        AdminSites.canEdit(site);
+        ensureCanDoThis(site, PermissionsArray.Permission.EDIT_POSTS);
         PostFile postFile = FenixFramework.getDomainObject(postFileId);
         FenixFramework.atomic(()->{
             if(site.equals(postFile.getSite())) {

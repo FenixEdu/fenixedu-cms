@@ -73,7 +73,6 @@ public class AdminPostsService {
     @Atomic(mode = Atomic.TxMode.WRITE)
     public PostFile createFile(Post post, String name, Boolean embedded, Group canViewGroup, MultipartFile file) {
 	try {
-	    AdminSites.canEdit(post.getSite());
 	    GroupBasedFile groupBasedFile = new GroupBasedFile(name, name, file.getBytes(), canViewGroup);
 	    return new PostFile(post, groupBasedFile, embedded, post.getFilesSet().size());
 	} catch(IOException e) {
@@ -83,8 +82,6 @@ public class AdminPostsService {
 
     @Atomic(mode = Atomic.TxMode.WRITE)
     public void processPostChanges(Site site, Post post, JsonObject postJson) {
-		AdminSites.canEdit(site);
-
 		LocalizedString name = Post.sanitize(LocalizedString.fromJson(postJson.get("name")));
 		LocalizedString body = Post.sanitize(LocalizedString.fromJson(postJson.get("body")));
 		LocalizedString excerpt = Post.sanitize(LocalizedString.fromJson(postJson.get("excerpt")));
