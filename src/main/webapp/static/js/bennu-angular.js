@@ -55,6 +55,7 @@
                 model: '=bennuGroup'
             },
             link: function(scope, el, attr) {
+                Bennu.group.setupModal();
                 el.hide();
                 var handler = Bennu.group.createWidget(el);
                 scope.$watch('model', function(value) {
