@@ -42,13 +42,8 @@ import org.fenixedu.cms.api.json.MenuAdapter;
 import org.fenixedu.cms.api.json.PageAdapter;
 import org.fenixedu.cms.api.json.PostAdapter;
 import org.fenixedu.cms.api.json.SiteAdapter;
-import org.fenixedu.cms.domain.Category;
-import org.fenixedu.cms.domain.Menu;
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
-import org.fenixedu.cms.domain.Post;
-import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.commons.i18n.LocalizedString;
 
@@ -77,6 +72,7 @@ public class SiteResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String createSite(String json) {
+        CmsSettings.getInstance().ensureCanManageSettings();
         return view(createSiteFromJson(json));
     }
 

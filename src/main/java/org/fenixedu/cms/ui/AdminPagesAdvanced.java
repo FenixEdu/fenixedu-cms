@@ -63,7 +63,6 @@ public class AdminPagesAdvanced {
                         @RequestParam(required = false, defaultValue = "1") int currentPage) {
         Site site = Site.fromSlug(slug);
         ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_ADVANCED_PAGES);
-        AdminSites.canEdit(site);
         Collection<Page> allPages = Strings.isNullOrEmpty(query) ? site.getPagesSet() : searchPages(site.getPagesSet(), query);
         SearchUtils.Partition<Page> partition =
                         new SearchUtils.Partition<>(allPages, Page.CREATION_DATE_COMPARATOR, PER_PAGE, currentPage);
@@ -77,7 +76,6 @@ public class AdminPagesAdvanced {
     @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
     public RedirectView createPage(@PathVariable String slug, @RequestParam LocalizedString name) {
         Site s = Site.fromSlug(slug);
-        AdminSites.canEdit(s);
         Page page = createPage(name, s);
         return new RedirectView("/cms/pages/advanced/" + s.getSlug() + "/" + page.getSlug() + "/edit", true);
     }
@@ -94,7 +92,6 @@ public class AdminPagesAdvanced {
     public String edit(Model model, @PathVariable String slugSite, @PathVariable String slugPage) {
         Site s = Site.fromSlug(slugSite);
         ensureCanDoThis(s, Permission.SEE_PAGES, Permission.EDIT_PAGE, Permission.EDIT_ADVANCED_PAGES);
-        AdminSites.canEdit(s);
 
         if (slugPage.equals("--**--")) {
             slugPage = "";
@@ -118,7 +115,6 @@ public class AdminPagesAdvanced {
                              @RequestParam String viewGroup,
                              @RequestParam(required = false) Boolean published) {
         Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
         ensureCanDoThis(s, Permission.SEE_PAGES, Permission.EDIT_PAGE, Permission.EDIT_ADVANCED_PAGES);
         Page p = s.pageForSlug(slugPage.equals("--**--") ? "" : slugPage);
         slug = ofNullable(slug).orElseGet(()->p.getSlug());
@@ -155,7 +151,6 @@ public class AdminPagesAdvanced {
     public RedirectView delete(@PathVariable String slugSite, @PathVariable String slugPage) {
         FenixFramework.atomic(() -> {
             Site site = Site.fromSlug(slugSite);
-            AdminSites.canEdit(site);
             ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE, Permission.DELETE_PAGE, Permission.EDIT_ADVANCED_PAGES);
             site.pageForSlug(slugPage).delete();
         });

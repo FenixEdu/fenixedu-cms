@@ -99,8 +99,12 @@ public class Category extends Category_Base implements Wrappable, Sluggable, Clo
      */
     @Override
     public boolean isValidSlug(String slug) {
-        Category c = getSite().categoryForSlug(slug);
-        return c == null || c == this;
+        try {
+            Category c = getSite().categoryForSlug(slug);
+            return c == this;
+        } catch (CmsDomainException cmsDomainException){
+            return true;
+        }
     }
 
     public String getAddress() {

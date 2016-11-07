@@ -54,12 +54,8 @@ public class AdminComponents {
                                                   @PathVariable String slugPage,
                                                   @RequestBody String json) throws Exception {
         Site site = Site.fromSlug(slugSite);
-        AdminSites.canEdit(site);
-
         Page page = site.pageForSlug(slugPage);
-
         createComponent(page, new JsonParser().parse(json).getAsJsonObject());
-
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -85,7 +81,6 @@ public class AdminComponents {
     @RequestMapping(value = "/componentArguments/{page}", produces = "application/json;charset=UTF-8")
     public String getComponentArguments(@PathVariable Page page, @RequestParam String type) {
         ensureCanDoThis(page.getSite(), Permission.SEE_PAGE_COMPONENTS);
-        AdminSites.canEdit(page.getSite());
         ComponentDescriptor descriptor = Component.forType(type);
         if (descriptor == null) {
             throw new IllegalArgumentException("Component '" + type + "' is unknown!");
@@ -98,7 +93,6 @@ public class AdminComponents {
                                         @PathVariable String componentId) {
 
         Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
         Page p = s.pageForSlug(slugPage);
         Component component = p.componentForOid(componentId);
 

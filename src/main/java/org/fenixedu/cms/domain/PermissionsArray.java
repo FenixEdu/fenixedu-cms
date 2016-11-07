@@ -77,6 +77,8 @@ public class PermissionsArray implements Serializable {
         CREATE_POST(1),
         DELETE_POSTS(1),
         DELETE_POSTS_PUBLISHED(1),
+
+        SEE_POSTS(1),
         EDIT_POSTS(1),
         EDIT_POSTS_PUBLISHED(1),
         PUBLISH_POSTS(1),

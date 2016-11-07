@@ -33,6 +33,7 @@ ${portal.toolkit()}
 			<c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION') || permissions:canDoThis(site, 'MANAGE_ROLES')}">
 	          	<button type="button" data-toggle="modal" data-target="#site-settings" class="btn btn-link"><i class="glyphicon glyphicon-wrench"></i></button>
 	        </c:if>
+			<br/><small><modular:intersect location="site.extra" position="description"><modular:arg key="site" value="${site}"></modular:arg></modular:intersect></small>
 	        <small>
           		<ol class="breadcrumb">
                     <li><a href="${pageContext.request.contextPath}/cms/sites">Content Management</a></li>
@@ -232,9 +233,10 @@ ${portal.toolkit()}
 
 				                        <div class="form-group">
 				                            <label for="site-description" class="col-sm-2 control-label"><spring:message code="site.edit.label.description"/></label>
-
 				                            <div class="col-sm-10">
-				                                <input id="site-description" bennu-localized-string name="description" class="form-control" value='${site.description.json()}' \>
+				                                <textarea id="site-description" bennu-localized-string bennu-html-editor
+														  name="description" class="form-control">
+														  <c:out value="${site.description.json()}"/></textarea>
 				                            </div>
 				                        </div>
 

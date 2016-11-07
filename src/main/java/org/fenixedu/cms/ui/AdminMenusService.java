@@ -61,8 +61,7 @@ public class AdminMenusService {
 
 	@Atomic
     public Menu createMenu(Site site, LocalizedString name) {
-	AdminSites.canEdit(site);
-	return new Menu(site, name);
+	    return new Menu(site, name);
     }
 
     public JsonObject serializeMenu(Menu menu) {

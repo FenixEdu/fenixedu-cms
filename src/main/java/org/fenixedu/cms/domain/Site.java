@@ -173,8 +173,8 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * searches for a {@link Site} by slug.
      *
      * @param slug the slug of the {@link Site} wanted.
-     * @return the {@link Site} with the given slug if it exists, or null
-     *         otherwise.
+     * @return the {@link Site} with the given slug if it exists
+     * @throws CmsDomainException if the site doesn't exist
      */
     public static Site fromSlug(String slug) {
         if (slug == null) {
@@ -182,7 +182,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
         }
         Site match = siteCache.computeIfAbsent(slug, Site::manualFind);
         if (match == null) {
-            return null;
+            throw CmsDomainException.notFound();
         }
         if (!FenixFramework.isDomainObjectValid(match) || !match.getSlug().equals(slug)) {
             siteCache.remove(slug, match);
@@ -206,7 +206,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      *         or null otherwise.
      */
     public Page pageForSlug(String slug) {
-        return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElse(null);
+        return getPagesSet().stream().filter(page -> slug.equals(page.getSlug())).findAny().orElseThrow(() ->  CmsDomainException.notFound());
     }
 
     /**
@@ -224,11 +224,11 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * searches for a {@link Category} by slug on this {@link Site}.
      *
      * @param slug the slug of the {@link Category} wanted.
-     * @return the {@link Category} with the given slug if it exists on this
-     *         site, or null otherwise.
+     * @return the {@link Category} with the given slug if it exists on this site.
+     * @throws CmsDomainException if the category is not found
      */
     public Category categoryForSlug(String slug) {
-        return getCategoriesSet().stream().filter(category -> slug.equals(category.getSlug())).findAny().orElse(null);
+        return getCategoriesSet().stream().filter(category -> slug.equals(category.getSlug())).findAny().orElseThrow(() -> CmsDomainException.notFound());
     }
 
     @Atomic
@@ -501,10 +501,6 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
     }
 
     public class SiteWrap extends Wrap {
-
-        public boolean isAdmin() {
-            return PermissionEvaluation.canAccess(Authenticate.getUser(), Site.this);
-        }
 
         public boolean canPost() {
             return true; // TODO: Verify using can post permissions
