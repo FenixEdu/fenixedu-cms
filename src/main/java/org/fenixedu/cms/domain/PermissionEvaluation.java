@@ -76,4 +76,15 @@ public class PermissionEvaluation {
         ensureCanDoThis(Authenticate.getUser(), site, permissions);
     }
 
+
+    private static void ensureCanAccess(User user, Site site) {
+        if (!canAccess(user,site)) {
+            throw CmsDomainException.forbiden();
+        }
+    }
+
+    public static void ensureCanAccess(Site site) {
+        ensureCanAccess(Authenticate.getUser(),site);
+    }
+
 }

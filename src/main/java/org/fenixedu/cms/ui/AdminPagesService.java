@@ -1,23 +1,24 @@
 /**
  * Copyright © 2014 Instituto Superior Técnico
- *
+ * <p>
  * This file is part of FenixEdu CMS.
- *
+ * <p>
  * FenixEdu CMS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * FenixEdu CMS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU Lesser General Public License
  * along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.fenixedu.cms.ui;
 
+import com.google.gson.JsonObject;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.signals.DomainObjectEvent;
 import org.fenixedu.bennu.signals.Signal;
@@ -27,14 +28,8 @@ import org.fenixedu.cms.domain.component.StaticPost;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
-
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 /**
  * Created by borgez on 03-08-2015.
@@ -50,7 +45,6 @@ public class AdminPagesService {
 
     @Atomic(mode = Atomic.TxMode.WRITE)
     public Page createPageAndPost(LocalizedString name, Site site) {
-      	AdminSites.canEdit(site);
       	Post post = postsService.createPost(site, name);
 	Page page = new Page(site, Post.sanitize(name));
 	page.addComponents(new StaticPost(post));
@@ -117,7 +111,7 @@ public class AdminPagesService {
     }
 
     public JsonObject serializeMenu(Menu menu) {
-	return menusService.serializeMenu(menu);
+        return menusService.serializeMenu(menu);
     }
 
 }

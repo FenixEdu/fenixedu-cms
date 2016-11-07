@@ -51,7 +51,6 @@ public class AdminCategory {
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
     public String categories(Model model, @PathVariable(value = "slug") String slug) {
         Site site = Site.fromSlug(slug);
-        AdminSites.canEdit(site);
         ensureCanDoThis(site, Permission.LIST_CATEGORIES);
         model.addAttribute("site", site);
         model.addAttribute("categories", getCategories(site));
@@ -61,7 +60,6 @@ public class AdminCategory {
     @RequestMapping(value = "{slugSite}/create", method = RequestMethod.POST)
     public RedirectView createCategory(@PathVariable String slugSite, @RequestParam LocalizedString name) {
         Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
         Category c = createCategory(s, name);
         return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);
     }
@@ -70,7 +68,6 @@ public class AdminCategory {
     public RedirectView delete(@PathVariable String slugSite, @PathVariable String slugCategory) {
         FenixFramework.atomic(() -> {
             Site s = Site.fromSlug(slugSite);
-            AdminSites.canEdit(s);
             ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY, Permission.DELETE_CATEGORY);
 
             Category category = s.categoryForSlug(slugCategory);
@@ -88,7 +85,6 @@ public class AdminCategory {
                                             @PathVariable String slugCategory,
                                             @RequestParam LocalizedString name) {
         Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
         Category c = s.categoryForSlug(slugCategory);
         createPost(s, c, name);
         return new RedirectView("/cms/categories/" + s.getSlug() + "/" + c.getSlug(), true);
@@ -97,7 +93,6 @@ public class AdminCategory {
     @RequestMapping(value = "{slugSite}/{slugCategory}", method = RequestMethod.GET)
     public String viewCategory(Model model, @PathVariable String slugSite, @PathVariable String slugCategory) {
         Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
         ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY);
         Category category = s.categoryForSlug(slugCategory);
         if(category.getPrivileged()) {
@@ -113,10 +108,8 @@ public class AdminCategory {
                                      @RequestParam LocalizedString name,
                                      @RequestParam(required = false, defaultValue = "false") boolean privileged) {
         Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
         Category c = s.categoryForSlug(slugCategory);
         FenixFramework.atomic(()->{
-            AdminSites.canEdit(s);
             ensureCanDoThis(s, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY);
             if(c.getPrivileged()) {
                 ensureCanDoThis(s, Permission.USE_PRIVILEGED_CATEGORY, Permission.EDIT_PRIVILEGED_CATEGORY);

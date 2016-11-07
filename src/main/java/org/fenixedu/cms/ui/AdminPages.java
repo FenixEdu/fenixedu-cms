@@ -71,7 +71,6 @@ public class AdminPages {
     public String pages(Model model, @PathVariable String slug, @RequestParam(required = false) String query,
                     @RequestParam(required = false, defaultValue = "1") int currentPage) {
         Site site = Site.fromSlug(slug);
-        AdminSites.canEdit(site);
         ensureCanDoThis(site, Permission.SEE_PAGES);
         Collection<Page> allPages = Strings.isNullOrEmpty(query) ? getStaticPages(site) : searchPages(getStaticPages(site), query);
         SearchUtils.Partition<Page> partition =
@@ -87,7 +86,6 @@ public class AdminPages {
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.GET)
     public String edit(Model model, @PathVariable String slugSite, @PathVariable String slugPage) {
         Site site = Site.fromSlug(slugSite);
-        AdminSites.canEdit(site);
         ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE);
         Page page = site.pageForSlug(slugPage);
         if(!page.isStaticPage()) {
@@ -102,7 +100,6 @@ public class AdminPages {
     @RequestMapping(value = "{slugSite}/{slugPage}/data", method = RequestMethod.GET, produces = JSON)
     public @ResponseBody String data(@PathVariable String slugSite, @PathVariable String slugPage) {
         Site site = Site.fromSlug(slugSite);
-        AdminSites.canEdit(site);
         ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE);
         Page page = site.pageForSlug(slugPage);
         if(!page.isStaticPage()) {
@@ -124,7 +121,6 @@ public class AdminPages {
     @RequestMapping(value = "{slug}/create", method = RequestMethod.POST)
     public RedirectView createPage(@PathVariable String slug, @RequestParam LocalizedString name) {
         Site site = Site.fromSlug(slug);
-        AdminSites.canEdit(site);
         ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE, Permission.CREATE_PAGE);
         Page page = service.createPageAndPost(name, site);
         return pageRedirect(page);
@@ -146,7 +142,6 @@ public class AdminPages {
     @RequestMapping(value = "{slugSite}/{slugPage}/delete", method = RequestMethod.POST)
     public RedirectView delete(@PathVariable String slugSite, @PathVariable String slugPage) {
         Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
         Page page = s.pageForSlug(slugPage);
         FenixFramework.atomic(() -> {
             ensureCanDoThis(page.getSite(), Permission.EDIT_PAGE, Permission.DELETE_PAGE);
@@ -164,7 +159,6 @@ public class AdminPages {
     @RequestMapping(value = "{slugSite}/{slugPage}/metadata", method = RequestMethod.GET)
     public String viewEditMetadata(Model model, @PathVariable String slugSite, @PathVariable String slugPage) {
         Site s = Site.fromSlug(slugSite);
-        AdminSites.canEdit(s);
         ensureCanDoThis(s, Permission.EDIT_PAGE, Permission.SEE_METADATA, Permission.EDIT_METADATA);
         Page page  = s.pageForSlug(slugPage);
         if(!page.isStaticPage()) {
@@ -189,7 +183,6 @@ public class AdminPages {
             throw CmsDomainException.forbiden();
         }
         FenixFramework.atomic(()-> {
-            AdminSites.canEdit(s);
             ensureCanDoThis(s, Permission.EDIT_PAGE, Permission.SEE_METADATA, Permission.EDIT_METADATA);
             page.getStaticPost().ifPresent(
                 post -> post.setMetadata(PostMetadata.internalize(metadata)));

@@ -18,10 +18,8 @@
  */
 package org.fenixedu.cms.ui;
 
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static org.fenixedu.cms.domain.PermissionEvaluation.canAccess;
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionEvaluation.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -211,7 +209,7 @@ public class AdminSites {
     @RequestMapping("/{slug}")
     public String manage(Model model, @PathVariable String slug) throws IOException {
         Site site = Site.fromSlug(slug);
-        canEdit(site);
+        ensureCanAccess(site);
         model.addAttribute("site", site);
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
         editSiteInfo(site, model);
@@ -224,7 +222,6 @@ public class AdminSites {
     String viewSiteAnalyticsData(@PathVariable String slug) {
         Site site = Site.fromSlug(slug);
         ensureCanDoThis(site, Permission.MANAGE_ANALYTICS);
-        canEdit(site);
         return site.getAnalytics().getOrFetch(site).toString();
     }
 
@@ -238,7 +235,6 @@ public class AdminSites {
     @RequestMapping(value = "/{slug}/export", method = RequestMethod.GET)
     public void export(@PathVariable String slug, HttpServletResponse response) {
         Site site = Site.fromSlug(slug);
-        canEdit(site);
         CmsSettings.getInstance().ensureCanManageSettings();
 
         try {
@@ -285,16 +281,6 @@ public class AdminSites {
                 .collect(toList());
     }
 
-    public static void canEdit(Site site) {
-        if (site == null) {
-            throw CmsDomainException.notFound();
-        }
-        // TODO: remove this method
-        /*if (!(site.getCanAdminGroup().isMember(Authenticate.getUser()))) {
-            throw CmsDomainException.forbiden();
-        }*/
-    }
-
     @RequestMapping(value = "{slug}/edit", method = RequestMethod.POST)
     public RedirectView edit(@PathVariable(value = "slug") String slug, @RequestParam LocalizedString name,
                              @RequestParam LocalizedString description, @RequestParam(required = false) String theme, @RequestParam(
@@ -309,10 +295,11 @@ public class AdminSites {
             return new RedirectView("/sites/" + slug + "/edit", true);
         } else {
             Site s = Site.fromSlug(slug);
-            AdminSites.canEdit(s);
             newSlug = Optional.ofNullable(newSlug).orElse(slug);
-            editSite(name, description, theme, newSlug, published, s, viewGroup, folder, analyticsCode, accountId,
-                    s.pageForSlug(initialPageSlug));
+            if(canAccess(Authenticate.getUser(),s)) {
+                editSite(name, description, theme, newSlug, published, s, viewGroup, folder, analyticsCode, accountId,
+                        s.pageForSlug(initialPageSlug));
+            }
             return new RedirectView("/cms/sites/" + newSlug + "#general", true);
         }
     }
@@ -363,11 +350,14 @@ public class AdminSites {
     @RequestMapping(value = "{siteSlug}/clone", method = RequestMethod.POST)
     public RedirectView clone(@PathVariable String siteSlug) {
         Site s = Site.fromSlug(siteSlug);
-        AdminSites.canEdit(s);
+        CmsSettings.getInstance().ensureCanManageSettings();
+        ensureCanAccess(s);
         Site newSite = cloneSite(s);
         //TODO - add success message
         return new RedirectView("/cms/sites/", true);
     }
+
+
 
     @Atomic(mode = TxMode.WRITE)
     private Site cloneSite(Site originalSite) {
@@ -433,9 +423,7 @@ public class AdminSites {
     @RequestMapping(value = "{slug}/delete", method = RequestMethod.POST)
     public RedirectView delete(@PathVariable(value = "slug") String slug) {
         Site s = Site.fromSlug(slug);
-
-        AdminSites.canEdit(s);
-
+        CmsSettings.getInstance().ensureCanManageSettings();
         s.delete();
         return new RedirectView("/cms/sites", true);
     }

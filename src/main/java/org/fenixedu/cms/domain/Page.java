@@ -106,8 +106,12 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
      */
     @Override
     public boolean isValidSlug(String slug) {
-        Page p = getSite().pageForSlug(slug);
-        return p == null || p == this;
+        try {
+            Page p = getSite().pageForSlug(slug);
+            return p== this;
+        } catch (CmsDomainException cmsDomainException){
+            return true;
+        }
     }
 
     /**
