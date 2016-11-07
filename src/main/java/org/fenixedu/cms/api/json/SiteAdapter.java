@@ -19,10 +19,7 @@
 package org.fenixedu.cms.api.json;
 
 import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.CHANGE_THEME;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_SITE_INFORMATION;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.MANAGE_ANALYTICS;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.PUBLISH_SITE;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.*;
 
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
 import org.fenixedu.bennu.core.domain.exceptions.BennuCoreDomainException;
@@ -75,6 +72,7 @@ public class SiteAdapter implements JsonAdapter<Site> {
         JsonObject jObj = json.getAsJsonObject();
 
         if (jObj.has("slug") && !jObj.get("slug").isJsonNull()) {
+            ensureCanDoThis(site, CHOOSE_PATH_AND_FOLDER);
             site.isValidSlug(jObj.get("slug").getAsString());
             site.setSlug(jObj.get("slug").getAsString());
         }
@@ -92,6 +90,11 @@ public class SiteAdapter implements JsonAdapter<Site> {
         if (jObj.has("analyticsCode") && !jObj.get("analyticsCode").isJsonNull()) {
             ensureCanDoThis(site, MANAGE_ANALYTICS);
             site.setAnalyticsCode(jObj.get("analyticsCode").getAsString());
+        }
+
+        if (jObj.has("folder") && !jObj.get("folder").isJsonNull()){
+            ensureCanDoThis(site,CHOOSE_PATH_AND_FOLDER);
+            site.setFolder(FenixFramework.getDomainObject(jObj.get("folder").getAsString()));
         }
 
         if (jObj.has("theme") && !jObj.get("theme").isJsonNull()) {
