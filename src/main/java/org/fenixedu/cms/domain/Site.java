@@ -240,12 +240,13 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      * @return the {@link Category} with the given slug if it exists on this site, or null otherwise.
      */
     public Category getOrCreateCategoryForSlug(String slug, LocalizedString name) {
-        Category c = categoryForSlug(slug);
-        if (c == null) {
-            c = new Category(this, name);
-            c.setSlug(slug);
+        try {
+            return categoryForSlug(slug);
+        } catch (CmsDomainException e) {
+            Category category = new Category(this, name);
+            category.setSlug(slug);
+            return category;
         }
-        return c;
     }
 
     @Override
