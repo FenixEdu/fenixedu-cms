@@ -73,6 +73,8 @@ public class DefaultRoles {
     Set<Permission> permissions = new HashSet<>();
     permissions.add(Permission.CREATE_POST);
     permissions.add(Permission.CREATE_PAGE);
+    permissions.add(Permission.SEE_POSTS);
+    permissions.add(Permission.SEE_PRIVATE_POSTS);
     permissions.add(Permission.SEE_PAGES);
     permissions.add(Permission.SEE_PAGE_COMPONENTS);
     permissions.add(Permission.DELETE_OTHERS_POSTS);
@@ -112,6 +114,8 @@ public class DefaultRoles {
       permissions.add(Permission.CREATE_POST);
       permissions.add(Permission.CREATE_PAGE);
       permissions.add(Permission.SEE_PAGES);
+      permissions.add(Permission.SEE_POSTS);
+      permissions.add(Permission.SEE_PRIVATE_POSTS);
       permissions.add(Permission.DELETE_OTHERS_POSTS);
       permissions.add(Permission.DELETE_PAGE);
       permissions.add(Permission.DELETE_POSTS);
@@ -142,6 +146,7 @@ public class DefaultRoles {
     permissions.add(Permission.CREATE_POST);
     permissions.add(Permission.DELETE_POSTS);
     permissions.add(Permission.DELETE_POSTS_PUBLISHED);
+    permissions.add(Permission.SEE_POSTS);
     permissions.add(Permission.EDIT_POSTS);
     permissions.add(Permission.EDIT_POSTS_PUBLISHED);
     permissions.add(Permission.LIST_CATEGORIES);
@@ -154,6 +159,7 @@ public class DefaultRoles {
   private Set<Permission> getContributorPermissions() {
     Set<Permission> permissions = new HashSet<>();
     permissions.add(Permission.CREATE_POST);
+    permissions.add(Permission.SEE_POSTS);
     permissions.add(Permission.DELETE_POSTS);
     permissions.add(Permission.EDIT_POSTS);
     permissions.add(Permission.LIST_CATEGORIES);
