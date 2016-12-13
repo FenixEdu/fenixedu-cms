@@ -61,7 +61,7 @@ ${portal.toolkit()}
                         <h5><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/${role.externalId}/edit">${role.roleTemplate.description.content}</a></h5>
                     </td>
                     <td>${role.roleTemplate.permissions.get().size()}</td>
-                    <td>${role.group.toGroup().getMembers().count()}</td>
+                    <td>${role.group.toGroup().getMembers().size()}</td>
                     <td>
                         <div class="btn-group">
 	                        <button data-toggle="modal" data-target="#delete-modal" class="btn btn-icon btn-danger" data-role-id="${role.externalId}"><i class="glyphicon glyphicon-trash"></i></button>
