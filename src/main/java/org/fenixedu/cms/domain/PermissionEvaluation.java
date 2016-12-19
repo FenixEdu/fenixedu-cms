@@ -35,13 +35,13 @@ import java.util.stream.Stream;
 public class PermissionEvaluation {
 
     public static boolean canAccess(User user, Site site) {
-        return Group.parse("#managers").isMember(user)
+        return Group.managers().isMember(user)
                 || site.getRolesSet().stream().filter(x -> x.getGroup().isMember(user)).findAny().isPresent();
     }
 
     public static boolean canDoThis(User user, Site site, Permission... permissions) {
         HashSet<Permission> requiredPerms = Sets.newHashSet(permissions);
-        if (Group.parse("#managers").isMember(user)) {
+        if (Group.managers().isMember(user)) {
             return true;
         }
 

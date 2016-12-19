@@ -45,7 +45,6 @@ import org.apache.tika.io.FilenameUtils;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.domain.groups.PersistentGroup;
-import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
@@ -155,8 +154,7 @@ public class AdminSites {
 
         model.addAttribute("allPermissions", PermissionsArray.all());
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
-        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(
-                Authenticate.getUser()));
+        model.addAttribute("isManager", Group.managers().isMember(Authenticate.getUser()));
         model.addAttribute("templates", Site.getTemplates());
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
                 .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
@@ -222,8 +220,7 @@ public class AdminSites {
 
         model.addAttribute("allPermissions",PermissionsArray.all());
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
-        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(
-                Authenticate.getUser()));
+        model.addAttribute("isManager", Group.managers().isMember(Authenticate.getUser()));
         model.addAttribute("templates", Site.getTemplates());
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
                 .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
@@ -456,7 +453,7 @@ public class AdminSites {
     public RedirectView editSettings(@RequestParam(required = false) String themesManagers, @RequestParam(required = false) String rolesManagers,
                                      @RequestParam(required = false) String foldersManagers, @RequestParam(required = false) String settingsManagers) {
         FenixFramework.atomic(() -> {
-            if (DynamicGroup.get("managers").isMember(Authenticate.getUser())) {
+            if (Group.managers().isMember(Authenticate.getUser())) {
                 CmsSettings settings = CmsSettings.getInstance().getInstance();
                 settings.ensureCanManageGlobalPermissions();
                 settings.setThemesManagers(group(themesManagers));

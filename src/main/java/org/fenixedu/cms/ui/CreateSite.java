@@ -67,7 +67,7 @@ public class CreateSite {
         site.setPublished(published);
 
         Role adminRole = new Role(DefaultRoles.getInstance().getAdminRole(), site);
-        if (!Group.parse("#managers").isMember(Authenticate.getUser())) {
+        if (!Group.managers().isMember(Authenticate.getUser())) {
             adminRole.setGroup(Group.users(Authenticate.getUser()).toPersistentGroup());
         }
         new Role(DefaultRoles.getInstance().getAuthorRole(), site);

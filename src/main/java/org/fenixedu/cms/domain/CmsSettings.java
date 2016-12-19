@@ -27,7 +27,7 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 public class CmsSettings extends CmsSettings_Base {
 
     public CmsSettings() {
-        PersistentDynamicGroup managers = (PersistentDynamicGroup) Group.parse("#managers").toPersistentGroup();
+        PersistentDynamicGroup managers = Group.managers().toPersistentGroup();
         setFoldersManagers(managers);
         setRolesManagers(managers);
         setSettingsManagers(managers);
@@ -51,7 +51,7 @@ public class CmsSettings extends CmsSettings_Base {
     }
 
     public boolean canManageGloabalPermissions() {
-        return Group.parse("#managers").isMember(Authenticate.getUser());
+        return Group.managers().isMember(Authenticate.getUser());
     }
 
     public void ensureCanManageFolders() {
