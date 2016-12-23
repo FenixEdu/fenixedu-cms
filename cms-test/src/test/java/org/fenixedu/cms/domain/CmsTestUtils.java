@@ -6,10 +6,12 @@ import org.fenixedu.bennu.core.domain.UserProfile;
 import org.fenixedu.bennu.core.domain.groups.PersistentGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.commons.i18n.LocalizedString;
 
+import java.util.EnumSet;
 import java.util.Locale;
 
 import static junit.framework.TestCase.assertNotNull;
@@ -47,8 +49,8 @@ public class CmsTestUtils {
 
         Site site = new Site(siteName, siteDescription);
 
-        Role adminRole = new Role(DefaultRoles.getInstance().getAdminRole(), site);
-        adminRole.setGroup(Group.users(user).toPersistentGroup());
+        Role adminRole = new Role(createRoleTemplate("admin", bootstrapAdminPermissions()), site);
+        adminRole.setGroup(Group.users(user));
 
         return site;
     }
@@ -116,6 +118,29 @@ public class CmsTestUtils {
         theme.setType("theme type " + methodName);
 
         return theme;
+    }
+    
+    
+    public static RoleTemplate createRoleTemplate(String name, EnumSet<Permission> permissions){
+        RoleTemplate roletemplate = new RoleTemplate();
+        roletemplate.setName(createLocalizedString(name));
+        roletemplate.setPermissions(new PermissionsArray(permissions));
+        return roletemplate;
+    }
+    
+    
+    public static EnumSet<Permission> bootstrapAdminPermissions(){
+        return EnumSet.of(Permission.CREATE_POST, Permission.CREATE_PAGE, Permission.SEE_POSTS,
+            Permission.SEE_PRIVATE_POSTS,
+            Permission.SEE_PAGES, Permission.SEE_PAGE_COMPONENTS, Permission.DELETE_OTHERS_POSTS, Permission.DELETE_PAGE,
+            Permission.DELETE_POSTS, Permission.DELETE_PRIVATE_POSTS, Permission.DELETE_POSTS_PUBLISHED,
+            Permission.EDIT_OTHERS_POSTS, Permission.EDIT_PAGE, Permission.EDIT_POSTS, Permission.EDIT_POSTS_PUBLISHED,
+            Permission.EDIT_SITE_INFORMATION, Permission.LIST_CATEGORIES, Permission.EDIT_CATEGORY, Permission.DELETE_CATEGORY,
+            Permission.CREATE_CATEGORY, Permission.MANAGE_ANALYTICS, Permission.MANAGE_ROLES, Permission.PUBLISH_PAGES,
+            Permission.PUBLISH_POSTS, Permission.PUBLISH_SITE, Permission.CREATE_MENU, Permission.DELETE_MENU,
+            Permission.LIST_MENUS, Permission.EDIT_MENU, Permission.CREATE_MENU_ITEM, Permission.DELETE_MENU_ITEM,
+            Permission.EDIT_MENU_ITEM, Permission.CHANGE_PATH_PAGES, Permission.CHOOSE_PATH_AND_FOLDER,
+            Permission.EDIT_SITE_INFORMATION, Permission.CHOOSE_DEFAULT_PAGE);
     }
 
 }

@@ -28,10 +28,7 @@ import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
-import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.CMSThemeFile;
-import org.fenixedu.cms.domain.Category;
-import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.rendering.CMSExtensions;
 import org.fenixedu.cms.rss.RSSService;
 import org.fenixedu.commons.i18n.I18N;
@@ -86,7 +83,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
     public void handleRequest(Site site, HttpServletRequest req, HttpServletResponse res, String pageSlug) throws IOException,
             ServletException {
 
-        if (site.getCanViewGroup().isMember(Authenticate.getUser()) || Group.managers().isMember(Authenticate.getUser())) {
+        if (site.getCanViewGroup().isMember(Authenticate.getUser()) || PermissionEvaluation.canAccess(Authenticate.getUser(),site)) {
             if (site.getPublished()) {
                 try {
                     String baseUrl = "/" + site.getBaseUrl();

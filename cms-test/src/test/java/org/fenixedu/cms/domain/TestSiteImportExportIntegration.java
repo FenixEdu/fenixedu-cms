@@ -87,7 +87,8 @@ public class TestSiteImportExportIntegration extends TestCMS {
         Assert.assertEquals(importedSite.getName(), site.getName());
         assertTrue(importedSite.getRolesSet().stream()
                 .allMatch(role -> site.getRolesSet().stream()
-                        .anyMatch(r -> r.getGroup().expression().equals(role.getGroup().expression())
+                        .anyMatch(r -> r.getGroup().toPersistentGroup().expression().equals(role.getGroup().toPersistentGroup()
+                            .expression())
                                 && r.getRoleTemplate().getExternalId().equals(role.getRoleTemplate().getExternalId()))));
 
         Assert.assertEquals(importedSite.getCanViewGroup(), site.getCanViewGroup());

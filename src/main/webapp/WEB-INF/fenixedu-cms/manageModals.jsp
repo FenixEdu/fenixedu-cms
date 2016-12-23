@@ -170,7 +170,7 @@
                                                 <c:forEach var="role" items="${roles}">
                                                     <tr>
                                                         <td class="col-md-10">
-                                                                ${role.description.content}
+                                                                ${role.name.content}
                                                             <a href="#" data-id="${role.externalId}" class="edit-permissions-link btn btn-small btn-default pull-right">Edit</a>
                                                         </td>
                                                         <td class="col-md-2">
@@ -407,7 +407,7 @@
         var roles = [
                 <c:forEach var="role" items="${roles}">
                     {
-                        description:<c:out value="${role.description.json()}" escapeXml="false"></c:out>,
+                        description:<c:out value="${role.name.json()}" escapeXml="false"></c:out>,
                         externalId:<c:out value="${role.externalId}"></c:out>,
                         permissions:<c:out  value="${role.permissions.json()}" escapeXml="false"></c:out>
                     },
@@ -543,13 +543,26 @@
 
                         <div class="form-group">
                             <label for="embedded" class="col-sm-2 control-label"><spring:message code="label.embedded"/></label>
-
                             <div class="col-sm-2">
                                 <div class="switch switch-success">
                                     <input type="checkbox" id="embeded" value="true" \>
                                     <label for="embeded">Embedded</label>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="roles" class="col-sm-2 control-label"><spring:message code="label.roles"/></label>
+                            <div class="col-sm-10">
+                                <c:forEach items="${roles}" var="template">
+                                    <div class="col-sm-2">
+                                        <label for="roles">${template.name.content}<input type="checkbox" name="roles"
+                                                                                          value="${template.externalId}">
+                                        </label>
+                                    </div>
+                                </c:forEach>
+                            </div>
+
                         </div>
 
                     </div>

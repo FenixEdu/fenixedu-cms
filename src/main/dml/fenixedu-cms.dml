@@ -642,18 +642,16 @@ relation PreviousActivity{
  * ################################
  */
 
-class Role {
-  LocalizedString name;
-}
+class Role { }
 
 class RoleTemplate {
-  LocalizedString description;
+  LocalizedString name;
   PermissionsArray permissions;
 }
 
 relation RoleHasTemplate {
   Role playsRole roles {
-    multiplicity 0..*;
+    multiplicity *;
   }
   RoleTemplate playsRole roleTemplate{
     multiplicity 1..1;
@@ -662,7 +660,7 @@ relation RoleHasTemplate {
 
 relation SiteHasRoles {
   Role playsRole roles {
-    multiplicity 0..*;
+    multiplicity *;
   }
   Site playsRole site {
     multiplicity 1..1;
@@ -674,15 +672,15 @@ relation RoleTemplateHasRoot {
     multiplicity 1..1;
   }
   RoleTemplate playsRole roleTemplates {
-    multiplicity 0..*;
+    multiplicity *;
   }
 }
 
 relation RoleHasUserGroup {
   Role playsRole role {
-    multiplicity 0..*;
+    multiplicity *;
   }
-  .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole group {
+  protected .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole persistentGroup {
     multiplicity 1..1;
   }
 }

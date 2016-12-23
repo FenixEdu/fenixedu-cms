@@ -21,6 +21,7 @@ package org.fenixedu.cms.domain;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.signals.DomainObjectEvent;
 import org.fenixedu.bennu.core.signals.Signal;
+import org.fenixedu.commons.i18n.LocalizedString;
 
 public class Role extends Role_Base {
 
@@ -29,10 +30,9 @@ public class Role extends Role_Base {
     public static final String SIGNAL_EDITED = "fenixedu.cms.role.edited";
 
     public Role(RoleTemplate template, Site site) {
-        setName(template.getDescription());
         setRoleTemplate(template);
         setSite(site);
-        setGroup(Group.nobody().toPersistentGroup());
+        setGroup(Group.nobody());
         Signal.emit(SIGNAL_CREATED,new DomainObjectEvent<>(this));
     }
 
@@ -44,8 +44,23 @@ public class Role extends Role_Base {
         super.deleteDomainObject();
     }
 
-    public static void rolesWithPermission(Site site, String permissionType) {
-
+    
+    public void setGroup(Group group) {
+        if (group == null) {
+            setPersistentGroup(null);
+        } else {
+            setPersistentGroup(group.toPersistentGroup());
+        }
     }
-
+    
+    public Group getGroup(){
+        if(getPersistentGroup()==null){
+            return Group.nobody();
+        }
+        return getPersistentGroup().toGroup();
+    }
+    
+    public LocalizedString getName() {
+        return getRoleTemplate().getName();
+    }
 }
