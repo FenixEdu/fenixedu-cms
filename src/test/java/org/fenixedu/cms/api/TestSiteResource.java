@@ -1,23 +1,25 @@
 package org.fenixedu.cms.api;
 
-import com.flickr4java.flickr.auth.Auth;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import pt.ist.fenixframework.FenixFramework;
+
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.api.bean.SiteBean;
 import org.fenixedu.cms.api.json.SiteAdapter;
 import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.CmsSettings;
 import org.fenixedu.cms.domain.CmsTestUtils;
-import org.fenixedu.cms.domain.DefaultRoles;
-import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Role;
-import org.fenixedu.cms.domain.RoleTemplate;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
@@ -27,18 +29,15 @@ import org.junit.runner.RunWith;
 import org.junit.runners.FenixFrameworkRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pt.ist.fenixframework.FenixFramework;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(FenixFrameworkRunner.class)
 public class TestSiteResource extends TestCmsApi {
@@ -317,13 +316,11 @@ public class TestSiteResource extends TestCmsApi {
         Authenticate.mock(user);
         
         Site site = CmsTestUtils.createSite(user, "editSite");
-    
-        RoleTemplate adminRoleTemplate = DefaultRoles.getInstance().getAdminRole();
-        EnumSet<Permission> defaultPermissions = adminRoleTemplate.getPermissions().get();
-        defaultPermissions.add(Permission.CHANGE_THEME);
-        adminRoleTemplate.setPermissions(new PermissionsArray(defaultPermissions));
-        Role role = new Role(adminRoleTemplate,site);
-        role.setGroup(user.groupOf().toPersistentGroup());
+        EnumSet<Permission> permissions = CmsTestUtils.bootstrapAdminPermissions();
+        permissions.add(Permission.CHANGE_THEME);
+        
+        Role role = new Role(CmsTestUtils.createRoleTemplate("admin", permissions),site);
+        role.setGroup(user.groupOf());
         
         LocalizedString nameEdit =
                 new LocalizedString(Locale.UK, "site name uk nameEdit").with(Locale.US, "site name us nameEdit");

@@ -149,7 +149,8 @@ public class AdminSites {
         model.addAttribute("sitesWithoutFolder", sitesWithoutFolder);
         model.addAttribute("sitesWithoutFolderCount", sitesWithoutFolderCount);
 
-        model.addAttribute("roles", Bennu.getInstance().getRoleTemplatesSet().stream().sorted(Comparator.comparing(x -> x.getDescription().getContent())).collect(Collectors.toSet()));
+        model.addAttribute("roles", Bennu.getInstance().getRoleTemplatesSet().stream().sorted(Comparator.comparing(x -> x.getName()
+            .getContent())).collect(Collectors.toSet()));
         model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet().stream().sorted(Comparator.comparing(x -> x.getFunctionality().getTitle().getContent())).collect(Collectors.toList()));
 
         model.addAttribute("allPermissions", PermissionsArray.all());
@@ -158,6 +159,7 @@ public class AdminSites {
         model.addAttribute("templates", Site.getTemplates());
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
                 .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
+        model.addAttribute("roles", Bennu.getInstance().getRoleTemplatesSet());
         return "fenixedu-cms/manage";
     }
 
@@ -216,7 +218,8 @@ public class AdminSites {
 
         model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet().stream().sorted(Comparator.comparing(x -> x.getFunctionality().getTitle().getContent())).collect(Collectors.toList()));
         model.addAttribute("tag", tag);
-        model.addAttribute("roles", Bennu.getInstance().getRoleTemplatesSet().stream().sorted(Comparator.comparing( x -> x.getDescription().getContent())).collect(Collectors.toSet()));
+        model.addAttribute("roles", Bennu.getInstance().getRoleTemplatesSet().stream().sorted(Comparator.comparing( x -> x.getName()
+            .getContent())).collect(Collectors.toSet()));
 
         model.addAttribute("allPermissions",PermissionsArray.all());
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
@@ -453,14 +456,15 @@ public class AdminSites {
     public RedirectView editSettings(@RequestParam(required = false) String themesManagers, @RequestParam(required = false) String rolesManagers,
                                      @RequestParam(required = false) String foldersManagers, @RequestParam(required = false) String settingsManagers) {
         FenixFramework.atomic(() -> {
-            if (Group.managers().isMember(Authenticate.getUser())) {
-                CmsSettings settings = CmsSettings.getInstance().getInstance();
-                settings.ensureCanManageGlobalPermissions();
-                settings.setThemesManagers(group(themesManagers));
-                settings.setRolesManagers(group(rolesManagers));
-                settings.setFoldersManagers(group(foldersManagers));
-                settings.setSettingsManagers(group(settingsManagers));
+            if(!Group.managers().isMember(Authenticate.getUser())) {
+                CmsSettings.getInstance().ensureCanManageSettings();
             }
+    
+            CmsSettings settings = CmsSettings.getInstance().getInstance();
+            settings.setThemesManagers(group(themesManagers));
+            settings.setRolesManagers(group(rolesManagers));
+            settings.setFoldersManagers(group(foldersManagers));
+            settings.setSettingsManagers(group(settingsManagers));
         });
         return new RedirectView("/cms/sites", true);
     }
@@ -523,7 +527,7 @@ public class AdminSites {
             Site site = Site.fromSlug(slugSite);
             PermissionEvaluation.canDoThis(site, Permission.MANAGE_ROLES);
             Role role = FenixFramework.getDomainObject(roleId);
-            role.setGroup(Group.parse(group).toPersistentGroup());
+            role.setGroup(Group.parse(group));
             Signal.emit(Role.SIGNAL_EDITED, new DomainObjectEvent<>(role));
         });
     }

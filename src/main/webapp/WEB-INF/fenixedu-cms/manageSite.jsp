@@ -354,7 +354,7 @@ ${portal.toolkit()}
 									                            </td>
 									                            <td>
 									                            	<div class="pull-right">
-										                            	<button type="button" class="btn btn-default btn-xs add-user-btn" data-role-id="${role.externalId}" data-role-name="${role.name.content}" data-role-group='${role.getGroup().toGroup().getExpression()}'>Add user</button>
+										                            	<button type="button" class="btn btn-default btn-xs add-user-btn" data-role-id="${role.externalId}" data-role-name="${role.name.content}" data-role-group='${role.getGroup().getExpression()}'>Add user</button>
 							                            	            <div class="dropdown">
 																			<a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 																				<span class="glyphicon glyphicon-option-vertical"></span>

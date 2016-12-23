@@ -71,8 +71,7 @@ ${portal.toolkit()}
         <div class="panel-body">
           <dl class="dl-horizontal">
               <dt>Description</dt>
-              <dd>${roleTemplate.description.content}</dd>
-
+              <dd>${roleTemplate.name.content}</dd>
               <dt>Number of Sites</dt>
               <dd>${roleTemplate.numSites}</dd>
           </dl>
@@ -119,7 +118,7 @@ ${portal.toolkit()}
         <h4 class="modal-title">Are you sure?</h4>
       </div>
       <div class="modal-body">
-        <p>You are about to delete the role '<c:out value="${roleTemplate.description.content}" />'. There is no way to rollback this operation. Are you sure? </p>
+        <p>You are about to delete the role '<c:out value="${roleTemplate.name.content}" />'. There is no way to rollback this operation. Are you sure? </p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
@@ -146,7 +145,7 @@ ${portal.toolkit()}
                     <div class="form-group" id="role-description">
                         <label class="col-sm-2 control-label">Description</label>
                         <div class="col-sm-10">
-                            <input bennu-localized-string required-any name="description" placeholder="Enter a description for this role template." value='${roleTemplate.description.json()}'>
+                            <input bennu-localized-string required-any name="description" placeholder="Enter a description for this role template." value='${roleTemplate.name.json()}'>
                         </div>
                     </div>
 

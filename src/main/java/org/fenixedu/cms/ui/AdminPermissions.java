@@ -55,7 +55,7 @@ public class AdminPermissions {
         CmsSettings.getInstance().ensureCanManageRoles();
         FenixFramework.atomic(() -> {
             RoleTemplate template = new RoleTemplate();
-            template.setDescription(description);
+            template.setName(description);
             template.setPermissions(PermissionsArray.fromJson(toJsonArray(permissions)));
         });
         return new RedirectView("/cms/permissions", true);
@@ -87,7 +87,7 @@ public class AdminPermissions {
         FenixFramework.atomic(() -> {
             CmsSettings.getInstance().ensureCanManageRoles();
             RoleTemplate template = FenixFramework.getDomainObject(roleTemplateId);
-            template.setDescription(description);
+            template.setName(description);
             template.setPermissions(PermissionsArray.fromJson(toJsonArray(permissions)));
         });
         return new RedirectView("/cms/permissions/" + roleTemplateId + "/edit", true);

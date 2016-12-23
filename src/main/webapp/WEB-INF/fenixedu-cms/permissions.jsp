@@ -55,7 +55,7 @@ ${portal.toolkit()}
             <c:forEach var="template" items="${templates}">
                 <tr>
                     <td>
-                        <h5><a href="${pageContext.request.contextPath}/cms/permissions/${template.externalId}/edit">${template.description.content}</a></h5>
+                        <h5><a href="${pageContext.request.contextPath}/cms/permissions/${template.externalId}/edit">${template.name.content}</a></h5>
                     </td>
                     <td>${template.numSites}</td>
                     <td>
