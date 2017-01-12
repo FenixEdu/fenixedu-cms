@@ -34,7 +34,7 @@ ${portal.toolkit()}
         <button type="button" data-toggle="modal" data-target="#edit-modal" class="btn btn-primary">
             <i class="glyphicon glyphicon-edit"></i> Associate Users
         </button>
-        <c:if test="${cmsSettings.canManageGloabalPermissions()}">
+        <c:if test="${cmsSettings.canManageGlobalPermissions()}">
           <a class="btn btn-default" href="${pageContext.request.contextPath}/cms/permissions/${role.roleTemplate.externalId}/edit">Template</a>
         </c:if>
     </p>

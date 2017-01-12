@@ -55,7 +55,7 @@
                                             </li>
                                         </c:if>
 
-                                        <c:if test="${isManager}">
+                                        <c:if test="${cmsSettings.canManageSettings()}">
                                             <li role="presentation">
                                                 <a href="#acl" aria-controls="acl" role="tab" data-toggle="tab">Access Control</a>
                                             </li>
@@ -195,7 +195,7 @@
                                 </div>
                             </c:if>
 
-                            <c:if test="${isManager}">
+                            <c:if test="${cmsSettings.canManageSettings()}">
                                 <div role="tabpanel" class="tab-pane" id="acl">
                                     <div class="form-group">
                                         <label class="control-label col-sm-3">Themes managers:</label>
