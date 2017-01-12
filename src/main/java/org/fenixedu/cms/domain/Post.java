@@ -450,6 +450,10 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         public List<Wrap> getAttachments() {
             return getAttachmentFilesSorted().map(PostFile::makeWrap).collect(Collectors.toList());
         }
+        
+        public Wrap getMetadata() {
+            return Post.this.getMetadata().makeWrap();
+        }
 
     }
 
