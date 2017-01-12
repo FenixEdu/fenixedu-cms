@@ -43,9 +43,8 @@ public class CmsBootstrapper {
 
     @Bootstrap
     public static void bootstrapCms() {
-        if (Bennu.getInstance().getCmsSettings() == null) {
-            FenixFramework.atomic(() -> Bennu.getInstance().setCmsSettings(new CmsSettings()));
-        }
+        
+        CmsSettings.init();
         
         if (Bennu.getInstance().getRoleTemplatesSet().isEmpty()) {
             initDefaultRoles();

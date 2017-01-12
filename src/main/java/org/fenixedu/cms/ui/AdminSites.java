@@ -155,7 +155,6 @@ public class AdminSites {
 
         model.addAttribute("allPermissions", PermissionsArray.all());
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
-        model.addAttribute("isManager", Group.managers().isMember(Authenticate.getUser()));
         model.addAttribute("templates", Site.getTemplates());
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
                 .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
@@ -223,7 +222,6 @@ public class AdminSites {
 
         model.addAttribute("allPermissions",PermissionsArray.all());
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
-        model.addAttribute("isManager", Group.managers().isMember(Authenticate.getUser()));
         model.addAttribute("templates", Site.getTemplates());
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
                 .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
@@ -456,9 +454,7 @@ public class AdminSites {
     public RedirectView editSettings(@RequestParam(required = false) String themesManagers, @RequestParam(required = false) String rolesManagers,
                                      @RequestParam(required = false) String foldersManagers, @RequestParam(required = false) String settingsManagers) {
         FenixFramework.atomic(() -> {
-            if(!Group.managers().isMember(Authenticate.getUser())) {
-                CmsSettings.getInstance().ensureCanManageSettings();
-            }
+            CmsSettings.getInstance().ensureCanManageGlobalPermissions();
     
             CmsSettings settings = CmsSettings.getInstance().getInstance();
             settings.setThemesManagers(group(themesManagers));
