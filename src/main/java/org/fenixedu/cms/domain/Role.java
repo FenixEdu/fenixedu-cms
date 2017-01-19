@@ -43,7 +43,6 @@ public class Role extends Role_Base {
         setGroup(null);
         super.deleteDomainObject();
     }
-
     
     public void setGroup(Group group) {
         if (group == null) {

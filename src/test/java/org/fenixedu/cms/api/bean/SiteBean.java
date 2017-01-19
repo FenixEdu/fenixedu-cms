@@ -10,7 +10,6 @@ public class SiteBean {
     private LocalizedString description;
     private String theme;
     private Boolean embedded;
-    private String template;
     private String slug;
     private String analyticsCode;
     private String alternativeSite;
@@ -92,13 +91,6 @@ public class SiteBean {
         this.embedded = embedded;
     }
 
-    public String getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(String template) {
-        this.template = template;
-    }
 
     public String getSlug() {
         return slug;

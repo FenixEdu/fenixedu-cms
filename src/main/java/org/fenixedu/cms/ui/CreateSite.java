@@ -43,40 +43,42 @@ public class CreateSite {
     @RequestMapping(method = RequestMethod.POST)
     public RedirectView create(@RequestParam LocalizedString name,
             @RequestParam(required = false, defaultValue = "{}") LocalizedString description,
-            @RequestParam(required = false) String template, @RequestParam(required = false) String theme,
+            @RequestParam(required = false) SiteBuilder builder, @RequestParam(required = false) String theme,
             @RequestParam(required = false, defaultValue = "false") boolean embedded,
             @RequestParam(required = false) Set<String> roles,
             @RequestParam(required = false) String folder, RedirectAttributes redirectAttributes) {
-        roles.forEach(r->System.out.println(r));
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/sites/new", true);
         } else {
-            createSite(Sanitization.strictSanitize(name), Sanitization.sanitize(name), false, template, folder, embedded,
+            createSite(Sanitization.strictSanitize(name), Sanitization.sanitize(description), builder,false, folder, embedded,
                 theme, roles);
             return new RedirectView("/cms/sites/", true);
         }
     }
 
     @Atomic
-    private void createSite(LocalizedString name, LocalizedString description, boolean published, String template, String folder,
+    private void createSite(LocalizedString name, LocalizedString description, SiteBuilder builder, boolean published, String folder,
             boolean embedded, String themeType, Set<String> roles) {
         CmsSettings.getInstance().ensureCanManageSettings();
-        Site site = new Site(name, description);
-
-        ofNullable(folder).filter(t -> !Strings.isNullOrEmpty(t)).map(FenixFramework::getDomainObject).map(CMSFolder.class::cast)
-                .ifPresent(site::setFolder);
-
-        site.setEmbedded(ofNullable(embedded).orElse(false));
-        site.updateMenuFunctionality();
-        site.setPublished(published);
+        if (builder !=null){
+            builder.create(name, description);
+        } else {
+            Site site = new Site(name, description);
         
-        roles.forEach(role -> new Role(FenixFramework.getDomainObject(role),site));
-            
-        ofNullable(template).filter(t -> !Strings.isNullOrEmpty(t)).map(Site::templateFor).ifPresent(t -> t.makeIt(site));
-        ofNullable(themeType).filter(t -> !Strings.isNullOrEmpty(t)).map(CMSTheme::forType).ifPresent(site::setTheme);
-
-        SiteActivity.createdSite(site, Authenticate.getUser());
+            ofNullable(folder).filter(t -> !Strings.isNullOrEmpty(t)).map(FenixFramework::getDomainObject).map(CMSFolder.class::cast)
+                    .ifPresent(site::setFolder);
+    
+            site.setEmbedded(ofNullable(embedded).orElse(false));
+            site.updateMenuFunctionality();
+            site.setPublished(published);
+    
+            roles.forEach(role -> new Role(FenixFramework.getDomainObject(role), site));
+    
+            ofNullable(themeType).filter(t -> !Strings.isNullOrEmpty(t)).map(CMSTheme::forType).ifPresent(site::setTheme);
+    
+            SiteActivity.createdSite(site, Authenticate.getUser());
+        }
     }
 
 }

@@ -16,22 +16,25 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with FenixEdu CMS.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.fenixedu.cms.domain;
+package org.fenixedu.cms.api.resource;
 
-import org.springframework.stereotype.Component;
+import com.google.gson.JsonElement;
+import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.rest.BennuRestResource;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
-@Target({ ElementType.TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Component
-public @interface RegisterSiteTemplate {
-    String name();
+@Path("/cms/builders")
+public class SiteBuildersResource extends BennuRestResource {
 
-    String description();
+    //TODO: check permissions in all methods
 
-    String type();
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public JsonElement listAllBuilders() {
+        return view(Bennu.getInstance().getSiteBuildersSet());
+    }
 }
