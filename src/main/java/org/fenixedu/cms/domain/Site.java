@@ -66,54 +66,10 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
 
     public static final Comparator<Site> NAME_COMPARATOR = Comparator.comparing(Site::getName);
     public static final Comparator<Site> CREATION_DATE_COMPARATOR = Comparator.comparing(Site::getCreationDate);
-    /**
-     * maps the registered template types on the tempate classes
-     */
-    protected static final HashMap<String, Class<?>> TEMPLATES = new HashMap<>();
 
     private static final Logger logger = LoggerFactory.getLogger(Site.class);
-
-    /**
-     * registers a new site template
-     *
-     * @param type the type of the template. This must be unique on the
-     *            application.
-     * @param c the class to be registered as a template.
-     */
-    public static void register(String type, Class<?> c) {
-        TEMPLATES.put(type, c);
-    }
-
-    /**
-     * searches for a {@link SiteTemplate} by type.
-     *
-     * @param type the type of the {@link SiteTemplate} wanted.
-     * @return the {@link SiteTemplate} with the given type if it exists or null
-     *         otherwise.
-     */
-    public static SiteTemplate templateFor(String type) {
-        try {
-            return (SiteTemplate) TEMPLATES.get(type).newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            logger.error("Error while instancing a site template", e);
-            return null;
-        }
-    }
-
-    /**
-     * @return mapping between the type and description for all the registered {@link SiteTemplate}.
-     */
-    public static HashMap<String, RegisterSiteTemplate> getTemplates() {
-        HashMap<String, RegisterSiteTemplate> map = new HashMap<>();
-
-        for (Class<?> c : TEMPLATES.values()) {
-            RegisterSiteTemplate registerSiteTemplate = c.getAnnotation(RegisterSiteTemplate.class);
-            map.put(registerSiteTemplate.type(), registerSiteTemplate);
-        }
-
-        return map;
-    }
-
+    private Group defaultRoleTemplateRole;
+    
     protected Site() {
         super();
     }
@@ -475,7 +431,8 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
     }
 
     @Override
-    public boolean isValidSlug(String slug) {
+    public boolean
+    isValidSlug(String slug) {
         Stream<MenuItem> menuItems = PortalConfiguration.getInstance().getMenu().getOrderedChild().stream();
         return !Strings.isNullOrEmpty(slug)
                 && (slug.equals(getSlug()) || menuItems.map(MenuItem::getPath).noneMatch(path -> path.equals(slug)));
@@ -517,7 +474,11 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
     public boolean checkHasEitherFunctionalityOrFolder() {
         return getFunctionality() != null || getFolder() != null;
     }
-
+    
+    public Role getDefaultRoleTemplateRole() {
+        return getRolesSet().stream().filter(role->role.getRoleTemplate().equals(getDefaultRoleTemplate())).findAny().orElseGet(()->null);
+    }
+    
     public class SiteWrap extends Wrap {
 
         public boolean canPost() {

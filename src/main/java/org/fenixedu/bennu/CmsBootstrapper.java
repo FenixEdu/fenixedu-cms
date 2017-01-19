@@ -18,8 +18,6 @@
  */
 package org.fenixedu.bennu;
 
-import pt.ist.fenixframework.FenixFramework;
-
 import java.util.EnumSet;
 
 import org.fenixedu.bennu.core.bootstrap.AdminUserBootstrapper;
@@ -27,10 +25,8 @@ import org.fenixedu.bennu.core.bootstrap.annotations.Bootstrap;
 import org.fenixedu.bennu.core.bootstrap.annotations.Bootstrapper;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.i18n.BundleUtil;
-import org.fenixedu.cms.domain.CmsSettings;
-import org.fenixedu.cms.domain.PermissionsArray;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
-import org.fenixedu.cms.domain.RoleTemplate;
 
 @Bootstrapper(bundle = "resources.CmsResources", name = "application.title.cms.bootstrapper", after = AdminUserBootstrapper.class, sections = {})
 public class CmsBootstrapper {
@@ -40,6 +36,7 @@ public class CmsBootstrapper {
     private static final String AUTHOR_ROLE_NAME = "roles.author";
     private static final String CONTRIBUTOR_ROLE_NAME = "roles.contributor";
     private static final String DEFAULT_BUNDLE = "CmsPermissionResources";
+    private static final String SITE_BUILDER_SLUG = "defaultBuilder";
 
     @Bootstrap
     public static void bootstrapCms() {
@@ -49,16 +46,35 @@ public class CmsBootstrapper {
         if (Bennu.getInstance().getRoleTemplatesSet().isEmpty()) {
             initDefaultRoles();
         }
+    
+        createBlogSiteBuilder();
+        createDefaultSiteBuilder();
     }
     
+    private static void createBlogSiteBuilder() {
+        BlogSiteBuilder blogBuilder = BlogSiteBuilder.getInstance();
+        Bennu.getInstance().getRoleTemplatesSet().forEach(role->
+            blogBuilder.addRoleTemplate(role)
+        );
+        blogBuilder.setTheme(CMSTheme.getDefaultTheme());
+    }
+    
+    
+    private static void createDefaultSiteBuilder() {
+        SiteBuilder builder = new SiteBuilder(SITE_BUILDER_SLUG);
+        Bennu.getInstance().getRoleTemplatesSet().forEach(role->
+                builder.addRoleTemplate(role)
+        );
+        builder.setTheme(CMSTheme.getDefaultTheme());
+    }
     public static void initDefaultRoles() {
-        createTemplate(getAdminPermissions(), ADMIN_ROLE_NAME);
-        createTemplate(getEditorPermissions(), EDITOR_ROLE_NAME);
-        createTemplate(getAuthorPermissions(), AUTHOR_ROLE_NAME);
-        createTemplate(getContributorPermissions(), CONTRIBUTOR_ROLE_NAME);
+        createRoleTemplate(getAdminPermissions(), ADMIN_ROLE_NAME);
+        createRoleTemplate(getEditorPermissions(), EDITOR_ROLE_NAME);
+        createRoleTemplate(getAuthorPermissions(), AUTHOR_ROLE_NAME);
+        createRoleTemplate(getContributorPermissions(), CONTRIBUTOR_ROLE_NAME);
     }
     
-    private static RoleTemplate createTemplate(EnumSet<Permission> permissions, String description) {
+    private static RoleTemplate createRoleTemplate(EnumSet<Permission> permissions, String description) {
         RoleTemplate template = new RoleTemplate();
         template.setPermissions(new PermissionsArray(permissions));
         template.setName(BundleUtil.getLocalizedString(DEFAULT_BUNDLE, description));

@@ -155,10 +155,9 @@ public class AdminSites {
 
         model.addAttribute("allPermissions", PermissionsArray.all());
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
-        model.addAttribute("templates", Site.getTemplates());
+        model.addAttribute("builders", Bennu.getInstance().getSiteBuildersSet());
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
                 .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
-        model.addAttribute("roles", Bennu.getInstance().getRoleTemplatesSet());
         return "fenixedu-cms/manage";
     }
 
@@ -222,7 +221,7 @@ public class AdminSites {
 
         model.addAttribute("allPermissions",PermissionsArray.all());
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
-        model.addAttribute("templates", Site.getTemplates());
+        model.addAttribute("builders", Bennu.getInstance().getSiteBuildersSet());
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
                 .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
         return "fenixedu-cms/manageSearch";
@@ -239,9 +238,7 @@ public class AdminSites {
     }
 
     @RequestMapping(value = "/{slug}/analytics", method = RequestMethod.GET, produces = JSON)
-    public
-    @ResponseBody
-    String viewSiteAnalyticsData(@PathVariable String slug) {
+    public @ResponseBody String viewSiteAnalyticsData(@PathVariable String slug) {
         Site site = Site.fromSlug(slug);
         ensureCanDoThis(site, Permission.MANAGE_ANALYTICS);
         return site.getAnalytics().getOrFetch(site).toString();

@@ -24,6 +24,7 @@
 
 <c:if test="${cmsSettings.canManageSettings()}">
     <modular:intersect location="sites.manage" position="creation.modals">
+        <modular:arg key="csrfField" value="${csrf.field()}"></modular:arg>
     </modular:intersect>
     <div class="modal fade" id="sites-settings">
         <div class="modal-dialog">
@@ -500,6 +501,21 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-2 control-label">Builder</label>
+
+                            <div class="col-sm-10">
+                                <select name="builder" id="builder" class="form-control">
+                                    <option value="${null}">&lt; None &gt;</option>
+
+                                    <c:forEach items="${builders}" var="builder">
+                                        <option value="${builder.externalId}">${builder.slug}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="no-builder-options">
+                        <div class="form-group">
                             <label for="inputEmail3" class="col-sm-2 control-label">Theme</label>
 
                             <div class="col-sm-10">
@@ -513,22 +529,10 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="inputEmail3" class="col-sm-2 control-label">Template</label>
 
-                            <div class="col-sm-10">
-                                <select name="template" id="" class="form-control">
-                                    <option value="${null}">&lt; <spring:message code="site.create.label.emptySite"/> &gt;</option>
-
-                                    <c:forEach items="${templates}" var="template">
-                                        <option value="${template.key}">${template.value.name()} - ${template.value.description()}</option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                        </div>
 
                         <div class="form-group">
-                            <label for="folder" class="col-sm-2 control-label">Tag</label>
+                            <label for="folder" class="col-sm-2 control-label">Folder</label>
 
                             <div class="col-sm-10">
                                 <select name="folder" id="" class="form-control">
@@ -542,11 +546,10 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="embedded" class="col-sm-2 control-label"><spring:message code="label.embedded"/></label>
+                            <label for="embeded" class="col-sm-2 control-label"><spring:message code="label.embedded"/></label>
                             <div class="col-sm-2">
                                 <div class="switch switch-success">
-                                    <input type="checkbox" id="embeded" value="true" \>
-                                    <label for="embeded">Embedded</label>
+                                    <label for="embeded"><input type="checkbox" id="embeded" value="true" \>Embedded</label>
                                 </div>
                             </div>
                         </div>
@@ -554,17 +557,20 @@
                         <div class="form-group">
                             <label for="roles" class="col-sm-2 control-label"><spring:message code="label.roles"/></label>
                             <div class="col-sm-10">
+                                <div class="row">
                                 <c:forEach items="${roles}" var="template">
-                                    <div class="col-sm-2">
-                                        <label for="roles">${template.name.content}<input type="checkbox" name="roles"
-                                                                                          value="${template.externalId}">
+                                <div class="col-sm-3">
+                                        <label for="roles-${template.name.content}">
+                                            <input type="checkbox" name="roles" value="${template.externalId}">
+                                            ${template.name.content}
                                         </label>
-                                    </div>
+                                </div>
                                 </c:forEach>
+                            </div>
                             </div>
 
                         </div>
-
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="reset" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -575,6 +581,17 @@
         </div>
     </div>
 
+    <script>
+        $(document).ready(function(){
+            $("#builder").change(function(){
+                if($(this).val()!=""){
+                    $("#no-builder-options").hide();
+                } else {
+                    $("#no-builder-options").show();
+                }
+            })
+        })
+    </script>
     <script>
         $(document).ready(function() {
             function updatePermissionsJson() {

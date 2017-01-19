@@ -19,8 +19,6 @@
 package org.fenixedu.cms.rendering;
 
 import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.RegisterSiteTemplate;
-import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ComponentType;
 
@@ -30,7 +28,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
 import java.util.Set;
 
-@HandlesTypes({ ComponentType.class, RegisterSiteTemplate.class })
+@HandlesTypes({ ComponentType.class })
 public class CMSInitializer implements ServletContainerInitializer {
 
     @Override
@@ -40,11 +38,6 @@ public class CMSInitializer implements ServletContainerInitializer {
                 
             	if (type.isAnnotationPresent(ComponentType.class)) {
                     Component.register(type);
-                }
-                
-                if (type.isAnnotationPresent(RegisterSiteTemplate.class)) {
-                    RegisterSiteTemplate annotation = type.getAnnotation(RegisterSiteTemplate.class);
-                    Site.register(annotation.type(), type);
                 }
             }
         }

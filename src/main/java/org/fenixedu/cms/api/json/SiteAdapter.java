@@ -58,12 +58,7 @@ public class SiteAdapter implements JsonAdapter<Site> {
         if (jObj.has("embedded") && !jObj.get("embedded").isJsonNull()) {
             site.setEmbedded(jObj.get("embedded").getAsBoolean());
         }
-
-        if (jObj.has("template") && !jObj.get("template").isJsonNull()) {
-            String template = jObj.get("template").getAsString();
-            Site.templateFor(template).makeIt(site);
-        }
-
+        
         site.updateMenuFunctionality();
 
         return site;

@@ -31,7 +31,7 @@ ${portal.toolkit()}
 	<div class="page-header">
 	    <h1>${site.name.content}
 			<c:if test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION') || permissions:canDoThis(site, 'MANAGE_ROLES')}">
-	          	<button type="button" data-toggle="modal" data-target="#site-settings" class="btn btn-link"><i class="glyphicon glyphicon-wrench"></i></button>
+	          	<button type="button" data-toggle="modal" data-target="#site-settings" class="btn btn-link"><i class="glyphicon glyphicon-wrench"></i> Settings</button>
 	        </c:if>
 			<br/><small><modular:intersect location="site.extra" position="description"><modular:arg key="site" value="${site}"></modular:arg></modular:intersect></small>
 	        <small>
@@ -333,6 +333,14 @@ ${portal.toolkit()}
 							        </div>
 									</c:if>
 						            <c:if test="${permissions:canDoThis(site, 'MANAGE_ROLES')}">
+										<label for="defaultRole" class="col-sm-2 control-label"><spring:message code="label.default.role"/></label>
+										<div class="col-sm-10">
+											<select id="defaultRole" name="defaultRole" class="form-control">
+												<c:forEach items="${site.roles}" var="role">
+													<option value="${role.externalId}">${role.name.content}</option>
+												</c:forEach>
+											</select>
+										</div>
 										<c:choose>
 											<c:when test="${permissions:canDoThis(site, 'EDIT_SITE_INFORMATION')}">
 												<div role="tabpanel" class="tab-pane form-horizontal" id="roles"
@@ -372,7 +380,7 @@ ${portal.toolkit()}
 										                </c:forEach>
 							                		</tbody>
 							                	</table>
-								            </ul>
+											</ul>
 								        </div>
 
 							        </c:if>

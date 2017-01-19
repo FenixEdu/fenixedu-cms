@@ -80,7 +80,7 @@ ${portal.toolkit()}
                         <span class="badge">${category.postsSet.size()}</span>
                         <div class="btn-group pull-right">
                             <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="glyphicon glyphicon-option-vertical"></span>
+                                <span class="carret"></span>
                             </button>
                             <ul class="dropdown-menu">
                                 <c:if test="${permissions:canDoThis(site, 'EDIT_CATEGORY')}">
