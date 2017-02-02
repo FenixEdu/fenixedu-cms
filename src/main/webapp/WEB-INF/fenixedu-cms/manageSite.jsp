@@ -362,11 +362,12 @@ ${portal.toolkit()}
 									                            </td>
 									                            <td>
 									                            	<div class="pull-right">
-										                            	<button type="button" class="btn btn-default btn-xs add-user-btn" data-role-id="${role.externalId}" data-role-name="${role.name.content}" data-role-group='${role.getGroup().getExpression()}'>Add user</button>
-							                            	            <div class="dropdown">
-																			<a class="dropdown-toggle" href="#" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-																				<span class="glyphicon glyphicon-option-vertical"></span>
-																			</a>
+																		<div class="btn-group">
+																			<button type="button" class="btn btn-default btn-xs add-user-btn" data-role-id="${role.externalId}" data-role-name="${role.name.content}" data-role-group='${role.getGroup().getExpression()}'>Add user</button>
+																			<button type="button" class="btn btn-default  btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+																				<span class="caret"></span>
+																				<span class="sr-only">Toggle Dropdown</span>
+																			</button>
 																			<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
 																				<li><a href="${pageContext.request.contextPath}/cms/sites/${site.slug}/roles/${role.externalId}/edit">View</a></li>
 																				<c:if test="${cmsSettings.canManageRoles()}">
@@ -499,7 +500,6 @@ ${portal.toolkit()}
 					                    You are about to delete the site '<c:out value="${site.name.content}" />'. You will also be deleting all content, including ${site.postSet.size() } posts. There is no way to rollback this opeartion. Are you sure?
 					                </div>
 					                <div class="modal-footer">
-
 					                    <button type="button" data-dismiss="modal" class="btn btn-default"><spring:message
 					                            code="action.cancel"/></button>
 					                    <button type="submit" class="btn btn-danger"><spring:message code="action.delete"/></button>
@@ -509,7 +509,7 @@ ${portal.toolkit()}
 					    </form>
 					</div>
 
-					<c:if test="${cmsSettings.canManageRoles()}">
+					<c:if test="${permissions:canDoThis(site, 'MANAGE_ROLES')}">
 						<div class="modal fade" id="delete-role-modal">
 						    <div class="modal-dialog">
 						      <div class="modal-content">
