@@ -28,6 +28,8 @@ import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.CMSComponent;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ComponentDescriptor;
+import org.fenixedu.cms.domain.component.StaticPost;
+import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -73,7 +75,14 @@ public class AdminComponents {
             page.addComponents(Component.forType(type));
         } else {
             JsonObject params = json.get("parameters").getAsJsonObject();
-            page.addComponents(descriptor.instantiate(params));
+            Component instance = descriptor.instantiate(params);
+            if (instance instanceof StaticPost) {
+                StaticPost staticPost = (StaticPost) instance;
+                if (staticPost.getPost().getSite() == null) {
+                    throw CmsDomainException.notFound();
+                }
+            }
+            page.addComponents(instance);
         }
     }
 

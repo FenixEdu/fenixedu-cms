@@ -80,7 +80,7 @@ public class PostResource extends BennuRestResource {
         if (!Authenticate.getUser().equals(post.getCreatedBy())) {
             ensureCanDoThis(post.getSite(), EDIT_POSTS, DELETE_OTHERS_POSTS);
         }
-        post.delete();
+        post.archive();
         return Response.ok().build();
     }
 

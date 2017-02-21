@@ -113,6 +113,19 @@ public class SiteActivity extends SiteActivity_Base {
         makeActivity(site,object);
     }
 
+    public static void recoveredPost(Post post, Site site, User user){
+        JsonObject object = new JsonObject();
+
+        object.addProperty("type","postRecovered");
+        object.addProperty("post", post.getExternalId());
+        object.add("postName", post.getName().json());
+        object.addProperty("pageSlug",(String) null);
+        object.addProperty("user", user.getUsername());
+        object.addProperty("userName", user.getProfile().getDisplayName());
+
+        makeActivity(site,object);
+    }
+
     public static void createdPage(Page page, User user) {
         JsonObject object = new JsonObject();
 
@@ -153,7 +166,18 @@ public class SiteActivity extends SiteActivity_Base {
         makeActivity(site,object);
     }
 
+    public static void recoveredPage(Page page, Site site, User user) {
+        JsonObject object = new JsonObject();
 
+        object.addProperty("type","pageRecovered");
+        object.addProperty("post", (String) null);
+        object.add("pageName", page.getName().json());
+        object.addProperty("pageSlug",(String) null);
+        object.addProperty("user", user.getUsername());
+        object.addProperty("userName", user.getProfile().getDisplayName());
+
+        makeActivity(site,object);
+    }
 
     public void delete() {
         setPrevious(null);

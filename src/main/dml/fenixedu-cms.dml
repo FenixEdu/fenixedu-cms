@@ -436,9 +436,23 @@ relation SitePost{
     }
 }
 
+relation SiteArchivedPosts{
+    Site playsRole archivedSite;
+    Post playsRole archivedPosts {
+        multiplicity *;
+    }
+}
+
 relation SitePage {
     protected Site playsRole site;
     Page playsRole pages {
+        multiplicity *;
+    }
+}
+
+relation SiteArchivedPage {
+    Site playsRole archivedSite;
+    Page playsRole archivedPages {
         multiplicity *;
     }
 }

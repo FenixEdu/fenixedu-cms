@@ -50,6 +50,8 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     public static final String SIGNAL_CREATED = "fenixedu.cms.page.created";
     public static final String SIGNAL_DELETED = "fenixedu.cms.page.deleted";
     public static final String SIGNAL_EDITED = "fenixedu.cms.page.edited";
+    public static final String SIGNAL_ARCHIVED = "fenixedu.cms.page.archived";
+    public static final String SIGNAL_RECOVERED = "fenixedu.cms.page.recovered";
 
     public static final Comparator<Page> CREATION_DATE_COMPARATOR = Comparator.comparing(Page::getCreationDate).reversed();
     public static Comparator<Page> PAGE_NAME_COMPARATOR = Comparator.comparing(Page::getName);
@@ -107,8 +109,10 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     @Override
     public boolean isValidSlug(String slug) {
         try {
-            Page p = getSite().pageForSlug(slug);
-            return p== this;
+            return this == getSite().getArchivedPagesSet().stream()
+                    .filter(page -> page.getSlug() != null)
+                    .filter(page -> page.getSlug().equals(slug))
+                    .findAny().orElse(getSite().pageForSlug(slug));
         } catch (CmsDomainException cmsDomainException){
             return true;
         }
@@ -149,10 +153,32 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
         deleteDomainObject();
     }
 
+    @Atomic
+    public void archive() {
+        setPublished(false);
+        getStaticPost().ifPresent(post -> post.setActive(false));
+        setArchivedSite(getSite());
+        setSite(null);
+
+
+        Signal.emit(SIGNAL_ARCHIVED, this.getOid());
+    }
+
+    @Atomic
+    public void recover() {
+        setSite(getArchivedSite());
+        setArchivedSite(null);
+
+        Signal.emit(SIGNAL_RECOVERED, this.getOid());
+    }
+
     /**
      * @return the URL link for this page.
      */
     public String getAddress() {
+        if (getSite() == null) {
+            return null;
+        }
         return CoreConfiguration.getConfiguration().applicationUrl() + "/" + getSite().getBaseUrl() + "/" + getSlug();
     }
 

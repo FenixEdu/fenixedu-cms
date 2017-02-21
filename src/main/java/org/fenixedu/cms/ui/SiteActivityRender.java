@@ -55,11 +55,13 @@ public class SiteActivityRender {
         attachRenderer("postCreated", SiteActivityRender::postCreated);
         attachRenderer("postEdited",SiteActivityRender::postEdited);
         attachRenderer("postDeleted",SiteActivityRender::postDeleted);
+        attachRenderer("postRecovered",SiteActivityRender::postRecovered);
         attachRenderer("siteImported", SiteActivityRender::siteImported);
         attachRenderer("siteCloned", SiteActivityRender::siteCloned);
         attachRenderer("pageCreated", SiteActivityRender::pageCreated);
         attachRenderer("pageEdited",SiteActivityRender::pageEdited);
         attachRenderer("pageDeleted",SiteActivityRender::pageDeleted);
+        attachRenderer("pageRecovered",SiteActivityRender::pageRecovered);
     }
 
     private static void siteImported(SiteActivity activity, Writer writer) {
@@ -104,6 +106,12 @@ public class SiteActivityRender {
         write(writer, obj.get("user").getAsString(), "deleted", postName);
     }
 
+    private static void postRecovered(SiteActivity activity, Writer writer) {
+        JsonElement el = activity.getContent();
+        JsonObject obj = el.getAsJsonObject();
+        String postName = LocalizedString.fromJson(obj.get("postName")).getContent();
+        write(writer, obj.get("user").getAsString(), "recovered", postName);
+    }
 
     private static void pageCreated(SiteActivity activity, Writer writer) {
         JsonElement el = activity.getContent();
@@ -125,6 +133,13 @@ public class SiteActivityRender {
         JsonObject obj = el.getAsJsonObject();
         String postName = LocalizedString.fromJson(obj.get("pageName")).getContent();
         write(writer, obj.get("user").getAsString(), "deleted", postName);
+    }
+
+    private static void pageRecovered(SiteActivity activity, Writer writer) {
+        JsonElement el = activity.getContent();
+        JsonObject obj = el.getAsJsonObject();
+        String pageName = LocalizedString.fromJson(obj.get("pageName")).getContent();
+        write(writer, obj.get("user").getAsString(), "recovered", pageName);
     }
 
 

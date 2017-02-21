@@ -61,6 +61,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     public static final String SIGNAL_CREATED = "fenixedu.cms.post.created";
     public static final String SIGNAL_DELETED = "fenixedu.cms.post.deleted";
     public static final String SIGNAL_EDITED = "fenixedu.cms.post.edited";
+    public static final String SIGNAL_ARCHIVED = "fenixedu.cms.post.archived";
+    public static final String SIGNAL_RECOVERED = "fenixedu.cms.post.recovered";
 
 
     public static final Comparator<Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate).reversed();
@@ -118,7 +120,11 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
      */
     @Override
     public boolean isValidSlug(String slug) {
-        Post p = getSite().postForSlug(slug);
+        Post p = getSite().getArchivedPostsSet().stream()
+                .filter(post -> post.getSlug() != null)
+                .filter(post -> post.getSlug().equals(slug))
+                .findAny().orElse(getSite().postForSlug(slug));
+
         return p == null || p == this;
     }
 
@@ -129,6 +135,9 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         if (isStaticPost()) {
             return getStaticPage().get().getAddress();
         } else {
+            if (getSite() == null) {
+                return null;
+            }
             return Optional.ofNullable(getSite().getViewPostPage()).map(page -> page.getAddress() + "/" + getSlug()).orElse(null);
         }
     }
@@ -149,6 +158,23 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
 
         deleteDomainObject();
+    }
+
+    @Atomic
+    public void archive() {
+        setActive(false);
+        setArchivedSite(getSite());
+        setSite(null);
+
+        Signal.emit(SIGNAL_ARCHIVED, this.getOid());
+    }
+
+    @Atomic
+    public void recover() {
+        setSite(getArchivedSite());
+        setArchivedSite(null);
+
+        Signal.emit(SIGNAL_RECOVERED, this.getOid());
     }
 
     public boolean hasPublicationPeriod() {

@@ -210,6 +210,17 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
     }
 
     /**
+     * searches for an archived {@link Page} by slug on this {@link Site}.
+     *
+     * @param slug the slug of the {@link Page} wanted.
+     * @return the archived {@link Page} with the given slug if it exists on this site,
+     *         or null otherwise.
+     */
+    public Page archivedPageForSlug(String slug) {
+        return getArchivedPagesSet().stream().filter(post -> slug.equals(post.getSlug())).findAny().orElse(null);
+    }
+
+    /**
      * searches for a {@link Post} by slug on this {@link Site}.
      *
      * @param slug the slug of the {@link Post} wanted.
@@ -218,6 +229,17 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
      */
     public Post postForSlug(String slug) {
         return getPostSet().stream().filter(post -> slug.equals(post.getSlug())).findAny().orElse(null);
+    }
+
+    /**
+     * searches for an archived {@link Post} by slug on this {@link Site}.
+     *
+     * @param slug the slug of the archived {@link Post} wanted.
+     * @return the archived {@link Post} with the given slug if it exists on this site,
+     *         or null otherwise.
+     */
+    public Post archivedPostForSlug(String slug) {
+        return getArchivedPostsSet().stream().filter(post -> slug.equals(post.getSlug())).findAny().orElse(null);
     }
 
     /**
@@ -647,5 +669,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
         return getPostSet().stream().filter(p -> !p.isStaticPost()).sorted(Post.CREATION_DATE_COMPARATOR);
     }
 
-
+    public Stream<Post> getNonStaticArchivedPostsStream() {
+        return getArchivedPostsSet().stream().filter(p -> !p.isStaticPost()).sorted(Post.CREATION_DATE_COMPARATOR);
+    }
 }
