@@ -35,6 +35,8 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.Atomic;
 
 import java.util.*;
@@ -57,6 +59,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
     public static final Comparator<Post> CREATION_DATE_COMPARATOR = Comparator.comparing(Post::getCreationDate).reversed();
 
+    private static final Logger logger = LoggerFactory.getLogger(Post.class);
+    
     /**
      * The logged {@link User} creates a new Post.
      * @param site site
@@ -134,6 +138,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
 
     @Atomic
     public void delete() {
+        logger.info("Post " + getSlug()  + " - " + getExternalId() + " of Site " + getSite().getSlug() +
+                " deleted by user "+ Authenticate.getUser().getExternalId());
         Signal.emit(SIGNAL_DELETED, this.getOid());
 
         setCreatedBy(null);
@@ -145,8 +151,8 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         getComponentSet().stream().forEach(Component::delete);
         getCategoriesSet().stream().forEach(category -> category.removePosts(this));
         getRevisionsSet().stream().forEach(PostContentRevision::delete);
-
-
+    
+    
         deleteDomainObject();
     }
 
@@ -324,6 +330,10 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
         setLatestRevision(pcr);
 
         setModificationDate(new DateTime());
+    
+    
+        logger.info("New post revision " + getSlug()  + " - " + getExternalId() + " of Site " + getSite().getSlug() +
+                " created by user "+ Authenticate.getUser().getExternalId());
     }
 
     public LocalizedString getExcerpt() {
