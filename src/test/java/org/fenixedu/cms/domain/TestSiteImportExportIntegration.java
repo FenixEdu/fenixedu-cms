@@ -24,22 +24,27 @@ import static org.junit.Assert.*;
 
 @RunWith(FenixFrameworkRunner.class)
 public class TestSiteImportExportIntegration extends TestCMS {
+    
+    private static final String SLUG_CATEGORIES = "ImporterJsonCategories";
+    private static final String SLUG_PAGE = "ImporterJsonPage";
+    private static final String SLUG_EMPTY_SITE = "ImporterEmptySite";
+    private static final String SLUG_EMPTY_POST = "ImporterEmptyPost";
 
     @Test
     public void jsonImportEmptySite() {
-        User user = CmsTestUtils.createAuthenticatedUser("exportEmptySiteUser");
-        Site site = CmsTestUtils.createSite(user, "exportEmptySite");
+        User user = CmsTestUtils.createAuthenticatedUser(SLUG_EMPTY_SITE);
+        Site site = CmsTestUtils.createSite(user, SLUG_EMPTY_SITE);
         Site importedSite = exportAndImport(site);
         assertEqualSites(site, importedSite);
     }
 
     @Test
     public void jsonExportPost() {
-        User user = CmsTestUtils.createAuthenticatedUser("jsonExportEmptyPost");
-        Site site = CmsTestUtils.createSite(user, "jsonExportEmptyPost");
-        Post post = CmsTestUtils.createPost(site, "jsonExportEmptyPost");
-        PostContentRevision version = CmsTestUtils.createVersion(post, "jsonExportEmptyPostPostBody");
-        post.setLocation(CmsTestUtils.createLocalizedString("jsonExportEmptyPostLocation"));
+        User user = CmsTestUtils.createAuthenticatedUser(SLUG_EMPTY_POST);
+        Site site = CmsTestUtils.createSite(user, SLUG_EMPTY_POST);
+        Post post = CmsTestUtils.createPost(site, SLUG_EMPTY_POST);
+        PostContentRevision version = CmsTestUtils.createVersion(post, SLUG_EMPTY_POST+"_POST_BODY");
+        post.setLocation(CmsTestUtils.createLocalizedString(SLUG_EMPTY_POST+"localization"));
         post.setMetadata(new PostMetadata().with("firstKey", "my-test-value").with("secondKey", "secondTestValue"));
         post.setPublicationBegin(new DateTime());
         post.setPublicationEnd(null);
@@ -49,12 +54,12 @@ public class TestSiteImportExportIntegration extends TestCMS {
 
     @Test
     public void jsonCategories() {
-        User user = CmsTestUtils.createAuthenticatedUser("jsonCategories");
-        Site site = CmsTestUtils.createSite(user, "jsonCategories");
-        Post post = CmsTestUtils.createPost(site, "jsonCategories");
-        Category category1 = CmsTestUtils.createCategory(site, "jsonCategories1");
-        Category category2 = CmsTestUtils.createCategory(site, "jsonCategories2");
-        Category category3 = CmsTestUtils.createCategory(site, "jsonCategories3");
+        User user = CmsTestUtils.createAuthenticatedUser(SLUG_CATEGORIES);
+        Site site = CmsTestUtils.createSite(user, SLUG_CATEGORIES);
+        Post post = CmsTestUtils.createPost(site, SLUG_CATEGORIES);
+        Category category1 = CmsTestUtils.createCategory(site, SLUG_CATEGORIES +"1");
+        Category category2 = CmsTestUtils.createCategory(site, SLUG_CATEGORIES +"2");
+        Category category3 = CmsTestUtils.createCategory(site, SLUG_CATEGORIES +"3");
         category2.addComponents(new ListCategoryPosts(category2));
 
         category3.addComponents(new ListCategoryPosts(category3));
@@ -67,15 +72,15 @@ public class TestSiteImportExportIntegration extends TestCMS {
 
     @Test
     public void jsonPage() throws ServletException {
-        User user = CmsTestUtils.createAuthenticatedUser("jsonPage");
-        Site site = CmsTestUtils.createSite(user, "jsonPage");
-        Page page1 = CmsTestUtils.createPage(site, "jsonPage1");
-        Page page2 = CmsTestUtils.createPage(site, "jsonPage2");
-        Page page3 = CmsTestUtils.createPage(site, "jsonPage3");
-        page2.addComponents(new ListCategoryPosts(CmsTestUtils.createCategory(site, "jsonPage")));
-        page3.addComponents(new StaticPost(CmsTestUtils.createPost(site, "jsonPage")));
-        page3.addComponents(new StaticPost(CmsTestUtils.createPost(site, "jsonPage22")));
-        page3.addComponents(new ListCategoryPosts(CmsTestUtils.createCategory(site, "jsonPage22Cate")));
+        User user = CmsTestUtils.createAuthenticatedUser(SLUG_PAGE);
+        Site site = CmsTestUtils.createSite(user, SLUG_PAGE);
+        Page page1 = CmsTestUtils.createPage(site, SLUG_PAGE+"1");
+        Page page2 = CmsTestUtils.createPage(site, SLUG_PAGE+"2");
+        Page page3 = CmsTestUtils.createPage(site, SLUG_PAGE+"3");
+        page2.addComponents(new ListCategoryPosts(CmsTestUtils.createCategory(site, SLUG_PAGE)));
+        page3.addComponents(new StaticPost(CmsTestUtils.createPost(site, SLUG_PAGE)));
+        page3.addComponents(new StaticPost(CmsTestUtils.createPost(site, SLUG_PAGE+"22")));
+        page3.addComponents(new ListCategoryPosts(CmsTestUtils.createCategory(site, SLUG_PAGE+"22Cate")));
         page3.addComponents(Component.forType(ViewPost.class));
 
         Site importedSite = exportAndImport(site);

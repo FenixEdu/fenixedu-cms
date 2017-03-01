@@ -259,9 +259,6 @@ public class TestSiteExporter extends TestCMS {
             assertTrue(pageJson.has("canViewGroup"));
             assertEquals(Group.parse(pageJson.get("canViewGroup").getAsString()), page.getCanViewGroup());
 
-            assertFalse(pageJson.has("templateType"));
-  
-
             assertTrue(pageJson.has("published"));
             assertEquals(pageJson.get("published").getAsBoolean(), page.getPublished());
 

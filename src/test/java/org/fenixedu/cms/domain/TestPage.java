@@ -35,6 +35,7 @@ public class TestPage extends TestCMS {
         assertTrue(equalDates(dt, page.getCreationDate()));
         assertTrue(equalDates(dt, page.getModificationDate()));
         assertEquals(user, page.getCreatedBy());
+        
         assertEquals(site, page.getSite());
         assertTrue(page.getComponentsSet().isEmpty());
         assertTrue(page.getMenuItemsSet().isEmpty());
@@ -47,10 +48,10 @@ public class TestPage extends TestCMS {
 
     @Test
     public void checkValidSlug() {
-        User user = CmsTestUtils.createAuthenticatedUser("checkValidSlug");
-        Site site = CmsTestUtils.createSite(user, "checkValidSlug");
-        Page page1 = CmsTestUtils.createPage(site, "checkValidSlug1");
-        Page page2 = CmsTestUtils.createPage(site, "checkValidSlug2");
+        User user = CmsTestUtils.createAuthenticatedUser("checkPageValidSlug");
+        Site site = CmsTestUtils.createSite(user, "checkPageValidSlug");
+        Page page1 = CmsTestUtils.createPage(site, "checkPageValidSlug1");
+        Page page2 = CmsTestUtils.createPage(site, "checkPageValidSlug2");
 
         assertTrue(page1.isValidSlug("xpto"));
         assertTrue(page1.isValidSlug(page1.getSlug()));

@@ -3,6 +3,7 @@ package org.fenixedu.cms.api;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.groups.ManualGroupRegister;
 import org.fenixedu.bennu.core.json.JsonBuilder;
 import org.fenixedu.bennu.core.rest.DomainExceptionMapper;
@@ -57,6 +58,7 @@ public class TestCmsApi extends JerseyTest {
     @BeforeClass
     @Atomic(mode = TxMode.WRITE)
     public static void initObjects() {
+        Bennu.getInstance();
         ensure();
     }
 

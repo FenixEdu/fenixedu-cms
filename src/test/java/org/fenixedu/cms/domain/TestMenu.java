@@ -39,10 +39,10 @@ public class TestMenu extends TestCMS {
 
     @Test
     public void checkValidSlug() {
-        User user = CmsTestUtils.createAuthenticatedUser("checkValidSlug");
-        Site site = CmsTestUtils.createSite(user, "checkValidSlug");
-        Menu menu1 = CmsTestUtils.createMenu(site, "checkValidSlug1");
-        Menu menu2 = CmsTestUtils.createMenu(site, "checkValidSlug2");
+        User user = CmsTestUtils.createAuthenticatedUser("checkMenuValidSlug");
+        Site site = CmsTestUtils.createSite(user, "checkMenuValidSlug");
+        Menu menu1 = CmsTestUtils.createMenu(site, "checkMenuValidSlug1");
+        Menu menu2 = CmsTestUtils.createMenu(site, "checkMenuValidSlug2");
 
         assertTrue(menu1.isValidSlug("xpto"));
         assertTrue(menu1.isValidSlug(menu1.getSlug()));

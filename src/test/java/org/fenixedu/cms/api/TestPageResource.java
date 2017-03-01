@@ -56,7 +56,7 @@ public class TestPageResource extends TestCmsApi {
         assertTrue("response site should have an modificationDate field", jsonResponse.has("modificationDate"));
         assertEquals("modificationDate response should be equal to expected", page.getModificationDate().toString(), jsonResponse
                 .get("modificationDate").getAsString());
-
+    
         assertTrue("response post should have a published field", jsonResponse.has("published"));
         assertEquals("published response should be equal to expected published", false, jsonResponse.get("published")
                 .getAsBoolean());

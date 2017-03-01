@@ -68,8 +68,10 @@ public class TestSiteResource extends TestCmsApi {
     @Test
     public void listUserSingleSites() {
         // prepare
+
         User user = CmsTestUtils.createAuthenticatedUser("listUserSingleSites");
         CmsTestUtils.setUserAsManager(user);
+        int sitesCount = new JsonParser().parse(getSitesTarget().request().get(String.class)).getAsJsonArray().size();
         
         Site site = CmsTestUtils.createSite(user, "listUserSingleSites");
 
@@ -81,9 +83,9 @@ public class TestSiteResource extends TestCmsApi {
         assertTrue("user site admin should get site in response", !response.isEmpty() && !response.equals(EMPTY_RESPONSE));
 
         JsonArray jsonResponseArray = new JsonParser().parse(response).getAsJsonArray();
-        assertTrue("response should contain only a single site", jsonResponseArray.size() == 1);
+        assertTrue("response should contain only a single site", jsonResponseArray.size() - sitesCount == 1);
 
-        JsonObject jsonResponse = jsonResponseArray.get(0).getAsJsonObject();
+        JsonObject jsonResponse = jsonResponseArray.get(jsonResponseArray.size()-1).getAsJsonObject();
 
         JsonElement siteJson = removeNullKeys(new SiteAdapter().view(site, new JsonBuilder()));
 
