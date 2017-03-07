@@ -512,6 +512,10 @@ ${portal.angularToolkit()}
     var createPostFilesUrl = '${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/files';
 
     angular.module('editPostApp', ['bennuToolkit', 'fancyTreeDirective', 'ngFileUpload'])
+        .config(['$httpProvider', function($httpProvider) {
+            $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
+            $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
+        }])
         .controller('PostCtrl', ['$scope', '$http','Upload', '$timeout', function($scope, $http, Upload, $timeout){
 
 

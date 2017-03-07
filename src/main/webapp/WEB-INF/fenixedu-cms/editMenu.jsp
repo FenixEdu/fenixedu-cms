@@ -141,6 +141,10 @@ ${portal.angularToolkit()}
     var saveMenuUrl = context + "/edit";
 
     angular.module('menuApp', ['bennuToolkit', 'fancyTreeDirective'])
+        .config(['$httpProvider', function($httpProvider) {
+            $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
+            $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
+        }])
         .controller('MenuCtrl', ['$scope', '$http', function($scope, $http){
             var self = this;
             $http.get(menuDataUrl).success(function(data) {
