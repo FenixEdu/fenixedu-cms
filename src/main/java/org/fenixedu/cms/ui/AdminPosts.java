@@ -23,6 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.*;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
@@ -36,6 +37,8 @@ import org.springframework.web.servlet.view.RedirectView;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -179,10 +182,28 @@ public class AdminPosts {
     public @ResponseBody String addFile(@PathVariable String slugSite, @PathVariable String slugPost,
                     @RequestParam String name, @RequestParam boolean embedded, @RequestParam MultipartFile file) {
         Site s = Site.fromSlug(slugSite);
-        Post p = s.postForSlug(slugPost);
-        ensureCanEditPost(p);
-        PostFile postFile = service.createFile(p, name, embedded, p.getCanViewGroup(), file);
-        return service.serializePostFile(postFile).toString();
+        Post post = s.postForSlug(slugPost);
+        ensureCanEditPost(post);
+    
+        File tmp;
+    
+        try {
+            tmp = File.createTempFile("cms-","-post");
+        } catch(IOException e) {
+            throw new RuntimeException("Error creating Post File for post " + post, e);
+        }
+    
+        try {
+            file.transferTo(tmp);
+            PostFile postFile = service.createFile(post, name, embedded, post.getCanViewGroup(), tmp);
+            return service.serializePostFile(postFile).toString();
+    
+        } catch (IOException e){
+            throw new RuntimeException("Error creating Post File for post " + post, e);
+        } finally {
+            tmp.delete();
+        }
+        
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/metadata", method = RequestMethod.GET)

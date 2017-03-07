@@ -188,6 +188,11 @@
             <version>${version.javax.ws.rs.javax.ws.rs.api}</version>
         </dependency>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${version.commons-io.commons-io}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
             <version>${version.org.apache.tika.tika-core}</version>

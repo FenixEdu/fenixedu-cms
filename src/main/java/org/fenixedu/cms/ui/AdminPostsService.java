@@ -38,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -64,13 +65,10 @@ public class AdminPostsService {
     }
 
     @Atomic(mode = Atomic.TxMode.WRITE)
-    public PostFile createFile(Post post, String name, Boolean embedded, Group canViewGroup, MultipartFile file) {
-	try {
-	    GroupBasedFile groupBasedFile = new GroupBasedFile(name, name, file.getBytes(), canViewGroup);
-	    return new PostFile(post, groupBasedFile, embedded, post.getFilesSet().size());
-	} catch(IOException e) {
-	    throw new RuntimeException("Error creating Post File for post " + post, e);
-	}
+    public PostFile createFile(Post post, String name, Boolean embedded, Group canViewGroup, File file) throws IOException {
+
+			GroupBasedFile groupBasedFile = new GroupBasedFile(name, name, file, canViewGroup);
+			return new PostFile(post, groupBasedFile, embedded, post.getFilesSet().size());
     }
 
     @Atomic(mode = Atomic.TxMode.WRITE)

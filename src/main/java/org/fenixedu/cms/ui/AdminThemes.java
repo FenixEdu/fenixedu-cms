@@ -490,7 +490,7 @@ public class AdminThemes {
         return new RedirectView("/cms/themes/" + type + "/see");
     }
 
-    @Atomic
+    @Atomic(mode = Atomic.TxMode.WRITE)
     private void editTheme(CMSTheme theme, String name, String description, CMSTheme extTheme, MultipartFile thumbnail,
             String defaultTheme) {
         theme.setName(name);
@@ -500,6 +500,8 @@ public class AdminThemes {
         if (extTheme != null) {
             theme.setExtended(extTheme);
         }
+        Signal.emit(CMSTheme.SIGNAL_EDITED, new DomainObjectEvent<>(theme));
+    
         if (!thumbnail.isEmpty()) {
             GroupBasedFile old = theme.getPreviewImage();
             if (old != null) {
@@ -507,16 +509,23 @@ public class AdminThemes {
                 old.delete();
             }
             GroupBasedFile newthumbnail = null;
+            File tmpFile;
             try {
-                newthumbnail = new GroupBasedFile(thumbnail.getOriginalFilename(), thumbnail.getOriginalFilename(),
-                        thumbnail.getBytes(), Group.anyone());
-            } catch (IOException e) {
+                tmpFile = File.createTempFile("cms", "thumbnail");
+                try{
+                    thumbnail.transferTo(tmpFile);
+                    newthumbnail = new GroupBasedFile(thumbnail.getOriginalFilename(), thumbnail.getOriginalFilename(),
+                            tmpFile,Group.anyone());
+                } finally {
+                    tmpFile.delete();
+        
+                }
+            } catch (IOException e ) {
                 logger.error("Can't create thumbnail file", e);
             }
             theme.setPreviewImage(newthumbnail);
             theme.setPreviewImagePath(null);
         }
-        Signal.emit(CMSTheme.SIGNAL_EDITED, new DomainObjectEvent<>(theme));
     }
 
     @RequestMapping(value = "{type}/deleteDir", method = RequestMethod.POST)

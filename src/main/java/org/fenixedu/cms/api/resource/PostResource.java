@@ -40,6 +40,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
@@ -112,7 +115,7 @@ public class PostResource extends BennuRestResource {
     public void createFileFromRequest(Post post, Part part) throws IOException {
         AdminPosts.ensureCanEditPost(post);
         GroupBasedFile groupBasedFile = new GroupBasedFile(part.getName(), part.getName(),
-                ByteStreams.toByteArray(part.getInputStream()), Group.logged());
+                part.getInputStream(), Group.logged());
 
         PostFile postFile = new PostFile(post, groupBasedFile, false, 0);
         post.addFiles(postFile);
