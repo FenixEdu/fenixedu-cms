@@ -27,14 +27,16 @@ ${portal.toolkit()}
     <h2><a href="${pageContext.request.contextPath}/cms/permissions"><small>Manage Role</small></a></h2>
 </div>
 
-<div row="row">
+<div class="row">
   <div class="col-sm-6">
-    <a href="#" data-toggle="modal" data-target="#edit-modal" class="btn btn-default btn-primary">
-      <span class="glyphicon glyphicon-edit"></span>&nbsp;Edit
-    </a>
-    <a href="#" data-toggle="modal" data-target="#connect-site-modal" class="btn btn-default">
-      <span class="glyphicon glyphicon-plus"></span>&nbsp;Site
-    </a>
+      <p>
+        <a href="#" data-toggle="modal" data-target="#edit-modal" class="btn btn-default btn-primary">
+          <span class="glyphicon glyphicon-edit"></span>&nbsp;Edit
+        </a>
+        <a href="#" data-toggle="modal" data-target="#connect-site-modal" class="btn btn-default">
+          <span class="glyphicon glyphicon-plus"></span>&nbsp;Site
+        </a>
+      </p>
   </div>
 
   <div class="col-sm-6">
@@ -71,8 +73,7 @@ ${portal.toolkit()}
         <div class="panel-body">
           <dl class="dl-horizontal">
               <dt>Description</dt>
-              <dd>${roleTemplate.description.content}</dd>
-
+              <dd>${roleTemplate.name.content}</dd>
               <dt>Number of Sites</dt>
               <dd>${roleTemplate.numSites}</dd>
           </dl>
@@ -119,7 +120,7 @@ ${portal.toolkit()}
         <h4 class="modal-title">Are you sure?</h4>
       </div>
       <div class="modal-body">
-        <p>You are about to delete the role '<c:out value="${roleTemplate.description.content}" />'. There is no way to rollback this operation. Are you sure? </p>
+        <p>You are about to delete the role '<c:out value="${roleTemplate.name.content}" />'. There is no way to rollback this operation. Are you sure? </p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
@@ -133,7 +134,7 @@ ${portal.toolkit()}
 <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form method="POST" action="${pageContext.request.contextPath}/cms/permissions/${roleTemplate.externalId}/edit">
+            <form class="form-horizontal" method="POST" action="${pageContext.request.contextPath}/cms/permissions/${roleTemplate.externalId}/edit">
                 ${csrf.field()}
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><spanclass="sr-only"></span></button>
@@ -146,7 +147,8 @@ ${portal.toolkit()}
                     <div class="form-group" id="role-description">
                         <label class="col-sm-2 control-label">Description</label>
                         <div class="col-sm-10">
-                            <input bennu-localized-string required-any name="description" placeholder="Enter a description for this role template." value='${roleTemplate.description.json()}'>
+                            <input  class="form-control"  bennu-localized-string required-any name="description"
+                                    placeholder="Enter a description for this role template." value='${roleTemplate.name.json()}'>
                         </div>
                     </div>
 
@@ -154,17 +156,21 @@ ${portal.toolkit()}
 
 
                     <c:forEach var="permission" items="${allPermissions}">
-                        <div class="form-group permissions-inputs">
-                            <div class="col-sm-12">
-                                <div class="checkbox">
+                    <div class="form-group permissions-inputs">
+                        <div class="col-sm-10 col-sm-offset-2">
+                            <div class="checkbox-inline">
+                                <label>
                                     <input type="checkbox" data-permission-name="${permission.name()}" ${roleTemplate.permissions.get().contains(permission) ? 'checked' : ''}/>
-                                    <label class="control-label">${permission.localizedName.content}</label>
-                                </div>
+                                    ${permission.localizedName.content}
+                                    <small class="help-block"> ${permission.localizedDescription.content}</small>
+                                </label>
                             </div>
-                            <p class="help-block">${permission.localizedDescription.content}</p>
                         </div>
+                    </div>
+
                     </c:forEach>
 
+                </div>
 
                 </div>
 

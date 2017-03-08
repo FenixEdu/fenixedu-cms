@@ -18,19 +18,14 @@
  */
 package org.fenixedu.cms.ui;
 
-import static java.util.stream.Collectors.toList;
-import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.ui.SearchUtils.searchPages;
+import pt.ist.fenixframework.FenixFramework;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
 import org.fenixedu.cms.domain.Post;
@@ -55,7 +50,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import pt.ist.fenixframework.FenixFramework;
+import static java.util.stream.Collectors.toList;
+import static org.fenixedu.cms.domain.PermissionEvaluation.canDoThis;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.ui.SearchUtils.searchPages;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/pages")

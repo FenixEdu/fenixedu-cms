@@ -243,7 +243,12 @@ ${portal.toolkit()}
 
 <script type="text/javascript">
 
-    angular.module('componentsApp', []).controller('ComponentController', ['$scope', '$http', function ($scope, $http) {
+    angular.module('componentsApp', [])
+        .config(['$httpProvider', function($httpProvider) {
+            $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
+            $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
+        }])
+        .controller('ComponentController', ['$scope', '$http', function ($scope, $http) {
         $scope.components = ${availableComponents};
         $scope.installStateless = function (component) {
             $http.post('${pageContext.request.contextPath}/cms/components/${site.slug}/${page.slug}/create', {type: component.type}).

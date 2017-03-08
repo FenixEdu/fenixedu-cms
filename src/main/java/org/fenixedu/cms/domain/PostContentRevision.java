@@ -18,8 +18,9 @@
  */
 package org.fenixedu.cms.domain;
 
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
+
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 
 import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 

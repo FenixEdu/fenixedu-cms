@@ -18,9 +18,9 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.EnumSet;
-
 import org.fenixedu.bennu.core.domain.Bennu;
+
+import java.util.EnumSet;
 
 public class RoleTemplate extends RoleTemplate_Base {
 

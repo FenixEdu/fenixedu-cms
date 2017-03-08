@@ -18,19 +18,11 @@
  */
 package org.fenixedu.cms.ui;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
-import org.fenixedu.cms.domain.CmsSettings;
-import org.fenixedu.cms.domain.PermissionsArray;
-import org.fenixedu.cms.domain.Role;
-import org.fenixedu.cms.domain.RoleTemplate;
-import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.*;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,11 +30,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
-
 import pt.ist.fenixframework.FenixFramework;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/permissions")
@@ -61,7 +55,7 @@ public class AdminPermissions {
         CmsSettings.getInstance().ensureCanManageRoles();
         FenixFramework.atomic(() -> {
             RoleTemplate template = new RoleTemplate();
-            template.setDescription(description);
+            template.setName(description);
             template.setPermissions(PermissionsArray.fromJson(toJsonArray(permissions)));
         });
         return new RedirectView("/cms/permissions", true);
@@ -93,7 +87,7 @@ public class AdminPermissions {
         FenixFramework.atomic(() -> {
             CmsSettings.getInstance().ensureCanManageRoles();
             RoleTemplate template = FenixFramework.getDomainObject(roleTemplateId);
-            template.setDescription(description);
+            template.setName(description);
             template.setPermissions(PermissionsArray.fromJson(toJsonArray(permissions)));
         });
         return new RedirectView("/cms/permissions/" + roleTemplateId + "/edit", true);

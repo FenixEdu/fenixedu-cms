@@ -18,19 +18,18 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class PostMetadata implements Serializable, Wrappable {
 

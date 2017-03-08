@@ -18,9 +18,9 @@
  */
 package org.fenixedu.cms.domain.wraps;
 
-import java.util.Optional;
-
 import org.fenixedu.bennu.core.domain.User;
+
+import java.util.Optional;
 
 /**
  * Created by nurv on 09/09/14.

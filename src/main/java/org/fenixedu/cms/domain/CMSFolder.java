@@ -19,12 +19,11 @@
 package org.fenixedu.cms.domain;
 
 import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.bennu.portal.domain.MenuContainer;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.commons.i18n.LocalizedString;
-
 import pt.ist.fenixframework.Atomic;
 
 public class CMSFolder extends CMSFolder_Base {

@@ -18,12 +18,12 @@
  */
 package org.fenixedu.cms.domain.component;
 
-import java.util.stream.Collectors;
-
 import org.fenixedu.cms.domain.Category;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.rendering.TemplateContext;
+
+import java.util.stream.Collectors;
 
 /**
  * Component that lists all the {@link Category} of a given site.

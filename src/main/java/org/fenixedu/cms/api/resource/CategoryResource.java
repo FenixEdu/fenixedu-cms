@@ -18,24 +18,17 @@
  */
 package org.fenixedu.cms.api.resource;
 
-import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.DELETE_CATEGORY;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.EDIT_CATEGORY;
-import static org.fenixedu.cms.domain.PermissionsArray.Permission.LIST_CATEGORIES;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import com.google.gson.JsonElement;
 import org.fenixedu.bennu.core.rest.BennuRestResource;
 import org.fenixedu.cms.api.json.CategoryAdapter;
 import org.fenixedu.cms.domain.Category;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.*;
 
 @Path("/cms/categories")
 public class CategoryResource extends BennuRestResource {
@@ -45,7 +38,7 @@ public class CategoryResource extends BennuRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String getCategory(@PathParam("oid") Category category) {
+    public JsonElement getCategory(@PathParam("oid") Category category) {
         return view(category, CategoryAdapter.class);
     }
 
@@ -53,11 +46,11 @@ public class CategoryResource extends BennuRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{oid}")
-    public String updateCategory(@PathParam("oid") Category category, String json) {
+    public JsonElement updateCategory(@PathParam("oid") Category category, JsonElement json) {
         return updateCategoryFromJson(category, json);
     }
 
-    private String updateCategoryFromJson(Category category, String json) {
+    private JsonElement updateCategoryFromJson(Category category, JsonElement json) {
         return view(update(json, category, CategoryAdapter.class));
     }
 

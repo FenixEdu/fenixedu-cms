@@ -167,7 +167,6 @@ ${portal.angularToolkit()}
 <script src="${pageContext.request.contextPath}/bennu-admin/fancytree/jquery-ui.min.js"></script>
 <link href="${pageContext.request.contextPath}/static/css/skin-awesome/ui.fancytree.css" rel="stylesheet" type="text/css">
 <script src="${pageContext.request.contextPath}/static/js/jquery.fancytree-all.js" type="text/javascript"></script>
-<script src="${pageContext.request.contextPath}/static/js/bennu-angular.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/jquery.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/js/fancytree-directive.js" type="text/javascript"></script>
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload-shim.js" type="text/javascript" charset="utf-8"></script>
@@ -513,6 +512,10 @@ ${portal.angularToolkit()}
     var createPostFilesUrl = '${pageContext.request.contextPath}/cms/posts/${site.slug}/${post.slug}/files';
 
     angular.module('editPostApp', ['bennuToolkit', 'fancyTreeDirective', 'ngFileUpload'])
+        .config(['$httpProvider', function($httpProvider) {
+            $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
+            $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
+        }])
         .controller('PostCtrl', ['$scope', '$http','Upload', '$timeout', function($scope, $http, Upload, $timeout){
 
 

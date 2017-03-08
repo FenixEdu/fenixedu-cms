@@ -49,6 +49,18 @@ class Site{
   public SiteAnalytics analytics;
 }
 
+class SiteBuilder {
+   String slug;
+   boolean published;
+   boolean embedded;
+}
+
+class SystemSiteBuilder extends SiteBuilder {
+}
+
+class BlogSiteBuilder extends SystemSiteBuilder {
+}
+
 public class PersistentSiteViewersGroup extends .org.fenixedu.bennu.core.domain.groups.PersistentGroup;
 
 public class CMSFolder {
@@ -184,6 +196,27 @@ relation SiteCMSTheme{
   }
 }
 
+
+relation SiteBuilderSite {
+    public Site playsRole site {
+        multiplicity 0..*;
+    }
+    public SiteBuilder playsRole builder {
+        multiplicity 0..1;
+    }
+}
+
+
+
+relation SiteBuilderCMSTheme {
+    public CMSTheme playsRole theme {
+        multiplicity 0..1;
+    }
+    public SiteBuilder playsRole builders {
+        multiplicity 0..*;
+    }
+}
+
 relation DefaultPage{
   public CMSTemplate playsRole defaultTemplate{
     multiplicity 0..1;
@@ -280,6 +313,15 @@ relation CMSThemeBennu{
   CMSTheme playsRole CMSThemes{
     multiplicity *;
   }
+}
+
+relation SiteBuilderBennu {
+    .org.fenixedu.bennu.core.domain.Bennu playsRole bennu{
+        multiplicity 1..1;
+    }
+    public SiteBuilder playsRole siteBuilders {
+        multiplicity 0..*;
+    }
 }
 
 relation CMSTemplateCMSTheme{
@@ -394,6 +436,16 @@ relation CategorySite{
     }
 }
 
+relation SiteBuilderCategory {
+    public Category playsRole categories {
+        multiplicity 0..*;
+    }
+    protected SiteBuilder playsRole builders {
+        multiplicity 0..*;
+    }
+}
+
+
 relation MenuSite{
     protected Site playsRole site;
     Menu playsRole menus {
@@ -491,6 +543,15 @@ relation FolderHasSites {
     public CMSFolder playsRole folder;
     public Site playsRole site {
         multiplicity *;
+    }
+}
+
+relation SiteBuilderCMSFolder {
+    public CMSFolder playsRole folder {
+        multiplicity 0..1;
+    }
+    public SiteBuilder playsRole builders {
+        multiplicity 0..*;
     }
 }
 
@@ -642,18 +703,16 @@ relation PreviousActivity{
  * ################################
  */
 
-class Role {
-  LocalizedString name;
-}
+class Role { }
 
 class RoleTemplate {
-  LocalizedString description;
+  LocalizedString name;
   PermissionsArray permissions;
 }
 
 relation RoleHasTemplate {
   Role playsRole roles {
-    multiplicity 0..*;
+    multiplicity *;
   }
   RoleTemplate playsRole roleTemplate{
     multiplicity 1..1;
@@ -662,27 +721,65 @@ relation RoleHasTemplate {
 
 relation SiteHasRoles {
   Role playsRole roles {
-    multiplicity 0..*;
+    multiplicity *;
   }
   Site playsRole site {
     multiplicity 1..1;
   }
 }
 
+relation SiteBuilderDefaultViewGroup {
+    protected SiteBuilder playsRole siteBuilderViewGroup {
+        multiplicity *;
+    }
+
+    protected .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole viewGroup {
+        multiplicity 1..1;
+    }
+}
+
+relation SiteBuilderHasRoleTemplates {
+    RoleTemplate playsRole roleTemplate {
+        multiplicity 0..*;
+    }
+    SiteBuilder playsRole siteBuilder {
+        multiplicity 0..*;
+    }
+}
+
+relation SystemSiteBuilderBuilderHasDefaultRoleTemplates {
+    RoleTemplate playsRole defaultRoleTemplate {
+        multiplicity 0..1;
+    }
+    protected SystemSiteBuilder playsRole defaultSiteBuilder {
+        multiplicity 0..*;
+    }
+}
+
+relation SiteHasDefaultRoleTemplates {
+    RoleTemplate playsRole defaultRoleTemplate {
+        multiplicity 0..1;
+    }
+    Site playsRole site {
+        multiplicity 0..*;
+    }
+}
+
+
 relation RoleTemplateHasRoot {
   .org.fenixedu.bennu.core.domain.Bennu playsRole bennu {
     multiplicity 1..1;
   }
   RoleTemplate playsRole roleTemplates {
-    multiplicity 0..*;
+    multiplicity *;
   }
 }
 
 relation RoleHasUserGroup {
   Role playsRole role {
-    multiplicity 0..*;
+    multiplicity *;
   }
-  .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole group {
+  protected .org.fenixedu.bennu.core.domain.groups.PersistentGroup playsRole persistentGroup {
     multiplicity 1..1;
   }
 }

@@ -94,7 +94,7 @@ ${portal.toolkit()}
                         </div>
                         <div class="btn-group pull-right">
                             <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="glyphicon glyphicon-option-vertical"></span>
+								<span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
                                 <c:if test="${permissions:canDoThis(site, 'EDIT_PAGE')}">

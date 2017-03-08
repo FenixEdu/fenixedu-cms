@@ -26,8 +26,8 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 
 public class CmsSettings extends CmsSettings_Base {
 
-    public CmsSettings() {
-        PersistentDynamicGroup managers = (PersistentDynamicGroup) Group.parse("#managers").toPersistentGroup();
+    private CmsSettings() {
+        PersistentDynamicGroup managers = Group.managers().toPersistentGroup();
         setFoldersManagers(managers);
         setRolesManagers(managers);
         setSettingsManagers(managers);
@@ -50,8 +50,8 @@ public class CmsSettings extends CmsSettings_Base {
         return getThemesManagers().isMember(Authenticate.getUser());
     }
 
-    public boolean canManageGloabalPermissions() {
-        return Group.parse("#managers").isMember(Authenticate.getUser());
+    public boolean canManageGlobalPermissions() {
+        return Group.managers().isMember(Authenticate.getUser());
     }
 
     public void ensureCanManageFolders() {
@@ -79,13 +79,22 @@ public class CmsSettings extends CmsSettings_Base {
     }
 
     public void ensureCanManageGlobalPermissions() {
-        if (!canManageGloabalPermissions()) {
+        if (!canManageGlobalPermissions()) {
             throw CmsDomainException.forbiden();
         }
     }
 
     public static CmsSettings getInstance() {
+        if(Bennu.getInstance().getCmsSettings()==null){
+            init();
+        }
+        
         return Bennu.getInstance().getCmsSettings();
     }
-
+    
+    public static void init() {
+        if(Bennu.getInstance().getCmsSettings()==null){
+            Bennu.getInstance().setCmsSettings(new CmsSettings());
+        }
+    }
 }

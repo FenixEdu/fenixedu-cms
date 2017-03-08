@@ -34,7 +34,7 @@ ${portal.toolkit()}
         <button type="button" data-toggle="modal" data-target="#edit-modal" class="btn btn-primary">
             <i class="glyphicon glyphicon-edit"></i> Associate Users
         </button>
-        <c:if test="${cmsSettings.canManageGloabalPermissions()}">
+        <c:if test="${cmsSettings.canManageGlobalPermissions()}">
           <a class="btn btn-default" href="${pageContext.request.contextPath}/cms/permissions/${role.roleTemplate.externalId}/edit">Template</a>
         </c:if>
     </p>
@@ -77,7 +77,7 @@ ${portal.toolkit()}
           <dd><a href="${role.site.editUrl}">${role.site.name.content}</a></dd>
       		
           <dt>Number of users</dt>
-      		<dd>${role.group.members.size()}</dd>
+      		<dd>${role.group.members.count()}</dd>
         </dl>
       </div>
     </div>
@@ -130,7 +130,7 @@ ${portal.toolkit()}
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Members</label>
                     <div class="col-sm-10">
-                       <input bennu-group allow="nobody,custom" name="group" type="text" value='${role.getGroup().toGroup().getExpression()}'/>
+                       <input bennu-group allow="nobody,custom" name="group" type="text" value='${role.getGroup().getExpression()}'/>
                     </div>
                 </div>
             </div>

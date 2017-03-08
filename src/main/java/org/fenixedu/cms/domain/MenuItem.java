@@ -18,7 +18,20 @@
  */
 package org.fenixedu.cms.domain;
 
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
+import org.fenixedu.cms.domain.wraps.Wrap;
+import org.fenixedu.cms.domain.wraps.Wrappable;
+import org.fenixedu.cms.exceptions.CmsDomainException;
+import org.fenixedu.commons.i18n.LocalizedString;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,21 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
-import org.fenixedu.cms.domain.wraps.Wrap;
-import org.fenixedu.cms.domain.wraps.Wrappable;
-import org.fenixedu.cms.exceptions.CmsDomainException;
-import org.fenixedu.commons.i18n.LocalizedString;
-import org.joda.time.DateTime;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.consistencyPredicates.ConsistencyPredicate;
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * Models the items of a {@link Menu}
@@ -52,7 +51,9 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
     public static final String SIGNAL_CREATED = "fenixedu.cms.menuItem.created";
     public static final String SIGNAL_DELETED = "fenixedu.cms.menuItem.deleted";
     public static final String SIGNAL_EDITED = "fenixedu.cms.menuItem.edited";
-
+    
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(MenuItem.class);
+    
     /**
      * The logged {@link User} creates a new MenuItem.
      * @param menu menu
@@ -173,7 +174,9 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     @Atomic
     public void delete() {
-        Signal.emit(MenuItem.SIGNAL_CREATED, new DomainObjectEvent<>(this.getMenu()));
+        logger.info("Menu item " + getName()  + " - " + getExternalId() + " son of " + getParent().getName()+
+                " of site " + getMenu().getSite().getSlug() + " deleted by user "+ Authenticate.getUser().getExternalId());
+        Signal.emit(MenuItem.SIGNAL_DELETED, new DomainObjectEvent<>(this.getMenu()));
         List<MenuItem> items = Lists.newArrayList(getChildrenSet());
         removeFromParent();
         items.forEach(i -> remove(i));

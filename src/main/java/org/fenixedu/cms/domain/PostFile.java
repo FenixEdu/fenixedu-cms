@@ -18,15 +18,16 @@
  */
 package org.fenixedu.cms.domain;
 
-import java.util.Comparator;
-
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
-import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
+import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
 import org.fenixedu.cms.domain.wraps.Wrap;
 import org.fenixedu.cms.domain.wraps.Wrappable;
+
+import java.io.IOException;
+import java.util.Comparator;
 
 public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wrappable, Cloneable {
 
@@ -49,9 +50,15 @@ public class PostFile extends PostFile_Base implements Comparable<PostFile>, Wra
     @Override
     public PostFile clone(CloneCache cloneCache) {
         return cloneCache.getOrClone(this, obj -> {
-            GroupBasedFile fileClone = new GroupBasedFile(getFiles().getDisplayName(), getFiles().getFilename(),
-                    getFiles().getContent(), getFiles().getAccessGroup());
-            return new PostFile(getPost(), fileClone, getIsEmbedded(), getIndex());
+            
+            try {
+                GroupBasedFile fileClone  = new GroupBasedFile(getFiles().getDisplayName(), getFiles().getFilename(),
+                        getFiles().getStream(), getFiles().getAccessGroup());
+                return new PostFile(getPost(), fileClone, getIsEmbedded(), getIndex());
+            } catch (IOException e) {
+                throw new RuntimeException("Could not clone file " + getFiles().getDisplayName());
+            }
+            
         });
     }
 

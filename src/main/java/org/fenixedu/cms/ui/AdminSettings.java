@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
-
 import pt.ist.fenixframework.FenixFramework;
 
 @BennuSpringController(AdminSites.class)
@@ -39,7 +38,9 @@ public class AdminSettings {
 
   @RequestMapping
   public String view(Model model) {
+  
     CmsSettings.getInstance().ensureCanManageGlobalPermissions();
+    
     model.addAttribute("cmsSettings", Bennu.getInstance().getCmsSettings());
     return "fenixedu-cms/settings";
   }
@@ -47,9 +48,10 @@ public class AdminSettings {
   @RequestMapping(method = RequestMethod.POST)
   public RedirectView view(@RequestParam String themesManagers, @RequestParam String rolesManagers,
                      @RequestParam String foldersManagers, @RequestParam String settingsManagers) {
+    CmsSettings.getInstance().ensureCanManageGlobalPermissions();
+  
     FenixFramework.atomic(()->{
       CmsSettings settings = CmsSettings.getInstance().getInstance();
-      settings.ensureCanManageGlobalPermissions();
       settings.setThemesManagers(group(themesManagers));
       settings.setRolesManagers(group(rolesManagers));
       settings.setFoldersManagers(group(foldersManagers));

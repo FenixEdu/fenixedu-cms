@@ -18,10 +18,8 @@
  */
 package org.fenixedu.cms.ui;
 
-import static java.util.Optional.ofNullable;
-
+import com.google.common.base.Strings;
 import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.core.groups.UserGroup;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.*;
@@ -31,11 +29,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
-import com.google.common.base.Strings;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
+
+import java.util.Set;
+
+import static java.util.Optional.ofNullable;
 
 @BennuSpringController(AdminSites.class)
 @RequestMapping("/cms/sites/new")
@@ -44,43 +43,42 @@ public class CreateSite {
     @RequestMapping(method = RequestMethod.POST)
     public RedirectView create(@RequestParam LocalizedString name,
             @RequestParam(required = false, defaultValue = "{}") LocalizedString description,
-            @RequestParam(required = false) String template, @RequestParam(required = false) String theme,
+            @RequestParam(required = false) SiteBuilder builder, @RequestParam(required = false) String theme,
             @RequestParam(required = false, defaultValue = "false") boolean embedded,
+            @RequestParam(required = false) Set<String> roles,
             @RequestParam(required = false) String folder, RedirectAttributes redirectAttributes) {
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
             return new RedirectView("/cms/sites/new", true);
         } else {
-            createSite(Sanitization.strictSanitize(name), Sanitization.sanitize(name), false, template, folder, embedded, theme);
+            createSite(Sanitization.strictSanitize(name), Sanitization.sanitize(description), builder,false, folder, embedded,
+                theme, roles);
             return new RedirectView("/cms/sites/", true);
         }
     }
 
     @Atomic
-    private void createSite(LocalizedString name, LocalizedString description, boolean published, String template, String folder,
-            boolean embedded, String themeType) {
+    private void createSite(LocalizedString name, LocalizedString description, SiteBuilder builder, boolean published, String folder,
+            boolean embedded, String themeType, Set<String> roles) {
         CmsSettings.getInstance().ensureCanManageSettings();
-        Site site = new Site(name, description);
-
-        ofNullable(folder).filter(t -> !Strings.isNullOrEmpty(t)).map(FenixFramework::getDomainObject).map(CMSFolder.class::cast)
-                .ifPresent(site::setFolder);
-
-        site.setEmbedded(ofNullable(embedded).orElse(false));
-        site.updateMenuFunctionality();
-        site.setPublished(published);
-
-        Role adminRole = new Role(DefaultRoles.getInstance().getAdminRole(), site);
-        if (!Group.parse("#managers").isMember(Authenticate.getUser())) {
-            adminRole.setGroup(UserGroup.of(Authenticate.getUser()).toPersistentGroup());
+        if (builder !=null){
+            builder.create(name, description);
+        } else {
+            Site site = new Site(name, description);
+        
+            ofNullable(folder).filter(t -> !Strings.isNullOrEmpty(t)).map(FenixFramework::getDomainObject).map(CMSFolder.class::cast)
+                    .ifPresent(site::setFolder);
+    
+            site.setEmbedded(ofNullable(embedded).orElse(false));
+            site.updateMenuFunctionality();
+            site.setPublished(published);
+    
+            roles.forEach(role -> new Role(FenixFramework.getDomainObject(role), site));
+    
+            ofNullable(themeType).filter(t -> !Strings.isNullOrEmpty(t)).map(CMSTheme::forType).ifPresent(site::setTheme);
+    
+            SiteActivity.createdSite(site, Authenticate.getUser());
         }
-        new Role(DefaultRoles.getInstance().getAuthorRole(), site);
-        new Role(DefaultRoles.getInstance().getContributorRole(), site);
-        new Role(DefaultRoles.getInstance().getEditorRole(), site);
-
-        ofNullable(template).filter(t -> !Strings.isNullOrEmpty(t)).map(Site::templateFor).ifPresent(t -> t.makeIt(site));
-        ofNullable(themeType).filter(t -> !Strings.isNullOrEmpty(t)).map(CMSTheme::forType).ifPresent(site::setTheme);
-
-        SiteActivity.createdSite(site, Authenticate.getUser());
     }
 
 }

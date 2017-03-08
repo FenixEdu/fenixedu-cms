@@ -18,6 +18,17 @@
  */
 package org.fenixedu.cms.domain.component;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.component.ComponentContextProvider.EmptyProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.ClassUtils;
+import pt.ist.fenixframework.DomainObject;
+import pt.ist.fenixframework.FenixFramework;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -26,19 +37,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import org.fenixedu.cms.domain.Page;
-import org.fenixedu.cms.domain.Site;
-import org.fenixedu.cms.domain.component.ComponentContextProvider.EmptyProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.ClassUtils;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
-import pt.ist.fenixframework.DomainObject;
-import pt.ist.fenixframework.FenixFramework;
 
 /**
  * Describes a {@link Component}, containing all the necessary information to

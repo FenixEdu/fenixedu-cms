@@ -27,7 +27,7 @@ ${portal.toolkit()}
 <div class="page-header">
     <h1>Content Managment
           <c:if test="${cmsSettings.canManageSettings()}">
-          <button type="button" class="btn btn-link" data-target="#sites-settings" data-toggle="modal"><i class="glyphicon glyphicon-wrench"></i></button>
+          <button type="button" class="btn btn-link" data-target="#sites-settings" data-toggle="modal"><i class="glyphicon glyphicon-wrench"></i> Settings</button>
           </c:if>
           <small>
 
@@ -67,6 +67,7 @@ ${portal.toolkit()}
 
 <div class="row">
   <div class="col-sm-8">
+    <p>
     <c:if test="${cmsSettings.canManageSettings()}">
       <div class="btn-group">
       <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create-site"><i class="glyphicon glyphicon-plus"></i> New</button>
@@ -87,17 +88,23 @@ ${portal.toolkit()}
     </c:if>
 
     <c:if test="${cmsSettings.canManageThemes()}">
-      <a href="${pageContext.request.contextPath}/cms/themes" class="btn btn-default"><i class="glyphicon glyphicon-wrench"></i> Themes</a>
+      <a href="${pageContext.request.contextPath}/cms/themes" class="btn btn-default"><i class="glyphicon glyphicon-leaf"></i> Themes</a>
     </c:if>
-
+    <c:if test="${cmsSettings.canManageRoles()}">
+      <a href="${pageContext.request.contextPath}/cms/permissions" class="btn btn-default"><i class="glyphicon glyphicon-book"></i> Permissions</a>
+    </c:if>
+    <c:if test="${cmsSettings.canManageSettings()}">
+        <a href="${pageContext.request.contextPath}/cms/builders" class="btn btn-default"><i class="glyphicon glyphicon-book"></i> Site Builders</a>
+    </c:if>
+    </p>
   </div>
   <div class="col-sm-4">
   <div class="input-group">
       <div class="input-group-btn">
         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <c:if test="${folder != null and folder != 'no-folder'}">${folder.functionality.title.content}</c:if>
-          <c:if test="${folder != null and folder == 'no-folder'}">Untagged</c:if>
-          <c:if test="${folder == null}">Tag</c:if>
+          <c:if test="${folder != null and folder == 'no-folder'}">No Folder</c:if>
+          <c:if test="${folder == null}">Folder</c:if>
          <span class="caret"></span></button>
         <ul class="dropdown-menu">
           <c:if test="${not empty tag}">

@@ -18,20 +18,12 @@
  */
 package org.fenixedu.cms.domain;
 
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
-
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.groups.AnyoneGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
 import org.fenixedu.cms.domain.component.Component;
 import org.fenixedu.cms.domain.component.ListCategoryPosts;
 import org.fenixedu.cms.domain.component.StaticPost;
@@ -39,8 +31,16 @@ import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.joda.time.DateTime;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.Atomic;
+
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * Model for a page on a given Site.
@@ -55,7 +55,9 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
 
     public static final Comparator<Page> CREATION_DATE_COMPARATOR = Comparator.comparing(Page::getCreationDate).reversed();
     public static Comparator<Page> PAGE_NAME_COMPARATOR = Comparator.comparing(Page::getName);
-
+    
+    private static final Logger logger = LoggerFactory.getLogger(Page.class);
+    
     /**
      * the logged {@link User} creates a new Page.
      * @param site site
@@ -70,7 +72,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
             throw CmsDomainException.forbiden();
         }
         setCreatedBy(Authenticate.getUser());
-        setCanViewGroup(AnyoneGroup.get());
+        setCanViewGroup(Group.anyone());
         setSite(site);
         setPublished(false);
         setName(name);
@@ -134,9 +136,25 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
         }
         return null;
     }
-
+    
+    @Override
+    public void removeComponents(Component components) {
+        logger.info("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() +
+                " component " + components.getType() + " removed by user "+ Authenticate.getUser().getExternalId());
+        super.removeComponents(components);
+    }
+    
+    @Override
+    public void addComponents(Component components) {
+        logger.info("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() +
+                " component " + components.getType() + " added by user "+ Authenticate.getUser().getExternalId());
+        super.addComponents(components);
+    }
+    
     @Atomic
     public void delete() {
+        logger.info("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() +
+                " deleted by user "+ Authenticate.getUser().getExternalId());
         Signal.emit(SIGNAL_DELETED, this.getOid());
 
         for (Component component : getComponentsSet()) {
@@ -239,6 +257,9 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
         } else {
             setTemplateType(null);
         }
+    
+        logger.info("Page " + getSlug() + " of Site " + getSite().getSlug() +
+                " template changed by user "+ Authenticate.getUser());
     }
 
     public boolean isPublished() {

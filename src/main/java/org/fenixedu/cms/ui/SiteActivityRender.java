@@ -18,16 +18,15 @@
  */
 package org.fenixedu.cms.ui;
 
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.function.BiConsumer;
-
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.cms.domain.SiteActivity;
 import org.fenixedu.commons.i18n.LocalizedString;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.function.BiConsumer;
 
 public class SiteActivityRender {
 

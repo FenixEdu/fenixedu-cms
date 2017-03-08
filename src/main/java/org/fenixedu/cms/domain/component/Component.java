@@ -18,8 +18,8 @@
  */
 package org.fenixedu.cms.domain.component;
 
-import java.util.HashMap;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.cms.domain.CloneCache;
@@ -28,12 +28,10 @@ import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.cms.rendering.TemplateContext;
 import org.joda.time.DateTime;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
+
+import java.util.HashMap;
 
 public abstract class Component extends Component_Base implements org.fenixedu.cms.domain.Cloneable {
 

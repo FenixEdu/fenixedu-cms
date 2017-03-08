@@ -18,10 +18,10 @@
  */
 package org.fenixedu.cms.domain.component;
 
+import org.fenixedu.cms.domain.Page;
+
 import java.util.Collection;
 import java.util.Collections;
-
-import org.fenixedu.cms.domain.Page;
 
 /**
  * A {@link ComponentContextProvider} provides the slot options for {@link ComponentParameter} parameters.

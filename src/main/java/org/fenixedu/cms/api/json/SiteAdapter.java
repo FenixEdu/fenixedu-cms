@@ -22,20 +22,22 @@ import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 import static org.fenixedu.cms.domain.PermissionsArray.Permission.*;
 
 import org.fenixedu.bennu.core.annotation.DefaultJsonAdapter;
+import org.fenixedu.bennu.core.api.json.DateTimeViewer;
+import org.fenixedu.bennu.core.api.json.LocalizedStringViewer;
 import org.fenixedu.bennu.core.domain.exceptions.BennuCoreDomainException;
 import org.fenixedu.bennu.core.json.JsonAdapter;
 import org.fenixedu.bennu.core.json.JsonBuilder;
-import org.fenixedu.bennu.core.json.adapters.DateTimeViewer;
-import org.fenixedu.bennu.core.json.adapters.LocalizedStringViewer;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.commons.i18n.LocalizedString;
+import pt.ist.fenixframework.FenixFramework;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import pt.ist.fenixframework.FenixFramework;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
+import static org.fenixedu.cms.domain.PermissionsArray.Permission.*;
 
 @DefaultJsonAdapter(Site.class)
 public class SiteAdapter implements JsonAdapter<Site> {
@@ -56,12 +58,7 @@ public class SiteAdapter implements JsonAdapter<Site> {
         if (jObj.has("embedded") && !jObj.get("embedded").isJsonNull()) {
             site.setEmbedded(jObj.get("embedded").getAsBoolean());
         }
-
-        if (jObj.has("template") && !jObj.get("template").isJsonNull()) {
-            String template = jObj.get("template").getAsString();
-            Site.templateFor(template).makeIt(site);
-        }
-
+        
         site.updateMenuFunctionality();
 
         return site;

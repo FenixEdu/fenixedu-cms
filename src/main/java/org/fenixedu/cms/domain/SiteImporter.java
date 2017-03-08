@@ -18,36 +18,35 @@
  */
 package org.fenixedu.cms.domain;
 
-import static java.util.Optional.ofNullable;
-import static org.apache.tika.io.FilenameUtils.normalize;
-import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
-import org.fenixedu.bennu.core.groups.Group;
-import org.fenixedu.bennu.io.domain.GroupBasedFile;
-import org.fenixedu.bennu.io.servlets.FileDownloadServlet;
-import org.fenixedu.cms.domain.component.CMSComponent;
-import org.fenixedu.cms.domain.component.Component;
-import org.fenixedu.cms.domain.component.ComponentDescriptor;
-import org.fenixedu.cms.domain.component.ListCategoryPosts;
-import org.fenixedu.commons.i18n.LocalizedString;
-import org.joda.time.DateTime;
-
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
+import org.apache.commons.io.FileUtils;
+import org.fenixedu.bennu.core.groups.Group;
+import org.fenixedu.bennu.io.domain.GroupBasedFile;
+import org.fenixedu.bennu.io.servlet.FileDownloadServlet;
+import org.fenixedu.cms.domain.component.CMSComponent;
+import org.fenixedu.cms.domain.component.Component;
+import org.fenixedu.cms.domain.component.ComponentDescriptor;
+import org.fenixedu.cms.domain.component.ListCategoryPosts;
+import org.fenixedu.cms.exceptions.CmsDomainException;
+import org.fenixedu.commons.i18n.LocalizedString;
+import org.joda.time.DateTime;
 import pt.ist.fenixframework.Atomic;
+
+import java.io.*;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import static java.util.Optional.ofNullable;
+import static org.apache.tika.io.FilenameUtils.normalize;
+import static org.fenixedu.commons.i18n.LocalizedString.fromJson;
 
 /**
  * Created by borgez-dsi on 24-06-2015.
@@ -106,13 +105,18 @@ public class SiteImporter {
     }
 
     private Page importPage(Site site, String pageSlug, JsonObject jsonObject) {
-        return ofNullable(site.pageForSlug(pageSlug)).orElseGet(() -> {
+    
+        try{
+            return site.pageForSlug(pageSlug);
+        } catch(CmsDomainException e){
+    
             Page page = new Page(site, fromJson(jsonObject.get("name")));
             page.setSlug(jsonObject.get("slug").getAsString());
             page.setCanViewGroup(Group.parse(jsonObject.get("canViewGroup").getAsString()));
             if (jsonObject.has("templateType") && !jsonObject.get("templateType").isJsonNull()) {
                 page.setTemplateType(jsonObject.get("templateType").getAsString());
             }
+            
             page.setPublished(jsonObject.get("published").getAsBoolean());
             for (JsonElement el : jsonObject.get("components").getAsJsonArray()) {
                 Component component = importComponent(el.getAsJsonObject());
@@ -120,8 +124,9 @@ public class SiteImporter {
                     page.addComponents(component);
                 }
             }
+            
             return page;
-        });
+        }
     }
 
     private Component importComponent(JsonObject jsonObject) {
@@ -201,12 +206,19 @@ public class SiteImporter {
 
             for (JsonElement postFileEl : jsonObject.get("files").getAsJsonArray()) {
                 JsonObject postFileJson = postFileEl.getAsJsonObject();
-                GroupBasedFile file = new GroupBasedFile(postFileJson.get("displayName").getAsString(),
-                        postFileJson.get("fileName").getAsString(), readFile(postFileJson.get("file").getAsString()),
-                        Group.parse(postFileJson.get("viewGroup").getAsString()));
-                new PostFile(post, file, postFileJson.get("isEmbedded").getAsBoolean(), postFileJson.get("index").getAsInt());
-                body = replace(body, postFileJson.get("url").getAsString(), FileDownloadServlet.getDownloadUrl(file));
-                excerpt = replace(excerpt, postFileJson.get("url").getAsString(), FileDownloadServlet.getDownloadUrl(file));
+             
+                try {
+                    InputStream inputStream = getZipFile().getInputStream(
+                            getZipFile().getEntry(normalize("files/" + postFileJson.get("file").getAsString())));
+                    GroupBasedFile file = new GroupBasedFile(postFileJson.get("displayName").getAsString(),
+                            postFileJson.get("fileName").getAsString(),inputStream,
+                            Group.parse(postFileJson.get("viewGroup").getAsString()));
+                    new PostFile(post, file, postFileJson.get("isEmbedded").getAsBoolean(), postFileJson.get("index").getAsInt());
+                    body = replace(body, postFileJson.get("url").getAsString(), FileDownloadServlet.getDownloadUrl(file));
+                    excerpt = replace(excerpt, postFileJson.get("url").getAsString(), FileDownloadServlet.getDownloadUrl(file));
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to import file "+ postFileJson.get("url").getAsString());
+                }
             }
 
             post.setBodyAndExcerpt(body, excerpt);
@@ -223,14 +235,7 @@ public class SiteImporter {
         return result;
     }
 
-    private byte[] readFile(String fileId) {
-        try {
-            return ByteStreams.toByteArray(getZipFile().getInputStream(getZipFile().getEntry(normalize("files/" + fileId))));
-        } catch (IOException e) {
-            return new byte[]{};
-        }
-    }
-
+   
     private Category importCategory(Site site, String categorySlug, JsonObject jsonObject) {
         Category category = site.getOrCreateCategoryForSlug(categorySlug, fromJson(jsonObject.get("name")));
         for (JsonElement el : jsonObject.get("components").getAsJsonArray()) {

@@ -18,12 +18,12 @@
  */
 package org.fenixedu.cms.domain.component;
 
+import org.fenixedu.cms.domain.component.ComponentContextProvider.EmptyProvider;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.fenixedu.cms.domain.component.ComponentContextProvider.EmptyProvider;
 
 /**
  * Marks the annotated method parameter as being a dynamic parameter for the

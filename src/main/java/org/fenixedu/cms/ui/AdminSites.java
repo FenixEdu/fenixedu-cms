@@ -18,12 +18,22 @@
  */
 package org.fenixedu.cms.ui;
 
-import static java.util.stream.Collectors.toList;
-import static org.fenixedu.cms.domain.PermissionEvaluation.*;
+import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.Atomic.TxMode;
+import pt.ist.fenixframework.FenixFramework;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,19 +45,31 @@ import org.apache.tika.io.FilenameUtils;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.domain.groups.PersistentGroup;
-import org.fenixedu.bennu.core.groups.DynamicGroup;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
-import org.fenixedu.bennu.signals.DomainObjectEvent;
-import org.fenixedu.bennu.signals.Signal;
+import org.fenixedu.bennu.core.signals.DomainObjectEvent;
+import org.fenixedu.bennu.core.signals.Signal;
 import org.fenixedu.bennu.social.domain.api.GoogleAPI;
 import org.fenixedu.bennu.social.domain.user.GoogleUser;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
-import org.fenixedu.cms.domain.*;
+import org.fenixedu.cms.domain.CMSFolder;
+import org.fenixedu.cms.domain.CMSTheme;
+import org.fenixedu.cms.domain.CloneCache;
+import org.fenixedu.cms.domain.CmsSettings;
+import org.fenixedu.cms.domain.Page;
+import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.PermissionsArray;
 import org.fenixedu.cms.domain.PermissionsArray.Permission;
+import org.fenixedu.cms.domain.Role;
+import org.fenixedu.cms.domain.RoleTemplate;
+import org.fenixedu.cms.domain.Sanitization;
+import org.fenixedu.cms.domain.Site;
+import org.fenixedu.cms.domain.SiteActivity;
+import org.fenixedu.cms.domain.SiteExporter;
+import org.fenixedu.cms.domain.SiteImporter;
 import org.fenixedu.cms.exceptions.CmsDomainException;
 import org.fenixedu.commons.i18n.LocalizedString;
 import org.slf4j.Logger;
@@ -74,9 +96,10 @@ import com.google.api.services.analytics.model.Webproperty;
 import com.google.common.base.Strings;
 import com.google.common.io.Files;
 
-import pt.ist.fenixframework.Atomic;
-import pt.ist.fenixframework.Atomic.TxMode;
-import pt.ist.fenixframework.FenixFramework;
+import static java.util.stream.Collectors.toList;
+import static org.fenixedu.cms.domain.PermissionEvaluation.canAccess;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanAccess;
+import static org.fenixedu.cms.domain.PermissionEvaluation.ensureCanDoThis;
 
 @SpringApplication(group = "logged", path = "cms", title = "application.title.cms")
 @SpringFunctionality(app = AdminSites.class, title = "application.admin-portal.title")
@@ -126,14 +149,13 @@ public class AdminSites {
         model.addAttribute("sitesWithoutFolder", sitesWithoutFolder);
         model.addAttribute("sitesWithoutFolderCount", sitesWithoutFolderCount);
 
-        model.addAttribute("roles", Bennu.getInstance().getRoleTemplatesSet().stream().sorted(Comparator.comparing(x -> x.getDescription().getContent())).collect(Collectors.toSet()));
+        model.addAttribute("roles", Bennu.getInstance().getRoleTemplatesSet().stream().sorted(Comparator.comparing(x -> x.getName()
+            .getContent())).collect(Collectors.toSet()));
         model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet().stream().sorted(Comparator.comparing(x -> x.getFunctionality().getTitle().getContent())).collect(Collectors.toList()));
 
         model.addAttribute("allPermissions", PermissionsArray.all());
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
-        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(
-                Authenticate.getUser()));
-        model.addAttribute("templates", Site.getTemplates());
+        model.addAttribute("builders", Bennu.getInstance().getSiteBuildersSet());
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
                 .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
         return "fenixedu-cms/manage";
@@ -194,13 +216,12 @@ public class AdminSites {
 
         model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet().stream().sorted(Comparator.comparing(x -> x.getFunctionality().getTitle().getContent())).collect(Collectors.toList()));
         model.addAttribute("tag", tag);
-        model.addAttribute("roles", Bennu.getInstance().getRoleTemplatesSet().stream().sorted(Comparator.comparing( x -> x.getDescription().getContent())).collect(Collectors.toSet()));
+        model.addAttribute("roles", Bennu.getInstance().getRoleTemplatesSet().stream().sorted(Comparator.comparing( x -> x.getName()
+            .getContent())).collect(Collectors.toSet()));
 
         model.addAttribute("allPermissions",PermissionsArray.all());
         model.addAttribute("cmsSettings", CmsSettings.getInstance());
-        model.addAttribute("isManager", DynamicGroup.get("managers").isMember(
-                Authenticate.getUser()));
-        model.addAttribute("templates", Site.getTemplates());
+        model.addAttribute("builders", Bennu.getInstance().getSiteBuildersSet());
         model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet().stream()
                 .sorted(Comparator.comparing(CMSTheme::getName)).collect(Collectors.toList()));
         return "fenixedu-cms/manageSearch";
@@ -217,9 +238,7 @@ public class AdminSites {
     }
 
     @RequestMapping(value = "/{slug}/analytics", method = RequestMethod.GET, produces = JSON)
-    public
-    @ResponseBody
-    String viewSiteAnalyticsData(@PathVariable String slug) {
+    public @ResponseBody String viewSiteAnalyticsData(@PathVariable String slug) {
         Site site = Site.fromSlug(slug);
         ensureCanDoThis(site, Permission.MANAGE_ANALYTICS);
         return site.getAnalytics().getOrFetch(site).toString();
@@ -432,14 +451,13 @@ public class AdminSites {
     public RedirectView editSettings(@RequestParam(required = false) String themesManagers, @RequestParam(required = false) String rolesManagers,
                                      @RequestParam(required = false) String foldersManagers, @RequestParam(required = false) String settingsManagers) {
         FenixFramework.atomic(() -> {
-            if (DynamicGroup.get("managers").isMember(Authenticate.getUser())) {
-                CmsSettings settings = CmsSettings.getInstance().getInstance();
-                settings.ensureCanManageGlobalPermissions();
-                settings.setThemesManagers(group(themesManagers));
-                settings.setRolesManagers(group(rolesManagers));
-                settings.setFoldersManagers(group(foldersManagers));
-                settings.setSettingsManagers(group(settingsManagers));
-            }
+            CmsSettings.getInstance().ensureCanManageGlobalPermissions();
+    
+            CmsSettings settings = CmsSettings.getInstance().getInstance();
+            settings.setThemesManagers(group(themesManagers));
+            settings.setRolesManagers(group(rolesManagers));
+            settings.setFoldersManagers(group(foldersManagers));
+            settings.setSettingsManagers(group(settingsManagers));
         });
         return new RedirectView("/cms/sites", true);
     }
@@ -502,7 +520,7 @@ public class AdminSites {
             Site site = Site.fromSlug(slugSite);
             PermissionEvaluation.canDoThis(site, Permission.MANAGE_ROLES);
             Role role = FenixFramework.getDomainObject(roleId);
-            role.setGroup(Group.parse(group).toPersistentGroup());
+            role.setGroup(Group.parse(group));
             Signal.emit(Role.SIGNAL_EDITED, new DomainObjectEvent<>(role));
         });
     }

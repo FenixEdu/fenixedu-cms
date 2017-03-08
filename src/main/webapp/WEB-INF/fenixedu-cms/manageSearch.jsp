@@ -25,9 +25,9 @@
 ${portal.toolkit()}
 
 <div class="page-header">
-    <h1>Content Managment
+    <h1>Content Management
           <c:if test="${cmsSettings.canManageSettings()}">
-          <button type="button" class="btn btn-link" data-target="#sites-settings" data-toggle="modal"><i class="glyphicon glyphicon-wrench"></i></button>
+          <button type="button" class="btn btn-link" data-target="#sites-settings" data-toggle="modal"><i class="glyphicon glyphicon-wrench"></i> Settings</button>
           </c:if>
           <small>
 
@@ -91,6 +91,13 @@ ${portal.toolkit()}
     <c:if test="${cmsSettings.canManageThemes()}">
       <a href="${pageContext.request.contextPath}/cms/themes" class="btn btn-default"><i class="glyphicon glyphicon-wrench"></i> Themes</a>
     </c:if>
+      <c:if test="${cmsSettings.canManageRoles()}">
+          <a href="${pageContext.request.contextPath}/cms/permissions" class="btn btn-default"><i class="glyphicon glyphicon-book"></i> Permissions</a>
+      </c:if>
+      <c:if test="${cmsSettings.canManageSettings()}">
+          <a href="${pageContext.request.contextPath}/cms/builders" class="btn btn-default"><i class="glyphicon glyphicon-book"></i> Site Builders</a>
+      </c:if>
+
 
   </div>
   <div class="col-sm-4">
@@ -156,8 +163,7 @@ ${portal.toolkit()}
         </td>
         <td class="col-md-2">${cms.prettyDate(i.creationDate)}</td>
         <td class="col-md-2"><p>
-         <span class="glyphicon glyphicon-option-vertical"></span>
-              <input type="checkbox" ng-model="post.active" id="success" class="ng-pristine ng-valid">
+            <input type="checkbox" ng-model="post.active" id="success" class="ng-pristine ng-valid">
               <label for="success">Published</label>
               </p>
             <div class="dropdown pull-right">

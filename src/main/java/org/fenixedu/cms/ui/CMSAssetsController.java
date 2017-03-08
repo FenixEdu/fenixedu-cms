@@ -18,12 +18,6 @@
  */
 package org.fenixedu.cms.ui;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.fenixedu.cms.domain.CMSTheme;
 import org.fenixedu.cms.domain.CMSThemeFile;
 import org.joda.time.DateTime;
@@ -31,6 +25,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.HandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
 
 @Controller
 @RequestMapping("/cms/assets")
