@@ -66,7 +66,7 @@ public class PageResource extends BennuRestResource {
     @Path("/{oid}")
     public Response deletePage(@PathParam("oid") Page page) {
         ensureCanDoThis(page.getSite(), SEE_PAGES, EDIT_PAGE, DELETE_PAGE);
-        page.delete();
+        page.archive();
         return Response.ok().build();
     }
 }

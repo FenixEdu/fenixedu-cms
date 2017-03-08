@@ -152,7 +152,7 @@ public class AdminPagesAdvanced {
         FenixFramework.atomic(() -> {
             Site site = Site.fromSlug(slugSite);
             ensureCanDoThis(site, Permission.SEE_PAGES, Permission.EDIT_PAGE, Permission.DELETE_PAGE, Permission.EDIT_ADVANCED_PAGES);
-            site.pageForSlug(slugPage).delete();
+            site.pageForSlug(slugPage).archive();
         });
         return new RedirectView("/cms/pages/advanced/" + slugSite, true);
     }

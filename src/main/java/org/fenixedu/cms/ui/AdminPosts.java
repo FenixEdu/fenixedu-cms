@@ -70,14 +70,21 @@ public class AdminPosts {
     public String posts(Model model, @PathVariable String slug,
                     @RequestParam(required = false, defaultValue = "1") int page,
                     @RequestParam(required = false) String query, @RequestParam(required = false) String category,
-                    @RequestParam(required = false, defaultValue = "false") boolean showAll) {
+                    @RequestParam(required = false, defaultValue = "false") boolean showAll,
+                    @RequestParam(required = false, defaultValue = "false") boolean archived) {
 
         Site site = Site.fromSlug(slug);
         ensureCanDoThis(site,Permission.SEE_POSTS);
-        Collection<Post> posts = site.getPostSet();
+        if (archived) {
+            ensureCanDoThis(site, Permission.DELETE_POSTS);
+        }
+        Collection<Post> posts = (archived) ? site.getArchivedPostsSet() : site.getPostSet();
         if (!Strings.isNullOrEmpty(category)) {
             Category cat = site.categoryForSlug(category);
-            posts = cat.getPostsSet();
+            posts = cat.getPostsSet().stream()
+                    .filter(p -> (archived) ? p.getArchivedSite() != null : p.getSite() != null)
+                    .collect(Collectors.toSet());
+
             model.addAttribute("category", cat);
         }
 
@@ -97,7 +104,7 @@ public class AdminPosts {
         model.addAttribute("partition", partition);
         model.addAttribute("posts", partition.getItems());
 
-        return "fenixedu-cms/posts";
+        return (archived) ? "fenixedu-cms/archivedPosts" : "fenixedu-cms/posts";
     }
 
     @RequestMapping(value = "{slugSite}/{slugPost}/data", method = RequestMethod.GET, produces = JSON)
@@ -153,9 +160,30 @@ public class AdminPosts {
                 ensureCanDoThis(s, Permission.DELETE_OTHERS_POSTS);
             }
             SiteActivity.deletedPost(post, Site.fromSlug(slugSite), Authenticate.getUser());
-            post.delete();
+            post.archive();
         });
         return new RedirectView("/cms/posts/" + slugSite + "", true);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPost}/recover", method = RequestMethod.POST)
+    public RedirectView recover(@PathVariable String slugSite, @PathVariable String slugPost) {
+        Site s = Site.fromSlug(slugSite);
+        Post post = s.archivedPostForSlug(slugPost);
+
+        FenixFramework.atomic(() -> {
+            ensureCanEditPost(post);
+            ensureCanDoThis(s, Permission.DELETE_POSTS);
+
+            if(!Authenticate.getUser().equals(post.getCreatedBy())) {
+                ensureCanDoThis(s, Permission.DELETE_OTHERS_POSTS);
+            }
+
+            SiteActivity.recoveredPost(post, Site.fromSlug(slugSite), Authenticate.getUser());
+
+            post.recover();
+        });
+
+        return new RedirectView("/cms/posts/" + slugSite + "/" + post.getSlug() + "/edit", true);
     }
 
 

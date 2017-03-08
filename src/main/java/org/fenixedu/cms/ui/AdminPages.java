@@ -26,6 +26,7 @@ import static org.fenixedu.cms.ui.SearchUtils.searchPages;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
@@ -69,18 +70,23 @@ public class AdminPages {
 
     @RequestMapping(value = "{slug}", method = RequestMethod.GET)
     public String pages(Model model, @PathVariable String slug, @RequestParam(required = false) String query,
-                    @RequestParam(required = false, defaultValue = "1") int currentPage) {
+                    @RequestParam(required = false, defaultValue = "1") int currentPage,
+                    @RequestParam(required = false, defaultValue = "false") boolean archived) {
         Site site = Site.fromSlug(slug);
         ensureCanDoThis(site, Permission.SEE_PAGES);
-        Collection<Page> allPages = Strings.isNullOrEmpty(query) ? getStaticPages(site) : searchPages(getStaticPages(site), query);
+        if (archived) {
+            ensureCanDoThis(site, Permission.DELETE_PAGE);
+        }
+        Collection<Page> pages = (archived) ? getStaticArchivedPages(site) : getStaticPages(site);
+        pages = Strings.isNullOrEmpty(query) ? pages : searchPages(pages, query);
         SearchUtils.Partition<Page> partition =
-                        new SearchUtils.Partition<>(allPages, Page.CREATION_DATE_COMPARATOR, PER_PAGE, currentPage);
+                        new SearchUtils.Partition<>(pages, Page.CREATION_DATE_COMPARATOR, PER_PAGE, currentPage);
 
         model.addAttribute("site", site);
         model.addAttribute("query", query);
         model.addAttribute("partition", partition);
         model.addAttribute("pages", partition.getItems());
-        return "fenixedu-cms/pages";
+        return (archived) ?  "fenixedu-cms/archivedPages" : "fenixedu-cms/pages";
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/edit", method = RequestMethod.GET)
@@ -148,12 +154,30 @@ public class AdminPages {
             if(!page.isStaticPage()) {
                 throw CmsDomainException.forbiden();
             }
-            page.getStaticPost().ifPresent(Post::delete);
+
             SiteActivity.deletedPage(page,s, Authenticate.getUser());
 
-            page.delete();
+            page.archive();
         });
         return allPagesRedirect(s);
+    }
+
+    @RequestMapping(value = "{slugSite}/{slugPage}/recover", method = RequestMethod.POST)
+    public RedirectView recover(@PathVariable String slugSite, @PathVariable String slugPage) {
+        Site site = Site.fromSlug(slugSite);
+        Page page = site.archivedPageForSlug(slugPage);
+        FenixFramework.atomic(() -> {
+            ensureCanDoThis(page.getSite(), Permission.EDIT_PAGE, Permission.DELETE_PAGE);
+            if(!page.isStaticPage()) {
+                throw CmsDomainException.forbiden();
+            }
+
+            SiteActivity.recoveredPage(page, site, Authenticate.getUser());
+
+            page.recover();
+        });
+
+        return pageRedirect(page);
     }
 
     @RequestMapping(value = "{slugSite}/{slugPage}/metadata", method = RequestMethod.GET)
@@ -190,8 +214,17 @@ public class AdminPages {
         return new RedirectView("/cms/pages/" + s.getSlug() + "/" + page.getSlug() + "/metadata", true);
     }
 
+
+    private Collection<Page> getStaticArchivedPages(Site site) {
+        return filterStaticPages(site.getArchivedPagesSet());
+    }
+
     private Collection<Page> getStaticPages(Site site) {
-        return site.getPagesSet().stream().filter(Page::isStaticPage).sorted(Page.PAGE_NAME_COMPARATOR)
+        return filterStaticPages(site.getPagesSet());
+    }
+
+    private Collection<Page> filterStaticPages(Collection<Page> pages) {
+        return pages.stream().filter(Page::isStaticPage).sorted(Page.PAGE_NAME_COMPARATOR)
                 .collect(toList());
     }
 
