@@ -51,6 +51,7 @@ public class CmsBootstrapper {
         createDefaultSiteBuilder();
     }
     
+    // Created mostly for demo purposes, no real need to do it
     private static void createBlogSiteBuilder() {
         BlogSiteBuilder blogBuilder = BlogSiteBuilder.getInstance();
         Bennu.getInstance().getRoleTemplatesSet().forEach(role->
@@ -59,7 +60,7 @@ public class CmsBootstrapper {
         blogBuilder.setTheme(CMSTheme.getDefaultTheme());
     }
     
-    
+    // Created mostly for demo purposes, no real need to do it
     private static void createDefaultSiteBuilder() {
         SiteBuilder builder = new SiteBuilder(SITE_BUILDER_SLUG);
         Bennu.getInstance().getRoleTemplatesSet().forEach(role->
@@ -67,6 +68,7 @@ public class CmsBootstrapper {
         );
         builder.setTheme(CMSTheme.getDefaultTheme());
     }
+    
     public static void initDefaultRoles() {
         createRoleTemplate(getAdminPermissions(), ADMIN_ROLE_NAME);
         createRoleTemplate(getEditorPermissions(), EDITOR_ROLE_NAME);

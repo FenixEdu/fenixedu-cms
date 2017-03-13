@@ -19,7 +19,6 @@
 package org.fenixedu.cms.ui;
 
 import com.google.common.base.Strings;
-import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
 import org.fenixedu.cms.domain.*;
@@ -73,7 +72,8 @@ public class CreateSite {
             site.updateMenuFunctionality();
             site.setPublished(published);
     
-            roles.forEach(role -> new Role(FenixFramework.getDomainObject(role), site));
+            ofNullable(roles).ifPresent(rolesSet->
+                    rolesSet.forEach(role -> new Role(FenixFramework.getDomainObject(role), site)));
     
             ofNullable(themeType).filter(t -> !Strings.isNullOrEmpty(t)).map(CMSTheme::forType).ifPresent(site::setTheme);
     
