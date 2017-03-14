@@ -61,7 +61,7 @@ ${portal.angularToolkit()}
 
                 <div class="form-group">
                     <label class="control-label"><spring:message code="menu.edit.label.name"/></label>
-                    <input type="text" required="true" ng-localized-string="selectedItem.name" class="form-control" placeholder="<spring:message code="menu.edit.label.name"/>">
+                    <input type="text" required="true" bennu-localized-string="selectedItem.name" class="form-control" placeholder="<spring:message code="menu.edit.label.name"/>">
                     <p class="text-info" ng-class="{'text-danger': !selectedItem.name}">
                         Please enter the name that should be presented for this menu item.
                     </p>
