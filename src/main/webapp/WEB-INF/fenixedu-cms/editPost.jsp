@@ -281,7 +281,7 @@ ${portal.angularToolkit()}
 								<div class="form-group">
 									<label class="col-sm-2 control-label"><spring:message code="categories.create.label.name"/></label>
 									<div class="col-sm-10">
-										<input ng-localized-string="newCategory.name" required-any />
+										<input bennu-localized-string="newCategory.name" required-any />
 										<p ng-show="!newCategory.name" class="text-danger"><spring:message code="categories.create.error.emptyName"/></p>
 									</div>
 								</div>
