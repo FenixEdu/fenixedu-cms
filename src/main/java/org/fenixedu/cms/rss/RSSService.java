@@ -160,7 +160,7 @@ public class RSSService {
         createNode(writer, eventFactory, "link", post.getAddress());
         boolean hasEmail = post.getCreatedBy().getProfile() != null && post.getCreatedBy().getProfile().getEmail() != null;
         String authorEmail = hasEmail ? post.getCreatedBy().getProfile().getEmail() : "";
-        createNode(writer, eventFactory, "author", authorEmail + " (" + post.getCreatedBy().getName() + ")");
+        createNode(writer, eventFactory, "author", authorEmail + " (" + post.getCreatedBy().getProfile().getDisplayName() + ")");
         createNode(writer, eventFactory, "guid", post.getAddress() + "#" + post.getExternalId());
         if (!post.getCategoriesSet().isEmpty()) {
             createNode(writer, eventFactory, "category",
