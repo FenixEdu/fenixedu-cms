@@ -165,7 +165,7 @@ public class AdminPages {
         Site site = Site.fromSlug(slugSite);
         Page page = site.archivedPageForSlug(slugPage);
         FenixFramework.atomic(() -> {
-            ensureCanDoThis(page.getSite(), Permission.EDIT_PAGE, Permission.DELETE_PAGE);
+            ensureCanDoThis(site, Permission.EDIT_PAGE, Permission.DELETE_PAGE);
             if(!page.isStaticPage()) {
                 throw CmsDomainException.forbiden();
             }
