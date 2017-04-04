@@ -174,8 +174,10 @@ public class MenuItem extends MenuItem_Base implements Comparable<MenuItem>, Wra
 
     @Atomic
     public void delete() {
-        logger.info("Menu item " + getName()  + " - " + getExternalId() + " son of " + getParent().getName()+
-                " of site " + getMenu().getSite().getSlug() + " deleted by user "+ Authenticate.getUser().getExternalId());
+        logger.info("Menu item " + getName().toString()  + " - " + getExternalId()
+                + " son of " + (getParent() == null ? getTop().getName().getContent() : getParent().getName().getContent())
+                + " of site " + getMenu().getSite().getSlug()
+                + " deleted by user "+ Authenticate.getUser().getExternalId());
         Signal.emit(MenuItem.SIGNAL_DELETED, new DomainObjectEvent<>(this.getMenu()));
         List<MenuItem> items = Lists.newArrayList(getChildrenSet());
         removeFromParent();
