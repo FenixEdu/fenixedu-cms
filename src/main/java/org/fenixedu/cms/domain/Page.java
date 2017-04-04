@@ -177,7 +177,7 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
         getStaticPost().ifPresent(post -> post.setActive(false));
         setArchivedSite(getSite());
         setSite(null);
-
+        getMenuItemsSet().stream().forEach(MenuItem::delete);
 
         Signal.emit(SIGNAL_ARCHIVED, this.getOid());
     }
