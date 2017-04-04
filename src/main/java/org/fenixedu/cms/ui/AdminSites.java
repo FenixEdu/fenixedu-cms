@@ -18,6 +18,7 @@
  */
 package org.fenixedu.cms.ui;
 
+import org.fenixedu.bennu.core.domain.exceptions.BennuCoreDomainException;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.Atomic.TxMode;
 import pt.ist.fenixframework.FenixFramework;
@@ -311,15 +312,21 @@ public class AdminSites {
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/sites/" + slug + "/edit", true);
+            return new RedirectView("/sites/" + slug + "#general", true);
         } else {
             Site s = Site.fromSlug(slug);
             newSlug = Optional.ofNullable(newSlug).orElse(slug);
             if(canAccess(Authenticate.getUser(),s)) {
-                editSite(name, description, theme, newSlug, published, s, viewGroup, folder, analyticsCode, accountId,
-                        s.pageForSlug(initialPageSlug));
+                try {
+                    editSite(name, description, theme, newSlug, published, s, viewGroup, folder, analyticsCode, accountId,
+                            s.pageForSlug(initialPageSlug));
+                } catch( BennuCoreDomainException exception) {
+                    redirectAttributes.addFlashAttribute(exception.getMessage(), true);
+                    return new RedirectView("/sites/" + slug + "#general", true);
+    
+                }
             }
-            return new RedirectView("/cms/sites/" + newSlug + "#general", true);
+            return new RedirectView("/cms/sites/" + newSlug, true);
         }
     }
 
