@@ -312,7 +312,7 @@ public class AdminSites {
 
         if (name.isEmpty()) {
             redirectAttributes.addFlashAttribute("emptyName", true);
-            return new RedirectView("/sites/" + slug + "#general", true);
+            return new RedirectView("/cms/sites/" + slug + "#general", true);
         } else {
             Site s = Site.fromSlug(slug);
             newSlug = Optional.ofNullable(newSlug).orElse(slug);
@@ -322,7 +322,7 @@ public class AdminSites {
                             s.pageForSlug(initialPageSlug));
                 } catch( BennuCoreDomainException exception) {
                     redirectAttributes.addFlashAttribute(exception.getMessage(), true);
-                    return new RedirectView("/sites/" + slug + "#general", true);
+                    return new RedirectView("/cms/sites/" + slug + "#general", true);
     
                 }
             }
