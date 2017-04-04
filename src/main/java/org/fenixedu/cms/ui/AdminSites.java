@@ -325,10 +325,10 @@ public class AdminSites {
 
     public void editSiteInfo(Site site, Model model) {
         if (PermissionEvaluation.canDoThis(site, Permission.EDIT_SITE_INFORMATION)) {
-            if (CmsSettings.getInstance().canManageThemes()) {
+            if (PermissionEvaluation.canDoThis(site, Permission.CHANGE_THEME)) {
                 model.addAttribute("themes", Bennu.getInstance().getCMSThemesSet());
             }
-            if (CmsSettings.getInstance().canManageFolders()) {
+            if (PermissionEvaluation.canDoThis(site, Permission.CHOOSE_PATH_AND_FOLDER)) {
                 model.addAttribute("folders", Bennu.getInstance().getCmsFolderSet());
             }
             if (CmsSettings.getInstance().canManageSettings()) {

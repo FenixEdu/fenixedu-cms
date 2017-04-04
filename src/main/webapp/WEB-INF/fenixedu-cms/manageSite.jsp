@@ -268,13 +268,25 @@ ${portal.toolkit()}
 				                            <label for="folder" class="col-sm-2 control-label">Tag</label>
 
 				                            <div class="col-sm-10">
-				                                <select name="folder" id="" class="form-control" ${permissions:canDoThis(site, 'CHOOSE_PATH_AND_FOLDER') ? '' : 'disabled'}>
-				                                    <option value ${site.folder == null ? 'selected': ''}>--</option>
+												<c:if test="${permissions:canDoThis(site, 'CHOOSE_PATH_AND_FOLDER')}">
+													<select name="folder" id="" class="form-control" >
+														<option value ${site.folder == null ? 'selected': ''}>--</option>
 
-				                                    <c:forEach items="${folders}" var="folder">
-				                                        <option value="${folder.externalId}" ${site.folder == folder ? 'selected': ''}>${folder.functionality.description.content}</option>
-				                                    </c:forEach>
-				                                </select>
+														<c:forEach items="${folders}" var="folder">
+															<option value="${folder.externalId}" ${site.folder == folder ? 'selected': ''}>${folder.functionality.description.content}</option>
+														</c:forEach>
+													</select>
+												</c:if>
+												<c:if test="${!permissions:canDoThis(site, 'CHOOSE_PATH_AND_FOLDER')}">
+													<select name="folder" id="" class="form-control" disabled>
+														<c:if test="${site.folder ==null}">
+															<option>--</option>
+														</c:if>
+														<c:if test="${site.folder !=null}">
+															<option>${site.folder.functionality.description.content}</option>
+														</c:if>
+													</select>
+												</c:if>
 				                            </div>
 				                        </div>
 
