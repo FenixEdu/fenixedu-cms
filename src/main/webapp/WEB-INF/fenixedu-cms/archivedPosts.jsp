@@ -134,6 +134,7 @@ ${portal.toolkit()}
             </div>
             <div class="modal-footer">
                 <form id="recover-form" method="POST">
+                    ${csrf.field()}
                     <button type="submit" class="btn btn-primary"><spring:message code="site.manage.label.recover"/></button>
                     <a class="btn btn-default" data-dismiss="modal"><spring:message code="action.cancel"/></a>
                 </form>

@@ -162,7 +162,7 @@ public class AdminPosts {
         Post post = s.archivedPostForSlug(slugPost);
 
         FenixFramework.atomic(() -> {
-            ensureCanEditPost(post);
+            ensureCanEditPost(s, post);
             ensureCanDoThis(s, Permission.DELETE_POSTS);
 
             if(!Authenticate.getUser().equals(post.getCreatedBy())) {
@@ -235,12 +235,16 @@ public class AdminPosts {
     }
 
     public static void ensureCanEditPost(Post post) {
-        PermissionEvaluation.ensureCanDoThis(post.getSite(), Permission.EDIT_POSTS);
+        ensureCanEditPost(post.getSite(), post);
+    }
+
+    public static void ensureCanEditPost(Site site, Post post) {
+        PermissionEvaluation.ensureCanDoThis(site, Permission.EDIT_POSTS);
         if(!Authenticate.getUser().equals(post.getCreatedBy())) {
-            PermissionEvaluation.ensureCanDoThis(post.getSite(), Permission.EDIT_OTHERS_POSTS);
+            PermissionEvaluation.ensureCanDoThis(site, Permission.EDIT_OTHERS_POSTS);
         }
         if(post.isVisible()) {
-            PermissionEvaluation.ensureCanDoThis(post.getSite(), Permission.EDIT_POSTS_PUBLISHED);
+            PermissionEvaluation.ensureCanDoThis(site, Permission.EDIT_POSTS_PUBLISHED);
         }
     }
 
