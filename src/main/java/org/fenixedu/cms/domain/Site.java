@@ -375,6 +375,8 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
         setCreatedBy(null);
         setBennu(null);
         setAnalytics(null);
+        setBuilder(null);
+        setDefaultRoleTemplate(null);
 
         getActivityLinesSet().stream().forEach(org.fenixedu.cms.domain.SiteActivity::delete);
         getPostSet().stream().forEach(Post::delete);
@@ -383,6 +385,8 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
         getPagesSet().stream().forEach(org.fenixedu.cms.domain.Page::delete);
         getRolesSet().stream().forEach(Role::delete);
         deleteDomainObject();
+        
+        
     }
 
     /**
