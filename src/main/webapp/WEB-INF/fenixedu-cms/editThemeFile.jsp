@@ -105,7 +105,7 @@
     $("#saveBtn").attr('disabled', true);
     $("#saveBtn #txt").html('<spring:message code="action.saving"/>');
     $.ajax('${pageContext.request.contextPath}/cms/themes/${theme.type}/editFile/${file.fullPath}',
-    { data: editor.getValue(), type: 'PUT' }).done(function () {
+    { headers: {"${csrf.headerName}":"${csrf.token}"}, data: editor.getValue(), type: 'PUT' }).done(function () {
     $("#saveBtn").attr('disabled', false); $("#saveBtn #txt").html('<spring:message code="action.save" />');
     });
   }
