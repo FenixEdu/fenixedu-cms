@@ -111,7 +111,7 @@ ${portal.toolkit()}
                     <label for="published" class="col-sm-2 control-label"><spring:message code="label.published"/></label>
                     <div class="col-sm-10">
                         <div class="switch switch-success">
-                            <label for="published"><input type="checkbox" id="published" value="${bulder.published}" ${builder.published ? 'checked' : ''} \>Published</label>
+                            <label for="published"><input type="checkbox" name="published" id="published" value="true" ${builder.published ? 'checked' : ''} \>Published</label>
                         </div>
                     </div>
                 </div>
@@ -120,7 +120,7 @@ ${portal.toolkit()}
                     <label for="viewGroup" class="col-sm-2 control-label"><spring:message code="label.view.group"/></label>
                     <div class="col-sm-10">
                         <div class="switch switch-success">
-                            <input bennu-group name="viewGroup" type="text" allow="public,users,managers,custom"  value='${builder.canViewGroup.expression}'/>
+                            <input bennu-group id="viewGroup" name="viewGroup" type="text" allow="public,users,managers,custom"  value='${builder.canViewGroup.expression}'/>
                         </div>
                     </div>
                 </div>

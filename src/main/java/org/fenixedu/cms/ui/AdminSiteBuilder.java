@@ -1,5 +1,6 @@
 package org.fenixedu.cms.ui;
 
+import com.restfb.experimental.api.Groups;
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
@@ -11,6 +12,7 @@ import pt.ist.fenixframework.FenixFramework;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -57,9 +59,9 @@ public class AdminSiteBuilder {
     }
     
     @RequestMapping(value = "/{builderSlug}", method = RequestMethod.POST)
-    public String update(Model model, @PathVariable("builderSlug") String builderSlug,
-                         @RequestParam(required = false)  String canViewGroup, @RequestParam(required = false) String newSlug,
-                         @RequestParam(required = false)  String theme, @RequestParam(required = false)  String folder,
+    public String update(Model model, @PathVariable("builderSlug") String builderSlug, @RequestParam(required = false) String newSlug,
+                         @RequestParam(required = false) String theme, @RequestParam(required = false)  String folder,
+                         @RequestParam(required = false) boolean published, @RequestParam(required = false) String viewGroup,
                          @RequestParam(required = false) String defaultRole, @RequestParam(required = false) Set<String> roles ) {
         CmsSettings.getInstance().ensureCanManageSettings();
         ArrayList<String> errors = new ArrayList<>();
@@ -70,16 +72,17 @@ public class AdminSiteBuilder {
                 builder.setSlug(newSlug);
                 builder.setTheme(CMSTheme.forType(theme));
                 builder.setFolder(FenixFramework.getDomainObject(folder));
-                builder.getRoleTemplateSet().forEach(rt -> builder.removeRoleTemplate(rt));
+                builder.getRoleTemplateSet().forEach(builder::removeRoleTemplate);
+                builder.setPublished(published);
+                builder.setCanViewGroup(Group.parse(viewGroup));
                 if (builder.isSystemBuilder()) {
                     ((SystemSiteBuilder) builder).setDefaultRoleTemplate(FenixFramework.getDomainObject(defaultRole));
                 }
                 if (roles != null) {
                     roles.stream().map(r -> (RoleTemplate) FenixFramework.getDomainObject(r))
-                            .filter(rt -> rt != null)
-                            .forEach(rt -> builder.addRoleTemplate(rt));
+                            .filter(Objects::nonNull)
+                            .forEach(builder::addRoleTemplate);
                 }
-                builder.setCanViewGroup(Group.parse(canViewGroup));
             });
         } else {
             errors.add("error.invalid.slug");
