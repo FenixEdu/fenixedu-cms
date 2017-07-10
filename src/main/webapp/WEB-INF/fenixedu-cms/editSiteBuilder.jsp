@@ -92,7 +92,7 @@ ${portal.toolkit()}
                             <option value>--</option>
 
                             <c:forEach items="${folders}" var="f">
-                                <option value="${f.externalId}">${f.functionality.description.content}</option>
+                                <option value="${f.externalId}" ${f == builder.folder ? 'selected' : ''}>${f.functionality.description.content}</option>
                             </c:forEach>
                         </select>
                     </div>
