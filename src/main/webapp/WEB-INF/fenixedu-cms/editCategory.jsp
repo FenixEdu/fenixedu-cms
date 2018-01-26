@@ -69,14 +69,27 @@ ${portal.toolkit()}
                             <div class="col-sm-12 col-md-6">
                                 <div class="thumbnail">
                                     <div class="caption">
-                                        <h5><a href="${post.editUrl}">${post.name.content}</a></h3>
+                                        <c:choose>
+                                            <c:when test="${post.active}">
+                           	                <h5><a href="${post.editUrl}">${post.name.content}</a></h5>
+                           		    </c:when>
+                           		    <c:otherwise>
+                           		        <h5><a href="#">${post.name.content}</a>
+                                                    <p>
+                                                        <label><spring:message code="post.edit.label.archived" /></label>
+                                                    </p>
+                                                 </h5>
+                                            </c:otherwise>
+                                        </c:choose>
                                         <p><small>${post.creationDate.toString('dd MMMM yyyy, HH:mm', locale)}</small></p>
                                         <span class="label label-default">${post.createdBy.name}</small>
 
                                         <div class="btn-group pull-right">
-                                            <a href="${post.editUrl}" class="btn btn-icon btn-primary pull-right">
-                                                <i class="glyphicon glyphicon-cog"></i>
-                                            </a>
+                                            <c:if test="${post.active}">
+                                                <a href="${post.editUrl}" class="btn btn-icon btn-primary pull-right">
+                                                    <i class="glyphicon glyphicon-cog"></i>
+                                                </a>
+                                            </c:if>
                                         </div>
                                     </div>
                                 </div>
