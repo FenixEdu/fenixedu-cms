@@ -43,7 +43,7 @@ public class Role extends Role_Base {
 
     public void delete() {
         logger.info("Role " + getName().getContent() + " -  " + getExternalId() +
-                " deleted by user " + Authenticate.getUser().getExternalId());
+                " deleted by user " + Authenticate.getUser().getUsername());
         Signal.emit(SIGNAL_DELETED, this.getOid());
         setRoleTemplate(null);
         setSite(null);
@@ -53,7 +53,7 @@ public class Role extends Role_Base {
     
     public void setGroup(Group group) {
         logger.info("Role " + getName().getContent() + " - " + getExternalId() +
-                " changed to " + group.getExpression() + " by user "+ Authenticate.getUser().getExternalId());
+                " changed to " + group.getExpression() + " by user "+ Authenticate.getUser().getUsername());
         setPersistentGroup(group.toPersistentGroup());
     }
     

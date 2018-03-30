@@ -139,7 +139,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     @Atomic
     public void delete() {
         logger.info("Post " + getSlug()  + " - " + getExternalId() + " of Site " + getSite().getSlug() +
-                " deleted by user "+ Authenticate.getUser().getExternalId());
+                " deleted by user "+ Authenticate.getUser().getUsername());
         Signal.emit(SIGNAL_DELETED, this.getOid());
 
         setCreatedBy(null);
@@ -333,7 +333,7 @@ public class Post extends Post_Base implements Wrappable, Sluggable, Cloneable {
     
     
         logger.info("New post revision " + getSlug()  + " - " + getExternalId() + " of Site " + getSite().getSlug() +
-                " created by user "+ Authenticate.getUser().getExternalId());
+                " created by user "+ Authenticate.getUser().getUsername());
     }
 
     public LocalizedString getExcerpt() {

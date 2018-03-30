@@ -140,21 +140,21 @@ public class Page extends Page_Base implements Sluggable, Cloneable {
     @Override
     public void removeComponents(Component components) {
         logger.info("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() +
-                " component " + components.getType() + " removed by user "+ Authenticate.getUser().getExternalId());
+                " component " + components.getType() + " removed by user "+ Authenticate.getUser().getUsername());
         super.removeComponents(components);
     }
     
     @Override
     public void addComponents(Component components) {
         logger.info("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() +
-                " component " + components.getType() + " added by user "+ Authenticate.getUser().getExternalId());
+                " component " + components.getType() + " added by user "+ Authenticate.getUser().getUsername());
         super.addComponents(components);
     }
     
     @Atomic
     public void delete() {
         logger.info("Page " + getSlug() + " - " + getExternalId() + " of Site " + getSite().getSlug() +
-                " deleted by user "+ Authenticate.getUser().getExternalId());
+                " deleted by user "+ Authenticate.getUser().getUsername());
         Signal.emit(SIGNAL_DELETED, this.getOid());
 
         for (Component component : getComponentsSet()) {

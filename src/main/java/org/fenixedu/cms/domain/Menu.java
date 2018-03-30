@@ -79,7 +79,7 @@ public class Menu extends Menu_Base implements Wrappable, Sluggable, Cloneable, 
     @Atomic
     public void delete() {
         logger.info("Menu " + getName()  + " - " + getExternalId() +" of site " + getSite().getSlug() +
-                " deleted by user "+ Authenticate.getUser().getExternalId());
+                " deleted by user "+ Authenticate.getUser().getUsername());
         Signal.emit(Menu.SIGNAL_DELETED, new DomainObjectEvent<>(this));
         Sets.newHashSet(getItemsSet()).stream().distinct().forEach(MenuItem::delete);
         this.setCreatedBy(null);
