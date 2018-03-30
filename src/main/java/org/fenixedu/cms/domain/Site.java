@@ -226,7 +226,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
     public void setSlug(String slug) {
         String oldSlug = getSlug();
         super.setSlug(SlugUtils.makeSlug(this, slug));
-        logger.info("Site " + getExternalId() +  " slug changed from " + oldSlug + " to " + getSlug() + " by user "+ Authenticate.getUser().getExternalId());
+        logger.info("Site " + getExternalId() +  " slug changed from " + oldSlug + " to " + getSlug() + " by user "+ Authenticate.getUser().getUsername());
     
     }
 
@@ -357,7 +357,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
 
     @Atomic
     public void delete() {
-        logger.info("Site " + getSlug() + " - " + getExternalId() + " deleted by user "+ Authenticate.getUser().getExternalId());
+        logger.info("Site " + getSlug() + " - " + getExternalId() + " deleted by user "+ Authenticate.getUser().getUsername());
         Signal.emit(SIGNAL_DELETED, this.getOid());
 
         MenuFunctionality mf = getFunctionality();
@@ -476,7 +476,7 @@ final public class Site extends Site_Base implements Wrappable, Sluggable, Clone
         if (folder != null && getFunctionality() != null) {
             deleteMenuFunctionality();
         }
-        logger.info("Site " + getSlug()  + " - " + getExternalId() +  " folder changed by user "+ Authenticate.getUser().getExternalId());
+        logger.info("Site " + getSlug()  + " - " + getExternalId() +  " folder changed by user "+ Authenticate.getUser().getUsername());
     }
 
     @ConsistencyPredicate
