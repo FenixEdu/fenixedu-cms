@@ -37,6 +37,11 @@ ${portal.angularToolkit()}
 <script src="${pageContext.request.contextPath}/static/js/ng-file-upload.js" type="text/javascript" charset="utf-8"></script>
 
 <div ng-app="editPostApp" ng-controller="PostCtrl">
+    <div class="alert alert-danger" role="alert" ng-if="errorMessage">
+        <spring:message code="page.edit.error.update"/>
+    </div>
+
+
     <div class="page-header">
         <h1>${site.name.content}</h1>
 
@@ -44,8 +49,8 @@ ${portal.angularToolkit()}
 
         <div class="row">
             <div class="col-sm-12">
-                <button ng-class="{disabled: !post.name}" type="button" class="btn btn-primary" ng-click="update()">
-                    <span class="glyphicon glyphicon-floppy-disk"></span> Update
+                <button ng-class="{disabled: !post.name || updating}" type="button" class="btn btn-primary" ng-click="update()">
+                    <span class="glyphicon glyphicon-floppy-disk"></span> {{updating ? "Updating..." : "Update" }}
                 </button>
                 <button type="button" class="btn btn-default disabled">
                     <span class="glyphicon glyphicon-edit"></span> Edit
@@ -483,6 +488,7 @@ ${portal.angularToolkit()}
                 });
 
                 $scope.update = function() {
+                    $scope.updating = true;
                     var menuItem = findMenuItem();
                     if(menuItem != null) {
                         if (typeof $scope.useMenu === 'boolean' && $scope.useMenu === false) {
@@ -497,7 +503,16 @@ ${portal.angularToolkit()}
                     }
 
                     var data = {post: $scope.post, menuItem: menuItem};
-                    $http.post(updatePostUrl, angular.toJson(data)).success(init);
+                    $http.post(updatePostUrl, angular.toJson(data)).success(function(response) {
+                        init(response);
+                        $scope.updating = false;
+                    }).error(function() {
+                        $scope.updating = false;
+                        $scope.errorMessage = true;
+                        $timeout(function() {
+                            $scope.errorMessage = false;
+                        }, 3000);
+                    });
                 };
 
                 $(window).bind('keydown', function(event) {
