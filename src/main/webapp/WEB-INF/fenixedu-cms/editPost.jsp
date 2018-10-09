@@ -48,12 +48,15 @@ ${portal.angularToolkit()}
     </h1>
 </div>
 <div ng-app="editPostApp" ng-controller="PostCtrl">
+		<div class="alert alert-danger" role="alert" ng-if="errorMessage">
+			<spring:message code="post.edit.error.update"/>
+		</div>
 
 
 		<div class="row">
 			<div class="col-sm-12">
-				<button ng-class="{disabled: !post.name}" type="button" class="btn btn-primary" ng-click="update()">
-					<span class="glyphicon glyphicon-floppy-disk"></span> Update
+				<button ng-class="{disabled: !post.name || updating}" type="button" class="btn btn-primary" ng-click="update()">
+					<span class="glyphicon glyphicon-floppy-disk"></span> {{updating ? "Updating..." : "Update" }}
 				</button>
 	            <button type="button" class="btn btn-default disabled">
             		<span class="glyphicon glyphicon-edit"></span> Edit
@@ -368,7 +371,7 @@ ${portal.angularToolkit()}
 	        $httpProvider.defaults.headers.common = $httpProvider.defaults.headers.common || {};
 	        $httpProvider.defaults.headers.common['${csrf.headerName}'] = '${csrf.token}';
 	    }])
-        .controller('PostCtrl', ['$scope', '$http','Upload', function($scope, $http, Upload){
+        .controller('PostCtrl', ['$scope', '$http', '$timeout', 'Upload', function($scope, $http, $timeout, Upload){
             $http.get("data").success(function(data){
 	                $scope.post = data.post;
 	                $scope.errors = undefined;
@@ -381,10 +384,17 @@ ${portal.angularToolkit()}
 	            	});
 
 	                $scope.update = function() {
+	                	$scope.updating = true;
 	                	$http.post(updatePostUrl, $scope.post).success(function(response) {
 	                		$scope.post = response.post;
+	                		$scope.updating = false;
 	                	}).error(function(response) {
 	                		$scope.errors = response;
+	                		$scope.updating = false;
+	                		$scope.errorMessage = true;
+	                		$timeout(function() {
+	                			$scope.errorMessage = false;
+	                		}, 3000);
 	                	});
 	                };
 
