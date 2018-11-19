@@ -36,7 +36,7 @@ public class CmsTestUtils {
 
     public static User createAuthenticatedUser(String username, String name, String familyName, String email) {
         User user = new User(username, new UserProfile(name, familyName, name + " " + familyName, email, Locale.getDefault()));
-        Authenticate.mock(user);
+        Authenticate.mock(user, "Mock user");
         return user;
     }
 

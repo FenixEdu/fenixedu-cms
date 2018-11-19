@@ -126,7 +126,7 @@ public class TestSiteResource extends TestCmsApi {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createErrorSiteWithoutName");
         CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user);
+        Authenticate.mock(user, "Mock user");
         
         LocalizedString description =
                 new LocalizedString(Locale.UK, "createErrorSiteWithoutName-description-uk").with(Locale.US,
@@ -145,7 +145,7 @@ public class TestSiteResource extends TestCmsApi {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createErrorSiteWithoutDescription");
         CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user);
+        Authenticate.mock(user, "Mock user");
         
         LocalizedString name =
                 new LocalizedString(Locale.UK, "createErrorSiteWithoutDescription-name-uk").with(Locale.US,
@@ -165,7 +165,7 @@ public class TestSiteResource extends TestCmsApi {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createMinSite");
         CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user);
+        Authenticate.mock(user, "Mock user");
         
         LocalizedString name = new LocalizedString(Locale.UK, "createMinSite-name-uk").with(Locale.US, "createMinSite-name-us");
         LocalizedString description =
@@ -224,7 +224,7 @@ public class TestSiteResource extends TestCmsApi {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("createFullSite");
         CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user);
+        Authenticate.mock(user, "Mock user");
         
         CMSTheme theme = new CMSTheme();
         theme.setType("createFullSite-theme-type");
@@ -313,7 +313,7 @@ public class TestSiteResource extends TestCmsApi {
         // prepare
         User user = CmsTestUtils.createAuthenticatedUser("editSite");
         CmsTestUtils.setUserAsManager(user);
-        Authenticate.mock(user);
+        Authenticate.mock(user, "Mock user");
         
         Site site = CmsTestUtils.createSite(user, "editSite");
         EnumSet<Permission> permissions = CmsTestUtils.bootstrapAdminPermissions();

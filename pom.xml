@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.fenixedu</groupId>
         <artifactId>fenix-framework-project</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
             <relativePath />
         </parent>
 
@@ -29,9 +29,9 @@
             <version.joda.time.joda.time>2.9.7</version.joda.time.joda.time>
             <version.org.apache.tika.tika-core>1.19.1</version.org.apache.tika.tika-core>
             <version.org.fenixedu.bennu-modular-rendering>1.1.0</version.org.fenixedu.bennu-modular-rendering>
-            <version.org.fenixedu.bennu-social>1.1.0</version.org.fenixedu.bennu-social>
-            <version.org.fenixedu.bennu>4.1.6</version.org.fenixedu.bennu>
-            <version.org.fenixedu.fenixedu-commons>1.1.2</version.org.fenixedu.fenixedu-commons>
+            <version.org.fenixedu.bennu-social>2.0.0</version.org.fenixedu.bennu-social>
+            <version.org.fenixedu.bennu>6.0.0</version.org.fenixedu.bennu>
+            <version.org.fenixedu.fenixedu-commons>3.0.0</version.org.fenixedu.fenixedu-commons>
             <version.org.ocpsoft.prettytime>3.2.7.Final</version.org.ocpsoft.prettytime>
         </properties>
 
