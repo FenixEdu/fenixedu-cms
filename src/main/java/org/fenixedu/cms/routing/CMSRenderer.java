@@ -18,19 +18,30 @@
  */
 package org.fenixedu.cms.routing;
 
-import com.google.common.base.Strings;
-import com.google.common.cache.CacheBuilder;
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.error.LoaderException;
-import com.mitchellbosecke.pebble.error.PebbleException;
-import com.mitchellbosecke.pebble.loader.ClasspathLoader;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.PortalConfiguration;
 import org.fenixedu.cms.CMSConfigurationManager;
 import org.fenixedu.cms.domain.CMSTheme;
-import org.fenixedu.cms.domain.Menu;
 import org.fenixedu.cms.domain.Page;
 import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.domain.component.Component;
@@ -42,18 +53,13 @@ import org.fenixedu.commons.i18n.I18N;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
+import com.google.common.base.Strings;
+import com.google.common.cache.CacheBuilder;
+import com.mitchellbosecke.pebble.PebbleEngine;
+import com.mitchellbosecke.pebble.error.LoaderException;
+import com.mitchellbosecke.pebble.error.PebbleException;
+import com.mitchellbosecke.pebble.loader.ClasspathLoader;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 /**
  * Created by diutsu on 01/03/16.
@@ -87,6 +93,7 @@ public class CMSRenderer {
         }
     })
     .extension(new CMSExtensions())
+    .defaultLocale(I18N.getLocale())
     .templateCache( CMSConfigurationManager.isInThemeDevelopmentMode() ? null:  CacheBuilder.newBuilder().expireAfterWrite(10,
         TimeUnit.MINUTES).build()).build();
 
@@ -161,7 +168,7 @@ public class CMSRenderer {
 
         res.setStatus(200);
         res.setContentType("text/html");
-        compiledTemplate.evaluate(res.getWriter(), global);
+        compiledTemplate.evaluate(res.getWriter(), global, I18N.getLocale());
     }
 
     private void populateSiteInfo(final HttpServletRequest req, Page page, Site site, TemplateContext context) {
@@ -227,7 +234,7 @@ public class CMSRenderer {
                 populateSiteInfo(req, null, site, global);
                 res.setStatus(errorCode);
                 res.setContentType("text/html");
-                compiledTemplate.evaluate(res.getWriter(), global);
+                compiledTemplate.evaluate(res.getWriter(), global, I18N.getLocale());
             } catch (PebbleException e) {
                 throw new ServletException("Could not render error page for " + errorCode);
             }
