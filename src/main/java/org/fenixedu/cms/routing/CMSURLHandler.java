@@ -18,17 +18,28 @@
  */
 package org.fenixedu.cms.routing;
 
-import com.google.common.base.Strings;
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.error.PebbleException;
-import com.mitchellbosecke.pebble.loader.StringLoader;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
-import org.fenixedu.bennu.core.groups.Group;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import java.util.Optional;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.stream.XMLStreamException;
+
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.util.CoreConfiguration;
 import org.fenixedu.bennu.portal.domain.MenuFunctionality;
 import org.fenixedu.bennu.portal.servlet.SemanticURLHandler;
-import org.fenixedu.cms.domain.*;
+import org.fenixedu.cms.domain.CMSTheme;
+import org.fenixedu.cms.domain.CMSThemeFile;
+import org.fenixedu.cms.domain.Category;
+import org.fenixedu.cms.domain.PermissionEvaluation;
+import org.fenixedu.cms.domain.Site;
 import org.fenixedu.cms.rendering.CMSExtensions;
 import org.fenixedu.cms.rss.RSSService;
 import org.fenixedu.commons.i18n.I18N;
@@ -38,17 +49,11 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.Optional;
+import com.google.common.base.Strings;
+import com.mitchellbosecke.pebble.PebbleEngine;
+import com.mitchellbosecke.pebble.error.PebbleException;
+import com.mitchellbosecke.pebble.loader.StringLoader;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 public final class CMSURLHandler implements SemanticURLHandler {
 
@@ -209,7 +214,7 @@ public final class CMSURLHandler implements SemanticURLHandler {
                         engine.getTemplate("<html><head></head><body><h1>POST action with backslash</h1><b>You posting data with a URL with a backslash. Alter the form to post with the same URL without the backslash</body></html>");
                 res.setStatus(500);
                 res.setContentType("text/html");
-                compiledTemplate.evaluate(res.getWriter());
+                compiledTemplate.evaluate(res.getWriter(), I18N.getLocale());
             } else {
                 renderer.errorPage(req, res, sites, 500);
             }
