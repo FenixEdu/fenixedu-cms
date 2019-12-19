@@ -22,6 +22,8 @@ import com.google.common.base.Strings;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.io.domain.GroupBasedFile;
 import org.fenixedu.bennu.spring.portal.BennuSpringController;
@@ -195,7 +197,9 @@ public class AdminPosts {
     
         try {
             file.transferTo(tmp);
-            PostFile postFile = service.createFile(post, name, embedded, post.getCanViewGroup(), tmp);
+            final Group group = post.getCanViewGroup();
+            final Group fileGroup =  group == null ? Group.nobody() : group.isMember((User) null) ? Group.logged() : group;
+            PostFile postFile = service.createFile(post, name, embedded, fileGroup, tmp);
             return service.serializePostFile(postFile).toString();
     
         } catch (IOException e){
