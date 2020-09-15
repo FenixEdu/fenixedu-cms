@@ -53,8 +53,16 @@ public class CMSConfiguration {
 
     @PostConstruct
     public void initBackend() {
-        PortalBackendRegistry.registerPortalBackend(cmsBackend());
-        PortalBackendRegistry.registerPortalBackend(cmsEmbeddedBackend());
+        try {
+            PortalBackendRegistry.registerPortalBackend(cmsBackend());
+        } catch (IllegalArgumentException ex) {
+            // Already registered...
+        }
+        try {
+            PortalBackendRegistry.registerPortalBackend(cmsEmbeddedBackend());
+        } catch (IllegalArgumentException ex) {
+            // Already registered...
+        }
     }
 
 }
