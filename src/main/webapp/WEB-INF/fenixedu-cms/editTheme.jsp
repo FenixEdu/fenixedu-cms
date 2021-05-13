@@ -649,22 +649,23 @@ function makeTemplate(){
     var name = $("#make-template-modal input[name='name']").val();
     var type = $("#make-template-modal input[name='type']").val();
     var description = $("#make-template-modal textarea[name='description']").val();
-    $.post(Bennu.contextPath + "/cms/themes/${theme.type}/newTemplate",{
-        type:type,
-        name:name,
-        description:description,
-        filename:filename
-    }).success(function(){
-        $("#make-template-modal").modal('hide');
+   
+    $.ajax(Bennu.contextPath + "/cms/themes/${theme.type}/newTemplate",    
+    {
+    	type: 'POST',
+    	headers: {"${csrf.headerName}":"${csrf.token}"},
+        data: {type:type, name:name, description:description,filename:filename},
+	}).done(function(){
+		$("#make-template-modal").modal('hide');
         $("#make-template-modal input[name='filename']").val("");
         $("#make-template-modal input[name='name']").val("");
         $("#make-template-modal input[name='type']").val("");
         $("#make-template-modal textarea[name='description']").val("");
-
-        $.get(Bennu.contextPath + "/cms/themes/${theme.type}/templates").success(function(e){
-            genTemplates(e);
-        })
-    })
+    	
+    	$.get(Bennu.contextPath + "/cms/themes/${theme.type}/templates").success(function(e){
+        	genTemplates(e);
+    	})
+	});
 }
 
 
