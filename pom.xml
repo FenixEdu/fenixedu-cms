@@ -19,7 +19,7 @@
         
         <properties>
             <version.com.google.apis.google-api-services-analytics>v3-rev136-1.22.0</version.com.google.apis.google-api-services-analytics>
-            <version.com.google.code.gson.gson>2.8.0</version.com.google.code.gson.gson>
+            <version.com.google.code.gson.gson>2.8.9</version.com.google.code.gson.gson>
             <version.com.google.guava>27.0-jre</version.com.google.guava>
             <version.com.googlecode.owasp-java-html-sanitizer>20160924.1</version.com.googlecode.owasp-java-html-sanitizer>
             <version.com.mitchellbosecke.pebble>2.3.0</version.com.mitchellbosecke.pebble>
